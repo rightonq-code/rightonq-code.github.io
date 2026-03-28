@@ -553,11 +553,11 @@
   .step:last-child { padding-right: 0; }
   .step-num {
     font-family: 'Syne', sans-serif;
-    font-weight: 800;
-    font-size: 48px;
-    color: rgba(47, 111, 210, 0.2);
+    font-weight: 900;
+    font-size: clamp(48px, 8vw, 80px);
+    color: #2F6FD2;
     line-height: 1;
-    margin-bottom: 16px;
+    margin-bottom: 12px;
   }
   .step h3 {
     font-family: 'Syne', sans-serif;
@@ -680,6 +680,45 @@
     background: var(--blue);
     border-bottom-right-radius: 4px;
   }
+  /* SMS card styles */
+  .msg-sms-out {
+    align-self: flex-end;
+    background: #4A7CC7;
+    color: #fff;
+    border-radius: 16px 16px 4px 16px;
+    padding: 8px 12px;
+    font-size: 12px;
+    line-height: 1.4;
+    max-width: 82%;
+    margin-bottom: 6px;
+  }
+  .msg-sms-in {
+    align-self: flex-start;
+    background: #E5E5EA;
+    color: #1a1a1a;
+    border-radius: 16px 16px 16px 4px;
+    padding: 8px 12px;
+    font-size: 12px;
+    line-height: 1.4;
+    max-width: 82%;
+    margin-bottom: 6px;
+  }
+  .phone-screen--sms {
+    background: #f2f2f7;
+  }
+  .case-channel-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: #4A7CC7;
+    border: 1px solid #4A7CC7;
+    border-radius: 4px;
+    padding: 2px 6px;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+  }
+
   .msg-in {
     align-self: flex-start;
     background: #1a2d45;
@@ -818,7 +857,6 @@
 <!-- SOCIAL PROOF STRIP -->
 <div class="proof-strip">
   <p class="proof-line1">Designed for team connection — the right message, the right group, whatever the location.</p>
-  <p class="proof-line2">Keeping everyone in the loop, without messaging everyone.</p>
 </div>
 
 <!-- HOW IT WORKS -->
@@ -828,19 +866,19 @@
     <h2 class="section-heading">How it <em>works.</em></h2>
     <div class="steps">
       <div class="step">
-        <div class="step-num">01</div>
+        <div class="step-num">Q1</div>
         <h3>You set the schedule</h3>
         <p>Add recipients and send times in your dashboard. No training needed.</p>
       </div>
       <div class="step-connector"></div>
       <div class="step">
-        <div class="step-num">02</div>
+        <div class="step-num">Q2</div>
         <h3>We send the message</h3>
         <p>WhatsApp or SMS, personalised, at exactly the right time.</p>
       </div>
       <div class="step-connector"></div>
       <div class="step">
-        <div class="step-num">03</div>
+        <div class="step-num">Q3</div>
         <h3>You get the confirmation</h3>
         <p>Delivery, read receipt, and reply tracked automatically.</p>
       </div>
@@ -874,22 +912,22 @@
         <p class="case-desc">Medication rounds, appointment reminders, and welfare checks — confirmed automatically.</p>
       </div>
 
-      <div class="case-card">
+      <div class="case-card case-card--sms">
         <div class="phone-wrap">
           <div class="phone">
             <div class="phone-notch"></div>
             <div class="phone-status">
-              <span class="status-dot"></span>
-              <span class="status-app">WhatsApp</span>
+              <span class="status-app">SMS</span>
             </div>
-            <div class="phone-screen">
-              <div class="msg msg-out">Roy — production meeting tonight at 6pm. Please confirm attendance. Reply YES or NO.</div>
-              <div class="msg msg-in">YES</div>
-              <div class="msg msg-out">Got it Roy. See you at 6 &#10003;</div>
+            <div class="phone-screen phone-screen--sms">
+              <div class="msg msg-sms-out">Roy — production meeting tonight at 6pm. Please confirm attendance. Reply YES or NO.</div>
+              <div class="msg msg-sms-in">YES</div>
+              <div class="msg msg-sms-out">Got it Roy. See you at 6 ✓</div>
             </div>
           </div>
         </div>
         <div class="case-label">Manufacturing &amp; Production</div>
+        <div class="case-channel-badge">SMS</div>
         <p class="case-desc">Shift confirmations, production meetings, and team alerts — no more chasing.</p>
       </div>
 
@@ -987,7 +1025,11 @@
     </div>
 
     <div>
-      <form class="contact-form" onsubmit="handleSubmit(event)">
+      <form class="contact-form" action="https://formspree.io/f/xykbkrnv" method="POST">
+  <input type="hidden" name="_subject" value="New RightOnQ enquiry from website">
+  <input type="hidden" name="_replyto" value="adam@rightonq.co.uk">
+  <input type="hidden" name="_autoresponse" value="Hi there, thank you so much for getting in touch with RightOnQ. I'm really looking forward to hearing more about what you're looking for and will be in touch with you shortly. In the meantime, if you'd prefer to speak directly, please don't hesitate to call or message me on +44 7852 331166. Warm regards, Adam Smith, RightOnQ www.rightonq.co.uk">
+  <input type="hidden" name="_next" value="https://www.rightonq.co.uk">
         <div class="form-group">
           <label>Your name</label>
           <input type="text" placeholder="Jane Smith" required>
