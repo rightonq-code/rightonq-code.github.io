@@ -476,6 +476,286 @@
     .contact-inner { grid-template-columns: 1fr; gap: 48px; }
     footer { padding: 32px 24px; flex-direction: column; align-items: flex-start; }
   }
+
+
+  /* PROOF STRIP */
+  .proof-strip {
+    padding: 18px 60px;
+    background: rgba(47, 111, 210, 0.06);
+    border-bottom: 1px solid rgba(47, 111, 210, 0.12);
+    text-align: center;
+  }
+  .proof-strip p {
+    color: var(--grey);
+    font-size: 13px;
+    font-weight: 400;
+    letter-spacing: 0.05em;
+    margin: 0;
+  }
+
+  /* SHARED SECTION STYLES */
+  .section-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 60px;
+  }
+  .section-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--blue-light);
+    margin-bottom: 16px;
+  }
+  .section-tag::before {
+    content: '';
+    width: 24px;
+    height: 1px;
+    background: var(--blue);
+  }
+  .section-heading {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(28px, 4vw, 48px);
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    color: var(--white);
+    margin-bottom: 48px;
+  }
+  .section-heading em { font-style: normal; color: var(--blue); }
+
+  /* HOW IT WORKS */
+  .how-section {
+    padding: 100px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .steps {
+    display: flex;
+    align-items: flex-start;
+    gap: 0;
+  }
+  .step {
+    flex: 1;
+    padding-right: 40px;
+  }
+  .step:last-child { padding-right: 0; }
+  .step-num {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 48px;
+    color: rgba(47, 111, 210, 0.2);
+    line-height: 1;
+    margin-bottom: 16px;
+  }
+  .step h3 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--white);
+    margin-bottom: 10px;
+  }
+  .step p {
+    color: var(--grey);
+    font-size: 15px;
+    line-height: 1.7;
+  }
+  .step-connector {
+    width: 60px;
+    flex-shrink: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--blue) 0%, rgba(47,111,210,0.2) 100%);
+    margin-top: 24px;
+    position: relative;
+    top: 22px;
+  }
+
+  /* USE CASES */
+  .use-cases {
+    padding: 100px 0;
+    background: rgba(255,255,255,0.015);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .case-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+  }
+  .case-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    padding: 32px 28px 28px;
+    transition: border-color 0.3s, transform 0.3s;
+  }
+  .case-card:hover {
+    border-color: rgba(47, 111, 210, 0.4);
+    transform: translateY(-4px);
+  }
+
+  /* PHONE MOCKUP */
+  .phone-wrap {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 28px;
+  }
+  .phone {
+    width: 200px;
+    background: #0d1d31;
+    border-radius: 28px;
+    border: 2px solid rgba(255,255,255,0.12);
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(47,111,210,0.15);
+    position: relative;
+  }
+  .phone-notch {
+    height: 22px;
+    background: #0a1726;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  .phone-notch::after {
+    content: '';
+    width: 50px;
+    height: 8px;
+    background: #070f1a;
+    border-radius: 4px;
+    display: block;
+  }
+  .phone-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    background: #0f2035;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #25D366;
+    flex-shrink: 0;
+    box-shadow: 0 0 6px #25D366;
+  }
+  .status-app {
+    font-size: 11px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.6);
+    letter-spacing: 0.02em;
+  }
+  .phone-screen {
+    padding: 14px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: #0d1d31;
+    min-height: 180px;
+  }
+  .msg {
+    max-width: 80%;
+    font-size: 11px;
+    line-height: 1.5;
+    padding: 8px 11px;
+    border-radius: 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 400;
+    color: var(--white);
+  }
+  .msg-out {
+    align-self: flex-end;
+    background: var(--blue);
+    border-bottom-right-radius: 4px;
+  }
+  .msg-in {
+    align-self: flex-start;
+    background: #1a2d45;
+    border-bottom-left-radius: 4px;
+    color: rgba(255,255,255,0.85);
+  }
+
+  .case-label {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--blue-light);
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    font-size: 11px;
+  }
+  .case-desc {
+    color: var(--grey);
+    font-size: 14px;
+    line-height: 1.7;
+    margin: 0;
+  }
+
+  /* FEATURES */
+  .features-section {
+    padding: 100px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0;
+  }
+  .feature-item {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 22px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    font-size: 15px;
+    color: var(--grey);
+    font-weight: 400;
+  }
+  .feature-item:nth-child(odd) { padding-right: 40px; border-right: 1px solid rgba(255,255,255,0.05); }
+  .feature-item:nth-child(even) { padding-left: 40px; }
+  .feature-item:nth-last-child(-n+2) { border-bottom: none; }
+  .feature-item svg { flex-shrink: 0; }
+
+  /* PRICING TEASER */
+  .pricing-section {
+    padding: 100px 0;
+    background: rgba(47, 111, 210, 0.05);
+    border-top: 1px solid rgba(47,111,210,0.15);
+    border-bottom: 1px solid rgba(47,111,210,0.15);
+  }
+  .pricing-inner {
+    text-align: center;
+  }
+  .pricing-inner .section-tag { justify-content: center; }
+  .pricing-inner .section-tag::before { display: none; }
+  .pricing-body {
+    color: var(--grey);
+    font-size: 17px;
+    line-height: 1.8;
+    max-width: 480px;
+    margin: 0 auto 36px;
+  }
+
+  /* RESPONSIVE ADDITIONS */
+  @media (max-width: 768px) {
+    .proof-strip { padding: 16px 24px; }
+    .section-inner { padding: 0 24px; }
+    .how-section, .use-cases, .features-section, .pricing-section { padding: 70px 0; }
+    .steps { flex-direction: column; gap: 40px; }
+    .step { padding-right: 0; }
+    .step-connector { display: none; }
+    .case-cards { grid-template-columns: 1fr; }
+    .features-grid { grid-template-columns: 1fr; }
+    .feature-item:nth-child(odd) { padding-right: 0; border-right: none; }
+    .feature-item:nth-child(even) { padding-left: 0; }
+    .feature-item:nth-last-child(-n+2) { border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .feature-item:last-child { border-bottom: none; }
+    .section-heading { margin-bottom: 32px; }
+  }
 </style>
 </head>
 <body>
@@ -504,62 +784,169 @@
 <section class="hero">
   <div class="hero-tag">Messaging infrastructure for business</div>
   <h1>Your people.<br>Your message.<br><em>Delivered.</em></h1>
-  <p class="hero-sub">RightOnQ replaces clunky communication tools with something your people already use — SMS and WhatsApp. No apps. No training. Just messages that land.</p>
+  <p class="hero-sub">Stop chasing confirmations. RightOnQ sends scheduled WhatsApp and SMS reminders and gets back a confirmed reply — automatically.</p>
   <div class="hero-actions">
     <a href="#contact" class="btn-primary">Talk to us</a>
-    <a href="#what" class="btn-secondary">See how it works</a>
+    <a href="#how" class="btn-secondary">See how it works</a>
   </div>
 
   <div class="ticker">
     <div class="ticker-inner">
       <span class="ticker-item">Care Providers</span>
       <span class="ticker-item">Transport Operators</span>
+      <span class="ticker-item">Manufacturing &amp; Production</span>
       <span class="ticker-item">Field Teams</span>
-      <span class="ticker-item">Dispersed Workforces</span>
-      <span class="ticker-item">Group Messaging at Scale</span>
-      <span class="ticker-item">SMS &amp; WhatsApp Native</span>
-      <span class="ticker-item">No App Required</span>
-      <span class="ticker-item">Per User Pricing</span>
+      <span class="ticker-item">Facilities Management</span>
       <span class="ticker-item">Care Providers</span>
       <span class="ticker-item">Transport Operators</span>
+      <span class="ticker-item">Manufacturing &amp; Production</span>
       <span class="ticker-item">Field Teams</span>
-      <span class="ticker-item">Dispersed Workforces</span>
-      <span class="ticker-item">Group Messaging at Scale</span>
-      <span class="ticker-item">SMS &amp; WhatsApp Native</span>
-      <span class="ticker-item">No App Required</span>
-      <span class="ticker-item">Per User Pricing</span>
+      <span class="ticker-item">Facilities Management</span>
     </div>
   </div>
 </section>
 
-<!-- WHAT WE DO -->
-<section class="what" id="what">
-  <div class="what-left">
-    <h2>Built for businesses<br>with <em>people to reach.</em></h2>
-    <p>If you manage a team spread across sites, routes, or residences — RightOnQ gives you a direct line to every one of them, via the channels they already trust.</p>
-    <p>We take the complexity out of at-scale communication. Personalised, automated, intelligent messaging — deployed in days, not months.</p>
+<!-- SOCIAL PROOF STRIP -->
+<div class="proof-strip">
+  <p>Designed for care providers, transport operators, manufacturers, and field teams</p>
+</div>
+
+<!-- HOW IT WORKS -->
+<section class="how-section" id="how">
+  <div class="section-inner">
+    <div class="section-tag">Simple by design</div>
+    <h2 class="section-heading">How it <em>works.</em></h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <h3>You set the schedule</h3>
+        <p>Add recipients and send times in your dashboard. No training needed.</p>
+      </div>
+      <div class="step-connector"></div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <h3>We send the message</h3>
+        <p>WhatsApp or SMS, personalised, at exactly the right time.</p>
+      </div>
+      <div class="step-connector"></div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <h3>You get the confirmation</h3>
+        <p>Delivery, read receipt, and reply tracked automatically.</p>
+      </div>
+    </div>
   </div>
-  <div class="what-right">
-    <div class="card">
-      <div class="card-num">01</div>
-      <h3>SMS &amp; WhatsApp Native</h3>
-      <p>No new apps. No logins. Messages go directly to the device your people already carry.</p>
+</section>
+
+<!-- USE CASES -->
+<section class="use-cases">
+  <div class="section-inner">
+    <div class="section-tag">Real scenarios</div>
+    <h2 class="section-heading">Built for the moments <em>that matter.</em></h2>
+    <div class="case-cards">
+
+      <div class="case-card">
+        <div class="phone-wrap">
+          <div class="phone">
+            <div class="phone-notch"></div>
+            <div class="phone-status">
+              <span class="status-dot"></span>
+              <span class="status-app">WhatsApp</span>
+            </div>
+            <div class="phone-screen">
+              <div class="msg msg-out">Penny, your 9am medication round starts in 30 minutes. Please confirm you&#39;re ready. Reply YES to confirm.</div>
+              <div class="msg msg-in">YES</div>
+              <div class="msg msg-out">Thanks Penny. Confirmed &#10003;</div>
+            </div>
+          </div>
+        </div>
+        <div class="case-label">Care Providers</div>
+        <p class="case-desc">Medication rounds, appointment reminders, and welfare checks — confirmed automatically.</p>
+      </div>
+
+      <div class="case-card">
+        <div class="phone-wrap">
+          <div class="phone">
+            <div class="phone-notch"></div>
+            <div class="phone-status">
+              <span class="status-dot"></span>
+              <span class="status-app">WhatsApp</span>
+            </div>
+            <div class="phone-screen">
+              <div class="msg msg-out">Roy — production meeting tonight at 6pm. Please confirm attendance. Reply YES or NO.</div>
+              <div class="msg msg-in">YES</div>
+              <div class="msg msg-out">Got it Roy. See you at 6 &#10003;</div>
+            </div>
+          </div>
+        </div>
+        <div class="case-label">Manufacturing &amp; Production</div>
+        <p class="case-desc">Shift confirmations, production meetings, and team alerts — no more chasing.</p>
+      </div>
+
+      <div class="case-card">
+        <div class="phone-wrap">
+          <div class="phone">
+            <div class="phone-notch"></div>
+            <div class="phone-status">
+              <span class="status-dot"></span>
+              <span class="status-app">WhatsApp</span>
+            </div>
+            <div class="phone-screen">
+              <div class="msg msg-out">Gabby — planned fire drill in 60 minutes. No evacuation yet. Reply DONE when you&#39;ve read this.</div>
+              <div class="msg msg-in">DONE</div>
+              <div class="msg msg-out">Acknowledged Gabby. Thank you &#10003;</div>
+            </div>
+          </div>
+        </div>
+        <div class="case-label">Facilities &amp; Field Teams</div>
+        <p class="case-desc">Safety checks, fire drills, and compliance confirmations — tracked and logged.</p>
+      </div>
+
     </div>
-    <div class="card">
-      <div class="card-num">02</div>
-      <h3>Personalised at Scale</h3>
-      <p>Every message feels individual. RightOnQ handles the personalisation automatically across your entire user base.</p>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features-section">
+  <div class="section-inner">
+    <div class="section-tag">What you get</div>
+    <h2 class="section-heading">Everything <em>included.</em></h2>
+    <div class="features-grid">
+      <div class="feature-item">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none" role="img" aria-label="WhatsApp and SMS icon"><circle cx="14" cy="14" r="13" stroke="#2F6FD2" stroke-width="1.5"/><path d="M8 14c0-3.3 2.7-6 6-6s6 2.7 6 6-2.7 6-6 6c-1.1 0-2.1-.3-3-.8L8 20l.8-3A5.9 5.9 0 0 1 8 14Z" stroke="#2F6FD2" stroke-width="1.5" stroke-linejoin="round"/></svg>
+        <span>WhatsApp &amp; SMS delivery</span>
+      </div>
+      <div class="feature-item">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none" role="img" aria-label="Scheduled sending icon"><circle cx="14" cy="14" r="13" stroke="#2F6FD2" stroke-width="1.5"/><circle cx="14" cy="14" r="4" stroke="#2F6FD2" stroke-width="1.5"/><path d="M14 8V5M14 23v-3M8 14H5M23 14h-3" stroke="#2F6FD2" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <span>Scheduled sending</span>
+      </div>
+      <div class="feature-item">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none" role="img" aria-label="Confirmation tracking icon"><circle cx="14" cy="14" r="13" stroke="#2F6FD2" stroke-width="1.5"/><path d="M9 14l3.5 3.5L19 10" stroke="#2F6FD2" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>Confirmation tracking</span>
+      </div>
+      <div class="feature-item">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none" role="img" aria-label="Automatic follow-ups icon"><circle cx="14" cy="14" r="13" stroke="#2F6FD2" stroke-width="1.5"/><path d="M14 8v6l4 2" stroke="#2F6FD2" stroke-width="1.5" stroke-linecap="round"/><path d="M8 20c1.5-1 3.5-1.5 6-1.5s4.5.5 6 1.5" stroke="#2F6FD2" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <span>Automatic follow-ups</span>
+      </div>
+      <div class="feature-item">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none" role="img" aria-label="Dashboard overview icon"><circle cx="14" cy="14" r="13" stroke="#2F6FD2" stroke-width="1.5"/><rect x="8" y="16" width="3" height="5" rx="1" stroke="#2F6FD2" stroke-width="1.5"/><rect x="12.5" y="12" width="3" height="9" rx="1" stroke="#2F6FD2" stroke-width="1.5"/><rect x="17" y="8" width="3" height="13" rx="1" stroke="#2F6FD2" stroke-width="1.5"/></svg>
+        <span>Dashboard overview</span>
+      </div>
+      <div class="feature-item">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none" role="img" aria-label="No app needed icon"><circle cx="14" cy="14" r="13" stroke="#2F6FD2" stroke-width="1.5"/><rect x="10" y="6" width="8" height="16" rx="2" stroke="#2F6FD2" stroke-width="1.5"/><path d="M12 19h4" stroke="#2F6FD2" stroke-width="1.5" stroke-linecap="round"/><path d="M17 6l4 4M21 6l-4 4" stroke="#2F6FD2" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <span>No app needed for recipients</span>
+      </div>
     </div>
-    <div class="card">
-      <div class="card-num">03</div>
-      <h3>Simple Pricing</h3>
-      <p>Per user, per month. No setup complexity. No long contracts. Start small and scale as you grow.</p>
-    </div>
-    <div class="card">
-      <div class="card-num">04</div>
-      <h3>Replaces Twilio Complexity</h3>
-      <p>Built for operators, not developers. If you're currently running raw SMS infrastructure, RightOnQ is the intelligent layer on top.</p>
-    </div>
+  </div>
+</section>
+
+<!-- PRICING TEASER -->
+<section class="pricing-section">
+  <div class="section-inner pricing-inner">
+    <div class="section-tag">Transparent pricing</div>
+    <h2 class="section-heading">Simple <em>pricing.</em></h2>
+    <p class="pricing-body">Per user, per month. No setup fees. No long contracts. Start small and scale as you grow.</p>
+    <a href="#contact" class="btn-primary">Get a quote</a>
   </div>
 </section>
 
@@ -638,6 +1025,8 @@
     <a href="/terms" style="color:rgba(255,255,255,0.25);font-size:13px;text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.25)'">Terms &amp; Conditions</a>
   </div>
 </footer>
+
+
 
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
   function handleSubmit(e) {
