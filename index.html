@@ -486,11 +486,20 @@
     text-align: center;
   }
   .proof-strip p {
-    color: var(--grey);
-    font-size: 13px;
-    font-weight: 400;
-    letter-spacing: 0.05em;
     margin: 0;
+  }
+  .proof-line1 {
+    font-size: 15px;
+    font-weight: 400;
+    color: rgba(255,255,255,0.55);
+    letter-spacing: 0.02em;
+  }
+  .proof-line2 {
+    font-size: 13px;
+    font-weight: 300;
+    color: rgba(255,255,255,0.35);
+    font-style: italic;
+    margin-top: 8px;
   }
 
   /* SHARED SECTION STYLES */
@@ -808,7 +817,8 @@
 
 <!-- SOCIAL PROOF STRIP -->
 <div class="proof-strip">
-  <p>Designed for care providers, transport operators, manufacturers, and field teams</p>
+  <p class="proof-line1">Designed for team connection — the right message, the right group, whatever the location.</p>
+  <p class="proof-line2">Keeping everyone in the loop, without messaging everyone.</p>
 </div>
 
 <!-- HOW IT WORKS -->
