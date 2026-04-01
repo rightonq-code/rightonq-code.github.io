@@ -3,71 +3,101 @@ layout: default
 title: "Blog"
 description: "Updates, insights and tips on business messaging from the RightOnQ team."
 ---
-
 <div class="blog-index">
-    <div class="blog-header">
-          <div class="section-tag">Updates & insights</div>div>
-          <h1 class="section-heading">The RightOnQ <em>Blog.</em></h1>h1>
-    </div>div>
+
+  <div class="blog-header">
+    <div class="section-tag">Updates &amp; insights</div>
+    <h1 class="section-heading">The RightOnQ <em>Blog.</em></h1>
+  </div>
 
   <div class="post-list">
-      {% for post in site.posts %}
-      <a href="{{ post.url }}" class="post-card">
-            <time datetime="{{ post.date | date: '%Y-%m-%d' }}">{{ post.date | date: '%B %-d, %Y' }}</time>time>
-            <h2>{{ post.title }}</h2>
-            <p>{{ post.description | default: post.excerpt | strip_html | truncate: 160 }}</p>
-            <span class="read-more">Read more &rarr;</span>span>
-      </a>a>
-      {% endfor %}
-  </div>div>
+    {% for post in site.posts %}
+    <a href="{{ post.url }}" class="post-card">
+      <time datetime="{{ post.date | date: '%Y-%m-%d' }}">{{ post.date | date: '%B %-d, %Y' }}</time>
+      <h2>{{ post.title }}</h2>
+      <p>{{ post.description | default: post.excerpt | strip_html | truncate: 160 }}</p>
+      <span class="read-more">Read more &rarr;</span>
+    </a>
+    {% endfor %}
+  </div>
 
   {% if site.posts.size == 0 %}
   <p style="color: var(--grey); font-size: 17px;">No posts yet — check back soon.</p>
   {% endif %}
-</div>div>
+
+</div>
 
 <style>
-    .blog-index { max-width: 100%; }
-    .blog-header { margin-bottom: 64px; }
-    .section-tag {
-          display: inline-flex; align-items: center; gap: 8px;
-          font-size: 12px; font-weight: 500; letter-spacing: 0.15em;
-          text-transform: uppercase; color: var(--blue-light); margin-bottom: 16px;
-    }
-    .section-tag::before {
-          content: ''; width: 24px; height: 1px; background: var(--blue);
-    }
-    .section-heading {
-          font-family: 'Syne', sans-serif; font-weight: 800;
-          font-size: clamp(36px, 5vw, 56px); letter-spacing: -0.02em; line-height: 1.1;
-    }
-    .section-heading em { font-style: normal; color: var(--blue); }
-    .post-list { display: grid; gap: 24px; }
-    .post-card {
-          display: block; text-decoration: none; color: inherit;
-          background: rgba(255,255,255,0.03);
-          border: 1px solid rgba(255,255,255,0.08);
-          border-radius: 12px; padding: 32px;
-          transition: border-color 0.3s, transform 0.3s;
-    }
-    .post-card:hover {
-          border-color: rgba(47,111,210,0.4); transform: translateY(-2px);
-    }
-    .post-card time {
-          font-size: 12px; font-weight: 500; letter-spacing: 0.1em;
-          text-transform: uppercase; color: var(--blue-light);
-    }
-    .post-card h2 {
-          font-family: 'Syne', sans-serif; font-weight: 700;
-          font-size: 24px; margin: 12px 0 8px; color: var(--white);
-    }
-    .post-card p {
-          font-size: 15px; color: var(--grey); line-height: 1.7; margin: 0;
-    }
-    .read-more {
-          display: inline-block; margin-top: 16px; font-size: 14px;
-          color: var(--blue-light); font-weight: 500; transition: color 0.2s;
-    }
-    .post-card:hover .read-more { color: var(--white); }
-  </style>
-</style></p></h2></em>
+  .blog-index { max-width: 100%; }
+  .blog-header { margin-bottom: 64px; }
+  .section-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--blue-light);
+    margin-bottom: 16px;
+  }
+  .section-tag::before {
+    content: '';
+    width: 24px;
+    height: 1px;
+    background: var(--blue);
+  }
+  .section-heading {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(36px, 5vw, 56px);
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+  .section-heading em { font-style: normal; color: var(--blue); }
+  .post-list { display: grid; gap: 24px; }
+  .post-card {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 32px;
+    transition: border-color 0.3s, transform 0.3s;
+  }
+  .post-card:hover {
+    border-color: rgba(47,111,210,0.4);
+    transform: translateY(-2px);
+  }
+  .post-card time {
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--blue-light);
+    display: block;
+  }
+  .post-card h2 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 24px;
+    margin: 12px 0 8px;
+    color: var(--white);
+  }
+  .post-card p {
+    font-size: 15px;
+    color: var(--grey);
+    line-height: 1.7;
+    margin: 0;
+  }
+  .read-more {
+    display: inline-block;
+    margin-top: 16px;
+    font-size: 14px;
+    color: var(--blue-light);
+    font-weight: 500;
+    transition: color 0.2s;
+  }
+  .post-card:hover .read-more { color: var(--white); }
+</style>
