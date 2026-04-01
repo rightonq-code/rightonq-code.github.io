@@ -77,7 +77,7 @@ That becomes the foundation.
 
 But the original spark came from something more personal.
 
-Watching older people — and the families who love them — trying to keep track of appointments, reminders, and important messages. As we age, continuity becomes harder (I can testify to that at 65). Dates blur. Messages get missed. Adult children often end up quietly managing the details of everyday life for their parents, trying to help without overstepping.
+Watching older people — and the families who love them — trying to keep track of appointments, reminders, and important messages. As we age, continuity becomes harder (I can testify to that being over 60). Dates blur. Messages get missed. Adult children often end up quietly managing the details of everyday life for their parents, trying to help without overstepping.
 
 My longer-term goal is a platform that makes that easier.
 
