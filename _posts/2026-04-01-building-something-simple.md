@@ -121,4 +121,4 @@ Just right on Q.
 
 RightOnQ is currently in development. If you manage people who don't always sit at a desk — I'd genuinely welcome a conversation.
 
-Adam Smith | Founder, RightOnQ
+Adam Smith &vert; Founder, RightOnQ
