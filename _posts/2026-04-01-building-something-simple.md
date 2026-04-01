@@ -115,10 +115,10 @@ Make something small, calm, and dependable. A service that does one job well —
 
 Nothing more. Nothing fancy.
 
-Just right on cue.
+Just right on Q.
 
 ---
 
-*RightOnQ is currently in development. If you work in senior living, field operations, or any sector where reaching dispersed teams reliably matters — I'd genuinely welcome a conversation.*
+RightOnQ is currently in development. If you manage people who don't always sit at a desk — I'd genuinely welcome a conversation.
 
-*Adam Smith | Founder, RightOnQ | [rightonq.co.uk](https://www.rightonq.co.uk)*
+Adam Smith | Founder, RightOnQ
