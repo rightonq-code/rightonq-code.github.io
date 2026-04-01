@@ -1,0 +1,19 @@
+title: "RightOnQ"
+description: "SMS & WhatsApp Messaging for Business"
+url: "https://www.rightonq.co.uk"
+baseurl: ""
+
+permalink: /blog/:title/
+
+# Exclude existing static pages from Jekyll processing
+exclude:
+  - README.md
+    - CNAME
+      - robots.txt
+        - sitemap.xml
+
+        # Keep existing HTML files working
+        keep_files:
+          - favicon.png
+            - apple-touch-icon.png
+              - og-image.png
