@@ -5,15 +5,13 @@ baseurl: ""
 
 permalink: /blog/:title/
 
-# Exclude existing static pages from Jekyll processing
 exclude:
   - README.md
-    - CNAME
-      - robots.txt
-        - sitemap.xml
+  - CNAME
+  - robots.txt
+  - sitemap.xml
 
-        # Keep existing HTML files working
-        keep_files:
-          - favicon.png
-            - apple-touch-icon.png
-              - og-image.png
+keep_files:
+  - favicon.png
+  - apple-touch-icon.png
+  - og-image.png
