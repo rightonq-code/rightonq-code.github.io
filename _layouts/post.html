@@ -1,0 +1,66 @@
+---
+layout: default
+---
+
+<article class="blog-post">
+    <div class="post-meta">
+          <a href="/blog" class="back-link">&larr; Back to Blog</a>a>
+          <time datetime="{{ page.date | date: '%Y-%m-%d' }}">{{ page.date | date: '%B %-d, %Y' }}</time>time>
+    </div>div>
+    <h1 class="post-title">{{ page.title }}</h1>h1>
+    <div class="post-body">
+          {{ content }}
+    </div>div>
+</article>article>
+
+<style>
+    .blog-post { max-width: 100%; }
+    .post-meta {
+          display: flex; align-items: center; justify-content: space-between;
+          margin-bottom: 32px;
+    }
+    .post-meta time {
+          font-size: 13px; color: var(--grey); letter-spacing: 0.05em; text-transform: uppercase;
+    }
+    .back-link {
+          font-size: 14px; color: var(--blue-light); text-decoration: none; transition: color 0.2s;
+    }
+    .back-link:hover { color: var(--white); }
+    .post-title {
+          font-family: 'Syne', sans-serif; font-weight: 800;
+          font-size: clamp(32px, 5vw, 52px); line-height: 1.1;
+          letter-spacing: -0.02em; margin-bottom: 48px;
+    }
+    .post-body {
+          font-size: 17px; line-height: 1.85; color: var(--grey);
+    }
+    .post-body h2, .post-body h3 {
+          font-family: 'Syne', sans-serif; color: var(--white); margin: 48px 0 16px;
+    }
+    .post-body h2 { font-size: 28px; font-weight: 700; }
+    .post-body h3 { font-size: 22px; font-weight: 600; }
+    .post-body p { margin-bottom: 24px; }
+    .post-body a { color: var(--blue-light); text-decoration: underline; transition: color 0.2s; }
+    .post-body a:hover { color: var(--white); }
+    .post-body ul, .post-body ol { margin: 0 0 24px 24px; }
+    .post-body li { margin-bottom: 8px; color: var(--grey); }
+    .post-body blockquote {
+          border-left: 3px solid var(--blue); padding: 16px 24px; margin: 32px 0;
+          background: rgba(47,111,210,0.06); border-radius: 0 8px 8px 0;
+          font-style: italic; color: var(--grey);
+    }
+    .post-body code {
+          background: rgba(255,255,255,0.06); padding: 2px 8px;
+          border-radius: 4px; font-size: 15px;
+    }
+    .post-body pre {
+          background: rgba(255,255,255,0.04); padding: 20px; border-radius: 8px;
+          overflow-x: auto; margin: 24px 0; border: 1px solid rgba(255,255,255,0.08);
+    }
+    .post-body pre code { background: none; padding: 0; }
+    .post-body img {
+          max-width: 100%; border-radius: 8px; margin: 32px 0;
+    }
+    .post-body strong { color: var(--white); font-weight: 500; }
+  </style>
+</style>
