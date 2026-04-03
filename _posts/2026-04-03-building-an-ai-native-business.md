@@ -13,6 +13,8 @@ In the last post, I talked about where RightOnQ came from — sitting in hospita
 
 This post is about what happened next.
 
+<br>
+
 ---
 
 ## Rebuilding the office I used to run
@@ -157,6 +159,6 @@ I’ll share what comes out of the internal demo phase — what worked, what did
 
 If you manage people who don’t always sit at a desk — drivers, care teams, field workers, factory staff — and the idea of simple, confirmed messaging sounds useful, I’d welcome a conversation.
 
-Adam Smith | Founder, RightOnQ
+Adam Smith — Founder, RightOnQ
 
 [rightonq.co.uk](https://www.rightonq.co.uk)
