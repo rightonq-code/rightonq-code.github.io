@@ -15,11 +15,11 @@ This post is about what happened next.
 
 ---
 
-## The honest reason
+## Rebuilding the office I used to run
 
-I couldn’t afford staff.
+I knew what a well-run office looked like — I’d built one before. But hiring a team of people to do it again wasn’t an option. So I asked a different question: could I build that same office with AI agents?
 
-That’s really where this starts. Not with some grand vision about AI transforming business. Not with a strategy deck or a seed round. I had an idea I believed in, no money to hire developers, and a very simple question: could I build an office out of AI agents and actually make it work?
+That’s really where this starts. Not with some grand vision about AI transforming business. Not with a strategy deck or a seed round. I had an idea I believed in, no money to hire developers, and a question worth answering.
 
 Two or three months ago, I started experimenting. I wasn’t thinking about registering a company. I was thinking: can I get these agents to do real, structured work — the kind of work I used to manage teams of people to do?
 
