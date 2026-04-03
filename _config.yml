@@ -5,11 +5,13 @@ baseurl: ""
 
 permalink: /blog/:title/
 
+include:
+  - robots.txt
+  - sitemap.xml
+
 exclude:
   - README.md
   - CNAME
-  - robots.txt
-  - sitemap.xml
 
 keep_files:
   - favicon.png
