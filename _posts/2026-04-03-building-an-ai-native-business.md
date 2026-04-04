@@ -13,8 +13,6 @@ In the last post, I talked about where RightOnQ came from — sitting in hospita
 
 This post is about what happened next.
 
-<br>
-
 ---
 
 ## Rebuilding the office I used to run
