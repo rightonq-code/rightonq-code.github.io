@@ -790,8 +790,43 @@ layout: null
     color: var(--grey);
     font-size: 17px;
     line-height: 1.8;
-    max-width: 480px;
-    margin: 0 auto 36px;
+    max-width: 780px;
+    margin: 0 auto 28px;
+  }
+  .pricing-example {
+    background: rgba(47, 111, 210, 0.07);
+    border: 1px solid rgba(47, 111, 210, 0.18);
+    border-radius: 12px;
+    padding: 28px 40px;
+    max-width: 780px;
+    margin: 0 auto 28px;
+    text-align: left;
+  }
+  .pricing-example p {
+    color: var(--grey);
+    font-size: 16px;
+    line-height: 1.7;
+    margin: 0 0 12px;
+  }
+  .pricing-example p:last-child {
+    margin: 0;
+  }
+  .pricing-highlight {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(36px, 5vw, 52px);
+    color: var(--blue);
+    letter-spacing: -0.02em;
+    display: block;
+    margin: 8px 0 4px;
+  }
+  .fine-print {
+    color: rgba(138, 155, 181, 0.6);
+    font-size: 13px;
+    line-height: 1.6;
+    max-width: 780px;
+    margin: 0 auto 24px;
+    font-style: italic;
   }
 
   /* RESPONSIVE ADDITIONS */
@@ -1000,11 +1035,13 @@ layout: null
     <div class="section-tag">Transparent pricing</div>
     <h2 class="section-heading">Simple <em>pricing.</em></h2>
     <p class="pricing-body">Pay-as-you-go from 5p per SMS. No setup fees. No long contracts.</p>
-    <p class="pricing-body">Example: 20 staff, 5 messages a day = 100 messages a day.</p>
-    <p class="pricing-body">Over a 20-day working month, that’s 2,000 messages — about £100 a month to keep a whole team in sync.</p>
-    <p class="pricing-body">Volume discounts from 5,000 messages a month.</p>
+    <div class="pricing-example">
+      <p>Example: 20 staff, 5 messages a day = 100 messages a day. Over a 20-day working month, that’s 2,000 messages.</p>
+      <span class="pricing-highlight">£100 a month</span>
+      <p>to keep a whole team in sync. Volume discounts from 5,000 messages a month.</p>
+    </div>
+    <p class="fine-print">Based on a single 160-character message. Prices exclude VAT.</p>
     <a href="#contact" class="btn-primary">Get a quote</a>
-    <p class="pricing-body"><em>Based on a single 160-character message. Prices exclude VAT.</em></p>
   </div>
 </section>
 
