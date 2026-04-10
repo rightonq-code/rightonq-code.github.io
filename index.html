@@ -814,11 +814,26 @@ layout: null
   .pricing-highlight {
     font-family: 'Syne', sans-serif;
     font-weight: 800;
-    font-size: clamp(36px, 5vw, 52px);
+    font-size: clamp(28px, 3.8vw, 40px);
     color: var(--blue);
     letter-spacing: -0.02em;
     display: block;
     margin: 8px 0 4px;
+  }
+  .example-label {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--blue);
+    margin-bottom: 16px;
+  }
+  .example-footnote {
+    font-size: 12px !important;
+    color: rgba(138, 155, 181, 0.6) !important;
+    font-style: italic;
+    margin-top: 16px !important;
   }
   .fine-print {
     color: rgba(138, 155, 181, 0.6);
@@ -1034,13 +1049,14 @@ layout: null
   <div class="section-inner pricing-inner">
     <div class="section-tag">Transparent pricing</div>
     <h2 class="section-heading">Simple <em>pricing.</em></h2>
-    <p class="pricing-body">Pay-as-you-go from 5p per SMS. No setup fees. No long contracts.</p>
+    <p class="pricing-body">Pay-as-you-go from 5p per SMS.* No setup fees. No long contracts.</p>
     <div class="pricing-example">
-      <p>Example: 20 staff, 5 messages a day = 100 messages a day. Over a 20-day working month, that’s 2,000 messages.</p>
+      <div class="example-label">Example</div>
+      <p>Say you’ve got 20 staff and you need to send each of them 5 messages a day — shift confirmations, schedule changes, site updates, the usual. That’s 100 messages a day. Over a 20-day working month, that comes to 2,000 messages.</p>
       <span class="pricing-highlight">£100 a month</span>
-      <p>to keep a whole team in sync. Volume discounts from 5,000 messages a month.</p>
+      <p>to keep a whole team properly in sync. Volume discounts kick in from 5,000 messages a month.</p>
+      <p class="example-footnote">* Based on a single 160-character message. Prices exclude VAT.</p>
     </div>
-    <p class="fine-print">Based on a single 160-character message. Prices exclude VAT.</p>
     <a href="#contact" class="btn-primary">Get a quote</a>
   </div>
 </section>
