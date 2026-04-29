@@ -2,8 +2,15 @@
 layout: default
 ---
 <article class="blog-post">
+  <!-- Breadcrumb navigation -->
+  <nav class="breadcrumb" aria-label="Breadcrumb">
+    <ol>
+      <li><a href="/">Home</a></li>
+      <li><a href="/blog/">Blog</a></li>
+      <li aria-current="page">{{ page.title }}</li>
+    </ol>
+  </nav>
   <div class="post-meta">
-    <a href="/blog" class="back-link">&larr; Back to Blog</a>
     <time datetime="{{ page.date | date: '%Y-%m-%d' }}">{{ page.date | date: '%B %-d, %Y' }}</time>
   </div>
   <h1 class="post-title">{{ page.title }}</h1>
@@ -91,4 +98,38 @@ layout: default
   .post-body img { max-width: 100%; border-radius: 8px; margin: 32px 0; }
   .post-body strong { color: var(--white); font-weight: 500; }
   .post-body hr { margin: 32px 0; }
+
+/* BREADCRUMB */
+.breadcrumb {
+  margin-bottom: 16px;
+}
+.breadcrumb ol {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  color: var(--grey);
+}
+.breadcrumb li + li::before {
+  content: "/";
+  color: rgba(138,155,181,0.4);
+  margin-right: 6px;
+}
+.breadcrumb a {
+  color: var(--blue-light);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.breadcrumb a:hover {
+  color: var(--white);
+}
+.breadcrumb li[aria-current="page"] {
+  color: rgba(255,255,255,0.5);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 280px;
+}
 </style>
