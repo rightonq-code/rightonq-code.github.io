@@ -970,6 +970,36 @@ layout: null
   padding-bottom: 20px;
   margin: 0;
 }
+
+/* CALCULATOR */
+.calc-section { padding: 100px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.calc-inner { max-width: 720px; }
+.calc-sliders { display: grid; gap: 32px; margin-bottom: 40px; }
+.calc-row { display: flex; flex-direction: column; gap: 12px; }
+.calc-label { display: flex; justify-content: space-between; align-items: baseline; }
+.calc-label span:first-child { font-size: 15px; color: var(--white); font-weight: 400; }
+.calc-value { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 18px; color: var(--blue); }
+input[type="range"] { -webkit-appearance: none; appearance: none; width: 100%; height: 4px; background: rgba(47,111,210,0.25); border-radius: 2px; outline: none; cursor: pointer; }
+input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%; background: var(--blue); cursor: pointer; box-shadow: 0 0 0 4px rgba(47,111,210,0.2); transition: box-shadow 0.2s; }
+input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 6px rgba(47,111,210,0.3); }
+.calc-result { background: rgba(47,111,210,0.07); border: 1px solid rgba(47,111,210,0.2); border-radius: 12px; padding: 28px 36px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px; }
+.calc-result-label { font-size: 12px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--blue-light); margin-bottom: 6px; }
+.calc-result-amount { font-family: 'Syne', sans-serif; font-weight: 800; font-size: clamp(32px, 5vw, 52px); color: var(--white); letter-spacing: -0.02em; line-height: 1; }
+.calc-result-sub { font-size: 13px; color: var(--grey); margin-top: 6px; }
+
+/* BOOK A DEMO STRIP */
+.demo-strip { background: linear-gradient(135deg, rgba(47,111,210,0.12) 0%, rgba(47,111,210,0.04) 100%); border-top: 1px solid rgba(47,111,210,0.2); border-bottom: 1px solid rgba(47,111,210,0.2); padding: 60px 0; }
+.demo-strip-inner { max-width: 1100px; margin: 0 auto; padding: 0 60px; display: flex; align-items: center; justify-content: space-between; gap: 32px; flex-wrap: wrap; }
+.demo-strip-text h2 { font-family: 'Syne', sans-serif; font-weight: 800; font-size: clamp(22px, 3vw, 32px); letter-spacing: -0.02em; margin-bottom: 8px; }
+.demo-strip-text h2 em { font-style: normal; color: var(--blue); }
+.demo-strip-text p { font-size: 15px; color: var(--grey); line-height: 1.6; max-width: 480px; }
+.demo-strip-actions { display: flex; gap: 16px; align-items: center; flex-shrink: 0; flex-wrap: wrap; }
+.btn-demo { padding: 16px 32px; background: var(--white); color: var(--navy); font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; text-decoration: none; border-radius: 6px; transition: all 0.2s; white-space: nowrap; }
+.btn-demo:hover { background: var(--blue-light); color: var(--white); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(47,111,210,0.3); }
+@media (max-width: 768px) {
+  .demo-strip-inner { padding: 0 24px; flex-direction: column; align-items: flex-start; }
+  .calc-result { flex-direction: column; align-items: flex-start; }
+}
 </style>
 </head>
 <body>
@@ -1171,6 +1201,60 @@ layout: null
   </div>
 </section>
 
+<!-- BOOK A DEMO -->
+<section class="demo-strip">
+  <div class="demo-strip-inner">
+    <div class="demo-strip-text">
+      <h2>See RightOnQ in <em>action.</em></h2>
+      <p>Book a free 15-minute call and we’ll show you exactly how it works — no slides, no sales pitch, just the product.</p>
+    </div>
+    <div class="demo-strip-actions">
+      <a href="https://calendly.com/rightonq/15min" target="_blank" rel="noopener" class="btn-demo">Book a 15-min demo</a>
+      <a href="#contact" class="btn-secondary">Or send a message</a>
+    </div>
+  </div>
+</section>
+<!-- CALCULATOR -->
+<section class="calc-section">
+  <div class="section-inner">
+    <div class="calc-inner">
+      <div class="section-tag">Work it out</div>
+      <h2 class="section-heading">What would it <em>cost you?</em></h2>
+      <div class="calc-sliders">
+        <div class="calc-row">
+          <div class="calc-label">
+            <span>Number of staff</span>
+            <span class="calc-value" id="calc-staff-val">20 people</span>
+          </div>
+          <input type="range" id="calc-staff" min="5" max="500" step="5" value="20" aria-label="Number of staff">
+        </div>
+        <div class="calc-row">
+          <div class="calc-label">
+            <span>Messages per person, per day</span>
+            <span class="calc-value" id="calc-msgs-val">3 messages</span>
+          </div>
+          <input type="range" id="calc-msgs" min="1" max="20" step="1" value="3" aria-label="Messages per person per day">
+        </div>
+        <div class="calc-row">
+          <div class="calc-label">
+            <span>Working days per month</span>
+            <span class="calc-value" id="calc-days-val">20 days</span>
+          </div>
+          <input type="range" id="calc-days" min="10" max="31" step="1" value="20" aria-label="Working days per month">
+        </div>
+      </div>
+      <div class="calc-result">
+        <div class="calc-result-left">
+          <div class="calc-result-label">Estimated monthly cost</div>
+          <div class="calc-result-amount" id="calc-total">£36</div>
+          <div class="calc-result-sub" id="calc-breakdown">20 staff × 3 msgs × 20 days = 1,200 messages — at 3p/msg</div>
+        </div>
+        <a href="#contact" class="btn-primary">Get an exact quote →</a>
+      </div>
+      <p style="font-size:12px;color:rgba(138,155,181,0.55);margin-top:16px;font-style:italic;">Estimate based on 3p/msg for volumes under 5,000/month. Volume discounts apply from 5,000 msgs. £10 monthly minimum. Prices exclude VAT.</p>
+    </div>
+  </div>
+</section>
 <!-- CONTACT -->
 <section class="contact" id="contact">
   <div class="contact-inner">
@@ -1387,6 +1471,43 @@ layout: null
     }, { passive: true });
   }
 
+  // Message volume calculator
+  (function() {
+    var staffEl  = document.getElementById('calc-staff');
+    var msgsEl   = document.getElementById('calc-msgs');
+    var daysEl   = document.getElementById('calc-days');
+    var staffVal = document.getElementById('calc-staff-val');
+    var msgsVal  = document.getElementById('calc-msgs-val');
+    var daysVal  = document.getElementById('calc-days-val');
+    var totalEl  = document.getElementById('calc-total');
+    var breakEl  = document.getElementById('calc-breakdown');
+    function ppm(n) {
+      if (n >= 50000) return 0.01;
+      if (n >= 20000) return 0.015;
+      if (n >= 10000) return 0.02;
+      if (n >= 5000)  return 0.025;
+      return 0.03;
+    }
+    function fmt(n) { return n >= 1000 ? n.toLocaleString('en-GB') : String(n); }
+    function update() {
+      var s = parseInt(staffEl.value, 10);
+      var m = parseInt(msgsEl.value, 10);
+      var d = parseInt(daysEl.value, 10);
+      staffVal.textContent = s + ' ' + (s === 1 ? 'person' : 'people');
+      msgsVal.textContent  = m + ' ' + (m === 1 ? 'message' : 'messages');
+      daysVal.textContent  = d + ' ' + (d === 1 ? 'day' : 'days');
+      var total = s * m * d;
+      var rate  = ppm(total);
+      var cost  = Math.max(10, total * rate);
+      var pence = Math.round(rate * 100);
+      totalEl.textContent = '£' + (cost % 1 === 0 ? cost.toFixed(0) : cost.toFixed(2));
+      breakEl.innerHTML   = fmt(s) + ' staff × ' + m + ' msgs × ' + d + ' days = ' + fmt(total) + ' messages — at ' + pence + 'p/msg';
+    }
+    if (staffEl) {
+      [staffEl, msgsEl, daysEl].forEach(function(el) { el.addEventListener('input', update); });
+      update();
+    }
+  })();
   // Cookie consent
   (function() {
     var KEY = 'rightonq_consent';
