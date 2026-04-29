@@ -4,14 +4,24 @@ layout: null
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-3CYR726BFR"></script>
-  <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-3CYR726BFR');
-  </script>
+  <!-- Google Fonts preconnect -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- Google tag (gtag.js) with UK GDPR consent mode -->
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('consent', 'default', {
+    'ad_storage': 'denied',
+    'analytics_storage': 'denied',
+    'ad_user_data': 'denied',
+    'ad_personalization': 'denied',
+    'wait_for_update': 500
+  });
+  gtag('js', new Date());
+  gtag('config', 'G-3CYR726BFR');
+</script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-3CYR726BFR"></script>
 <meta charset="UTF-8">
     <link rel="icon" type="image/png" href="/favicon.png">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -871,6 +881,95 @@ layout: null
     .feature-item:last-child { border-bottom: none; }
     .section-heading { margin-bottom: 32px; }
   }
+
+/* COOKIE BANNER */
+#cookie-banner {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  background: #1A2A40;
+  border: 1px solid rgba(47,111,210,0.35);
+  border-radius: 10px;
+  padding: 18px 24px;
+  max-width: 520px;
+  width: calc(100% - 48px);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  font-size: 13px;
+  color: rgba(255,255,255,0.7);
+  line-height: 1.5;
+}
+#cookie-banner[hidden] { display: none !important; }
+#cookie-banner p { margin: 0; flex: 1; min-width: 200px; }
+.cookie-btn {
+  padding: 8px 18px;
+  border-radius: 5px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.cookie-btn-accept { background: var(--blue); color: #fff; }
+.cookie-btn-accept:hover { background: var(--blue-light); }
+.cookie-btn-decline { background: transparent; color: rgba(255,255,255,0.45); border: 1px solid rgba(255,255,255,0.15); }
+.cookie-btn-decline:hover { color: #fff; border-color: rgba(255,255,255,0.4); }
+
+/* FAQ SECTION */
+.faq-section {
+  padding: 100px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.faq-list {
+  max-width: 720px;
+}
+.faq-list details {
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  padding: 0;
+}
+.faq-list details:last-child {
+  border-bottom: none;
+}
+.faq-list summary {
+  font-family: 'Syne', sans-serif;
+  font-weight: 600;
+  font-size: 17px;
+  color: var(--white);
+  padding: 22px 32px 22px 0;
+  cursor: pointer;
+  list-style: none;
+  position: relative;
+  line-height: 1.4;
+}
+.faq-list summary::-webkit-details-marker { display: none; }
+.faq-list summary::after {
+  content: '+';
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 22px;
+  font-weight: 300;
+  color: var(--blue);
+  transition: transform 0.2s;
+}
+.faq-list details[open] summary::after {
+  transform: translateY(-50%) rotate(45deg);
+}
+.faq-list details > p {
+  color: var(--grey);
+  font-size: 15px;
+  line-height: 1.8;
+  padding-bottom: 20px;
+  margin: 0;
+}
 </style>
 </head>
 <body>
@@ -1103,21 +1202,23 @@ layout: null
   <input type="hidden" name="_subject" value="New RightOnQ enquiry from website">
   <input type="hidden" name="_autoresponse" value="Hi there, thank you so much for getting in touch with RightOnQ. I'm really looking forward to hearing more about what you're looking for and will be in touch with you shortly. In the meantime, if you'd prefer to speak directly, please don't hesitate to call or message me on +44 7852 331166. Warm regards, Adam Smith, RightOnQ www.rightonq.co.uk">
   <input type="hidden" name="_next" value="https://www.rightonq.co.uk">
+        <!-- Honeypot: hidden from real users, traps bots -->
+        <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;opacity:0;pointer-events:none">
         <div class="form-group">
-          <label>Your name</label>
-          <input type="text" name="name" placeholder="Jane Smith" required>
+          <label for="contact-name">Your name</label>
+          <input id="contact-name" type="text" name="name" placeholder="Jane Smith" autocomplete="name" required>
         </div>
         <div class="form-group">
-          <label>Company</label>
-          <input type="text" name="company" placeholder="Acme Transport Ltd" required>
+          <label for="contact-company">Company</label>
+          <input id="contact-company" type="text" name="company" placeholder="Acme Transport Ltd" autocomplete="organization" required>
         </div>
         <div class="form-group">
-          <label>Email</label>
-          <input type="email" name="_replyto" placeholder="jane@company.co.uk" required>
+          <label for="contact-email">Email</label>
+          <input id="contact-email" type="email" name="_replyto" placeholder="jane@company.co.uk" autocomplete="email" inputmode="email" required>
         </div>
         <div class="form-group">
-          <label>Message</label>
-          <textarea rows="5" name="message" placeholder="Tell us about your team and what you're trying to solve..." required></textarea>
+          <label for="contact-message">Message</label>
+          <textarea id="contact-message" rows="5" name="message" placeholder="Tell us about your team and what you're trying to solve..." required></textarea>
         </div>
         <div class="form-submit">
           <button type="submit" class="btn-primary">Send message &rarr;</button>
@@ -1127,6 +1228,41 @@ layout: null
   </div>
 </section>
 
+<!-- FAQ -->
+<section class="faq-section">
+  <div class="section-inner">
+    <div class="section-tag">Common questions</div>
+    <h2 class="section-heading">FAQ</h2>
+    <div class="faq-list">
+
+      <details>
+        <summary>Do recipients need to install anything?</summary>
+        <p>No. Messages arrive as standard SMS or WhatsApp — nothing for your team to download or learn.</p>
+      </details>
+
+      <details>
+        <summary>Is RightOnQ GDPR-compliant?</summary>
+        <p>Yes. We’re a UK company and process data under UK GDPR. We only store the contact details you provide and the message logs needed for delivery and audit.</p>
+      </details>
+
+      <details>
+        <summary>What happens if someone doesn’t reply?</summary>
+        <p>You can configure automatic follow-up nudges, and your dashboard flags any unconfirmed messages so a human can step in.</p>
+      </details>
+
+      <details>
+        <summary>Which countries do you support?</summary>
+        <p>SMS and WhatsApp are supported in most countries. Pricing varies slightly by destination — get in touch for a quote.</p>
+      </details>
+
+      <details>
+        <summary>Is there a minimum contract?</summary>
+        <p>No long contracts. Pay-as-you-go from 6p per message with a £10 monthly minimum. Cancel any time.</p>
+      </details>
+
+    </div>
+  </div>
+</section>
 <!-- FOOTER -->
 <footer>
   <div class="footer-logo">
@@ -1138,7 +1274,7 @@ layout: null
       <text x="50" y="88" font-family="Arial Black, sans-serif" font-weight="900" font-size="58" fill="#2F6FD2" text-anchor="middle">Q</text>
     </svg>
     <div class="footer-left">
-      &copy; 2026 Continuity AI Ltd. Registered in England &amp; Wales.<br>
+      &copy; <span id="footer-year"></span> Continuity AI Ltd. Registered in England &amp; Wales.<br>
       Clay Bank Farmhouse, Hook Norton, BANBURY, OX15 5PA &middot; Companies House No. 17119848
     </div>
   </div>
@@ -1153,20 +1289,75 @@ layout: null
     <a href="/terms/" style="color:#4A8AE8;font-size:13px;text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#4A8AE8'">Terms &amp; Conditions</a>
   </div>
 </footer>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Do recipients need to install anything?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. Messages arrive as standard SMS or WhatsApp — nothing for your team to download or learn."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is RightOnQ GDPR-compliant?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. We're a UK company and process data under UK GDPR. We only store the contact details you provide and the message logs needed for delivery and audit."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What happens if someone doesn't reply?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "You can configure automatic follow-up nudges, and your dashboard flags any unconfirmed messages so a human can step in."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Which countries do you support?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "SMS and WhatsApp are supported in most countries. Pricing varies slightly by destination — get in touch for a quote."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is there a minimum contract?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No long contracts. Pay-as-you-go from 6p per message with a £10 monthly minimum. Cancel any time."
+      }
+    }
+  ]
+}
+</script>
 
-
+<!-- Cookie consent banner -->
+<div id="cookie-banner" hidden role="dialog" aria-label="Cookie preferences">
+  <p>We use analytics cookies to understand how the site is used. Nothing is sold or shared.</p>
+  <button type="button" class="cookie-btn cookie-btn-accept" data-consent="granted">Accept</button>
+  <button type="button" class="cookie-btn cookie-btn-decline" data-consent="denied">Decline</button>
+</div>
 
 <script>
+  // Form submit handler
   function handleSubmit(e) {
     e.preventDefault();
-    const btn = e.target.querySelector('button[type="submit"]');
-    btn.textContent = 'Sent \u2713';
+    var btn = e.target.querySelector('button[type="submit"]');
+    btn.textContent = 'Sent ✓';
     btn.style.background = '#1a7a4a';
     btn.disabled = true;
   }
 
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
+  // Scroll reveal
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
       if (entry.isIntersecting) {
         entry.target.style.opacity = '1';
         entry.target.style.transform = 'translateY(0)';
@@ -1174,4 +1365,46 @@ layout: null
     });
   }, { threshold: 0.1 });
 
-  document.querySelectorA
+  document.querySelectorAll('.card, .step, .case-card, .feature-item').forEach(function(el) {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(20px)';
+    el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+    observer.observe(el);
+  });
+
+  // Dynamic footer year
+  document.getElementById('footer-year').textContent = new Date().getFullYear();
+
+  // Header scroll opacity
+  var header = document.querySelector('nav');
+  if (header) {
+    window.addEventListener('scroll', function() {
+      if (window.scrollY > 20) {
+        header.style.background = 'rgb(11, 21, 36)';
+      } else {
+        header.style.background = 'rgba(11, 21, 36, 0.88)';
+      }
+    }, { passive: true });
+  }
+
+  // Cookie consent
+  (function() {
+    var KEY = 'rightonq_consent';
+    var banner = document.getElementById('cookie-banner');
+    var stored = localStorage.getItem(KEY);
+    if (stored === 'granted') {
+      gtag('consent', 'update', { analytics_storage: 'granted' });
+    } else if (!stored) {
+      banner.hidden = false;
+    }
+    banner.addEventListener('click', function(e) {
+      var choice = e.target.dataset.consent;
+      if (!choice) return;
+      localStorage.setItem(KEY, choice);
+      gtag('consent', 'update', { analytics_storage: choice });
+      banner.hidden = true;
+    });
+  })();
+</script>
+</body>
+</html>
