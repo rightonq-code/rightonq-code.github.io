@@ -1,7 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <!-- Google Fonts preconnect -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- Google tag (gtag.js) with UK GDPR consent mode -->
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('consent', 'default', {
+    'ad_storage': 'denied',
+    'analytics_storage': 'denied',
+    'ad_user_data': 'denied',
+    'ad_personalization': 'denied',
+    'wait_for_update': 500
+  });
+  gtag('js', new Date());
+  gtag('config', 'G-3CYR726BFR');
+</script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-3CYR726BFR"></script>
+<meta charset="UTF-8">
   <link rel="icon" type="image/png" href="/favicon.png">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -104,7 +122,104 @@
       .content-wrap { padding: 100px 24px 60px; }
       footer { padding: 32px 24px; flex-direction: column; align-items: flex-start; }
     }
-  </style>
+  
+/* COOKIE BANNER */
+#cookie-banner {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  background: #1A2A40;
+  border: 1px solid rgba(47,111,210,0.35);
+  border-radius: 10px;
+  padding: 18px 24px;
+  max-width: 520px;
+  width: calc(100% - 48px);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  font-size: 13px;
+  color: rgba(255,255,255,0.7);
+  line-height: 1.5;
+}
+#cookie-banner[hidden] { display: none !important; }
+#cookie-banner p { margin: 0; flex: 1; min-width: 200px; }
+.cookie-btn {
+  padding: 8px 18px;
+  border-radius: 5px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.cookie-btn-accept { background: var(--blue); color: #fff; }
+.cookie-btn-accept:hover { background: var(--blue-light); }
+.cookie-btn-decline { background: transparent; color: rgba(255,255,255,0.45); border: 1px solid rgba(255,255,255,0.15); }
+.cookie-btn-decline:hover { color: #fff; border-color: rgba(255,255,255,0.4); }
+</style>
+
+<!-- Blog post meta tags (only rendered on posts) -->
+{% if page.layout == "post" %}
+<meta property="og:title" content="{{ page.title }} — RightOnQ">
+<meta property="og:description" content="{{ page.description }}">
+<meta property="og:url" content="https://www.rightonq.co.uk{{ page.url }}">
+<meta property="og:type" content="article">
+<meta property="og:image" content="https://www.rightonq.co.uk/og-image-blog.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:site_name" content="RightOnQ">
+<meta property="og:locale" content="en_GB">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ page.title }} — RightOnQ">
+<meta name="twitter:description" content="{{ page.description }}">
+<meta name="twitter:image" content="https://www.rightonq.co.uk/og-image-blog.png">
+<link rel="canonical" href="https://www.rightonq.co.uk{{ page.url }}">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.rightonq.co.uk{{ page.url }}"
+  },
+  "headline": "{{ page.title | escape }}",
+  "description": "{{ page.description | escape }}",
+  "image": "https://www.rightonq.co.uk/og-image-blog.png",
+  "author": {
+    "@type": "Person",
+    "name": "Adam Smith",
+    "url": "https://www.rightonq.co.uk"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "RightOnQ",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.rightonq.co.uk/favicon.png"
+    }
+  },
+  "datePublished": "{{ page.date | date: '%Y-%m-%d' }}",
+  "dateModified": "{{ page.date | date: '%Y-%m-%d' }}"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.rightonq.co.uk/" },
+    { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://www.rightonq.co.uk/blog/" },
+    { "@type": "ListItem", "position": 3, "name": "{{ page.title | escape }}" }
+  ]
+}
+</script>
+{% endif %}
 </head>
 <body>
 
@@ -139,7 +254,7 @@
       <text x="50" y="88" font-family="Arial Black, sans-serif" font-weight="900" font-size="58" fill="#2F6FD2" text-anchor="middle">Q</text>
     </svg>
     <div class="footer-left">
-      &copy; 2026 Continuity AI Ltd. Registered in England &amp; Wales.<br>
+      &copy; <span id="footer-year"></span> Continuity AI Ltd. Registered in England &amp; Wales.<br>
       Clay Bank Farmhouse, Hook Norton, BANBURY, OX15 5PA &middot; Companies House No. 17119848
     </div>
   </div>
@@ -152,5 +267,44 @@
   </div>
 </footer>
 
+
+<!-- Cookie consent banner -->
+<div id="cookie-banner" hidden role="dialog" aria-label="Cookie preferences">
+  <p>We use analytics cookies to understand how the site is used. Nothing is sold or shared.</p>
+  <button type="button" class="cookie-btn cookie-btn-accept" data-consent="granted">Accept</button>
+  <button type="button" class="cookie-btn cookie-btn-decline" data-consent="denied">Decline</button>
+</div>
+
+<script>
+  // Dynamic footer year
+  document.getElementById('footer-year').textContent = new Date().getFullYear();
+
+  // Header scroll opacity
+  var header = document.querySelector('nav');
+  if (header) {
+    window.addEventListener('scroll', function() {
+      header.style.background = window.scrollY > 20 ? 'rgb(11, 21, 36)' : 'rgba(11, 21, 36, 0.88)';
+    }, { passive: true });
+  }
+
+  // Cookie consent
+  (function() {
+    var KEY = 'rightonq_consent';
+    var banner = document.getElementById('cookie-banner');
+    var stored = localStorage.getItem(KEY);
+    if (stored === 'granted') {
+      if (typeof gtag === 'function') gtag('consent', 'update', { analytics_storage: 'granted' });
+    } else if (!stored) {
+      banner.hidden = false;
+    }
+    banner.addEventListener('click', function(e) {
+      var choice = e.target.dataset.consent;
+      if (!choice) return;
+      localStorage.setItem(KEY, choice);
+      if (typeof gtag === 'function') gtag('consent', 'update', { analytics_storage: choice });
+      banner.hidden = true;
+    });
+  })();
+</script>
 </body>
 </html>
