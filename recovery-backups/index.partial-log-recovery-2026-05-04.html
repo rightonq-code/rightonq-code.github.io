@@ -1,0 +1,931 @@
+
+---
+layout: null
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google Fonts preconnect -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- Google tag (gtag.js) with UK GDPR consent mode -->
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('consent', 'default', {
+    'ad_storage': 'denied',
+    'analytics_storage': 'denied',
+    'ad_user_data': 'denied',
+    'ad_personalization': 'denied',
+    'wait_for_update': 500
+  });
+  gtag('js', new Date());
+  gtag('config', 'G-3CYR726BFR');
+</script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-3CYR726BFR"></script>
+<meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <meta name="format-detection" content="address=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RightOnQ — Verified RCS Messaging for Brand-Invested Businesses</title>
+<meta name="description" content="RightOnQ helps brand-invested businesses prepare, send and track verified RCS messages with SMS fallback, reply buttons, local-time scheduling and clear response tracking.">
+<meta name="keywords" content="RCS business messaging, verified sender messaging, branded audience messaging, SMS fallback, reply buttons, local time scheduling, RightOnQ, Continuity AI">
+<meta property="og:title" content="RightOnQ — Verified RCS Messaging for Brand-Invested Businesses">
+<meta property="og:description" content="Branded operational messages for brands with an audience worth reaching. RCS first, SMS fallback.">
+<meta property="og:url" content="https://www.rightonq.co.uk">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://www.rightonq.co.uk/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="RightOnQ — Verified RCS Messaging for Brand-Invested Businesses">
+<meta property="og:site_name" content="RightOnQ">
+<meta property="og:locale" content="en_GB">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="RightOnQ — Verified RCS Messaging for Brand-Invested Businesses">
+<meta name="twitter:description" content="RightOnQ helps businesses send verified RCS messages with SMS fallback, reply buttons and local-time scheduling.">
+<meta name="twitter:image" content="https://www.rightonq.co.uk/og-image.png">
+<meta name="robots" content="index, follow">
+<meta name="author" content="Continuity AI Ltd">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "RightOnQ",
+  "description": "RightOnQ helps brand-invested businesses prepare, send and track verified RCS messages with SMS fallback, reply buttons, local-time scheduling and clear response tracking.",
+  "url": "https://www.rightonq.co.uk",
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "Web",
+  "offers": {
+    "@type": "Offer",
+    "priceCurrency": "GBP",
+    "price": "0",
+    "description": "Quote-based messaging and onboarding support"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Continuity AI Ltd",
+    "alternateName": "RightOnQ",
+    "url": "https://www.rightonq.co.uk",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "Clay Bank Farmhouse",
+      "addressLocality": "Hook Norton",
+      "postalCode": "OX15 5PA",
+      "addressCountry": "GB"
+    },
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "email": "adam@rightonq.co.uk",
+      "contactType": "sales"
+    }
+  }
+}
+</script>
+<link rel="canonical" href="https://www.rightonq.co.uk">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #101a2a;
+    --navy-deep: #0c1420;
+    --panel: #18263a;
+    --panel-soft: #20324a;
+    --blue: #3478d8;
+    --blue-light: #67a6ff;
+    --gold: #d6b65a;
+    --green: #35b978;
+    --white: #f7fbff;
+    --grey: #a9b7ca;
+    --grey-light: #1f3047;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--navy);
+    color: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    overflow-x: hidden;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 20px 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(11, 21, 36, 0.88);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(47, 111, 210, 0.15);
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    text-decoration: none;
+  }
+
+  .logo-svg { width: 44px; height: 44px; flex-shrink: 0; }
+
+  .logo-text {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 20px;
+    color: var(--white);
+    letter-spacing: 0.06em;
+  }
+
+  .logo-text span { color: var(--blue); }
+
+  nav a.cta-nav {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--white);
+    text-decoration: none;
+    padding: 10px 24px;
+    border: 1px solid rgba(47, 111, 210, 0.5);
+    border-radius: 6px;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  nav a.cta-nav:hover {
+    background: var(--blue);
+    border-color: var(--blue);
+  }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 120px 60px 80px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -200px; right: -200px;
+    width: 700px; height: 700px;
+    background: radial-gradient(circle, rgba(47,111,210,0.18) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: -100px; left: -100px;
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(47,111,210,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--blue-light);
+    margin-bottom: 32px;
+    opacity: 0;
+    animation: fadeUp 0.6s ease forwards 0.2s;
+  }
+
+  .hero-tag::before {
+    content: '';
+    width: 24px; height: 1px;
+    background: var(--blue);
+  }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(48px, 7vw, 96px);
+    line-height: 1.0;
+    letter-spacing: 0;
+    max-width: 900px;
+    opacity: 0;
+    animation: fadeUp 0.7s ease forwards 0.4s;
+  }
+
+  h1 em { font-style: normal; color: var(--blue); }
+
+  .hero-sub {
+    margin-top: 32px;
+    font-size: clamp(16px, 2vw, 20px);
+    font-weight: 300;
+    color: var(--grey);
+    max-width: 580px;
+    line-height: 1.7;
+    opacity: 0;
+    animation: fadeUp 0.7s ease forwards 0.6s;
+  }
+  .tm-mark {
+    font-size: 0.48em;
+    font-weight: 500;
+    vertical-align: super;
+    margin-left: 0.08em;
+    color: var(--blue-light);
+    letter-spacing: 0;
+  }
+
+  .hero-actions {
+    margin-top: 48px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+    opacity: 0;
+    animation: fadeUp 0.7s ease forwards 0.8s;
+  }
+
+  .btn-primary {
+    padding: 16px 36px;
+    background: var(--blue);
+    color: white;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    text-decoration: none;
+    border-radius: 6px;
+    transition: all 0.2s;
+    border: none;
+    cursor: pointer;
+  }
+
+  .btn-primary:hover {
+    background: var(--blue-light);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(47,111,210,0.4);
+  }
+
+  .btn-secondary {
+    font-size: 15px;
+    font-weight: 400;
+    color: var(--grey);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: color 0.2s;
+  }
+
+  .btn-secondary:hover { color: var(--white); }
+  .btn-secondary::after { content: '→'; transition: transform 0.2s; }
+  .btn-secondary:hover::after { transform: translateX(4px); }
+
+  /* TICKER */
+  .ticker {
+    margin-top: 80px;
+    padding: 24px 0;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    overflow: hidden;
+    opacity: 0;
+    animation: fadeUp 0.7s ease forwards 1s;
+  }
+
+  .ticker-inner {
+    display: flex;
+    gap: 60px;
+    animation: ticker 22s linear infinite;
+    width: max-content;
+  }
+
+  .ticker-item {
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.25);
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .ticker-item::after {
+    content: '◆';
+    color: var(--blue);
+    font-size: 8px;
+  }
+
+  @keyframes ticker {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  /* WHAT WE DO */
+  .what {
+    padding: 120px 60px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .what-left h2 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(36px, 4vw, 56px);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin-bottom: 24px;
+  }
+
+  .what-left h2 em { font-style: normal; color: var(--blue); }
+
+  .what-left p {
+    font-size: 17px;
+    color: var(--grey);
+    line-height: 1.8;
+    margin-bottom: 16px;
+  }
+
+  .what-right { display: grid; gap: 16px; }
+
+  .card {
+    background: var(--grey-light);
+    border: 1px solid rgba(47,111,210,0.15);
+    border-radius: 12px;
+    padding: 28px 32px;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+
+  .card:hover {
+    border-color: rgba(47,111,210,0.5);
+    transform: translateX(4px);
+  }
+
+  .card-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    color: rgba(47, 111, 210, 0.6);
+    margin-bottom: 12px;
+  }
+
+  .card h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .card p { font-size: 14px; color: var(--grey); line-height: 1.7; }
+
+  /* CONTACT */
+  .contact {
+    padding: 120px 60px;
+    background: var(--grey-light);
+    border-top: 1px solid rgba(47,111,210,0.15);
+  }
+
+  .contact-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: start;
+  }
+
+  .contact h2 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(36px, 4vw, 56px);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin-bottom: 24px;
+  }
+
+  .contact h2 em { font-style: normal; color: var(--blue); }
+
+  .contact > .contact-inner > div > p {
+    font-size: 17px;
+    color: var(--grey);
+    line-height: 1.8;
+    margin-bottom: 40px;
+  }
+
+  .contact-details { display: grid; gap: 24px; }
+
+  .contact-item { display: flex; flex-direction: column; gap: 4px; }
+
+  .contact-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--blue);
+  }
+
+  .contact-value { font-size: 16px; color: var(--white); font-weight: 400; }
+  .contact-value a { color: var(--white); text-decoration: none; transition: color 0.2s; }
+  .contact-value a:hover { color: var(--blue-light); }
+
+  /* FORM */
+  .contact-form { display: grid; gap: 16px; }
+
+  .form-group { display: flex; flex-direction: column; gap: 8px; }
+
+  .form-group label {
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--grey);
+  }
+
+  .form-group input,
+  .form-group textarea {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 6px;
+    padding: 14px 18px;
+    color: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.2s;
+    resize: none;
+  }
+
+  .form-group input:focus,
+  .form-group textarea:focus { border-color: var(--blue); }
+
+  .form-group input::placeholder,
+  .form-group textarea::placeholder { color: rgba(255,255,255,0.2); }
+
+  .form-submit { margin-top: 8px; }
+
+  /* FOOTER */
+  footer {
+    padding: 40px 60px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .footer-logo { display: flex; align-items: center; gap: 10px; }
+  .footer-logo svg { width: 32px; height: 32px; }
+
+  .footer-left { font-size: 13px; color: rgba(255,255,255,0.25); line-height: 1.8; }
+  .footer-right { font-size: 13px; color: rgba(255,255,255,0.25); }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    nav {
+      padding: 16px 20px;
+      flex-direction: column;
+      gap: 14px;
+    }
+    nav > div {
+      gap: 16px !important;
+    }
+    .logo-text { font-size: 18px; }
+    .logo-svg { width: 38px; height: 38px; }
+    nav a.cta-nav { padding: 8px 18px; font-size: 13px; }
+    .hero { padding: 130px 24px 60px; }
+    .what { grid-template-columns: 1fr; padding: 80px 24px; gap: 48px; }
+    .contact { padding: 80px 24px; }
+    .contact-inner { grid-template-columns: 1fr; gap: 48px; }
+    footer { padding: 32px 24px; flex-direction: column; align-items: flex-start; }
+  }
+
+
+  /* PROOF STRIP */
+  .proof-strip {
+    height: 1px;
+    padding: 0;
+    background: rgba(47, 111, 210, 0.18);
+    border-bottom: 1px solid rgba(47, 111, 210, 0.12);
+  }
+  .proof-line2 {
+    font-size: 13px;
+    font-weight: 300;
+    color: rgba(255,255,255,0.35);
+    font-style: italic;
+    margin-top: 8px;
+  }
+
+  /* SHARED SECTION STYLES */
+  .section-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 60px;
+  }
+  .section-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--blue-light);
+    margin-bottom: 16px;
+  }
+  .section-tag::before {
+    content: '';
+    width: 24px;
+    height: 1px;
+    background: var(--blue);
+  }
+  .section-heading {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(28px, 4vw, 48px);
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    color: var(--white);
+    margin-bottom: 48px;
+  }
+  .section-heading em { font-style: normal; color: var(--blue); }
+
+  /* HOW IT WORKS */
+  .how-section {
+    padding: 100px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .steps {
+    display: flex;
+    align-items: flex-start;
+    gap: 0;
+  }
+  .step {
+    flex: 1;
+    padding-right: 40px;
+  }
+  .step:last-child { padding-right: 0; }
+  .step-num {
+    font-family: 'Syne', sans-serif;
+    font-weight: 900;
+    font-size: clamp(48px, 8vw, 80px);
+    color: #2F6FD2;
+    line-height: 1;
+    margin-bottom: 12px;
+  }
+  .step h3 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--white);
+    margin-bottom: 10px;
+  }
+  .step p {
+    color: var(--grey);
+    font-size: 15px;
+    line-height: 1.7;
+  }
+  .step-connector {
+    width: 60px;
+    flex-shrink: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--blue) 0%, rgba(47,111,…14217 tokens truncated…lass="use-cases">
+  <div class="section-inner">
+    <div class="section-tag">Where it fits</div>
+    <h2 class="section-heading">For businesses with an audience worth <em>reaching.</em></h2>
+    <div class="scenario-grid">
+      <div class="scenario-card">
+        <div class="scenario-icon">AM</div>
+        <h3>Automotive specialists</h3>
+        <p>A newly arrived car, sent to serious buyers by region, landing at 8am in each local market with one tap to request a viewing.</p>
+      </div>
+      <div class="scenario-card">
+        <div class="scenario-icon">HB</div>
+        <h3>Food and drink brands</h3>
+        <p>A seasonal release sent to trade customers with a product image, allocation details and a one-tap order response.</p>
+      </div>
+      <div class="scenario-card">
+        <div class="scenario-icon">RE</div>
+        <h3>Real estate teams</h3>
+        <p>A new instruction delivered to active buyers with photos, key details and a viewing request button before the email inbox wakes up.</p>
+      </div>
+      <div class="scenario-card">
+        <div class="scenario-icon">MS</div>
+        <h3>Medical and professional suppliers</h3>
+        <p>Product updates, availability notices and appointment-led messages sent to known contacts who expect useful information.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features-section">
+  <div class="section-inner">
+    <div class="section-tag">The RightOnQ business toolkit</div>
+    <h2 class="section-heading">What RightOnQ brings <em>together.</em></h2>
+    <div class="features-grid">
+      <div class="feature-item">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none" role="img" aria-label="Verified RCS icon"><circle cx="14" cy="14" r="13" stroke="#2F6FD2" stroke-width="1.5"/><path d="M8 14c0-3.3 2.7-6 6-6s6 2.7 6 6-2.7 6-6 6c-1.1 0-2.1-.3-3-.8L8 20l.8-3A5.9 5.9 0 0 1 8 14Z" stroke="#2F6FD2" stroke-width="1.5" stroke-linejoin="round"/></svg>
+        <span>Verified RCS sender profile</span>
+      </div>
+      <div class="feature-item">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none" role="img" aria-label="Scheduled sending icon"><circle cx="14" cy="14" r="13" stroke="#2F6FD2" stroke-width="1.5"/><circle cx="14" cy="14" r="4" stroke="#2F6FD2" stroke-width="1.5"/><path d="M14 8V5M14 23v-3M8 14H5M23 14h-3" stroke="#2F6FD2" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <span>Recipient local-time scheduling</span>
+      </div>
+      <div class="feature-item">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none" role="img" aria-label="Confirmation tracking icon"><circle cx="14" cy="14" r="13" stroke="#2F6FD2" stroke-width="1.5"/><path d="M9 14l3.5 3.5L19 10" stroke="#2F6FD2" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>One-tap reply buttons</span>
+      </div>
+      <div class="feature-item">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none" role="img" aria-label="Automatic follow-ups icon"><circle cx="14" cy="14" r="13" stroke="#2F6FD2" stroke-width="1.5"/><path d="M14 8v6l4 2" stroke="#2F6FD2" stroke-width="1.5" stroke-linecap="round"/><path d="M8 20c1.5-1 3.5-1.5 6-1.5s4.5.5 6 1.5" stroke="#2F6FD2" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <span>SMS fallback for essential reach</span>
+      </div>
+      <div class="feature-item">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none" role="img" aria-label="Dashboard overview icon"><circle cx="14" cy="14" r="13" stroke="#2F6FD2" stroke-width="1.5"/><rect x="8" y="16" width="3" height="5" rx="1" stroke="#2F6FD2" stroke-width="1.5"/><rect x="12.5" y="12" width="3" height="9" rx="1" stroke="#2F6FD2" stroke-width="1.5"/><rect x="17" y="8" width="3" height="13" rx="1" stroke="#2F6FD2" stroke-width="1.5"/></svg>
+        <span>Message tracking dashboard</span>
+      </div>
+      <div class="feature-item">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none" role="img" aria-label="No app needed icon"><circle cx="14" cy="14" r="13" stroke="#2F6FD2" stroke-width="1.5"/><rect x="10" y="6" width="8" height="16" rx="2" stroke="#2F6FD2" stroke-width="1.5"/><path d="M12 19h4" stroke="#2F6FD2" stroke-width="1.5" stroke-linecap="round"/><path d="M17 6l4 4M21 6l-4 4" stroke="#2F6FD2" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <span>No app needed for your audience</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- REGISTRATION -->
+<section class="registration-section">
+  <div class="section-inner registration-grid">
+    <div>
+      <div class="section-tag">RCS registration</div>
+      <h2 class="section-heading">The trust step is part of the <em>product.</em></h2>
+      <p class="lead-copy">RCS business messaging requires verification. That process is not a nuisance to hide away; it is part of why recipients trust the message when it arrives.</p>
+    </div>
+    <div class="registration-panel">
+      <h3>RightOnQ helps you get ready.</h3>
+      <p>Some businesses will already have their own RCS registration and want to integrate it. Others will need help preparing the business details, evidence and internal sign-off needed for approval.</p>
+      <p>Approval commonly takes around four to six weeks. If you want us to hand-hold the process, managed onboarding is available from around £500, depending on how much preparation and support is needed.</p>
+      <a href="https://developers.google.com/business-communications/rcs-business-messaging/guides/get-started/register-partner#rcs-for-business-partner-registration-interest-form" class="btn-primary" target="_blank" rel="noopener">View the official RCS registration route</a>
+    </div>
+  </div>
+</section>
+
+<!-- BOOK A DEMO -->
+<section class="demo-strip">
+  <div class="demo-strip-inner">
+    <div class="demo-strip-text">
+      <h2>Start getting RCS-ready.</h2>
+      <p>Book a short call and see RCS in action. We’re UK-based and currently work with UK businesses only. We’ll explain registration, approval timelines and sender profiles, show example messages, and send live examples to your phone while we talk.</p>
+    </div>
+    <div class="demo-strip-actions">
+      <a href="https://cal.com/adam-smith-wungl9/15min" target="_blank" rel="noopener" class="btn-demo">Book a Short Call</a>
+    </div>
+  </div>
+</section>
+<!-- CONTACT -->
+<section class="contact" id="contact">
+  <div class="contact-inner">
+    <div>
+      <h2>Curious about<br><em>RCS?</em></h2>
+      <p>Leave your details to join the RightOnQ contact list for updates on RCS business messaging for UK-based businesses, or send us a note if you have a specific question.</p>
+      <div class="contact-details">
+        <div class="contact-item">
+          <span class="contact-label">Email</span>
+          <span class="contact-value"><a href="mailto:adam@rightonq.co.uk">adam@rightonq.co.uk</a></span>
+        </div>
+        <div class="contact-item">
+          <span class="contact-label">Registered Company</span>
+          <span class="contact-value">Continuity AI Ltd<br>Trading as RightOnQ&trade;<br>Companies House No. 17119848</span>
+        </div>
+        <div class="contact-item">
+          <span class="contact-label">Website</span>
+          <span class="contact-value"><a href="https://www.rightonq.co.uk">www.rightonq.co.uk</a></span>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <form class="contact-form" action="https://formspree.io/f/xykbkrnv" method="POST">
+  <input type="hidden" name="_subject" value="New RightOnQ enquiry from website">
+  <input type="hidden" name="_autoresponse" value="Hi there, thank you so much for getting in touch with RightOnQ. I'm really looking forward to hearing more about what you're looking for and will be in touch with you shortly. In the meantime, if you'd prefer to speak directly, please don't hesitate to call or message me on +44 7852 331166. Warm regards, Adam Smith, RightOnQ www.rightonq.co.uk">
+  <input type="hidden" name="_next" value="https://www.rightonq.co.uk">
+        <!-- Honeypot: hidden from real users, traps bots -->
+        <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;opacity:0;pointer-events:none">
+        <div class="form-group">
+          <label for="contact-name">Your name</label>
+          <input id="contact-name" type="text" name="name" placeholder="Jane Smith" autocomplete="name" required>
+        </div>
+        <div class="form-group">
+          <label for="contact-company">Company</label>
+          <input id="contact-company" type="text" name="company" placeholder="Apex Motors Ltd" autocomplete="organization" required>
+        </div>
+        <div class="form-group">
+          <label for="contact-email">Email</label>
+          <input id="contact-email" type="email" name="_replyto" placeholder="jane@company.co.uk" autocomplete="email" inputmode="email" required>
+        </div>
+        <div class="form-group">
+          <label for="contact-message">Message</label>
+          <textarea id="contact-message" rows="5" name="message" placeholder="Tell us about your audience, your brand and the first message you would want to send..." required></textarea>
+        </div>
+        <div class="form-submit">
+          <button type="submit" class="btn-primary">Send message &rarr;</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq-section">
+  <div class="section-inner">
+    <div class="section-tag">Good to know</div>
+    <h2 class="section-heading">RCS <em>questions.</em></h2>
+    <div class="faq-list">
+
+      <details>
+        <summary>Do recipients need to install anything?</summary>
+        <p>No. RCS arrives in the phone's native messaging app on supported devices. If RCS is not available, the essential message can fall back to SMS.</p>
+      </details>
+
+      <details>
+        <summary>Is RightOnQ GDPR-compliant?</summary>
+        <p>Yes. We’re a UK company and process data under UK GDPR. We only store the contact details you provide and the message logs needed for delivery and audit.</p>
+      </details>
+
+      <details>
+        <summary>Can messages include reply buttons?</summary>
+        <p>Yes. Rich RCS cards can include up to four buttons, and carousel cards usually support one or two buttons per card. That means your audience can choose a clear next step with one tap, without typing a reply.</p>
+      </details>
+
+      <details>
+        <summary>What happens when RCS is not available?</summary>
+        <p>The message can fall back to SMS so the recipient still receives the essential information. Rich RCS elements such as images, carousels and buttons may not appear in the SMS version, and fallback SMS is charged at the applicable fallback message rate.</p>
+      </details>
+
+      <details>
+        <summary>Do you handle RCS registration?</summary>
+        <p>We can help, but it is not automatic. RCS registration needs business details, sender profile information, logo and banner assets, contact details, privacy and terms links, example messages, opt-in/opt-out information and approval checks. Some of that has to come from you. If you want us to hand-hold the process, we charge for the staff time involved, with managed onboarding available from around £500.</p>
+      </details>
+
+    </div>
+  </div>
+</section>
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">
+    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="RightOnQ logo">
+      <rect x="8" y="18" width="84" height="76" rx="14" ry="14" fill="white" opacity="0.9"/>
+      <rect x="28" y="8" width="12" height="22" rx="6" ry="6" fill="#0B1524"/>
+      <rect x="60" y="8" width="12" height="22" rx="6" ry="6" fill="#0B1524"/>
+      <text x="50" y="42" font-family="Arial Black, sans-serif" font-weight="900" font-size="16" fill="#0B1524" text-anchor="middle" letter-spacing="1">ON</text>
+      <text x="50" y="88" font-family="Arial Black, sans-serif" font-weight="900" font-size="58" fill="#2F6FD2" text-anchor="middle">Q</text>
+    </svg>
+    <div class="footer-left">
+      &copy; <span id="footer-year"></span> Continuity AI Ltd. Registered in England &amp; Wales.<br>
+      Companies House No. 17119848
+    </div>
+  </div>
+  <div class="footer-right">
+    RightOnQ<span class="tm-mark">TM</span> is a trading name of Continuity AI Ltd.
+    <br>
+    <a href="/" style="color:#4A8AE8;font-size:13px;text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#4A8AE8'">Home</a>
+    &nbsp;&middot;&nbsp;
+          <a href="/blog" style="color:#4A8AE8;font-size:13px;text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#4A8AE8'">Blog</a> &nbsp;&middot;&nbsp;
+    <a href="/privacy/" style="color:#4A8AE8;font-size:13px;text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#4A8AE8'">Privacy Policy</a>
+    &nbsp;&middot;&nbsp;
+    <a href="/terms/" style="color:#4A8AE8;font-size:13px;text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#4A8AE8'">Terms &amp; Conditions</a>
+  </div>
+</footer>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Do recipients need to install anything?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. RCS arrives in the phone's native messaging app on supported devices. If RCS is not available, the essential message can fall back to SMS."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is RightOnQ GDPR-compliant?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. We're a UK company and process data under UK GDPR. We only store the contact details you provide and the message logs needed for delivery and audit."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can messages include reply buttons?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Rich RCS cards can include up to four buttons, and carousel cards usually support one or two buttons per card. That means your audience can choose a clear next step with one tap, without typing a reply."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What happens when RCS is not available?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The message can fall back to SMS so the recipient still receives the essential information. Rich RCS elements such as images, carousels and buttons may not appear in the SMS version, and fallback SMS is charged at the applicable fallback message rate."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Do you handle RCS registration?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "We can help, but it is not automatic. RCS registration needs business details, sender profile information, logo and banner assets, contact details, privacy and terms links, example messages, opt-in/opt-out information and approval checks. Some of that has to come from you. If you want us to hand-hold the process, we charge for the staff time involved, with managed onboarding available from around £500."
+      }
+    }
+  ]
+}
+</script>
+
+<!-- Cookie consent banner -->
+<div id="cookie-banner" hidden role="dialog" aria-label="Cookie preferences">
+  <p>We use analytics cookies to understand how the site is used. Nothing is sold or shared.</p>
+  <button type="button" class="cookie-btn cookie-btn-accept" data-consent="granted">Accept</button>
+  <button type="button" class="cookie-btn cookie-btn-decline" data-consent="denied">Decline</button>
+</div>
+
+<script>
+  // Form submit handler
+  function handleSubmit(e) {
+    e.preventDefault();
+    var btn = e.target.querySelector('button[type="submit"]');
+    btn.textContent = 'Sent ✓';
+    btn.style.background = '#1a7a4a';
+    btn.disabled = true;
+  }
+
+  // Scroll reveal
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.style.opacity = '1';
+        entry.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.card, .step, .scenario-card, .feature-item, .quote-panel, .registration-panel').forEach(function(el) {
+    el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+    observer.observe(el);
+  });
+
+  // Dynamic footer year
+  document.getElementById('footer-year').textContent = new Date().getFullYear();
+
+  // Header scroll opacity
+  var header = document.querySelector('nav');
+  if (header) {
+    window.addEventListener('scroll', function() {
+      if (window.scrollY > 20) {
+        header.style.background = 'rgb(16, 26, 42)';
+      } else {
+        header.style.background = 'rgba(16, 26, 42, 0.88)';
+      }
+    }, { passive: true });
+  }
+  // Cookie consent
+  (function() {
+    var KEY = 'rightonq_consent';
+    var banner = document.getElementById('cookie-banner');
+    var stored = localStorage.getItem(KEY);
+    if (stored === 'granted') {
+      gtag('consent', 'update', { analytics_storage: 'granted' });
+    } else if (!stored) {
+      banner.hidden = false;
+    }
+    banner.addEventListener('click', function(e) {
+      var choice = e.target.dataset.consent;
+      if (!choice) return;
+      localStorage.setItem(KEY, choice);
+      gtag('consent', 'update', { analytics_storage: choice });
+      banner.hidden = true;
+    });
+  })();
+</script>
+</body>
+</html>

@@ -6,14 +6,21 @@ layout: null
 <html lang="en">
 
 <head>
-  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-3CYR726BFR"></script>
+  <!-- Google tag (gtag.js) with UK GDPR consent mode -->
   <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
+      gtag('consent', 'default', {
+        'ad_storage': 'denied',
+        'analytics_storage': 'denied',
+        'ad_user_data': 'denied',
+        'ad_personalization': 'denied',
+        'wait_for_update': 500
+      });
       gtag('js', new Date());
       gtag('config', 'G-3CYR726BFR');
   </script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-3CYR726BFR"></script>
 
 <meta charset="UTF-8">
 
@@ -26,7 +33,7 @@ layout: null
 <link rel="canonical" href="https://www.rightonq.co.uk/privacy/">
 <meta property="og:title" content="Privacy Policy — RightOnQ">
 <meta property="og:description" content="Privacy Policy for RightOnQ, a trading name of Continuity AI Ltd. How we collect, use and protect your data in accordance with UK GDPR.">
-<meta property="og:url" content="https://www.rightonq.co.uk/privacy">
+<meta property="og:url" content="https://www.rightonq.co.uk/privacy/">
 <meta property="og:type" content="website">
 <meta property="og:image" content="https://www.rightonq.co.uk/og-image.png">
 <meta property="og:image:width" content="1200">
@@ -35,9 +42,9 @@ layout: null
 <meta property="og:locale" content="en_GB">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Privacy Policy — RightOnQ">
-<meta name="twitter:description" content="Privacy Policy for RightOnQ, a trading name of Continuity AI Ltd. UK GDPR compliant.">
+<meta name="twitter:description" content="Privacy Policy for RightOnQ, explaining how Continuity AI Ltd handles personal data under UK GDPR.">
 <meta name="twitter:image" content="https://www.rightonq.co.uk/og-image.png">
-<meta name="robots" content="noindex, follow">
+<meta name="robots" content="index, follow">
 <meta name="author" content="Continuity AI Ltd">
 <script type="application/ld+json">
 {
@@ -57,7 +64,7 @@ layout: null
     "alternateName": "RightOnQ",
     "url": "https://www.rightonq.co.uk"
   },
-  "dateModified": "2026-03-28"
+  "dateModified": "2026-05-04"
 }
 </script>
 
@@ -479,9 +486,57 @@ layout: null
 
   .footer-right { font-size: 13px; color: rgba(255,255,255,0.25); }
 
-  .footer-right a { color: rgba(255,255,255,0.35); transition: color 0.2s; }
+  .footer-right a {
+    color: #4A8AE8;
+    font-size: 13px;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
 
   .footer-right a:hover { color: var(--white); }
+
+  #cookie-banner {
+    position: fixed;
+    left: 24px;
+    right: 24px;
+    bottom: 24px;
+    z-index: 40;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    max-width: 720px;
+    padding: 14px 16px;
+    background: rgba(11,21,36,0.96);
+    border: 1px solid rgba(74,138,232,0.35);
+    border-radius: 8px;
+    box-shadow: 0 18px 50px rgba(0,0,0,0.35);
+  }
+
+  #cookie-banner[hidden] { display: none !important; }
+
+  #cookie-banner p {
+    margin: 0;
+    flex: 1;
+    color: rgba(255,255,255,0.76);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .cookie-btn {
+    border: 1px solid rgba(74,138,232,0.45);
+    border-radius: 6px;
+    padding: 8px 12px;
+    background: transparent;
+    color: var(--white);
+    cursor: pointer;
+    font: inherit;
+    font-size: 13px;
+  }
+
+  .cookie-btn-accept {
+    background: var(--blue);
+    border-color: var(--blue);
+  }
 
   /* RESPONSIVE */
 
@@ -494,6 +549,8 @@ layout: null
     .content { padding: 60px 24px 80px; }
 
     footer { padding: 32px 24px; flex-direction: column; align-items: flex-start; }
+
+    #cookie-banner { flex-direction: column; align-items: flex-start; }
 
   }
 
@@ -539,7 +596,7 @@ layout: null
 
   <h1>Privacy<br><em>Policy.</em></h1>
 
-  <p class="page-meta">Continuity AI Ltd &nbsp;&middot;&nbsp; Last updated: 28 March 2026</p>
+  <p class="page-meta">Continuity AI Ltd &nbsp;&middot;&nbsp; Last updated: 4 May 2026</p>
 
 </div>
 
@@ -557,15 +614,15 @@ layout: null
 
     <h2>1. Who We Are</h2>
 
-    <p>Continuity AI Ltd ("we", "us", "our") trades as RightOnQ—. We are registered in England and Wales (Companies House No. 17119848) at Clay Bank Farmhouse, Hook Norton, BANBURY, OX15 5PA.</p>
+    <p>Continuity AI Ltd ("we", "us", "our") trades under the RightOnQ&trade; brand. We are registered in England and Wales (Companies House No. 17119848) at Clay Bank Farmhouse, Clay Bank, Hook Norton, Banbury, England, OX15 5PA.</p>
 
     <p>The role we hold under UK GDPR depends on whose personal data is being processed:</p>
 
     <p>For visitors to our website and for our business clients (the people and companies who buy and operate our service), we act as a <strong>data controller</strong>.</p>
 
-    <p>For end recipients of messages — for example, the staff, drivers, residents, contractors or service users of our business clients — we act as a <strong>data processor</strong>, processing their personal data on the documented instructions of the business client (who is the controller). This Privacy Policy describes both roles. Where we act as a processor, the controller is the business client whose dashboard you have been registered into; data subject requests from end recipients should normally be directed to that controller in the first instance.</p>
+    <p>For end recipients of messages — for example, the customers, clients, staff, contractors, agents, residents or service users of our business clients — we act as a <strong>data processor</strong>, processing their personal data on the documented instructions of the business client (who is the controller). This Privacy Policy describes both roles. Where we act as a processor, the controller is the business client whose dashboard or campaign you have been registered into; data subject requests from end recipients should normally be directed to that controller in the first instance.</p>
 
-    <p><strong>Data protection contact:</strong> Adam Wakeford, <a href="mailto:adam@rightonq.co.uk">adam@rightonq.co.uk</a></p>
+    <p><strong>Data protection contact:</strong> Adam Smith, <a href="mailto:adam@rightonq.co.uk">adam@rightonq.co.uk</a></p>
 
   </section>
 
@@ -577,9 +634,9 @@ layout: null
 
     <p><strong>Business clients / operators (controller):</strong> company name, contact name, email address and billing information; account login credentials (email and hashed password); usage data such as message volumes, delivery and read rates, dashboard activity and audit logs.</p>
 
-    <p><strong>End recipients of messages (processor — uploaded by our business clients):</strong> mobile phone number; first and/or last name where supplied for personalisation; group or team tag (e.g. "drivers", "accounts"); message content and replies (including suggested-reply selections on RCS); delivery, read and confirmation receipts; timestamp data.</p>
+    <p><strong>End recipients of messages (processor — uploaded by our business clients):</strong> mobile phone number; first and/or last name where supplied for personalisation; group, audience or customer tag; message content and replies (including suggested-reply selections on RCS); delivery, read and confirmation receipts; timestamp data.</p>
 
-    <p>We do not deliberately collect special category data (such as health, race, religion, sexual life or political opinion). However, the <strong>content</strong> of messages is determined by our business client, and may in some operational contexts (for example, care-sector medication round reminders) imply special category information about a recipient. Where this is the case, the business client is responsible for identifying the appropriate Article 9 lawful condition for that processing.</p>
+    <p>We do not deliberately collect special category data (such as health, race, religion, sexual life or political opinion). However, the <strong>content</strong> of messages is determined by our business client and could contain or imply sensitive information. Where this is the case, the business client is responsible for ensuring the data is lawful to send, for identifying any required Article 9 condition, and for giving any required notices to recipients.</p>
 
   </section>
 
@@ -589,13 +646,13 @@ layout: null
 
     <p>We use personal data only for the purposes set out below.</p>
 
-    <p><strong>To deliver our messaging service.</strong> We use mobile phone numbers, names, group tags and message content to deliver scheduled SMS, RCS Business Messaging and (where enabled) WhatsApp messages on behalf of our business clients, and to record delivery, read and reply data so the business client can confirm receipt.</p>
+    <p><strong>To deliver our messaging service.</strong> We use mobile phone numbers, names, group or audience tags and message content to deliver scheduled RCS Business Messaging and SMS fallback messages on behalf of our business clients, and to record delivery, read and reply data so the business client can manage responses and follow-up.</p>
 
     <p><strong>To operate our platform.</strong> We use business client account, login, billing and usage data to authenticate users, present the dashboard, raise invoices, prevent abuse and maintain audit logs.</p>
 
-    <p><strong>To respond to enquiries.</strong> We use contact form data to answer questions submitted via our website.</p>
+    <p><strong>To respond to enquiries and contact-list requests.</strong> We use contact form data to answer questions submitted via our website and, where requested, to send updates about RightOnQ, RCS Business Messaging and related service information. You can ask us to stop sending updates at any time by contacting <a href="mailto:adam@rightonq.co.uk">adam@rightonq.co.uk</a>.</p>
 
-    <p><strong>Lawful basis.</strong> For business clients, the lawful basis is <strong>contract</strong> — processing is necessary to deliver the service you have engaged us for. For website enquirers, the lawful basis is <strong>legitimate interests</strong> — namely responding to your enquiry. For end recipients, our lawful basis as processor is to perform the service on the controller’s instructions; the controller (the business client) is responsible for ensuring its own lawful basis under UK GDPR (typically <strong>contract</strong>, <strong>legitimate interests</strong> or, where applicable, <strong>consent</strong>) and for compliance with the Privacy and Electronic Communications Regulations (PECR) before adding recipients to the platform.</p>
+    <p><strong>Lawful basis.</strong> For business clients, the lawful basis is <strong>contract</strong> — processing is necessary to deliver the service you have engaged us for. For website enquirers and contact-list requests, the lawful basis is <strong>legitimate interests</strong> — namely responding to your enquiry and keeping interested UK businesses informed about our service, unless consent is required for a particular communication. Where we act as processor for end-recipient data, we process it on the business client’s documented instructions under our DPA. The business client is responsible for identifying its Article 6 and, where needed, Article 9 basis, and for PECR compliance before adding recipients to the platform.</p>
 
     <p>We do not sell personal data, do not use end recipient data for advertising or marketing, and do not use automated decision-making that produces legal or similarly significant effects.</p>
 
@@ -607,13 +664,15 @@ layout: null
 
     <p>We deliver messages using third-party messaging infrastructure providers. Depending on a business client’s configuration, the underlying provider for that client will be either Twilio or Sent. The provider used for a particular client is recorded in their service configuration and can be confirmed on request.</p>
 
-    <p><strong>Twilio Inc. (United States)</strong> — provides SMS, RCS Business Messaging and WhatsApp Business API delivery. Twilio is a sub-processor; data is processed under Twilio’s published Data Protection Addendum.</p>
+    <p><strong>Twilio Inc. (United States)</strong> — provides SMS and RCS Business Messaging delivery. Twilio is a sub-processor; data is processed under Twilio’s published Data Protection Addendum.</p>
 
-    <p><strong>Sent, Inc. (United States)</strong> — provides SMS, RCS Business Messaging and WhatsApp Business API delivery. Sent is a sub-processor; data is processed under Sent’s published Data Processing Addendum.</p>
+    <p><strong>Sent, Inc. (United States)</strong> — may provide SMS and RCS Business Messaging delivery where enabled for a client configuration. Sent is a sub-processor; data is processed under Sent’s published Data Processing Addendum.</p>
 
-    <p>Where messages are delivered via WhatsApp, delivery and read-receipt data is also processed by Meta Platforms Ireland Limited under Meta’s own terms and privacy policy. Where messages are delivered via RCS, branded sender registration and message delivery is also processed by Google LLC and the recipient’s mobile carrier.</p>
+    <p>Where messages are delivered via RCS, branded sender registration, message routing and delivery may also involve Google LLC, mobile carriers and other RCS infrastructure providers.</p>
 
-    <p><strong>International transfers.</strong> Twilio Inc. and Sent, Inc. are established in the United States. Personal data transferred to them is protected by the <strong>UK International Data Transfer Addendum to the EU Standard Contractual Clauses</strong> (or, where appropriate, the EU SCCs together with the UK Addendum). Copies of these safeguards are available from us on request.</p>
+    <p><strong>RCS onboarding and sender registration.</strong> Where we help with RCS onboarding, we may process and share business contact details, sender profile information, company descriptions, logos, banner assets, brand colours, example message content, opt-in and opt-out descriptions, use-case information and approval materials with the relevant messaging provider, Google and/or mobile carriers for registration, approval and ongoing sender management.</p>
+
+    <p><strong>International transfers.</strong> Some providers we use, including messaging providers, RCS infrastructure providers, analytics providers, form processors, payment processors and cloud providers, may process personal data outside the UK. Where personal data is transferred internationally, we use appropriate safeguards such as the <strong>UK International Data Transfer Addendum to the EU Standard Contractual Clauses</strong>, the EU SCCs with the UK Addendum, adequacy arrangements, or equivalent lawful transfer mechanisms. Copies of relevant safeguards are available from us on request where applicable.</p>
 
   </section>
 
@@ -629,11 +688,15 @@ layout: null
 
       <li><strong>Payment processors</strong> — Stripe and GoCardless — for billing of business clients only.</li>
 
+      <li><strong>Form and email processors</strong> — including Formspree or any replacement form processor — for website enquiries and contact-list requests.</li>
+
+      <li><strong>Analytics providers</strong> — Google Analytics, where analytics consent has been given, to understand how the website is used.</li>
+
       <li><strong>HMRC, regulators and law enforcement</strong> — where we are required to do so by law or where it is necessary to protect our rights or those of others.</li>
 
     </ul>
 
-    <p>All processors are bound by written data processing terms and operate in compliance with UK GDPR. A current sub-processor list is available on request and material additions or replacements will be notified in advance to business clients in accordance with our Terms &amp; Conditions.</p>
+    <p>We put written processing terms and appropriate safeguards in place with processors where required. The current sub-processor list is published in this Privacy Policy and will be updated as it changes. Material additions or replacements will be notified in advance to business clients in accordance with our Terms &amp; Conditions.</p>
 
   </section>
 
@@ -641,7 +704,7 @@ layout: null
 
     <h2>6. Recipient Opt-Out</h2>
 
-    <p>Recipients can opt out of further messages at any time by replying STOP (or an equivalent localised keyword) to any message, or by using the opt-out controls offered within RCS. Opt-out requests are honoured immediately on the messaging platform and the relevant business client is notified so that they can update their internal records. The business client is responsible for ensuring opted-out recipients are not re-registered without fresh consent.</p>
+    <p>Recipients can opt out of further messages at any time by replying STOP (or an equivalent localised keyword) to any message, or by using opt-out controls offered within RCS where available. Opt-out requests are processed promptly on the messaging platform and the relevant business client is notified so that they can update their internal records. The business client is responsible for ensuring opted-out recipients are not re-registered without fresh documented permission or another valid lawful basis.</p>
 
   </section>
 
@@ -660,6 +723,12 @@ layout: null
       <li><strong>End recipient records (name, mobile number, group tag)</strong> — retained while the business client maintains the recipient on the platform, and deleted within 30 days of the recipient being removed from the platform or the client’s contract ending, subject to any sub-processor minimum retention periods.</li>
 
       <li><strong>Website enquiries</strong> — retained for 12 months from receipt.</li>
+
+      <li><strong>Contact-list requests</strong> — retained until you ask us to remove you, or until we no longer need the contact record for service updates.</li>
+
+      <li><strong>RCS onboarding and sender-registration materials</strong> — retained for the duration of the client relationship and for up to 6 years afterwards where needed for contract, audit, regulatory, carrier or dispute purposes.</li>
+
+      <li><strong>Analytics and cookie-consent records</strong> — retained according to the settings of the relevant analytics and consent tools, and reviewed periodically.</li>
 
       <li><strong>Audit logs and security records</strong> — retained for up to 24 months for fraud, abuse and security investigations.</li>
 
@@ -703,7 +772,7 @@ layout: null
 
     <p>We implement appropriate technical and organisational measures to protect personal data, including HTTPS encryption for all data in transit, encryption at rest for stored data, role-based access controls, multi-factor authentication for administrative access, audit logging and regular security reviews. Our messaging sub-processors are independently assessed against recognised security standards.</p>
 
-    <p>In the event of a personal data breach that is likely to result in a risk to individuals’ rights and freedoms, we will notify the ICO within 72 hours and affected individuals without undue delay. Where we act as a processor, we will notify the relevant business client (the controller) without undue delay so that they can meet their own notification obligations.</p>
+    <p>In the event of a personal data breach, we will notify the ICO where required and, where feasible, within 72 hours of becoming aware of the breach. We will notify affected individuals without undue delay where the breach is likely to result in a high risk to their rights and freedoms. Where we act as a processor, we will notify the relevant business client (the controller) without undue delay so that they can meet their own notification obligations.</p>
 
   </section>
 
@@ -711,7 +780,7 @@ layout: null
 
     <h2>10. Cookies and Embedded Content</h2>
 
-    <p>Our website uses only essential cookies necessary for the site to function. We do not use advertising or third-party analytics cookies. Some pages may embed video content (for example, hosted on YouTube or Vimeo) for product demonstration purposes; if you play that content, the relevant video provider may set cookies on your device under their own terms.</p>
+    <p>Our website uses essential cookies necessary for the site to function. Where you give consent through our cookie banner, we may also use Google Analytics cookies to understand how the site is used. We do not use advertising cookies and we do not sell or share personal data for advertising. Some pages may embed video content (for example, hosted on YouTube or Vimeo) for product demonstration purposes; if you play that content, the relevant video provider may set cookies on your device under their own terms.</p>
 
   </section>
 
@@ -721,7 +790,7 @@ layout: null
 
     <p>We may update this Privacy Policy from time to time. Material changes will be communicated to business clients by email at least 30 days before they take effect. The current version is always available at <a href="https://www.rightonq.co.uk/privacy">www.rightonq.co.uk/privacy</a>.</p>
 
-    <p>Continuity AI Ltd (trading as RightOnQ—), Clay Bank Farmhouse, Hook Norton, BANBURY, OX15 5PA. Contact: <a href="mailto:adam@rightonq.co.uk">adam@rightonq.co.uk</a></p>
+    <p>Continuity AI Ltd (trading as RightOnQ&trade;), Clay Bank Farmhouse, Clay Bank, Hook Norton, Banbury, England, OX15 5PA. Contact: <a href="mailto:adam@rightonq.co.uk">adam@rightonq.co.uk</a></p>
 
   </section>
 
@@ -751,7 +820,7 @@ layout: null
 
       &copy; 2026 Continuity AI Ltd. Registered in England &amp; Wales.<br>
 
-      Clay Bank Farmhouse, Hook Norton, BANBURY, OX15 5PA &middot; Companies House No. 17119848
+      Clay Bank Farmhouse, Clay Bank, Hook Norton, Banbury, England, OX15 5PA &middot; Companies House No. 17119848
 
     </div>
 
@@ -761,6 +830,8 @@ layout: null
 
     <a href="/">Home</a> &nbsp;&middot;&nbsp;
 
+    <a href="/blog">Blog</a> &nbsp;&middot;&nbsp;
+
     <a href="/privacy">Privacy Policy</a> &nbsp;&middot;&nbsp;
 
     <a href="/terms">Terms &amp; Conditions</a>
@@ -768,6 +839,33 @@ layout: null
   </div>
 
 </footer>
+
+<!-- Cookie consent banner -->
+<div id="cookie-banner" hidden role="dialog" aria-label="Cookie preferences">
+  <p>We use analytics cookies to understand how the site is used. Nothing is sold or shared.</p>
+  <button type="button" class="cookie-btn cookie-btn-accept" data-consent="granted">Accept</button>
+  <button type="button" class="cookie-btn" data-consent="denied">Decline</button>
+</div>
+
+<script>
+  (function() {
+    var KEY = 'rightonq_consent';
+    var banner = document.getElementById('cookie-banner');
+    var stored = localStorage.getItem(KEY);
+    if (stored === 'granted') {
+      gtag('consent', 'update', { analytics_storage: 'granted' });
+    } else if (!stored) {
+      banner.hidden = false;
+    }
+    banner.addEventListener('click', function(e) {
+      var choice = e.target.dataset.consent;
+      if (!choice) return;
+      localStorage.setItem(KEY, choice);
+      gtag('consent', 'update', { analytics_storage: choice });
+      banner.hidden = true;
+    });
+  })();
+</script>
 
 </body>
 

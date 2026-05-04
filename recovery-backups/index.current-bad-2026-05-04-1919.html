@@ -1,3 +1,6 @@
+---
+layout: null
+---
 <!DOCTYPE html>
 <html lang="en-GB">
 <head>
@@ -75,10 +78,10 @@
   </script>
   <style>
     :root {
-      --navy: #0b1524;
-      --navy-deep: #08111d;
-      --panel: #172438;
-      --panel-soft: #1e3049;
+      --navy: #101a2a;
+      --navy-deep: #0b1320;
+      --panel: #18263a;
+      --panel-soft: #20324a;
       --blue: #3478d8;
       --blue-light: #67a6ff;
       --gold: #d6b65a;
@@ -105,18 +108,18 @@
       position: fixed;
       inset: 0 0 auto 0;
       z-index: 30;
-      min-height: 88px;
+      height: 88px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 0 clamp(24px, 5vw, 72px);
-      background: rgba(8,17,29,0.9);
+      background: rgba(11,19,32,0.88);
       backdrop-filter: blur(18px);
       border-bottom: 1px solid rgba(255,255,255,0.06);
     }
     .logo { display: inline-flex; align-items: center; text-decoration: none; }
     .site-logo-img {
-      width: clamp(166px, 14vw, 220px);
+      width: clamp(178px, 18vw, 245px);
       height: auto;
     }
     .nav-actions { display: flex; align-items: center; gap: 10px; }
@@ -146,17 +149,17 @@
 
     .hero {
       min-height: 100svh;
-      padding: 132px clamp(24px, 5vw, 72px) 72px;
+      padding: 132px clamp(24px, 5vw, 72px) 64px;
       background:
         radial-gradient(circle at 70% 25%, rgba(52,120,216,0.16), transparent 34%),
         linear-gradient(180deg, #111c2e 0%, #0b1320 100%);
       border-bottom: 1px solid rgba(52,120,216,0.18);
     }
     .hero-grid {
-      max-width: 1880px;
+      max-width: 1800px;
       margin: 0 auto;
       display: grid;
-      gap: clamp(42px, 5vw, 76px);
+      gap: 48px;
     }
     .hero-copy { max-width: 960px; }
     .eyebrow,
@@ -187,8 +190,8 @@
       line-height: 0.98;
     }
     h1 {
-      max-width: 980px;
-      font-size: clamp(50px, 8vw, 138px);
+      max-width: 920px;
+      font-size: clamp(54px, 9.4vw, 156px);
     }
     h1 em,
     .section-heading em { color: var(--blue); font-style: normal; }
@@ -216,12 +219,11 @@
 
     .hero-demo {
       display: grid;
-      grid-template-columns: minmax(390px, 0.95fr) minmax(290px, 0.55fr);
+      grid-template-columns: minmax(360px, 0.92fr) minmax(280px, 0.58fr);
       align-items: start;
-      justify-content: start;
+      justify-content: end;
       gap: clamp(26px, 4vw, 50px);
       margin-top: 12px;
-      max-width: 1180px;
     }
     .demo-label {
       margin: 0 0 12px;
@@ -457,11 +459,10 @@
     .carousel-dots button.active { background: var(--blue-light); }
 
     section { padding: 96px clamp(24px, 5vw, 72px); }
-    section:nth-of-type(even) { background: rgba(255,255,255,0.012); }
     .section-inner { max-width: 1560px; margin: 0 auto; }
     .section-heading {
       max-width: 1200px;
-      font-size: clamp(38px, 5.9vw, 88px);
+      font-size: clamp(38px, 6.2vw, 92px);
       margin-bottom: 34px;
     }
     .section-lead {
@@ -481,7 +482,7 @@
     .card h3 {
       font-family: 'Syne', sans-serif;
       color: var(--white);
-      font-size: clamp(24px, 2.8vw, 38px);
+      font-size: clamp(24px, 3vw, 40px);
       line-height: 1.1;
       margin-bottom: 14px;
     }
@@ -521,13 +522,12 @@
     .feature-grid,
     .steps-grid,
     .faq-grid { grid-template-columns: repeat(3, 1fr); }
-    .feature-grid { grid-template-columns: repeat(3, 1fr); }
     .card,
     .scenario-card,
     .step-card,
     .faq-card {
       border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 8px;
+      border-radius: 12px;
       background: rgba(255,255,255,0.04);
       padding: 24px;
     }
@@ -604,7 +604,7 @@
       font-family: 'Syne', sans-serif;
       color: var(--white);
       font-weight: 800;
-      font-size: clamp(34px, 5.8vw, 82px);
+      font-size: clamp(34px, 6vw, 86px);
       line-height: 0.98;
     }
     .pricing-highlight-sub {
@@ -703,7 +703,6 @@
 
     footer {
       display: flex;
-      align-items: flex-start;
       justify-content: space-between;
       gap: 30px;
       padding: 52px clamp(24px, 5vw, 72px);
@@ -778,9 +777,8 @@
       .nav-actions { width: 100%; }
       .nav-pill,
       .cta-nav { flex: 1; min-height: 42px; padding: 0 12px; }
-      .hero { padding-top: 138px; }
+      .hero { padding-top: 156px; }
       .hero-demo { gap: 34px; }
-      .phone-shell { max-width: 360px; }
       .sender-title,
       .sender-topline { align-items: flex-start; flex-direction: column; }
       .schedule { text-align: left; }
@@ -799,7 +797,7 @@
 <body>
   <nav>
     <a href="/" class="logo" aria-label="RightOnQ home">
-	      <img class="site-logo-img" src="images/rightonq-logo-transparent.png" alt="RightOnQ">
+      <img class="site-logo-img" src="/images/rightonq-logo-transparent.png" alt="RightOnQ">
     </a>
     <div class="nav-actions">
       <a href="/blog" class="nav-pill">Blog</a>
@@ -813,9 +811,9 @@
         <div class="hero-copy">
           <div class="eyebrow">RCS business messaging</div>
           <h1>For brands with an audience worth <em>reaching.</em></h1>
-          <p>RightOnQ&trade; software helps businesses prepare, send and track their branded RCS messages in the same place customers receive text messages, with SMS fallback, reply buttons and delivery timed to each receiver's local day.</p>
+          <p>RightOnQ&trade; software helps businesses prepare, send and track their branded RCS messages in the same place customers receive text messages, with SMS fallback, reply buttons and delivery timed to each recipient's local day.</p>
           <div class="hero-actions">
-	            <a href="#contact" class="btn-primary">Book a call</a>
+            <a href="#contact" class="btn-primary">Book a Call</a>
             <a href="/what-is-rcs/" class="btn-secondary">What is RCS?</a>
           </div>
         </div>
@@ -879,7 +877,7 @@
                   <div class="sender-badge">AM</div>
                   <div><strong>APEX MOTORS <span class="verified-dot">✓</span></strong><span>Verified business sender</span></div>
                 </div>
-	                <img class="rcs-image" id="carousel-image" src="images/aston-martin-db6-rcs-card.jpg" alt="1966 Aston Martin DB6 exterior">
+                <img class="rcs-image" id="carousel-image" src="/images/aston-martin-db6-rcs-card.jpg" alt="1966 Aston Martin DB6 exterior">
                 <div class="rcs-copy">
                   <h3 id="carousel-title">Just arrived</h3>
                   <p id="carousel-copy">1966 DB6 in Snow Shadow Grey. Immaculately restored and available for private viewings.</p>
@@ -900,31 +898,11 @@
           </div>
         </div>
       </div>
-	    </section>
+    </section>
 
-	    <section>
-	      <div class="section-inner">
-	        <div class="section-tag">Pricing</div>
-	        <h2 class="section-heading">Priced for message value, not message <em>noise.</em></h2>
-	        <p class="section-lead">RightOnQ&trade; RCS software is not built as a lowest-cost bulk SMS tool. Sending costs stay transparent, but the real value is verified brand delivery, better response paths, clear tracking and help getting RCS-ready.</p>
-	        <div class="pricing-example">
-	          <p>A specialist motor dealer has a 1966 Aston Martin DB6 ready for private viewings. The right campaign reaches a selected list of collectors with the car image, verified sender identity, local-time delivery and clear response options.</p>
-	          <span class="pricing-highlight">Aston Martin DB6 campaign to a selected audience</span>
-	          <span class="pricing-highlight-sub">Rich RCS style campaign with an image-led card, sender identity and one-tap response options.</span>
-	          <div class="rate-grid">
-	            <div class="rate-card"><span>Rich RCS card</span><strong>18p</strong><p>Guide price per outbound rich card message.</p></div>
-	            <div class="rate-card"><span>Text-led RCS</span><strong>8p</strong><p>Guide price per outbound text-led RCS message.</p></div>
-	            <div class="rate-card"><span>Platform and care</span><strong>&pound;25</strong><p>Monthly fee for the software and a real person when you need us.</p></div>
-	          </div>
-	          <p class="fine-print">Pricing is straightforward: pay for the messages you send, whether that's 100 or 1,000, plus a &pound;25/month platform and care fee. This helps cover RightOnQ&trade; being there when you need us, a real person on the phone, quick answers, and practical help getting business back on track.</p>
-	          <p class="fine-print">Prices shown exclude VAT. Replies are charged separately at around 1.1p + VAT each. If RCS is not available, SMS fallback keeps the essential message moving and is charged at the applicable SMS fallback rate.</p>
-	        </div>
-	      </div>
-	    </section>
-
-	    <section>
-	      <div class="section-inner">
-	        <div class="section-tag">What is RCS?</div>
+    <section>
+      <div class="section-inner">
+        <div class="section-tag">What is RCS?</div>
         <div class="panel">
           <h2 class="section-heading">RCS messages bring brand identity, rich content and <em>one-tap decisions.</em></h2>
           <p class="section-lead">RCS puts your business name, logo, imagery and reply actions inside the messaging app customers already use for texts. No separate download, no social app, and SMS can still carry the essential fallback message.</p>
@@ -939,29 +917,16 @@
       </div>
     </section>
 
-	    <section>
-	      <div class="section-inner">
-	        <div class="quote-card">
-	          <h2>RCS messages are easy to trust and <em>harder to ignore.</em></h2>
-	          <div class="quote-source">GSMA, the global mobile industry association, found over 70% of consumers said RCS would make them more likely to communicate with a brand</div>
-	        </div>
-	      </div>
-	    </section>
+    <section>
+      <div class="section-inner">
+        <div class="quote-card">
+          <h2>RCS messages are easy to trust and <em>harder to ignore.</em></h2>
+          <div class="quote-source">GSMA, the global mobile industry association, found over 70% of consumers said RCS would make them more likely to communicate with a brand</div>
+        </div>
+      </div>
+    </section>
 
-	    <section>
-	      <div class="section-inner">
-	        <div class="section-tag">The relationship channel</div>
-	        <h2 class="section-heading">A phone number is not just <em>contact data.</em></h2>
-	        <p class="section-lead">For many businesses, the phone number is the most direct relationship they hold. RCS gives that contact a more useful message: branded, visual, traceable and easier to answer.</p>
-	        <div class="feature-grid">
-	          <div class="card"><h3>Known contacts</h3><p>Send to people who already have a reason to hear from you, instead of treating messaging as anonymous bulk traffic.</p></div>
-	          <div class="card"><h3>Better context</h3><p>Use images, cards and clear action buttons so the message carries enough detail to make the next step obvious.</p></div>
-	          <div class="card"><h3>Clear follow-up</h3><p>Keep the response attached to the message card, so the team can see what happened and what needs attention next.</p></div>
-	        </div>
-	      </div>
-	    </section>
-
-	    <section class="use-cases">
+    <section class="use-cases">
       <div class="section-inner">
         <div class="section-tag">Where it fits</div>
         <h2 class="section-heading">For businesses with an audience worth <em>reaching.</em></h2>
@@ -992,14 +957,14 @@
 
     <section>
       <div class="section-inner">
-        <div class="section-tag">The RightOnQ business toolkit</div>
-        <h2 class="section-heading">What RightOnQ brings <em>together.</em></h2>
+        <div class="section-tag">What you get</div>
+        <h2 class="section-heading">What RightOnQ RCS brings <em>together.</em></h2>
         <div class="feature-grid">
           <div class="card"><h3>Verified RCS sender <span class="verified-dot">✓</span></h3><p>Your RCS sender profile gives the message a trusted business identity before the customer decides whether to engage.</p></div>
           <div class="card"><h3>Message dashboard</h3><p>Each campaign stays visible as a working card, with sent, delivered, On Q and reply numbers kept together.</p></div>
           <div class="card"><h3>One-tap replies</h3><p>Reply buttons turn interest into a clear action, without asking the receiver to write a message from scratch.</p></div>
           <div class="card"><h3>Richer message formats</h3><p>RCS can carry rich cards, media and carousel-style messages when plain text is not enough.</p></div>
-          <div class="card"><h3>Local-time scheduling</h3><p>Campaigns can be planned around the receiver's local day, so the message lands at a sensible time.</p></div>
+          <div class="card"><h3>Local-time scheduling</h3><p>Campaigns can be planned around the recipient's local day, so the message lands at a sensible time.</p></div>
           <div class="card"><h3>SMS fallback</h3><p>If RCS is not available, SMS fallback keeps the essential message moving at the applicable fallback message rate.</p></div>
         </div>
       </div>
@@ -1020,23 +985,41 @@
     <section>
       <div class="section-inner">
         <div class="section-tag">RCS registration</div>
-        <h2 class="section-heading">The trust step is part of the <em>product.</em></h2>
         <div class="panel">
           <h3>RightOnQ helps you get ready.</h3>
-          <p>RCS Business Messaging requires verification. Some businesses will already have their own RCS registration and want to integrate it. Others will need help preparing the business details, evidence and internal sign-off needed for approval.</p>
+          <p>Some businesses will already have their own RCS registration and want to integrate it. Others will need help preparing the business details, evidence and internal sign-off needed for approval.</p>
           <p style="margin-top:24px;">Approval commonly takes around four to six weeks. If you want us to hand-hold the process, managed onboarding is available from around £500, depending on how much preparation and support is needed.</p>
-          <div style="margin-top:36px;"><a class="btn-primary" href="https://developers.google.com/business-communications/rcs-business-messaging/guides/get-started/register-partner#rcs-for-business-partner-registration-interest-form" target="_blank" rel="noopener">View the official RCS registration route</a></div>
+          <div style="margin-top:36px;"><a class="btn-primary" href="https://developers.google.com/business-communications/rcs-business-messaging/guides/get-started/register" target="_blank" rel="noopener">Start RCS registration</a></div>
         </div>
       </div>
     </section>
 
-	    <section class="cta-strip">
+    <section>
+      <div class="section-inner">
+        <div class="section-tag">Pricing</div>
+        <h2 class="section-heading">Priced for message value, not message <em>noise.</em></h2>
+        <p class="section-lead">RightOnQ&trade; RCS software is not built as a lowest-cost bulk SMS tool. Sending costs stay transparent, but the real value is verified brand delivery, better response paths, clear tracking and help getting RCS-ready.</p>
+        <div class="pricing-example">
+          <p>A specialist motor dealer has a 1966 Aston Martin DB6 ready for private viewings. The right campaign reaches a selected list of collectors with the car image, verified sender identity, local-time delivery and clear response options.</p>
+          <span class="pricing-highlight">Aston Martin DB6 campaign to a selected audience</span>
+          <span class="pricing-highlight-sub">Rich RCS style campaign with an image-led card, sender identity and one-tap response options.</span>
+          <div class="rate-grid">
+            <div class="rate-card"><span>Rich RCS card</span><strong>18p</strong><p>Guide price per outbound rich card message.</p></div>
+            <div class="rate-card"><span>Text-led RCS</span><strong>8p</strong><p>Guide price per outbound text-led RCS message.</p></div>
+            <div class="rate-card"><span>Platform and care</span><strong>£25</strong><p>Monthly fee for the software and a real person when you need us.</p></div>
+          </div>
+          <p class="fine-print">Prices shown exclude VAT. Replies are charged separately at around 1.1p + VAT each. If RCS is not available, SMS fallback keeps the essential message moving and is charged at the applicable SMS fallback rate.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta-strip">
       <div class="cta-row">
         <div>
           <h2>Start getting RCS ready.</h2>
           <p>Book a call and see RCS in action. We're UK-based and currently work with UK businesses only. We'll explain registration, approval timelines and sender profiles, show example messages, and send live examples to your phone while we talk.</p>
         </div>
-        <a class="btn-primary" href="#contact">Book a call</a>
+        <a class="btn-primary" href="#contact">Book a Call</a>
       </div>
     </section>
 
@@ -1060,7 +1043,7 @@
     <section>
       <div class="section-inner">
         <div class="section-tag">Good to know</div>
-        <h2 class="section-heading">RCS questions.</h2>
+        <h2 class="section-heading">FAQ</h2>
         <div class="faq-grid">
           <div class="faq-card"><h3>Can messages include reply buttons?</h3><p>Yes. RCS supports suggested replies and actions. Exact limits can vary by implementation, so campaign controls should be checked before launch.</p></div>
           <div class="faq-card"><h3>Do you handle our RCS registration?</h3><p>We can help, but it is not default. Registration involves a cycle of work and some customer input, so managed onboarding is charged separately.</p></div>
@@ -1072,7 +1055,7 @@
 
   <footer>
     <div class="footer-logo">
-	      <img class="footer-mark" src="images/rightonq-calendar-mark-transparent.png" alt="RightOnQ">
+      <img class="footer-mark" src="/images/rightonq-calendar-mark-transparent.png" alt="RightOnQ">
       <div>
         &copy; <span id="footer-year"></span> Continuity AI Ltd. Registered in England &amp; Wales.<br>
         Clay Bank Farmhouse, Clay Bank, Hook Norton, Banbury, England, OX15 5PA &middot; Companies House No. 17119848
@@ -1095,19 +1078,19 @@
   <script>
     const cards = [
       {
-	        image: 'images/aston-martin-db6-rcs-card.jpg',
+        image: '/images/aston-martin-db6-rcs-card.jpg',
         alt: '1966 Aston Martin DB6 exterior',
         title: 'Just arrived',
         copy: '1966 DB6 in Snow Shadow Grey. Immaculately restored and available for private viewings.'
       },
       {
-	        image: 'images/aston-martin-db6-interior.jpg',
+        image: '/images/aston-martin-db6-interior.jpg',
         alt: 'Aston Martin DB6 interior detail',
         title: 'Interior detail',
         copy: 'Original interior trim, period details and elegant grand tourer finish throughout.'
       },
       {
-	        image: 'images/aston-martin-db6-engine.jpg',
+        image: '/images/aston-martin-db6-engine.jpg',
         alt: 'Aston Martin DB6 engine bay',
         title: 'Engine bay',
         copy: 'Immaculately presented engine bay with restored period-correct detail.'

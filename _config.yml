@@ -1,5 +1,5 @@
 title: "RightOnQ"
-description: "SMS & WhatsApp Messaging for Business"
+description: "Verified RCS Messaging for Brand-Invested Businesses"
 url: "https://www.rightonq.co.uk"
 baseurl: ""
 
@@ -12,6 +12,10 @@ include:
 exclude:
   - README.md
   - CNAME
+  - Gemfile
+  - Gemfile.lock
+  - RightOnQ_Web_Handover_2026-05-01.txt
+  - vendor
 
 keep_files:
   - favicon.png

@@ -1,0 +1,575 @@
+---
+layout: null
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What is RCS? — RightOnQ</title>
+<meta name="description" content="A short business-owner guide to RCS: verified branding, rich cards, reply buttons, SMS fallback and clearer customer response.">
+<link rel="canonical" href="https://www.rightonq.co.uk/what-is-rcs/">
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #101a2a;
+    --navy-deep: #0c1420;
+    --panel: #18263a;
+    --panel-soft: #20324a;
+    --blue: #3478d8;
+    --blue-light: #67a6ff;
+    --gold: #d6b65a;
+    --green: #35b978;
+    --white: #f7fbff;
+    --grey: #a9b7ca;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: linear-gradient(135deg, rgba(16,26,42,0.99), rgba(20,34,52,0.98));
+    color: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+  }
+  nav {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 10;
+    padding: 20px 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(12,20,32,0.88);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    backdrop-filter: blur(18px);
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    color: var(--white);
+    text-decoration: none;
+  }
+  .logo-svg { width: 44px; height: 44px; }
+  .logo-text {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 21px;
+    letter-spacing: 0.12em;
+  }
+  .logo-text span { color: var(--blue); }
+  .nav-return {
+    color: var(--grey);
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 14px;
+  }
+  .nav-return:hover { color: var(--white); }
+  main {
+    width: min(100%, 1180px);
+    margin: 0 auto;
+    padding: 156px 60px 80px;
+  }
+  .tag {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--blue-light);
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-bottom: 26px;
+  }
+  .tag::before {
+    content: '';
+    width: 42px;
+    height: 2px;
+    background: var(--blue);
+  }
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(52px, 8vw, 108px);
+    line-height: 0.95;
+    letter-spacing: 0;
+    max-width: 980px;
+    margin-bottom: 30px;
+  }
+  h1 em { color: var(--blue); font-style: normal; }
+  .intro {
+    max-width: 820px;
+    color: var(--grey);
+    font-size: clamp(18px, 2vw, 23px);
+    line-height: 1.65;
+    margin-bottom: 42px;
+  }
+  .hero-actions {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 62px;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 54px;
+    padding: 0 24px;
+    border-radius: 6px;
+    font-weight: 800;
+    text-decoration: none;
+  }
+  .btn-primary { background: var(--blue); color: #fff; }
+  .btn-secondary {
+    color: var(--grey);
+    border: 1px solid rgba(103,166,255,0.32);
+  }
+  .explainer-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 60px;
+  }
+  .card {
+    background: rgba(255,255,255,0.045);
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 10px;
+    padding: 24px;
+  }
+  .card h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 20px;
+    line-height: 1.2;
+    margin-bottom: 14px;
+  }
+  .card p,
+  .card li {
+    color: var(--grey);
+    font-size: 15px;
+    line-height: 1.65;
+  }
+  .card ul {
+    display: grid;
+    gap: 9px;
+    list-style: none;
+  }
+  .card li {
+    position: relative;
+    padding-left: 18px;
+  }
+  .card li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.72em;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--green);
+  }
+  .wide {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 18px;
+    align-items: stretch;
+    margin-bottom: 60px;
+  }
+  .sms-box,
+  .rcs-box {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 10px;
+    padding: 28px;
+  }
+  .sms-box { opacity: 0.82; }
+  .rcs-box { border-color: rgba(103,166,255,0.28); background: rgba(52,120,216,0.08); }
+  .message-demo {
+    margin-top: 22px;
+    background: #101928;
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 16px;
+    padding: 18px;
+    overflow: hidden;
+    max-width: 365px;
+  }
+  .brand-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+    font-weight: 800;
+  }
+  .brand-dot {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    color: var(--gold);
+    border: 1px solid rgba(214,182,90,0.8);
+    background: #172238;
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 900;
+  }
+  .brand-name {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    color: var(--white);
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+  }
+  .verified-dot {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    display: inline-grid;
+    place-items: center;
+    background: var(--green);
+    color: white;
+    font-size: 10px;
+    line-height: 1;
+  }
+  .brand-sub {
+    margin-top: 3px;
+    color: rgba(247,251,255,0.48);
+    font-size: 11px;
+    font-weight: 500;
+  }
+  .carousel-window {
+    overflow: hidden;
+    border-radius: 14px;
+  }
+  .carousel-track {
+    display: flex;
+    gap: 14px;
+    transition: transform 0.28s ease;
+  }
+  .carousel-card {
+    flex: 0 0 100%;
+    background: rgba(255,255,255,0.045);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    padding: 12px;
+    overflow: hidden;
+  }
+  .message-image {
+    height: 170px;
+    border-radius: 10px;
+    background-size: cover;
+    background-position: center 52%;
+    background-repeat: no-repeat;
+    border: 1px solid rgba(255,255,255,0.08);
+    margin-bottom: 0;
+  }
+  .message-image--exterior {
+    background-image: url('images/aston-martin-db6-rcs-card.jpg');
+    background-size: cover;
+    background-position: center 50%;
+  }
+  .message-image--interior {
+    background-image: url('images/aston-martin-db6-interior.jpg');
+    background-position: center 56%;
+  }
+  .message-image--engine {
+    background-image: url('images/aston-martin-db6-engine.jpg');
+    background-position: center 50%;
+  }
+  .carousel-card h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 17px;
+    line-height: 1.2;
+    margin-top: 10px;
+    margin-bottom: 6px;
+  }
+  .carousel-note {
+    color: rgba(247,251,255,0.72);
+    font-size: 13px;
+    line-height: 1.38;
+    margin-bottom: 10px;
+  }
+  .chip-row {
+    display: grid;
+    gap: 6px;
+  }
+  .chip {
+    border: 1px solid rgba(214,182,90,0.78);
+    border-radius: 999px;
+    padding: 8px 12px;
+    color: #f0d881;
+    text-align: center;
+    font-weight: 800;
+    font-size: 13px;
+  }
+  .chip:last-child {
+    border-color: rgba(103,166,255,0.55);
+    color: #b7d5ff;
+  }
+  .carousel-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 14px;
+  }
+  .carousel-control {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1px solid rgba(103,166,255,0.34);
+    background: rgba(52,120,216,0.12);
+    color: var(--white);
+    font-size: 18px;
+    cursor: pointer;
+  }
+  .carousel-dots {
+    display: flex;
+    gap: 7px;
+  }
+  .carousel-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: rgba(247,251,255,0.28);
+  }
+  .carousel-dot.is-active { background: var(--blue-light); }
+  .sms-demo {
+    margin-top: 24px;
+    max-width: 365px;
+    background: #101928;
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 16px;
+    padding: 18px;
+  }
+  .sms-demo-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: rgba(247,251,255,0.58);
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 16px;
+  }
+  .sms-sender {
+    color: rgba(247,251,255,0.82);
+    font-weight: 800;
+  }
+  .sms-bubble {
+    background: rgba(255,255,255,0.10);
+    border-radius: 17px 17px 17px 4px;
+    padding: 14px 15px;
+    color: rgba(247,251,255,0.82);
+    font-size: 14px;
+    line-height: 1.45;
+  }
+  .sms-compose {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 999px;
+    margin-top: 14px;
+    padding: 9px 11px 9px 14px;
+    color: rgba(247,251,255,0.38);
+    font-size: 12px;
+  }
+  .sms-send-dot {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: rgba(247,251,255,0.14);
+    color: rgba(247,251,255,0.48);
+    font-size: 13px;
+  }
+  .sms-limit {
+    margin-top: 13px;
+    color: rgba(169,183,202,0.72);
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  .footer-note {
+    color: rgba(169,183,202,0.72);
+    font-size: 13px;
+    line-height: 1.7;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    padding-top: 22px;
+  }
+  @media (max-width: 900px) {
+    nav { padding: 18px 24px; }
+    main { padding: 130px 24px 64px; }
+    .explainer-grid,
+    .wide { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<nav>
+  <a href="/" class="logo">
+    <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="RightOnQ logo">
+      <rect x="8" y="18" width="84" height="76" rx="14" ry="14" fill="white"/>
+      <rect x="28" y="8" width="12" height="22" rx="6" ry="6" fill="#0B1524"/>
+      <rect x="60" y="8" width="12" height="22" rx="6" ry="6" fill="#0B1524"/>
+      <text x="50" y="42" font-family="Arial Black, sans-serif" font-weight="900" font-size="16" fill="#0B1524" text-anchor="middle" letter-spacing="1">ON</text>
+      <text x="50" y="88" font-family="Arial Black, sans-serif" font-weight="900" font-size="58" fill="#2F6FD2" text-anchor="middle">Q</text>
+    </svg>
+    <span class="logo-text">RIGHT<span>ON</span>Q<span style="font-size:0.5em;vertical-align:super;color:var(--blue);">TM</span></span>
+  </a>
+  <a href="/" class="nav-return">Return to web page</a>
+</nav>
+
+<main>
+  <div class="tag">RCS in plain English</div>
+  <h1>What RCS gives your <em>business.</em></h1>
+  <p class="intro">RCS stands for Rich Communication Services. In plain English, it lets your business send verified, branded, interactive messages in the same place customers already receive texts.</p>
+
+  <div class="hero-actions">
+    <a href="/" class="btn btn-primary">Return to web page</a>
+  </div>
+
+  <section class="wide" aria-label="SMS and RCS comparison">
+    <div class="rcs-box">
+      <h2>RCS carousel example.</h2>
+      <p>Your business can show its name, logo and verified sender identity, then send rich cards with images and buttons the recipient can tap.</p>
+      <div class="message-demo" aria-label="Example RCS carousel message">
+        <div class="brand-row">
+          <span class="brand-dot">AM</span>
+          <span>
+            <span class="brand-name">APEX MOTORS <span class="verified-dot">✓</span></span>
+            <span class="brand-sub">Verified business sender</span>
+          </span>
+        </div>
+        <div class="carousel-window">
+          <div class="carousel-track" id="rcs-carousel-track">
+            <div class="carousel-card">
+              <div class="message-image message-image--exterior"></div>
+              <h3>Just arrived</h3>
+              <p class="carousel-note">1966 DB6 Aston in Snow Shadow Grey. We wanted you to be among the first to see it. Tap below if it's of interest or not.</p>
+              <div class="chip-row">
+                <div class="chip">Book appointment</div>
+                <div class="chip">More information</div>
+                <div class="chip">Not my cup of tea</div>
+              </div>
+            </div>
+            <div class="carousel-card">
+              <div class="message-image message-image--interior"></div>
+              <h3>Interior detail</h3>
+              <p class="carousel-note">Use the carousel to show cabin, trim and provenance without sending a separate message.</p>
+              <div class="chip-row">
+                <div class="chip">More information</div>
+                <div class="chip">Arrange a call</div>
+                <div class="chip">Not my cup of tea</div>
+              </div>
+            </div>
+            <div class="carousel-card">
+              <div class="message-image message-image--engine"></div>
+              <h3>Engine bay</h3>
+              <p class="carousel-note">Each card can carry its own image and next step, while staying inside one campaign.</p>
+              <div class="chip-row">
+                <div class="chip">Book appointment</div>
+                <div class="chip">More information</div>
+                <div class="chip">Not my cup of tea</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="carousel-controls" aria-label="Carousel controls">
+          <button class="carousel-control" type="button" id="rcs-carousel-prev" aria-label="Previous carousel card">‹</button>
+          <div class="carousel-dots" aria-hidden="true">
+            <span class="carousel-dot is-active"></span>
+            <span class="carousel-dot"></span>
+            <span class="carousel-dot"></span>
+          </div>
+          <button class="carousel-control" type="button" id="rcs-carousel-next" aria-label="Next carousel card">›</button>
+        </div>
+      </div>
+    </div>
+    <div class="sms-box">
+      <h2>SMS stays plain.</h2>
+      <p>SMS still reaches almost every phone, but the experience is text-led. There is no image card and no tap-button response; the recipient has to type the next step.</p>
+      <div class="sms-demo" aria-label="Example standard SMS message">
+        <div class="sms-demo-top">
+          <span class="sms-sender">APEX MOTORS</span>
+          <span>Text Message</span>
+        </div>
+        <div class="sms-bubble">
+          Just arrived: 1966 DB6 Aston in Snow Shadow Grey. We wanted you to be among the first to see it. Reply BOOK for an appointment or INFO for more information.
+        </div>
+        <div class="sms-compose">
+          <span>Text message...</span>
+          <span class="sms-send-dot">↑</span>
+        </div>
+        <p class="sms-limit">The message can still be useful, but the recipient has to type their own reply.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="explainer-grid">
+    <div class="card">
+      <h2>Why business owners care</h2>
+      <ul>
+        <li>Your message is clearly verified as coming from your business, not an unknown sender.</li>
+        <li>Customers recognise the brand, trust the message and act with more confidence.</li>
+        <li>Important offers, appointments or launches do not have to fight the email inbox.</li>
+        <li>Your team can see who has responded and what they asked for.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2>What RCS adds</h2>
+      <ul>
+        <li>Verified business name, logo and sender profile.</li>
+        <li>Photos, rich cards, carousels and longer messages.</li>
+        <li>Buttons for actions such as book, call, more information or not interested.</li>
+        <li>One campaign can give recipients clear next steps, from viewing more detail to booking a call or saying not interested.</li>
+        <li>Delivery and response signals that help with follow-up.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2>What to know</h2>
+      <ul>
+        <li>Business RCS requires brand registration and approval before sending.</li>
+        <li>Approval typically takes around four to six weeks, so it is worth starting early.</li>
+        <li>If RCS is not available, SMS fallback keeps the essential message moving at the applicable fallback message rate.</li>
+        <li>SMS fallback protects reach, but images, carousel cards and tap buttons will not appear in the same way.</li>
+      </ul>
+    </div>
+  </section>
+
+  <p class="footer-note">This short guide is based on Twilio's public RCS guidance and simplified for RightOnQ customers. Final behaviour can vary by country, carrier, device support, RCS registration status and fallback configuration.</p>
+</main>
+<script>
+  (function () {
+    const track = document.getElementById('rcs-carousel-track');
+    const prev = document.getElementById('rcs-carousel-prev');
+    const next = document.getElementById('rcs-carousel-next');
+    const dots = Array.from(document.querySelectorAll('.carousel-dot'));
+    if (!track || !prev || !next || dots.length === 0) return;
+
+    let index = 0;
+    function render() {
+      track.style.transform = 'translateX(calc(-' + (index * 100) + '% - ' + (index * 14) + 'px))';
+      dots.forEach(function (dot, dotIndex) {
+        dot.classList.toggle('is-active', dotIndex === index);
+      });
+    }
+
+    prev.addEventListener('click', function () {
+      index = (index + dots.length - 1) % dots.length;
+      render();
+    });
+
+    next.addEventListener('click', function () {
+      index = (index + 1) % dots.length;
+      render();
+    });
+  }());
+</script>
+</body>
+</html>

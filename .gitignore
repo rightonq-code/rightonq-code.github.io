@@ -1,0 +1,7 @@
+/_site/
+/.jekyll-cache/
+/.sass-cache/
+.bundle/
+vendor/
+.DS_Store
+RightOnQ_Web_Handover_2026-05-01.txt

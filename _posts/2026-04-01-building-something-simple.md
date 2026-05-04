@@ -1,11 +1,11 @@
 ---
 layout: post
-title: "Building Something Simple That Actually Works"
+title: "Designing Something Simple That Actually Works"
 date: 2026-04-01
 description: "A founder's note from Adam Smith — on cancer, waiting rooms, and why RightOnQ exists."
 ---
 
-*A note from Adam Smith, founder of RightOnQ — on where this came from and what it's trying to be.*
+*A note from Adam Smith, founder of RightOnQ — on where this idea came from and what it's trying to be.*
 
 ---
 
