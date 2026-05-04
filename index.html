@@ -472,20 +472,29 @@
 
   /* FOOTER */
   footer {
-    padding: 40px 60px;
+    padding: 44px 60px;
     border-top: 1px solid rgba(255,255,255,0.06);
     display: flex;
     align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
-    gap: 16px;
+    gap: 24px;
   }
 
-  .footer-logo { display: flex; align-items: center; gap: 10px; }
-  .footer-logo svg { width: 32px; height: 32px; }
+  .footer-logo { display: flex; align-items: center; gap: 18px; }
+  .footer-mark { width: 54px; height: 54px; object-fit: contain; flex: 0 0 auto; }
 
   .footer-left { font-size: 13px; color: rgba(255,255,255,0.25); line-height: 1.8; }
-  .footer-right { font-size: 13px; color: rgba(255,255,255,0.25); }
+  .footer-right { font-size: 13px; color: rgba(255,255,255,0.25); line-height: 1.55; text-align: right; }
+  .footer-trade { display: block; margin-bottom: 5px; color: rgba(255,255,255,0.24); }
+  .footer-trade .tm-mark { color: inherit; }
+  .footer-right a {
+    color: #4A8AE8;
+    font-size: 13px;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .footer-right a:hover { color: var(--white); }
 
   /* ANIMATIONS */
   @keyframes fadeUp {
@@ -511,6 +520,7 @@
     .contact { padding: 80px 24px; }
     .contact-inner { grid-template-columns: 1fr; gap: 48px; }
     footer { padding: 32px 24px; flex-direction: column; align-items: flex-start; }
+    .footer-right { text-align: left; }
   }
 
 
@@ -2421,27 +2431,20 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 6px rgba(47,
 <!-- FOOTER -->
 <footer>
   <div class="footer-logo">
-    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="RightOnQ logo">
-      <rect x="8" y="18" width="84" height="76" rx="14" ry="14" fill="white" opacity="0.9"></rect>
-      <rect x="28" y="8" width="12" height="22" rx="6" ry="6" fill="#0B1524"></rect>
-      <rect x="60" y="8" width="12" height="22" rx="6" ry="6" fill="#0B1524"></rect>
-      <text x="50" y="42" font-family="Arial Black, sans-serif" font-weight="900" font-size="16" fill="#0B1524" text-anchor="middle" letter-spacing="1">ON</text>
-      <text x="50" y="88" font-family="Arial Black, sans-serif" font-weight="900" font-size="58" fill="#2F6FD2" text-anchor="middle">Q</text>
-    </svg>
+    <img class="footer-mark" src="images/rightonq-calendar-mark-transparent.png" alt="RightOnQ calendar mark">
     <div class="footer-left">
       © <span id="footer-year">2026</span> Continuity AI Ltd. Registered in England &amp; Wales.<br>
       Companies House No. 17119848
     </div>
   </div>
   <div class="footer-right">
-    RightOnQ<span class="tm-mark">TM</span> is a trading name of Continuity AI Ltd.
-    <br>
-    <a href="index.html" style="color:#4A8AE8;font-size:13px;text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color=&#39;#fff&#39;" onmouseout="this.style.color=&#39;#4A8AE8&#39;">Home</a>
+    <span class="footer-trade">RightOnQ<span class="tm-mark">TM</span> is a trading name of Continuity AI Ltd.</span>
+    <a href="index.html">Home</a>
     &nbsp;·&nbsp;
-          <a href="blog/" style="color:#4A8AE8;font-size:13px;text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color=&#39;#fff&#39;" onmouseout="this.style.color=&#39;#4A8AE8&#39;">Blog</a> &nbsp;·&nbsp;
-    <a href="privacy.html" style="color:#4A8AE8;font-size:13px;text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color=&#39;#fff&#39;" onmouseout="this.style.color=&#39;#4A8AE8&#39;">Privacy Policy</a>
+    <a href="blog/">Blog</a> &nbsp;·&nbsp;
+    <a href="privacy.html">Privacy Policy</a>
     &nbsp;·&nbsp;
-    <a href="terms.html" style="color:#4A8AE8;font-size:13px;text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color=&#39;#fff&#39;" onmouseout="this.style.color=&#39;#4A8AE8&#39;">Terms &amp; Conditions</a>
+    <a href="terms.html">Terms &amp; Conditions</a>
   </div>
 </footer>
 <script type="application/ld+json">
