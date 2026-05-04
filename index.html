@@ -122,11 +122,18 @@
   .logo {
     display: flex;
     align-items: center;
-    gap: 14px;
     text-decoration: none;
   }
 
   .logo-svg { width: 44px; height: 44px; flex-shrink: 0; }
+
+  .logo-img {
+    width: 280px;
+    height: 62px;
+    object-fit: contain;
+    object-position: left center;
+    display: block;
+  }
 
   .logo-text {
     font-family: 'Syne', sans-serif;
@@ -514,6 +521,7 @@
     }
     .logo-text { font-size: 18px; }
     .logo-svg { width: 38px; height: 38px; }
+    .logo-img { width: 220px; height: 48px; }
     nav a.cta-nav { padding: 8px 18px; font-size: 13px; }
     .hero { padding: 130px 24px 60px; }
     .what { grid-template-columns: 1fr; padding: 80px 24px; gap: 48px; }
@@ -1958,22 +1966,10 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 6px rgba(47,
 
 <!-- NAV -->
 <nav style="background: rgb(16, 26, 42);">
-  <a href="index.html" class="logo">
-    <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="RightOnQ logo">
-      <!-- Card body -->
-      <rect x="8" y="18" width="84" height="76" rx="14" ry="14" fill="white"></rect>
-      <!-- Ring left -->
-      <rect x="28" y="8" width="12" height="22" rx="6" ry="6" fill="#0B1524"></rect>
-      <!-- Ring right -->
-      <rect x="60" y="8" width="12" height="22" rx="6" ry="6" fill="#0B1524"></rect>
-      <!-- ON text -->
-      <text x="50" y="42" font-family="Arial Black, sans-serif" font-weight="900" font-size="16" fill="#0B1524" text-anchor="middle" letter-spacing="1">ON</text>
-      <!-- Q -->
-      <text x="50" y="88" font-family="Arial Black, sans-serif" font-weight="900" font-size="58" fill="#2F6FD2" text-anchor="middle">Q</text>
-    </svg>
-    <span class="logo-text">RIGHT<span>ON</span>Q<span style="font-size:0.5em;vertical-align:super;text-decoration:none;color:var(--blue);">™</span></span>
+  <a href="/" class="logo">
+    <img class="logo-img" src="images/rightonq-logo-right-calendar-hires-cropped.png" alt="RightOnQ">
   </a>
-  <div style="display:flex;align-items:center;gap:24px;"><a href="blog/" style="font-family:&#39;DM Sans&#39;,sans-serif;font-size:14px;font-weight:500;color:#8A9BB5;text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color=&#39;#fff&#39;" onmouseout="this.style.color=&#39;#8A9BB5&#39;">Blog</a><a href="#contact" class="cta-nav">Get in touch</a></div>
+  <div style="display:flex;align-items:center;gap:24px;"><a href="/blog/" style="font-family:&#39;DM Sans&#39;,sans-serif;font-size:14px;font-weight:500;color:#8A9BB5;text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color=&#39;#fff&#39;" onmouseout="this.style.color=&#39;#8A9BB5&#39;">Blog</a><a href="#contact" class="cta-nav">Get in touch</a></div>
 </nav>
 
 <!-- HERO -->
@@ -2164,7 +2160,7 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 6px rgba(47,
       <p class="example-footnote">Prices shown exclude VAT. Replies are charged separately at around 1.1p + VAT each. If RCS is not available, SMS fallback keeps the essential message moving at the applicable fallback message rate.</p>
     </div>
     <div class="pricing-actions">
-      <a href="what-is-rcs.html" class="btn-primary">What is RCS?</a>
+      <a href="/what-is-rcs/" class="btn-primary">What is RCS?</a>
     </div>
   </div>
 </section>
@@ -2439,12 +2435,12 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 6px rgba(47,
   </div>
   <div class="footer-right">
     <span class="footer-trade">RightOnQ<span class="tm-mark">TM</span> is a trading name of Continuity AI Ltd.</span>
-    <a href="index.html">Home</a>
+    <a href="/">Home</a>
     &nbsp;·&nbsp;
-    <a href="blog/">Blog</a> &nbsp;·&nbsp;
-    <a href="privacy.html">Privacy Policy</a>
+    <a href="/blog/">Blog</a> &nbsp;·&nbsp;
+    <a href="/privacy/">Privacy Policy</a>
     &nbsp;·&nbsp;
-    <a href="terms.html">Terms &amp; Conditions</a>
+    <a href="/terms/">Terms &amp; Conditions</a>
   </div>
 </footer>
 <script type="application/ld+json">
