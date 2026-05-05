@@ -24,8 +24,8 @@
   <meta name="format-detection" content="address=no">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RightOnQ — Verified RCS Messaging for Brand-Invested Businesses</title>
-<meta name="description" content="RightOnQ helps brand-invested businesses prepare, send and track verified RCS messages with SMS fallback, reply buttons, local-time scheduling and clear response tracking.">
-<meta name="keywords" content="RCS business messaging, verified sender messaging, branded audience messaging, SMS fallback, reply buttons, local time scheduling, RightOnQ, Continuity AI">
+<meta name="description" content="RightOnQ helps brand-invested businesses prepare, send and track verified RCS messages with SMS fallback, reply buttons, UK-time scheduling and optional international time-zone scheduling.">
+<meta name="keywords" content="RCS business messaging, verified sender messaging, branded audience messaging, SMS fallback, reply buttons, UK time scheduling, international time zone scheduling, RightOnQ, Continuity AI">
 <meta property="og:title" content="RightOnQ — Verified RCS Messaging for Brand-Invested Businesses">
 <meta property="og:description" content="Branded operational messages for brands with an audience worth reaching. RCS first, SMS fallback.">
 <meta property="og:url" content="https://www.rightonq.co.uk">
@@ -38,7 +38,7 @@
 <meta property="og:locale" content="en_GB">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="RightOnQ — Verified RCS Messaging for Brand-Invested Businesses">
-<meta name="twitter:description" content="RightOnQ helps businesses send verified RCS messages with SMS fallback, reply buttons and local-time scheduling.">
+<meta name="twitter:description" content="RightOnQ helps businesses send verified RCS messages with SMS fallback, reply buttons, UK-time scheduling and optional international time-zone scheduling.">
 <meta name="twitter:image" content="https://www.rightonq.co.uk/og-image.png">
 <meta name="robots" content="index, follow">
 <meta name="author" content="Continuity AI Ltd">
@@ -47,7 +47,7 @@
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
   "name": "RightOnQ",
-  "description": "RightOnQ helps brand-invested businesses prepare, send and track verified RCS messages with SMS fallback, reply buttons, local-time scheduling and clear response tracking.",
+  "description": "RightOnQ helps brand-invested businesses prepare, send and track verified RCS messages with SMS fallback, reply buttons, UK-time scheduling and optional international time-zone scheduling.",
   "url": "https://www.rightonq.co.uk",
   "applicationCategory": "BusinessApplication",
   "operatingSystem": "Web",
@@ -55,7 +55,7 @@
     "@type": "Offer",
     "priceCurrency": "GBP",
     "price": "0",
-    "description": "Quote-based messaging and onboarding support"
+    "description": "Messaging usage plus UK-time or international time-zone platform plans"
   },
   "publisher": {
     "@type": "Organization",
@@ -593,7 +593,7 @@
   }
   .step {
     flex: 1;
-    padding-right: 40px;
+    padding-right: 24px;
   }
   .step:last-child { padding-right: 0; }
   .step-num {
@@ -617,7 +617,7 @@
     line-height: 1.7;
   }
   .step-connector {
-    width: 60px;
+    width: 44px;
     flex-shrink: 0;
     height: 2px;
     background: linear-gradient(90deg, var(--blue) 0%, rgba(47,111,210,0.2) 100%);
@@ -923,9 +923,36 @@
     align-items: center;
     gap: 8px;
     color: var(--white);
-    font-size: 12px;
-    font-weight: 800;
     margin-bottom: 8px;
+  }
+  .pricing-rate .basic-rcs-brand-name {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--white);
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0;
+    line-height: 1;
+    margin: 0;
+    text-transform: none;
+    white-space: nowrap;
+  }
+  .pricing-rate .basic-rcs-verified {
+    display: inline-grid;
+    place-items: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #2fbf72;
+    color: #fff;
+    font-size: 10px;
+    line-height: 1;
+    font-weight: 900;
+    letter-spacing: 0;
+    margin: 0;
+    text-transform: none;
+    flex: 0 0 16px;
   }
   .pricing-rate .basic-rcs-logo {
     width: 30px;
@@ -1524,6 +1551,20 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 6px rgba(47,
     white-space: nowrap;
   }
 
+  .dashboard-plan {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 999px;
+    padding: 6px 10px;
+    background: rgba(255,255,255,0.12);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 800;
+    white-space: nowrap;
+  }
+
   .dashboard-group {
     display: inline-flex;
     padding: 5px 9px;
@@ -1840,6 +1881,8 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 6px rgba(47,
     border-radius: 10px;
     padding: 24px;
     min-height: 250px;
+    display: flex;
+    flex-direction: column;
   }
 
   .scenario-icon {
@@ -1854,6 +1897,11 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 6px rgba(47,
     font-weight: 800;
     font-size: 14px;
   }
+  .scenario-icon svg {
+    width: 24px;
+    height: 24px;
+    stroke: currentColor;
+  }
 
   .scenario-card:nth-child(1) .scenario-icon { background: #223755; color: #f1d77b; }
   .scenario-card:nth-child(2) .scenario-icon { background: #294337; color: #afe6c3; }
@@ -1867,11 +1915,24 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 6px rgba(47,
     margin-bottom: 10px;
     color: var(--white);
   }
+  .scenario-card h3.scenario-title-compact {
+    font-size: 17px;
+    white-space: nowrap;
+  }
 
   .scenario-card p {
     color: var(--grey);
     font-size: 14px;
     line-height: 1.65;
+  }
+  .scenario-card-note {
+    display: block;
+    margin-top: auto;
+    padding-top: 18px;
+    color: rgba(138,155,181,0.78);
+    font-size: 12px;
+    line-height: 1.5;
+    font-style: italic;
   }
 
   .registration-panel {
@@ -1978,18 +2039,18 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 6px rgba(47,
     <div class="hero-copy">
       <div class="hero-tag">Branded RCS messaging for UK businesses</div>
       <h1>For brands with an audience worth <em>reaching.</em></h1>
-      <p class="hero-sub">RightOnQ<span class="tm-mark">TM</span> software helps businesses prepare, send and track their branded RCS messages in the same place customers receive text messages, with SMS fallback, reply buttons and delivery timed to each receiver's local day.</p>
+      <p class="hero-sub">RightOnQ<span class="tm-mark">TM</span> software helps businesses prepare, send and track their branded RCS messages in the same place customers receive text messages, with SMS fallback, reply buttons and premium time-zone scheduling when audiences are abroad.</p>
       <div class="hero-kicker">
         <span>Verified sender identity</span>
         <span>SMS fallback for reach</span>
         <span>One-tap replies</span>
-        <span>Local-time scheduling</span>
+        <span>Time-zone scheduling</span>
       </div>
     </div>
 
     <div class="hero-visual">
       <div class="visual-stack">
-        <div class="visual-label">Sender dashboard</div>
+        <div class="visual-label">International sender dashboard</div>
         <div class="sender-dashboard" aria-label="RightOnQ sender dashboard message card">
           <div class="dashboard-top">
             <div class="dashboard-top-row">
@@ -2000,11 +2061,11 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 6px rgba(47,
 	                  <span class="dashboard-account-name">Apex Motors</span>
 	                </div>
 	              </div>
-	              <div class="dashboard-clock">10:00 GMT</div>
+	              <div class="dashboard-plan">International plan</div>
 	            </div>
             <div class="dashboard-top-row">
               <div class="dashboard-title">DB6 Outreach Message</div>
-              <div class="dashboard-time">Scheduled delivery 08:00 local<br>Fri 1 May 2026</div>
+              <div class="dashboard-time">Scheduled delivery 08:00 by time zone<br>Fri 1 May 2026</div>
             </div>
             <div class="dashboard-meta-row">
 	              <div class="dashboard-group">Audience 100</div>
@@ -2036,7 +2097,7 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 6px rgba(47,
               <div class="timezone-row">
                 <span>
                   <span class="timezone-main">London</span>
-	                  <span class="timezone-sub">Delivered 08:00 GMT · 6 replies</span>
+	                  <span class="timezone-sub">Delivered 08:00 UK time · 6 replies</span>
                 </span>
                 <span class="timezone-badge">Live</span>
               </div>
@@ -2115,7 +2176,7 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 6px rgba(47,
     <p class="pricing-body">RightOnQ<span class="tm-mark">TM</span> RCS software is not built as a lowest-cost bulk SMS tool. Sending costs stay transparent, but the real value is verified brand delivery, better response paths, clear tracking and help getting RCS-ready.</p>
     <div class="pricing-example">
       <div class="example-label">Example campaign</div>
-      <p>A specialist motor dealer has a 1966 Aston Martin DB6 ready for private viewings. The right campaign reaches a selected list of collectors with the car image, verified sender identity, local-time delivery and clear response options.</p>
+      <p>A specialist motor dealer has a 1966 Aston Martin DB6 ready for private viewings. The right campaign reaches a selected list of collectors with the car image, verified sender identity, timed delivery and clear response options.</p>
       <span class="pricing-highlight">Aston Martin DB6 campaign to a selected audience</span>
       <p class="example-footnote">Rich RCS style campaign with an image-led card, sender identity and one-tap response options.</p>
       <div class="pricing-rate-grid">
@@ -2145,9 +2206,12 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 6px rgba(47,
         <div class="pricing-rate">
           <span>Basic RCS</span>
           <strong>Text-led</strong>
-          <p>A lower-cost format for simple branded messages, short updates or follow-up replies. It is closer to a verified text message than the rich card shown above.</p>
+          <p>A lower-cost format for simple branded messages, short updates or follow-up replies. It keeps the verified RCS sender identity, but without the image-led rich card shown above.</p>
           <div class="basic-rcs-example" aria-label="Basic RCS message example">
-            <div class="basic-rcs-brand"><span class="basic-rcs-logo">AM</span> Apex Motors</div>
+            <div class="basic-rcs-brand">
+              <span class="basic-rcs-logo">AM</span>
+              <span class="basic-rcs-brand-name">Apex Motors <span class="basic-rcs-verified" aria-label="Verified RCS sender">✓</span></span>
+            </div>
             <div class="basic-rcs-bubble">1966 Aston Martin DB6 in Snow Shadow Grey now available. Reply for more information or to arrange a call.</div>
           </div>
           <div class="basic-rcs-price">
@@ -2156,8 +2220,8 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 6px rgba(47,
           </div>
         </div>
       </div>
-      <p>Pricing is straightforward: pay for the messages you send, whether that's 100 or 1,000, plus a £25/month platform and care fee. This helps cover RightOnQ<span class="tm-mark">TM</span> being there when you need us, a real person on the phone, quick answers, and practical help getting business back on track.</p>
-      <p class="example-footnote">Prices shown exclude VAT. Replies are charged separately at around 1.1p + VAT each. If RCS is not available, SMS fallback keeps the essential message moving at the applicable fallback message rate.</p>
+      <p>Pricing is straightforward: pay for the messages you send, whether that's 100 or 1,000, plus the platform plan that fits your audience. UK-time operation is £25/month. International time-zone scheduling, for campaigns timed around audiences in places such as the Gulf or Hong Kong, is £50/month.</p>
+      <p class="example-footnote">*International time-zone scheduling is part of the £50/month plan. The £25/month plan is built around UK time. Prices shown exclude VAT. Replies are charged separately at around 1.1p + VAT each. If RCS is not available, SMS fallback keeps the essential message moving at the applicable fallback message rate.</p>
     </div>
     <div class="pricing-actions">
       <a href="/what-is-rcs/" class="btn-primary">What is RCS?</a>
@@ -2174,7 +2238,7 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 6px rgba(47,
     </div>
     <div>
       <p class="lead-copy">If someone has given you their phone number, that's a relationship. RCS gives your brand a new kind of presence on their phone: visual, verified and built for campaigns that can inform, invite or start a conversation.</p>
-      <p class="lead-copy">RightOnQ<span class="tm-mark">TM</span> software is built for UK businesses that want a straightforward way to plan, send and manage branded RCS campaigns. Messages are organised as traceable cards, so teams can see the audience, timing, delivery, replies and follow-up in one place. UK operation is the default, with local-time scheduling for audiences at home or abroad.</p>
+      <p class="lead-copy">RightOnQ<span class="tm-mark">TM</span> software is built for UK businesses that want a straightforward way to plan, send and manage branded RCS campaigns. Messages are organised as traceable cards, so teams can see the audience, timing, delivery, replies and follow-up in one place. UK-time operation is the default, with international time-zone scheduling available for audiences abroad.</p>
       <div class="quote-panel" style="transition: opacity 0.5s, transform 0.5s; opacity: 1; transform: translateY(0px);">
         <p>Branded, RCS-verified messages are easier to trust and <em>harder to ignore.</em></p>
         <span>GSMA, the global mobile industry association, found over 70% of consumers said RCS would make them more likely to communicate with a brand</span>
@@ -2231,7 +2295,7 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 6px rgba(47,
       <div class="step" style="transition: opacity 0.5s, transform 0.5s; opacity: 1; transform: translateY(0px);">
         <div class="step-num">Q2</div>
         <h3>Set up your account and audience</h3>
-        <p>While approval is moving, we configure your RightOnQ<span class="tm-mark">TM</span> account, prepare your first message formats and get your audience data ready for CSV upload.</p>
+        <p>While approval is moving, we help your team get ready with worked examples, practical guidance and a ready-to-use CSV template, so your people can move quickly once approved.</p>
       </div>
       <div class="step-connector"></div>
       <div class="step" style="transition: opacity 0.5s, transform 0.5s; opacity: 1; transform: translateY(0px);">
@@ -2250,24 +2314,34 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 6px rgba(47,
     <h2 class="section-heading">For businesses with an audience worth <em>reaching.</em></h2>
     <div class="scenario-grid">
       <div class="scenario-card" style="transition: opacity 0.5s, transform 0.5s; opacity: 1; transform: translateY(0px);">
-        <div class="scenario-icon">AM</div>
+        <div class="scenario-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M5 15l1.4-4.2A3 3 0 0 1 9.2 9h5.6a3 3 0 0 1 2.8 1.8L19 15" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path><path d="M4 15h16v3.2a1 1 0 0 1-1 1h-1.2a1 1 0 0 1-1-1V17H7.2v1.2a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V15Z" stroke-width="1.8" stroke-linejoin="round"></path><path d="M7 15.5h1.5M15.5 15.5H17" stroke-width="1.8" stroke-linecap="round"></path></svg>
+        </div>
         <h3>Automotive specialists</h3>
-        <p>A newly arrived vehicle sent to serious buyers by region, with images, key details and one tap to request a private viewing.</p>
+        <p>A newly arrived vehicle sent to serious buyers by international region, with images, key details and one tap to request a private viewing.</p>
+        <span class="scenario-card-note">Premium international time-zone scheduling</span>
       </div>
       <div class="scenario-card" style="transition: opacity 0.5s, transform 0.5s; opacity: 1; transform: translateY(0px);">
-        <div class="scenario-icon">HB</div>
+        <div class="scenario-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M9 4h6M10 4v4l-1.6 2.1A3 3 0 0 0 7.8 12v6.5A1.5 1.5 0 0 0 9.3 20h5.4a1.5 1.5 0 0 0 1.5-1.5V12a3 3 0 0 0-.6-1.9L14 8V4" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path><path d="M8 13.5h8" stroke-width="1.8" stroke-linecap="round"></path></svg>
+        </div>
         <h3>Food and drink brands</h3>
-        <p>A seasonal release sent to trade customers with product imagery, allocation details and a quick order-interest response.</p>
+        <p>National product launches, trade offers and event invitations sent to wholesalers, hospitality groups or valued trade customers, with imagery and one tap to show interest.</p>
       </div>
       <div class="scenario-card" style="transition: opacity 0.5s, transform 0.5s; opacity: 1; transform: translateY(0px);">
-        <div class="scenario-icon">RE</div>
-        <h3>Property and real estate teams</h3>
-        <p>A new instruction delivered to active buyers with photos, headline details and one tap to request a viewing.</p>
+        <div class="scenario-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M4 11.5 12 5l8 6.5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path><path d="M6.5 10.5V19h11v-8.5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path><path d="M10 19v-5h4v5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        </div>
+        <h3 class="scenario-title-compact">Property and real estate teams</h3>
+        <p>A new instruction delivered to active international buyers with photos, headline details and one tap to request a viewing or phone call.</p>
+        <span class="scenario-card-note">Premium international time-zone scheduling</span>
       </div>
       <div class="scenario-card" style="transition: opacity 0.5s, transform 0.5s; opacity: 1; transform: translateY(0px);">
-        <div class="scenario-icon">SS</div>
+        <div class="scenario-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M5 9.5 12 6l7 3.5-7 3.5-7-3.5Z" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 14.5 12 18l7-3.5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 9.5v5M19 9.5v5M12 13v5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        </div>
         <h3>Specialist suppliers</h3>
-        <p>Availability updates, product launches and appointment-led messages sent to known contacts who value timely information.</p>
+        <p>New products, offers and availability updates sent to people who already know your brand, with rich context and a clear route back to your website.</p>
       </div>
     </div>
   </div>
@@ -2276,8 +2350,8 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 6px rgba(47,
 <!-- FEATURES -->
 <section class="features-section">
   <div class="section-inner">
-    <div class="section-tag">The RightOnQ business toolkit</div>
-    <h2 class="section-heading">What RightOnQ brings <em>together.</em></h2>
+    <div class="section-tag">What the service includes</div>
+    <h2 class="section-heading">What RCS with RightOnQ brings <em>together.</em></h2>
     <div class="features-grid">
       <div class="feature-item" style="transition: opacity 0.5s, transform 0.5s; opacity: 1; transform: translateY(0px);">
         <svg width="28" height="28" viewBox="0 0 28 28" fill="none" role="img" aria-label="Verified RCS icon"><circle cx="14" cy="14" r="13" stroke="#2F6FD2" stroke-width="1.5"></circle><path d="M8 14c0-3.3 2.7-6 6-6s6 2.7 6 6-2.7 6-6 6c-1.1 0-2.1-.3-3-.8L8 20l.8-3A5.9 5.9 0 0 1 8 14Z" stroke="#2F6FD2" stroke-width="1.5" stroke-linejoin="round"></path></svg>
@@ -2285,7 +2359,7 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 6px rgba(47,
       </div>
       <div class="feature-item" style="transition: opacity 0.5s, transform 0.5s; opacity: 1; transform: translateY(0px);">
         <svg width="28" height="28" viewBox="0 0 28 28" fill="none" role="img" aria-label="Scheduled sending icon"><circle cx="14" cy="14" r="13" stroke="#2F6FD2" stroke-width="1.5"></circle><circle cx="14" cy="14" r="4" stroke="#2F6FD2" stroke-width="1.5"></circle><path d="M14 8V5M14 23v-3M8 14H5M23 14h-3" stroke="#2F6FD2" stroke-width="1.5" stroke-linecap="round"></path></svg>
-        <span>Receiver local-time scheduling</span>
+        <span>Optional international time-zone scheduling</span>
       </div>
       <div class="feature-item" style="transition: opacity 0.5s, transform 0.5s; opacity: 1; transform: translateY(0px);">
         <svg width="28" height="28" viewBox="0 0 28 28" fill="none" role="img" aria-label="Confirmation tracking icon"><circle cx="14" cy="14" r="13" stroke="#2F6FD2" stroke-width="1.5"></circle><path d="M9 14l3.5 3.5L19 10" stroke="#2F6FD2" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
@@ -2293,7 +2367,7 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 6px rgba(47,
       </div>
       <div class="feature-item" style="transition: opacity 0.5s, transform 0.5s; opacity: 1; transform: translateY(0px);">
         <svg width="28" height="28" viewBox="0 0 28 28" fill="none" role="img" aria-label="Automatic follow-ups icon"><circle cx="14" cy="14" r="13" stroke="#2F6FD2" stroke-width="1.5"></circle><path d="M14 8v6l4 2" stroke="#2F6FD2" stroke-width="1.5" stroke-linecap="round"></path><path d="M8 20c1.5-1 3.5-1.5 6-1.5s4.5.5 6 1.5" stroke="#2F6FD2" stroke-width="1.5" stroke-linecap="round"></path></svg>
-        <span>SMS fallback for essential reach</span>
+        <span>Automatic SMS fallback</span>
       </div>
       <div class="feature-item" style="transition: opacity 0.5s, transform 0.5s; opacity: 1; transform: translateY(0px);">
         <svg width="28" height="28" viewBox="0 0 28 28" fill="none" role="img" aria-label="Dashboard overview icon"><circle cx="14" cy="14" r="13" stroke="#2F6FD2" stroke-width="1.5"></circle><rect x="8" y="16" width="3" height="5" rx="1" stroke="#2F6FD2" stroke-width="1.5"></rect><rect x="12.5" y="12" width="3" height="9" rx="1" stroke="#2F6FD2" stroke-width="1.5"></rect><rect x="17" y="8" width="3" height="13" rx="1" stroke="#2F6FD2" stroke-width="1.5"></rect></svg>
@@ -2312,13 +2386,14 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 6px rgba(47,
   <div class="section-inner registration-grid">
     <div>
       <div class="section-tag">RCS registration</div>
-      <h2 class="section-heading">The trust step is part of the <em>product.</em></h2>
-      <p class="lead-copy">RCS business messaging requires verification. That process is not a nuisance to hide away; it is part of why people trust the message when it arrives.</p>
+      <h2 class="section-heading">No RCS registration, no verified sender <em>profile.</em></h2>
+      <p class="lead-copy">RCS business messaging is not an open free-for-all. Your sender profile has to be checked and approved before messages go live. That gatekeeping is the point: it helps keep poor-quality senders out and gives customers more reason to trust the message when it arrives.</p>
+      <p class="lead-copy">GSMA/OpenMarket research found that over 70% of consumers said RCS would make them more likely to communicate with a brand.</p>
     </div>
     <div class="registration-panel" style="transition: opacity 0.5s, transform 0.5s; opacity: 1; transform: translateY(0px);">
       <h3>RightOnQ helps you get ready.</h3>
       <p>Some businesses will already have their own RCS registration and want to integrate it. Others will need help preparing the business details, evidence and internal sign-off needed for approval.</p>
-      <p>Approval commonly takes around four to six weeks. If you want us to hand-hold the process, managed onboarding is available from around £500, depending on how much preparation and support is needed.</p>
+      <p>Approval commonly takes around four to six weeks. If you want us to support the process closely, managed onboarding is available from around £500, depending on how much preparation and support is needed.</p>
       <a href="https://developers.google.com/business-communications/rcs-business-messaging/guides/get-started/register-partner#rcs-for-business-partner-registration-interest-form" class="btn-primary" target="_blank" rel="noopener">View the official RCS registration route</a>
     </div>
   </div>
@@ -2329,7 +2404,7 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 6px rgba(47,
   <div class="demo-strip-inner">
     <div class="demo-strip-text">
       <h2>Start getting RCS-ready.</h2>
-      <p>Book a short call and see RCS in action. We’re UK-based and currently work with UK businesses only. We’ll explain registration, approval timelines and sender profiles, show example messages, and send live examples to your phone while we talk.</p>
+      <p>Book a call and see RCS in action. We’re UK-based and currently work with UK businesses only. We’ll explain registration, approval timelines and sender profiles, show example messages, and send live examples to your phone while we talk.</p>
     </div>
     <div class="demo-strip-actions">
       <a href="https://cal.com/adam-smith-wungl9/15min" target="_blank" rel="noopener" class="btn-demo">Book a call</a>
@@ -2403,7 +2478,7 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 6px rgba(47,
 
       <details open="">
         <summary>Is RightOnQ GDPR-compliant?</summary>
-        <p>Yes. We’re a UK company and process data under UK GDPR. We only store the contact details you provide and the message logs needed for delivery and audit.</p>
+        <p>RightOnQ is built to support UK GDPR compliance. We’re a UK company, process data under UK GDPR, and only store the contact details you provide plus the message logs needed for delivery and audit. Your organisation remains responsible for recipient consent, lawful basis and opt-out handling.</p>
       </details>
 
       <details open="">
@@ -2418,7 +2493,7 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 6px rgba(47,
 
       <details open="">
         <summary>Do you handle RCS registration?</summary>
-        <p>We can help, but it is not automatic. RCS registration needs business details, sender profile information, logo and banner assets, contact details, privacy and terms links, example messages, opt-in/opt-out information and approval checks. Some of that has to come from you. If you want us to hand-hold the process, we charge for the staff time involved, with managed onboarding available from around £500.</p>
+        <p>We can help, but it is not automatic. RCS registration needs business details, sender profile information, logo and banner assets, contact details, privacy and terms links, example messages, opt-in/opt-out information and approval checks. Some of that has to come from you. If you want us to support the process closely, managed onboarding is available from around £500.</p>
       </details>
 
     </div>
@@ -2461,7 +2536,7 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 6px rgba(47,
       "name": "Is RightOnQ GDPR-compliant?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes. We're a UK company and process data under UK GDPR. We only store the contact details you provide and the message logs needed for delivery and audit."
+        "text": "RightOnQ is built to support UK GDPR compliance. We're a UK company, process data under UK GDPR, and only store the contact details you provide plus the message logs needed for delivery and audit. Your organisation remains responsible for recipient consent, lawful basis and opt-out handling."
       }
     },
     {
@@ -2485,7 +2560,7 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 6px rgba(47,
       "name": "Do you handle RCS registration?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "We can help, but it is not automatic. RCS registration needs business details, sender profile information, logo and banner assets, contact details, privacy and terms links, example messages, opt-in/opt-out information and approval checks. Some of that has to come from you. If you want us to hand-hold the process, we charge for the staff time involved, with managed onboarding available from around £500."
+        "text": "We can help, but it is not automatic. RCS registration needs business details, sender profile information, logo and banner assets, contact details, privacy and terms links, example messages, opt-in/opt-out information and approval checks. Some of that has to come from you. If you want us to support the process closely, managed onboarding is available from around £500."
       }
     }
   ]
