@@ -7,19 +7,19 @@ permalink: /what-is-rcs/
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>What is RCS? — RightOnQ</title>
-<meta name="description" content="A short business-owner guide to RCS: verified branding, rich cards, reply buttons, SMS fallback and clearer customer response.">
+<title>What is RCS? A plain-English guide — RightOnQ</title>
+<meta name="description" content="A plain-English UK business guide to RCS: what Rich Communication Services means, how it differs from SMS, what it can send, and what the caveats are.">
 <link rel="canonical" href="https://www.rightonq.co.uk/what-is-rcs/">
-<meta property="og:title" content="What is RCS? — RightOnQ">
-<meta property="og:description" content="A short business-owner guide to RCS: verified branding, rich cards, reply buttons, SMS fallback and clearer customer response.">
+<meta property="og:title" content="What is RCS? A plain-English guide — RightOnQ">
+<meta property="og:description" content="A plain-English UK business guide to RCS: what Rich Communication Services means, how it differs from SMS, what it can send, and what the caveats are.">
 <meta property="og:url" content="https://www.rightonq.co.uk/what-is-rcs/">
 <meta property="og:type" content="article">
 <meta property="og:image" content="https://www.rightonq.co.uk/og-image.png">
 <meta property="og:site_name" content="RightOnQ">
 <meta property="og:locale" content="en_GB">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="What is RCS? — RightOnQ">
-<meta name="twitter:description" content="A short business-owner guide to RCS: verified branding, rich cards, reply buttons, SMS fallback and clearer customer response.">
+<meta name="twitter:title" content="What is RCS? A plain-English guide — RightOnQ">
+<meta name="twitter:description" content="A plain-English UK business guide to RCS: what Rich Communication Services means, how it differs from SMS, what it can send, and what the caveats are.">
 <meta name="twitter:image" content="https://www.rightonq.co.uk/og-image.png">
 <meta name="robots" content="index, follow">
 <link rel="icon" type="image/png" href="/favicon.png">
@@ -105,25 +105,33 @@ permalink: /what-is-rcs/
   }
   h1 {
     font-family: 'Syne', sans-serif;
-    font-size: clamp(52px, 8vw, 108px);
-    line-height: 0.95;
-    letter-spacing: 0;
-    max-width: 980px;
-    margin-bottom: 30px;
+    font-weight: 800;
+    font-size: clamp(40px, 4.8vw, 66px);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    max-width: 660px;
+    margin-bottom: 32px;
   }
   h1 em { color: var(--blue); font-style: normal; }
   .intro {
-    max-width: 820px;
+    max-width: 580px;
     color: var(--grey);
-    font-size: clamp(18px, 2vw, 23px);
-    line-height: 1.65;
+    font-size: clamp(16px, 2vw, 20px);
+    font-weight: 300;
+    line-height: 1.7;
     margin-bottom: 42px;
   }
-  .hero-actions {
-    display: flex;
-    gap: 16px;
-    flex-wrap: wrap;
-    margin-bottom: 62px;
+  .availability-note {
+    max-width: 760px;
+    color: rgba(169,183,202,0.82);
+    font-size: 15px;
+    line-height: 1.65;
+    border-left: 2px solid var(--blue);
+    padding-left: 18px;
+    margin: -18px 0 56px;
+  }
+  .bottom-actions {
+    margin-top: 34px;
   }
   .btn {
     display: inline-flex;
@@ -182,6 +190,78 @@ permalink: /what-is-rcs/
     height: 7px;
     border-radius: 50%;
     background: var(--green);
+  }
+  .plain-section {
+    margin-bottom: 60px;
+  }
+  .section-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--blue-light);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .section-kicker::before {
+    content: "";
+    width: 28px;
+    height: 1px;
+    background: var(--blue);
+  }
+  .plain-section h2 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(36px, 4vw, 56px);
+    line-height: 1.1;
+    letter-spacing: 0;
+    max-width: 850px;
+    margin-bottom: 24px;
+  }
+  .plain-section h2 em {
+    color: var(--blue);
+    font-style: normal;
+  }
+  .plain-copy {
+    max-width: 850px;
+    color: var(--grey);
+    font-size: 17px;
+    line-height: 1.75;
+  }
+  .plain-copy + .plain-copy { margin-top: 16px; }
+  .flow-diagram {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr auto 1fr;
+    gap: 12px;
+    align-items: center;
+    margin-top: 30px;
+  }
+  .flow-step {
+    min-height: 130px;
+    background: rgba(255,255,255,0.045);
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 10px;
+    padding: 18px;
+  }
+  .flow-step strong {
+    display: block;
+    font-family: 'Syne', sans-serif;
+    color: var(--white);
+    font-size: 17px;
+    margin-bottom: 8px;
+  }
+  .flow-step span {
+    color: var(--grey);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .flow-arrow {
+    color: var(--blue-light);
+    font-family: 'Syne', sans-serif;
+    font-size: 28px;
+    font-weight: 900;
   }
   .wide {
     display: grid;
@@ -281,16 +361,28 @@ permalink: /what-is-rcs/
     margin-bottom: 0;
   }
   .message-image--exterior {
-    background-image: url('images/aston-martin-db6-rcs-card.jpg');
+    background-image: url('/images/aston-martin-db6-rcs-card.jpg'), url('images/aston-martin-db6-rcs-card.jpg');
     background-size: cover;
     background-position: center 50%;
   }
   .message-image--interior {
-    background-image: url('images/aston-martin-db6-interior.jpg');
+    background-image: url('/images/aston-martin-db6-interior.jpg'), url('images/aston-martin-db6-interior.jpg');
     background-position: center 56%;
   }
   .message-image--engine {
-    background-image: url('images/aston-martin-db6-engine.jpg');
+    background-image: url('/images/aston-martin-db6-engine.jpg'), url('images/aston-martin-db6-engine.jpg');
+    background-position: center 50%;
+  }
+  .message-image--food-launch {
+    background-image: url('/images/hometown-brewery-open-harvest.png'), url('images/hometown-brewery-open-harvest.png');
+    background-position: center 52%;
+  }
+  .message-image--food-event {
+    background-image: url('/images/hometown-brewery-open-harvest-event.png'), url('images/hometown-brewery-open-harvest-event.png');
+    background-position: center 50%;
+  }
+  .message-image--food-range {
+    background-image: url('/images/hometown-brewery-james-mitchell.png'), url('images/hometown-brewery-james-mitchell.png');
     background-position: center 50%;
   }
   .carousel-card h3 {
@@ -408,6 +500,46 @@ permalink: /what-is-rcs/
     font-size: 12px;
     line-height: 1.5;
   }
+  .good-bad-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+    margin-bottom: 60px;
+  }
+  .good-bad-card {
+    background: rgba(255,255,255,0.045);
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 10px;
+    padding: 26px;
+  }
+  .good-bad-card h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 24px;
+    margin-bottom: 16px;
+  }
+  .good-bad-card ul {
+    display: grid;
+    gap: 11px;
+    list-style: none;
+  }
+  .good-bad-card li {
+    color: var(--grey);
+    font-size: 15px;
+    line-height: 1.6;
+    padding-left: 20px;
+    position: relative;
+  }
+  .good-bad-card li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.72em;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+  }
+  .good-bad-card--caveat li::before { background: var(--gold); }
   .footer-note {
     color: rgba(169,183,202,0.72);
     font-size: 13px;
@@ -415,11 +547,24 @@ permalink: /what-is-rcs/
     border-top: 1px solid rgba(255,255,255,0.08);
     padding-top: 22px;
   }
+  .source-list {
+    display: grid;
+    gap: 8px;
+    margin-top: 14px;
+  }
+  .source-list a {
+    color: var(--blue-light);
+    text-decoration: none;
+  }
+  .source-list a:hover { color: var(--white); }
   @media (max-width: 900px) {
     nav { padding: 18px 24px; }
     main { padding: 130px 24px 64px; }
     .explainer-grid,
-    .wide { grid-template-columns: 1fr; }
+    .wide,
+    .good-bad-grid { grid-template-columns: 1fr; }
+    .flow-diagram { grid-template-columns: 1fr; }
+    .flow-arrow { transform: rotate(90deg); justify-self: center; }
   }
 </style>
 </head>
@@ -440,12 +585,16 @@ permalink: /what-is-rcs/
 
 <main>
   <div class="tag">RCS in plain English</div>
-  <h1>What RCS gives your <em>business.</em></h1>
-  <p class="intro">RCS stands for Rich Communication Services. In plain English, it lets your business send verified, branded, interactive messages in the same place customers already receive texts.</p>
+  <h1>What is RCS, and why does it <em>matter?</em></h1>
+  <p class="intro">RCS stands for Rich Communication Services. It is the modern upgrade to SMS: your business name, logo, images, buttons and verified sender identity, delivered on the same message screen people already use for texts.</p>
+  <p class="availability-note">For most modern UK business audiences, RCS support is increasingly normal. On iPhone, RCS requires iOS 18 or later and a supporting carrier; iOS 18 was released in September 2024 and quickly reached the majority of compatible iPhones. Where RCS is not available, SMS or MMS fallback still carries the essential message.</p>
 
-  <div class="hero-actions">
-    <a href="/" class="btn btn-primary">Return to web page</a>
-  </div>
+  <section class="plain-section">
+    <div class="section-kicker">SMS vs RCS</div>
+    <h2>SMS is plain text. RCS adds brand, images and <em>reply buttons.</em></h2>
+    <p class="plain-copy">SMS stands for Short Message Service. It is simple, reliable and cost-effective, which is why it still works so well for bulk alerts, staff updates, appointment reminders and short operational messages. It reaches almost every mobile phone and everyone understands it.</p>
+    <p class="plain-copy">But SMS was built for a plainer world. It does not naturally carry brand identity, photography, product context or tap-to-reply choices. For sales, marketing and customer outreach teams competing with visual channels such as social media and email, that leaves a gap. RCS fills that gap by bringing richer presentation and clearer response paths into the same message screen.</p>
+  </section>
 
   <section class="wide" aria-label="SMS and RCS comparison">
     <div class="rcs-box">
@@ -495,7 +644,7 @@ permalink: /what-is-rcs/
         </div>
         <div class="carousel-controls" aria-label="Carousel controls">
           <button class="carousel-control" type="button" id="rcs-carousel-prev" aria-label="Previous carousel card">‹</button>
-          <div class="carousel-dots" aria-hidden="true">
+          <div class="carousel-dots" aria-hidden="true" id="rcs-carousel-dots">
             <span class="carousel-dot is-active"></span>
             <span class="carousel-dot"></span>
             <span class="carousel-dot"></span>
@@ -504,24 +653,67 @@ permalink: /what-is-rcs/
         </div>
       </div>
     </div>
-    <div class="sms-box">
-      <h2>SMS stays plain.</h2>
-      <p>SMS still reaches almost every phone, but the experience is text-led. There is no image card and no tap-button response; the recipient has to type the next step.</p>
-      <div class="sms-demo" aria-label="Example standard SMS message">
-        <div class="sms-demo-top">
-          <span class="sms-sender">APEX MOTORS</span>
-          <span>Text Message</span>
+    <div class="rcs-box">
+      <h2>Brewery launch example.</h2>
+      <p>A brewery can show a new bottled ale, invite trade buyers to a launch event, then give people a clear one-tap way to respond.</p>
+      <div class="message-demo" aria-label="Example brewery RCS carousel message">
+        <div class="brand-row">
+          <span class="brand-dot">HB</span>
+          <span>
+            <span class="brand-name">HOMETOWN BREWERY <span class="verified-dot">✓</span></span>
+            <span class="brand-sub">Verified business sender</span>
+          </span>
         </div>
-        <div class="sms-bubble">
-          Just arrived: 1966 DB6 Aston in Snow Shadow Grey. We wanted you to be among the first to see it. Reply BOOK for an appointment or INFO for more information.
+        <div class="carousel-window">
+          <div class="carousel-track" id="food-carousel-track">
+            <div class="carousel-card">
+              <div class="message-image message-image--food-launch"></div>
+              <h3>Open Harvest</h3>
+              <p class="carousel-note">A traditional bottled ale for pubs, farm shops and independent retailers looking for a fresh seasonal line.</p>
+              <div class="chip-row">
+                <div class="chip">Send sample case</div>
+                <div class="chip">Arrange a visit</div>
+                <div class="chip">Not for us</div>
+              </div>
+            </div>
+            <div class="carousel-card">
+              <div class="message-image message-image--food-event"></div>
+              <h3>June 2026 launch event</h3>
+              <p class="carousel-note">Invite selected buyers to the Open Harvest launch, with tasting notes, event details and a direct response.</p>
+              <div class="chip-row">
+                <div class="chip">RSVP</div>
+                <div class="chip">Undecided</div>
+                <div class="chip">Far too busy</div>
+              </div>
+            </div>
+            <div class="carousel-card">
+              <div class="message-image message-image--food-range"></div>
+              <h3>Meet James Mitchell</h3>
+              <p class="carousel-note">Introduce a new sales representative to trade partners with a clear, friendly way to respond.</p>
+              <div class="chip-row">
+                <div class="chip">Arrange a meet-up</div>
+                <div class="chip">Wish James all the best</div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="sms-compose">
-          <span>Text message...</span>
-          <span class="sms-send-dot">↑</span>
+        <div class="carousel-controls" aria-label="Food carousel controls">
+          <button class="carousel-control" type="button" id="food-carousel-prev" aria-label="Previous food carousel card">‹</button>
+          <div class="carousel-dots" aria-hidden="true" id="food-carousel-dots">
+            <span class="carousel-dot is-active"></span>
+            <span class="carousel-dot"></span>
+            <span class="carousel-dot"></span>
+          </div>
+          <button class="carousel-control" type="button" id="food-carousel-next" aria-label="Next food carousel card">›</button>
         </div>
-        <p class="sms-limit">The message can still be useful, but the recipient has to type their own reply.</p>
       </div>
     </div>
+  </section>
+
+  <section class="plain-section">
+    <div class="section-kicker">How it works</div>
+    <h2>RCS first, SMS fallback when the phone cannot receive <em>RCS.</em></h2>
+    <p class="plain-copy">The message is sent as RCS first. If the recipient’s phone and network are set up for RCS, they receive the rich version with branding, images and reply buttons. If RCS is not available, the message falls back to SMS or MMS, so the essential information still reaches them in a plainer format.</p>
   </section>
 
   <section class="explainer-grid">
@@ -544,44 +736,80 @@ permalink: /what-is-rcs/
         <li>Delivery and response signals that help with follow-up.</li>
       </ul>
     </div>
-    <div class="card">
-      <h2>What to know</h2>
+  </section>
+
+  <section class="good-bad-grid" aria-label="RCS advantages and caveats">
+    <div class="good-bad-card">
+      <h2>What is good about it?</h2>
       <ul>
-        <li>Business RCS requires brand registration and approval before sending.</li>
-        <li>Approval typically takes around four to six weeks, so it is worth starting early.</li>
-        <li>If RCS is not available, SMS fallback keeps the essential message moving at the applicable fallback message rate.</li>
-        <li>SMS fallback protects reach, but images, carousel cards and tap buttons will not appear in the same way.</li>
+        <li>Messages can arrive with your business name, logo and verified sender profile.</li>
+        <li>Images, carousels and buttons can make the message easier to understand.</li>
+        <li>Customers can tap a clear next step instead of typing a reply from scratch.</li>
+        <li>It can feel more trustworthy than a random number or a cold-looking SMS.</li>
+      </ul>
+    </div>
+    <div class="good-bad-card good-bad-card--caveat">
+      <h2>What are the catches?</h2>
+      <ul>
+        <li>Business RCS needs registration and approval before messages go live.</li>
+        <li>It costs more than basic SMS, especially for rich cards, replies and premium scheduling.</li>
+        <li>Rendering can vary by phone, carrier, country and messaging client.</li>
+        <li>Fallback SMS protects reach, but it cannot show the full rich RCS experience.</li>
       </ul>
     </div>
   </section>
 
-  <p class="footer-note">This short guide is based on Twilio's public RCS guidance and simplified for RightOnQ customers. Final behaviour can vary by country, carrier, device support, RCS registration status and fallback configuration.</p>
+  <section class="plain-section">
+    <div class="section-kicker">The plain answer</div>
+    <h2>RCS is worth looking at when trust and context <em>matter.</em></h2>
+    <p class="plain-copy">If you only need to send the cheapest possible line of text, SMS still has a place. If the message carries brand value, product detail, appointment intent, customer choice or a reason to act, RCS gives you more to work with.</p>
+    <p class="plain-copy">The sensible view is not “RCS replaces SMS tomorrow.” It is “RCS first where supported, SMS fallback where needed.” That is the practical route for UK businesses today.</p>
+  </section>
+
+  <div class="footer-note">
+    This guide is based on public guidance from Twilio, Google, Apple and the GSMA, simplified for RightOnQ customers. Final behaviour can vary by country, carrier, device support, RCS registration status and fallback configuration.
+    <div class="source-list" aria-label="RCS guide sources">
+      <a href="https://www.twilio.com/docs/rcs/send-an-rcs-message" target="_blank" rel="noopener">Twilio: Send and receive RCS messages</a>
+      <a href="https://developers.google.com/business-communications/rcs-business-messaging/guides/learn/rich-cards" target="_blank" rel="noopener">Google: RCS rich cards</a>
+      <a href="https://support.apple.com/en-us/122195" target="_blank" rel="noopener">Apple: RCS messaging on iPhone</a>
+      <a href="https://www.gsma.com/solutions-and-impact/technologies/networks/gsma_resources/rcs-research-study-2018/" target="_blank" rel="noopener">GSMA/OpenMarket: RCS Business Messaging research</a>
+    </div>
+    <div class="bottom-actions">
+      <a href="/" class="btn btn-primary">Return to web page</a>
+    </div>
+  </div>
 </main>
 <script>
   (function () {
-    const track = document.getElementById('rcs-carousel-track');
-    const prev = document.getElementById('rcs-carousel-prev');
-    const next = document.getElementById('rcs-carousel-next');
-    const dots = Array.from(document.querySelectorAll('.carousel-dot'));
-    if (!track || !prev || !next || dots.length === 0) return;
+    function initCarousel(trackId, prevId, nextId, dotsId) {
+      const track = document.getElementById(trackId);
+      const prev = document.getElementById(prevId);
+      const next = document.getElementById(nextId);
+      const dotsContainer = document.getElementById(dotsId);
+      const dots = dotsContainer ? Array.from(dotsContainer.querySelectorAll('.carousel-dot')) : [];
+      if (!track || !prev || !next || dots.length === 0) return;
 
-    let index = 0;
-    function render() {
-      track.style.transform = 'translateX(calc(-' + (index * 100) + '% - ' + (index * 14) + 'px))';
-      dots.forEach(function (dot, dotIndex) {
-        dot.classList.toggle('is-active', dotIndex === index);
+      let index = 0;
+      function render() {
+        track.style.transform = 'translateX(calc(-' + (index * 100) + '% - ' + (index * 14) + 'px))';
+        dots.forEach(function (dot, dotIndex) {
+          dot.classList.toggle('is-active', dotIndex === index);
+        });
+      }
+
+      prev.addEventListener('click', function () {
+        index = (index + dots.length - 1) % dots.length;
+        render();
+      });
+
+      next.addEventListener('click', function () {
+        index = (index + 1) % dots.length;
+        render();
       });
     }
 
-    prev.addEventListener('click', function () {
-      index = (index + dots.length - 1) % dots.length;
-      render();
-    });
-
-    next.addEventListener('click', function () {
-      index = (index + 1) % dots.length;
-      render();
-    });
+    initCarousel('rcs-carousel-track', 'rcs-carousel-prev', 'rcs-carousel-next', 'rcs-carousel-dots');
+    initCarousel('food-carousel-track', 'food-carousel-prev', 'food-carousel-next', 'food-carousel-dots');
   }());
 </script>
 </body>
