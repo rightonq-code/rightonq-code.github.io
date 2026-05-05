@@ -55,6 +55,12 @@ description: "Updates, insights and tips on business messaging from the RightOnQ
     line-height: 1.1;
   }
   .section-heading em { font-style: normal; color: var(--blue); }
+  @media (max-width: 768px) {
+    .section-heading {
+      font-size: clamp(30px, 9vw, 42px);
+      line-height: 1.12;
+    }
+  }
   .post-list { display: grid; gap: 24px; }
   .post-card {
     display: block;

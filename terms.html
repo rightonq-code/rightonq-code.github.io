@@ -137,13 +137,18 @@ permalink: /terms/
 
     align-items: center;
 
-    gap: 14px;
-
     text-decoration: none;
 
   }
 
   .logo-svg { width: 44px; height: 44px; flex-shrink: 0; }
+  .logo-img {
+    width: 280px;
+    height: 62px;
+    object-fit: contain;
+    object-position: left center;
+    display: block;
+  }
 
   .logo-text {
 
@@ -190,6 +195,20 @@ permalink: /terms/
     border-color: var(--blue);
 
   }
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+  .nav-links a {
+    font-family: 'DM Sans', sans-serif;
+    color: #8A9BB5;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--white); }
 
   .page-hero {
 
@@ -535,9 +554,22 @@ permalink: /terms/
 
   @media (max-width: 768px) {
 
-    nav { padding: 20px 24px; }
+    nav { padding: 14px 16px; gap: 12px; }
 
-    .page-hero { padding: 120px 24px 60px; }
+    .logo-img { width: 150px; height: 40px; }
+
+    .nav-links { gap: 12px; }
+
+    .nav-links a { font-size: 13px; }
+
+    nav a.cta-nav { padding: 8px 14px; font-size: 13px; }
+
+    .page-hero { padding: 112px 24px 60px; }
+
+    .page-hero h1 {
+      font-size: clamp(30px, 9vw, 42px);
+      line-height: 1.12;
+    }
 
     .content { padding: 60px 24px 80px; }
 
@@ -560,25 +592,14 @@ permalink: /terms/
 
   <a href="/" class="logo">
 
-    <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="RightOnQ logo">
-
-      <rect x="8" y="18" width="84" height="76" rx="14" ry="14" fill="white"/>
-
-      <rect x="28" y="8" width="12" height="22" rx="6" ry="6" fill="#0B1524"/>
-
-      <rect x="60" y="8" width="12" height="22" rx="6" ry="6" fill="#0B1524"/>
-
-      <text x="50" y="42" font-family="Arial Black, sans-serif" font-weight="900" font-size="16" fill="#0B1524" text-anchor="middle" letter-spacing="1">ON</text>
-
-      <text x="50" y="88" font-family="Arial Black, sans-serif" font-weight="900" font-size="58" fill="#2F6FD2" text-anchor="middle">Q</text>
-
-    </svg>
-
-    <span class="logo-text">RIGHT<span>ON</span>Q<span style="font-size:0.5em;vertical-align:super;">™</span></span>
+    <img class="logo-img" src="/images/rightonq-logo-transparent.png" alt="RightOnQ">
 
   </a>
 
-  <a href="/#contact" class="cta-nav">Get in touch</a>
+  <div class="nav-links">
+    <a href="/blog/">Blog</a>
+    <a href="/#contact" class="cta-nav">Get in touch</a>
+  </div>
 
 </nav>
 

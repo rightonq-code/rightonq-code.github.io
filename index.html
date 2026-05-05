@@ -519,18 +519,20 @@
   /* RESPONSIVE */
   @media (max-width: 768px) {
     nav {
-      padding: 16px 20px;
-      flex-direction: column;
-      gap: 14px;
+      padding: 14px 16px;
+      flex-direction: row;
+      gap: 12px;
     }
     nav > div {
-      gap: 16px !important;
+      gap: 12px !important;
+      flex: 0 0 auto;
     }
     .logo-text { font-size: 18px; }
     .logo-svg { width: 38px; height: 38px; }
-    .logo-img { width: 220px; height: 48px; }
-    nav a.cta-nav { padding: 8px 18px; font-size: 13px; }
-    .hero { padding: 130px 24px 60px; }
+    .logo-img { width: 150px; height: 40px; }
+    nav a[href="/blog/"] { font-size: 13px !important; }
+    nav a.cta-nav { padding: 8px 14px; font-size: 13px; }
+    .hero { padding: 112px 24px 60px; }
     .what { grid-template-columns: 1fr; padding: 80px 24px; gap: 48px; }
     .contact { padding: 80px 24px; }
     .contact-inner { grid-template-columns: 1fr; gap: 48px; }
@@ -1995,6 +1997,15 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 6px rgba(47,
     .hero { padding-top: 180px; }
     .hero-grid { grid-template-columns: 1fr; }
     .hero-grid { gap: 42px; }
+    .hero-copy h1 {
+      font-size: clamp(34px, 10.4vw, 46px);
+      line-height: 1.08;
+      max-width: 560px;
+    }
+    .section-heading {
+      font-size: clamp(30px, 9vw, 42px);
+      line-height: 1.12;
+    }
     .hero-kicker {
       grid-template-columns: repeat(2, 1fr);
       width: 100%;
@@ -2007,15 +2018,33 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 6px rgba(47,
       border-top: 1px solid rgba(103,166,255,0.18);
     }
     .hero-visual {
-      display: block;
-      width: min(100%, 344px);
+      display: grid;
+      gap: 18px;
+      width: 100%;
       justify-self: start;
     }
-    .rcs-phone { width: min(100%, 344px); }
+    .visual-stack {
+      width: min(100%, 390px);
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(103,166,255,0.22);
+      border-radius: 10px;
+      padding: 18px;
+    }
+    .visual-label {
+      margin: 0 0 16px;
+    }
+    .rcs-phone { width: 100%; }
     .sender-dashboard {
       width: 100%;
-      max-width: 344px;
-      margin-top: 18px;
+      max-width: none;
+      margin: 0;
+    }
+    .visual-stack--receiver {
+      width: min(100%, 390px);
+    }
+    .visual-stack--receiver .visual-label {
+      margin-top: 0;
+      margin-bottom: 16px;
     }
     .relationship-section,
     .rcs-explain-section,

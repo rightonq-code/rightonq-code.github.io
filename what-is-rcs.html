@@ -624,10 +624,20 @@ permalink: /what-is-rcs/
   }
   .footer-right a:hover { color: var(--white); }
   @media (max-width: 900px) {
-    nav { padding: 18px 24px; }
-    .logo-img { width: 220px; height: 48px; }
-    .nav-links { gap: 14px; }
-    main { padding: 130px 24px 64px; }
+    nav { padding: 14px 16px; }
+    .logo-img { width: 150px; height: 40px; }
+    .nav-links { gap: 12px; }
+    .nav-links a { font-size: 13px; }
+    nav a.cta-nav { padding: 8px 14px; }
+    main { padding: 112px 24px 64px; }
+    h1 {
+      font-size: clamp(34px, 10.4vw, 46px);
+      line-height: 1.08;
+    }
+    .plain-section h2 {
+      font-size: clamp(30px, 9vw, 42px);
+      line-height: 1.12;
+    }
     .explainer-grid,
     .wide,
     .good-bad-grid { grid-template-columns: 1fr; }
@@ -637,9 +647,10 @@ permalink: /what-is-rcs/
     .footer-right { text-align: left; }
   }
   @media (max-width: 640px) {
-    nav { align-items: flex-start; gap: 16px; }
-    .nav-links { flex-wrap: wrap; justify-content: flex-end; }
-    .logo-img { width: 190px; height: 42px; }
+    nav { align-items: center; gap: 12px; }
+    .nav-links { flex-wrap: nowrap; justify-content: flex-end; }
+    .nav-links a:first-child { display: none; }
+    .logo-img { width: 142px; height: 38px; }
   }
 </style>
 </head>

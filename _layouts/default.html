@@ -56,8 +56,15 @@
       backdrop-filter: blur(12px);
       border-bottom: 1px solid rgba(47, 111, 210, 0.15);
     }
-    .logo { display: flex; align-items: center; gap: 14px; text-decoration: none; }
+    .logo { display: flex; align-items: center; text-decoration: none; }
     .logo-svg { width: 44px; height: 44px; flex-shrink: 0; }
+    .logo-img {
+      width: 280px;
+      height: 62px;
+      object-fit: contain;
+      object-position: left center;
+      display: block;
+    }
     .logo-text {
       font-family: 'Syne', sans-serif;
       font-weight: 700;
@@ -118,7 +125,14 @@
     }
     .footer-right { font-size: 13px; color: rgba(255,255,255,0.25); line-height: 1.55; text-align: right; }
     .footer-trade { display: block; margin-bottom: 5px; color: rgba(255,255,255,0.24); }
-    .footer-trade .tm-mark { color: inherit; }
+    .footer-trade .tm-mark {
+      color: inherit;
+      font-size: 0.58em;
+      font-weight: 500;
+      vertical-align: super;
+      margin-left: 0.08em;
+      letter-spacing: 0;
+    }
     .footer-right a {
       color: #4A8AE8;
       font-size: 13px;
@@ -127,8 +141,17 @@
     }
     .footer-right a:hover { color: #fff; }
     @media (max-width: 768px) {
-      nav { padding: 20px 24px; }
-      .content-wrap { padding: 100px 24px 60px; }
+      nav { padding: 14px 16px; gap: 12px; }
+      .logo-img { width: 150px; height: 40px; }
+      .nav-links { gap: 12px; flex: 0 0 auto; }
+      .nav-links a.blog-link {
+        padding: 0;
+        border: none;
+        background: transparent;
+        font-size: 13px;
+      }
+      nav a.cta-nav { padding: 8px 14px; font-size: 13px; }
+      .content-wrap { padding: 112px 24px 60px; }
       footer { padding: 32px 24px; flex-direction: column; align-items: flex-start; }
       .footer-right { text-align: left; }
     }
@@ -250,14 +273,7 @@
 
 <nav>
   <a href="/" class="logo">
-    <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="RightOnQ logo">
-      <rect x="8" y="18" width="84" height="76" rx="14" ry="14" fill="white"/>
-      <rect x="28" y="8" width="12" height="22" rx="6" ry="6" fill="#0B1524"/>
-      <rect x="60" y="8" width="12" height="22" rx="6" ry="6" fill="#0B1524"/>
-      <text x="50" y="42" font-family="Arial Black, sans-serif" font-weight="900" font-size="16" fill="#0B1524" text-anchor="middle" letter-spacing="1">ON</text>
-      <text x="50" y="88" font-family="Arial Black, sans-serif" font-weight="900" font-size="58" fill="#2F6FD2" text-anchor="middle">Q</text>
-    </svg>
-    <span class="logo-text">RIGHT<span>ON</span>Q<span style="font-size:0.5em;vertical-align:super;color:var(--blue);">&#8482;</span></span>
+    <img class="logo-img" src="/images/rightonq-logo-transparent.png" alt="RightOnQ">
   </a>
   <div class="nav-links">
     <a href="/blog/" class="blog-link">Blog</a>
