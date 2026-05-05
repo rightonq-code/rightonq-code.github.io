@@ -1431,7 +1431,6 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 6px rgba(47,
     display: flex;
     justify-content: center;
     gap: 6px;
-    padding: 0 0 8px;
   }
 
   .rcs-carousel-dots button {
@@ -1447,6 +1446,33 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 6px rgba(47,
   .rcs-carousel-dots button.active {
     width: 18px;
     background: var(--blue);
+  }
+
+  .rcs-carousel-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 0 0 8px;
+  }
+
+  .rcs-carousel-control {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1px solid rgba(103,166,255,0.34);
+    background: rgba(52,120,216,0.12);
+    color: var(--white);
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  .rcs-carousel-control:hover,
+  .rcs-carousel-control:focus-visible {
+    border-color: rgba(103,166,255,0.7);
+    background: rgba(52,120,216,0.22);
+    outline: none;
   }
 
   .rcs-action {
@@ -2021,7 +2047,7 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 6px rgba(47,
     .hero {
       min-height: auto;
       justify-content: flex-start;
-      padding-top: 56px;
+      padding-top: 84px;
     }
     .hero-grid { grid-template-columns: 1fr; }
     .hero-grid { gap: 42px; }
@@ -2074,6 +2100,11 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 6px rgba(47,
     .visual-stack--receiver .visual-label {
       margin-top: 0;
       margin-bottom: 16px;
+    }
+    .rcs-carousel-control {
+      width: 40px;
+      height: 40px;
+      font-size: 20px;
     }
     .relationship-section,
     .rcs-explain-section,
@@ -2217,10 +2248,14 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 6px rgba(47,
                 </div>
               </div>
             </div>
-            <div class="rcs-carousel-dots" aria-label="RCS carousel cards">
-              <button type="button" class="active" aria-label="Show exterior card" data-rcs-card="0"></button>
-              <button type="button" aria-label="Show interior card" data-rcs-card="1"></button>
-              <button type="button" aria-label="Show engine bay card" data-rcs-card="2"></button>
+            <div class="rcs-carousel-controls" aria-label="RCS carousel controls">
+              <button class="rcs-carousel-control" type="button" id="home-rcs-carousel-prev" aria-label="Previous RCS carousel card">‹</button>
+              <div class="rcs-carousel-dots" aria-label="RCS carousel cards">
+                <button type="button" class="active" aria-label="Show exterior card" data-rcs-card="0"></button>
+                <button type="button" aria-label="Show interior card" data-rcs-card="1"></button>
+                <button type="button" aria-label="Show engine bay card" data-rcs-card="2"></button>
+              </div>
+              <button class="rcs-carousel-control" type="button" id="home-rcs-carousel-next" aria-label="Next RCS carousel card">›</button>
             </div>
             <div class="rcs-read">Delivered 08:00 local time</div>
           </div>
@@ -2704,17 +2739,21 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 6px rgba(47,
     var image = document.getElementById('rcs-carousel-image');
     var eyebrow = document.getElementById('rcs-carousel-eyebrow');
     var copy = document.getElementById('rcs-carousel-copy');
+    var prev = document.getElementById('home-rcs-carousel-prev');
+    var next = document.getElementById('home-rcs-carousel-next');
     var dots = Array.prototype.slice.call(document.querySelectorAll('[data-rcs-card]'));
     if (!image || !eyebrow || !copy || !dots.length) return;
+    var currentIndex = 0;
 
     function setCard(index) {
-      var card = cards[index];
+      currentIndex = (index + cards.length) % cards.length;
+      var card = cards[currentIndex];
       image.src = card.image;
       image.alt = card.alt;
       eyebrow.textContent = card.eyebrow;
       copy.textContent = card.copy;
       dots.forEach(function(dot, dotIndex) {
-        dot.classList.toggle('active', dotIndex === index);
+        dot.classList.toggle('active', dotIndex === currentIndex);
       });
     }
 
@@ -2723,6 +2762,16 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 6px rgba(47,
         setCard(Number(dot.dataset.rcsCard));
       });
     });
+    if (prev) {
+      prev.addEventListener('click', function() {
+        setCard(currentIndex - 1);
+      });
+    }
+    if (next) {
+      next.addEventListener('click', function() {
+        setCard(currentIndex + 1);
+      });
+    }
   })();
   // Cookie consent
   (function() {
