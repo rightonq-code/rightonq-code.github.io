@@ -62,25 +62,55 @@ permalink: /what-is-rcs/
   .logo {
     display: flex;
     align-items: center;
-    gap: 16px;
-    color: var(--white);
     text-decoration: none;
   }
-  .logo-svg { width: 44px; height: 44px; }
+  .logo-svg { width: 44px; height: 44px; flex-shrink: 0; }
+  .logo-img {
+    width: 280px;
+    height: 62px;
+    object-fit: contain;
+    object-position: left center;
+    display: block;
+  }
   .logo-text {
     font-family: 'Syne', sans-serif;
-    font-weight: 800;
-    font-size: 21px;
-    letter-spacing: 0.12em;
+    font-weight: 700;
+    font-size: 20px;
+    color: var(--white);
+    letter-spacing: 0.06em;
   }
   .logo-text span { color: var(--blue); }
-  .nav-return {
-    color: var(--grey);
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+  .nav-links a {
+    font-family: 'DM Sans', sans-serif;
+    color: #8A9BB5;
+    font-size: 14px;
+    font-weight: 500;
     text-decoration: none;
-    font-weight: 700;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--white); }
+  nav a.cta-nav {
+    color: var(--white);
+    padding: 10px 24px;
+    border: 1px solid rgba(47, 111, 210, 0.5);
+    border-radius: 6px;
+    white-space: nowrap;
+  }
+  nav a.cta-nav:hover {
+    background: var(--blue);
+    border-color: var(--blue);
+  }
+  .nav-return {
+    color: #8A9BB5;
+    text-decoration: none;
+    font-weight: 500;
     font-size: 14px;
   }
-  .nav-return:hover { color: var(--white); }
   main {
     width: min(100%, 1180px);
     margin: 0 auto;
@@ -132,6 +162,7 @@ permalink: /what-is-rcs/
   }
   .bottom-actions {
     margin-top: 34px;
+    margin-bottom: 30px;
   }
   .btn {
     display: inline-flex;
@@ -270,6 +301,9 @@ permalink: /what-is-rcs/
     align-items: stretch;
     margin-bottom: 60px;
   }
+  .example-kicker {
+    margin-bottom: 18px;
+  }
   .sms-box,
   .rcs-box {
     background: rgba(255,255,255,0.04);
@@ -279,6 +313,9 @@ permalink: /what-is-rcs/
   }
   .sms-box { opacity: 0.82; }
   .rcs-box { border-color: rgba(103,166,255,0.28); background: rgba(52,120,216,0.08); }
+  .rcs-box > h2 {
+    color: var(--gold);
+  }
   .message-demo {
     margin-top: 22px;
     background: #101928;
@@ -545,7 +582,7 @@ permalink: /what-is-rcs/
     font-size: 13px;
     line-height: 1.7;
     border-top: 1px solid rgba(255,255,255,0.08);
-    padding-top: 22px;
+    padding-top: 26px;
   }
   .source-list {
     display: grid;
@@ -557,30 +594,65 @@ permalink: /what-is-rcs/
     text-decoration: none;
   }
   .source-list a:hover { color: var(--white); }
+  footer {
+    padding: 44px 60px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 24px;
+  }
+  .footer-logo { display: flex; align-items: center; gap: 18px; }
+  .footer-mark { width: 54px; height: 54px; object-fit: contain; flex: 0 0 auto; }
+  .footer-left { font-size: 13px; color: rgba(255,255,255,0.25); line-height: 1.8; }
+  .footer-right { font-size: 13px; color: rgba(255,255,255,0.25); line-height: 1.55; text-align: right; }
+  .footer-trade { display: block; margin-bottom: 5px; color: rgba(255,255,255,0.24); }
+  .footer-trade .tm-mark {
+    color: inherit;
+    font-size: 0.58em;
+    font-weight: 500;
+    vertical-align: super;
+    margin-left: 0.08em;
+    letter-spacing: 0;
+  }
+  .footer-right a {
+    color: #4A8AE8;
+    font-size: 13px;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .footer-right a:hover { color: var(--white); }
   @media (max-width: 900px) {
     nav { padding: 18px 24px; }
+    .logo-img { width: 220px; height: 48px; }
+    .nav-links { gap: 14px; }
     main { padding: 130px 24px 64px; }
     .explainer-grid,
     .wide,
     .good-bad-grid { grid-template-columns: 1fr; }
     .flow-diagram { grid-template-columns: 1fr; }
     .flow-arrow { transform: rotate(90deg); justify-self: center; }
+    footer { padding: 32px 24px; flex-direction: column; align-items: flex-start; }
+    .footer-right { text-align: left; }
+  }
+  @media (max-width: 640px) {
+    nav { align-items: flex-start; gap: 16px; }
+    .nav-links { flex-wrap: wrap; justify-content: flex-end; }
+    .logo-img { width: 190px; height: 42px; }
   }
 </style>
 </head>
 <body>
 <nav>
   <a href="/" class="logo">
-    <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="RightOnQ logo">
-      <rect x="8" y="18" width="84" height="76" rx="14" ry="14" fill="white"/>
-      <rect x="28" y="8" width="12" height="22" rx="6" ry="6" fill="#0B1524"/>
-      <rect x="60" y="8" width="12" height="22" rx="6" ry="6" fill="#0B1524"/>
-      <text x="50" y="42" font-family="Arial Black, sans-serif" font-weight="900" font-size="16" fill="#0B1524" text-anchor="middle" letter-spacing="1">ON</text>
-      <text x="50" y="88" font-family="Arial Black, sans-serif" font-weight="900" font-size="58" fill="#2F6FD2" text-anchor="middle">Q</text>
-    </svg>
-    <span class="logo-text">RIGHT<span>ON</span>Q<span style="font-size:0.5em;vertical-align:super;color:var(--blue);">TM</span></span>
+    <img class="logo-img" src="/images/rightonq-logo-transparent.png" onerror="this.onerror=null;this.src='images/rightonq-logo-transparent.png';" alt="RightOnQ">
   </a>
-  <a href="/" class="nav-return">Return to web page</a>
+  <div class="nav-links">
+    <a href="/">Home</a>
+    <a href="/blog/">Blog</a>
+    <a href="/#contact" class="cta-nav">Get in touch</a>
+  </div>
 </nav>
 
 <main>
@@ -596,9 +668,10 @@ permalink: /what-is-rcs/
     <p class="plain-copy">But SMS was built for a plainer world. It does not naturally carry brand identity, photography, product context or tap-to-reply choices. For sales, marketing and customer outreach teams competing with visual channels such as social media and email, that leaves a gap. RCS fills that gap by bringing richer presentation and clearer response paths into the same message screen.</p>
   </section>
 
-  <section class="wide" aria-label="SMS and RCS comparison">
+  <div class="section-kicker example-kicker">RCS carousel examples</div>
+  <section class="wide" aria-label="RCS carousel examples">
     <div class="rcs-box">
-      <h2>RCS carousel example.</h2>
+      <h2>Luxury motor outreach example.</h2>
       <p>Your business can show its name, logo and verified sender identity, then send rich cards with images and buttons the recipient can tap.</p>
       <div class="message-demo" aria-label="Example RCS carousel message">
         <div class="brand-row">
@@ -727,13 +800,22 @@ permalink: /what-is-rcs/
       </ul>
     </div>
     <div class="card">
-      <h2>What RCS adds</h2>
+      <h2>What RCS brings in</h2>
       <ul>
         <li>Verified business name, logo and sender profile.</li>
         <li>Photos, rich cards, carousels and longer messages.</li>
         <li>Buttons for actions such as book, call, more information or not interested.</li>
         <li>One campaign can give recipients clear next steps, from viewing more detail to booking a call or saying not interested.</li>
         <li>Delivery and response signals that help with follow-up.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2>Return on message spend</h2>
+      <ul>
+        <li>RCS costs more than basic SMS, so it suits messages where the outcome matters.</li>
+        <li>The gain is stronger brand presence, richer context and a clearer reason to respond.</li>
+        <li>One-tap replies reduce friction for people who are busy but interested.</li>
+        <li>Best used for launches, appointments, premium offers, relationship updates and buyer follow-up.</li>
       </ul>
     </div>
   </section>
@@ -760,11 +842,15 @@ permalink: /what-is-rcs/
   </section>
 
   <section class="plain-section">
-    <div class="section-kicker">The plain answer</div>
-    <h2>RCS is worth looking at when trust and context <em>matter.</em></h2>
+    <div class="section-kicker">The simple answer</div>
+    <h2>RCS is worth looking at when trust and presentation <em>matter.</em></h2>
     <p class="plain-copy">If you only need to send the cheapest possible line of text, SMS still has a place. If the message carries brand value, product detail, appointment intent, customer choice or a reason to act, RCS gives you more to work with.</p>
-    <p class="plain-copy">The sensible view is not “RCS replaces SMS tomorrow.” It is “RCS first where supported, SMS fallback where needed.” That is the practical route for UK businesses today.</p>
+    <p class="plain-copy">The best use of RCS is not every message. It is the messages where presentation, trust and a clear response can change what happens next.</p>
   </section>
+
+  <div class="bottom-actions">
+    <a href="/" class="btn btn-primary">Return to homepage</a>
+  </div>
 
   <div class="footer-note">
     This guide is based on public guidance from Twilio, Google, Apple and the GSMA, simplified for RightOnQ customers. Final behaviour can vary by country, carrier, device support, RCS registration status and fallback configuration.
@@ -772,14 +858,31 @@ permalink: /what-is-rcs/
       <a href="https://www.twilio.com/docs/rcs/send-an-rcs-message" target="_blank" rel="noopener">Twilio: Send and receive RCS messages</a>
       <a href="https://developers.google.com/business-communications/rcs-business-messaging/guides/learn/rich-cards" target="_blank" rel="noopener">Google: RCS rich cards</a>
       <a href="https://support.apple.com/en-us/122195" target="_blank" rel="noopener">Apple: RCS messaging on iPhone</a>
-      <a href="https://www.gsma.com/solutions-and-impact/technologies/networks/gsma_resources/rcs-research-study-2018/" target="_blank" rel="noopener">GSMA/OpenMarket: RCS Business Messaging research</a>
-    </div>
-    <div class="bottom-actions">
-      <a href="/" class="btn btn-primary">Return to web page</a>
+      <a href="https://www.openmarket.com/blog/why-use-rcs-here-are-five-reasons-to-start/" target="_blank" rel="noopener">OpenMarket/GSMA: RCS Business Messaging research</a>
     </div>
   </div>
 </main>
+<footer>
+  <div class="footer-logo">
+    <img class="footer-mark" src="/images/rightonq-calendar-mark-transparent.png" onerror="this.onerror=null;this.src='images/rightonq-calendar-mark-transparent.png';" alt="RightOnQ calendar mark">
+    <div class="footer-left">
+      © <span id="footer-year">2026</span> Continuity AI Ltd. Registered in England &amp; Wales.<br>
+      Companies House No. 17119848
+    </div>
+  </div>
+  <div class="footer-right">
+    <span class="footer-trade">RightOnQ<span class="tm-mark">TM</span> is a trading name of Continuity AI Ltd.</span>
+    <a href="/">Home</a>
+    &nbsp;·&nbsp;
+    <a href="/blog/">Blog</a> &nbsp;·&nbsp;
+    <a href="/privacy/">Privacy Policy</a>
+    &nbsp;·&nbsp;
+    <a href="/terms/">Terms &amp; Conditions</a>
+  </div>
+</footer>
 <script>
+  document.getElementById('footer-year').textContent = new Date().getFullYear();
+
   (function () {
     function initCarousel(trackId, prevId, nextId, dotsId) {
       const track = document.getElementById(trackId);
