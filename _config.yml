@@ -15,6 +15,9 @@ exclude:
   - Gemfile
   - Gemfile.lock
   - RightOnQ_Web_Handover_2026-05-01.txt
+  - WEB2_HANDOVER_2026-05-04.md
+  - index.recovered-from-codex-log.html
+  - recovery-backups
   - vendor
 
 keep_files:
