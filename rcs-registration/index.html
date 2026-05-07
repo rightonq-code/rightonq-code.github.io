@@ -545,6 +545,87 @@
       line-height: 1.35;
     }
 
+    .storyboard-flow {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 16px;
+      margin-top: 22px;
+    }
+
+    .story-step {
+      position: relative;
+      border: 1px solid #d9e4f0;
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: 0 18px 38px rgba(16, 35, 56, 0.08);
+      padding: 18px;
+      min-height: 190px;
+    }
+
+    .story-step::after {
+      content: "→";
+      position: absolute;
+      top: 50%;
+      right: -15px;
+      transform: translateY(-50%);
+      color: #3f8cff;
+      font-size: 1.7rem;
+      font-weight: 900;
+    }
+
+    .story-step:last-child::after {
+      content: "";
+    }
+
+    .story-step.edit-loop::after {
+      content: "↺";
+      color: var(--gold);
+    }
+
+    .story-index {
+      display: inline-grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      margin-bottom: 12px;
+      border-radius: 50%;
+      background: #e8f2ff;
+      color: #18416f;
+      font-weight: 900;
+    }
+
+    .story-step h3 {
+      margin-bottom: 8px;
+      color: var(--field-text);
+      font-size: 1rem;
+    }
+
+    .story-step p {
+      color: var(--soft-text);
+      font-size: 0.9rem;
+      line-height: 1.42;
+    }
+
+    .story-step.success {
+      border-color: rgba(54, 191, 126, 0.45);
+      background: #f3fbf7;
+    }
+
+    .story-step.warning {
+      border-color: rgba(214, 182, 90, 0.5);
+      background: #fffaf0;
+    }
+
+    .storyboard-note {
+      margin-top: 18px;
+      border: 1px solid #d9e4f0;
+      border-radius: 8px;
+      background: #fff;
+      padding: 18px;
+      color: var(--soft-text);
+      line-height: 1.5;
+    }
+
     .video-frame {
       display: grid;
       place-items: center;
@@ -1332,6 +1413,26 @@
 
       .part-b-support-grid {
         grid-template-columns: 1fr;
+      }
+
+      .storyboard-flow {
+        grid-template-columns: 1fr;
+      }
+
+      .story-step::after {
+        content: "↓";
+        top: auto;
+        right: 50%;
+        bottom: -20px;
+        transform: translateX(50%);
+      }
+
+      .story-step.edit-loop::after {
+        content: "↺";
+      }
+
+      .story-step:last-child::after {
+        content: "";
       }
     }
 
@@ -2125,26 +2226,32 @@
     const progressSaveEnabled = true;
     const partBPreviewContent = {
       prepare: {
-        title: "Video preparation layout",
-        body: "RightOnQ uses the approved Part A details to prepare a review video that shows the RCS sender, the message experience, and how people can stop messages.",
-        workspaceTitle: "Part B video preparation",
-        workspaceIntro: "This is the internal preparation screen RightOnQ would use after Part A has been checked. It pulls together the approved sender details, brand assets, message examples, permission route, and STOP handling before the review video is made.",
-        stageTitle: "Review video player",
-        stageBody: "This is where the client will watch the review video. The video should show who the sender is, what the recipient sees, why messages are being sent, and how the recipient can opt out.",
+        title: "Part B storyboard",
+        body: "A simple map of what happens after Part A has been checked: RightOnQ prepares the video, the client reviews it, edits are handled if needed, and the registration is submitted.",
+        workspaceTitle: "Part B storyboard",
+        workspaceIntro: "This is the full Part B journey at a glance. Part B starts only after RightOnQ has checked Part A and agreed the written registration details are ready to support a review video.",
+        storyboard: [
+          ["Part A accepted", "The written details are checked and ready to support the video."],
+          ["Video prepared", "RightOnQ builds the video from the approved sender details and examples."],
+          ["Video sent to client", "The client receives a secure review page and checklist."],
+          ["Client decision", "The client approves the video or asks for edits."],
+          ["Submit registration", "The approved video URL goes into the registration pack."]
+        ],
+        storyboardNote: "If corrections are needed, the video loops back to RightOnQ for editing before the client approves it. Submission only happens after the client has approved the Part B video.",
         items: [
-          "Logo, banner and sender name shown clearly",
-          "Example RCS messages based on the approved use case",
-          "Permission route and STOP handling included",
-          "Accessible review video link prepared"
+          "Part A is checked before video work starts",
+          "Video is built from approved client information",
+          "Client reviews and either approves or requests edits",
+          "Submission happens only after video approval"
         ],
         cards: [
           {
-            title: "What RightOnQ checks first",
-            items: ["Brand name matches the public sender identity", "Message examples match the approved use case", "Opt-in and STOP wording are clear"]
+            title: "Why this order matters",
+            items: ["It avoids making a video from incorrect details", "It gives the client a clear review point", "It keeps submission separate from client approval"]
           },
           {
-            title: "Output from this stage",
-            items: ["Draft video script", "Visual sender mockup", "Private review video ready for the client"]
+            title: "What comes next",
+            items: ["Step 2 shows the client review checklist", "Step 3 shows approval", "Step 4 shows submission tracking"]
           }
         ]
       },
@@ -2353,6 +2460,7 @@
       const checklist = content.checklistItems || [];
       form.hidden = true;
       partBWorkspace.hidden = false;
+      const mainContent = content.storyboard ? renderPartBStoryboard(content) : renderPartBVisualWorkspace(content);
       partBWorkspace.innerHTML = `
         <p class="step-kicker">Part B preview</p>
         <div class="part-b-workspace-head">
@@ -2362,43 +2470,7 @@
           </div>
           <span class="preview-pill">Preview only</span>
         </div>
-        <div class="part-b-board">
-          <div class="part-b-stage">
-            <h3>${content.stageTitle}</h3>
-            <p>${content.stageBody}</p>
-            <div class="video-frame">
-              <div>
-                <strong>${content.stageTitle}</strong>
-                <span>${content.stageBody}</span>
-              </div>
-            </div>
-          </div>
-          <div class="part-b-stage">
-            <h3>Example RCS sender</h3>
-            <p>This example is copied from the RightOnQ RCS guide so the preview feels like a real branded message, not an admin placeholder.</p>
-            <div class="phone-demo" aria-label="Example RCS message preview">
-              <div class="phone-demo-header">
-                <span class="phone-demo-header-main">Hometown Brewery <span class="verified-dot">✓</span></span>
-                <small>Verified business sender</small>
-              </div>
-              <div class="phone-demo-body">
-                <div class="rcs-rich-card">
-                  <div class="rcs-card-image" role="img" aria-label="Open Harvest bottled ale"></div>
-                  <div class="rcs-card-body">
-                    <h4>Open Harvest</h4>
-                    <p>A traditional bottled ale for pubs, farm shops and independent retailers looking for a fresh seasonal line.</p>
-                    <div class="rcs-chip-row" aria-label="Example reply buttons">
-                      <span class="rcs-chip">Send sample case</span>
-                      <span class="rcs-chip">Arrange a visit</span>
-                      <span class="rcs-chip">Not for us</span>
-                    </div>
-                  </div>
-                </div>
-                <div class="opt-out-line">Reply STOP to opt out.</div>
-              </div>
-            </div>
-          </div>
-        </div>
+        ${mainContent}
         <div class="part-b-support-grid">
           ${checklist.length ? `
             <div class="part-b-card">
@@ -2439,6 +2511,63 @@
       `;
       document.getElementById("returnToPartAButton").addEventListener("click", showPartAWorkspace);
       document.querySelector(".workflow").scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function renderPartBStoryboard(content) {
+      return `
+        <div class="storyboard-flow" aria-label="Part B storyboard">
+          ${content.storyboard.map((step, index) => `
+            <div class="story-step ${index === 3 ? "edit-loop warning" : ""} ${index === content.storyboard.length - 1 ? "success" : ""}">
+              <span class="story-index">${index + 1}</span>
+              <h3>${step[0]}</h3>
+              <p>${step[1]}</p>
+            </div>
+          `).join("")}
+        </div>
+        <div class="storyboard-note">${content.storyboardNote}</div>
+      `;
+    }
+
+    function renderPartBVisualWorkspace(content) {
+      return `
+        <div class="part-b-board">
+          <div class="part-b-stage">
+            <h3>${content.stageTitle}</h3>
+            <p>${content.stageBody}</p>
+            <div class="video-frame">
+              <div>
+                <strong>${content.stageTitle}</strong>
+                <span>${content.stageBody}</span>
+              </div>
+            </div>
+          </div>
+          <div class="part-b-stage">
+            <h3>Example RCS sender</h3>
+            <p>This example is copied from the RightOnQ RCS guide so the preview feels like a real branded message, not an admin placeholder.</p>
+            <div class="phone-demo" aria-label="Example RCS message preview">
+              <div class="phone-demo-header">
+                <span class="phone-demo-header-main">Hometown Brewery <span class="verified-dot">✓</span></span>
+                <small>Verified business sender</small>
+              </div>
+              <div class="phone-demo-body">
+                <div class="rcs-rich-card">
+                  <div class="rcs-card-image" role="img" aria-label="Open Harvest bottled ale"></div>
+                  <div class="rcs-card-body">
+                    <h4>Open Harvest</h4>
+                    <p>A traditional bottled ale for pubs, farm shops and independent retailers looking for a fresh seasonal line.</p>
+                    <div class="rcs-chip-row" aria-label="Example reply buttons">
+                      <span class="rcs-chip">Send sample case</span>
+                      <span class="rcs-chip">Arrange a visit</span>
+                      <span class="rcs-chip">Not for us</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="opt-out-line">Reply STOP to opt out.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
     }
 
     function showPartAWorkspace() {
