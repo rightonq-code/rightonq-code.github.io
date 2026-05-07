@@ -2488,8 +2488,8 @@
               <p class="video-status" id="recordingStatus">Complete the form, then generate the registration demo video.</p>
             </div>
             <div class="completion-panel" id="completionPanel" aria-live="polite">
-              <h3>Thank you. Part A has been sent to RightOnQ.</h3>
-              <p>Your copy has been saved. RightOnQ will check the written registration details first. Once Part A has been reviewed, we will prepare Part B, the review video, and send you a secure login so you can check and approve it. Select <span class="completion-step-link"><span class="future-step-index">1</span> Part B storyboard</span> to see the next stage.</p>
+              <h3 id="completionTitle">Thank you. Part A has been received by RightOnQ.</h3>
+              <p id="completionMessage">Your copy has been saved. RightOnQ will check the written registration details first. Once Part A has been reviewed, we will prepare Part B, the review video, and send you a secure review link so you can check and approve it. Select <span class="completion-step-link"><span class="future-step-index">1</span> Part B storyboard</span> to see the next stage.</p>
             </div>
           </section>
 
@@ -2618,6 +2618,8 @@
     const reviewShell = document.getElementById("reviewShell");
     const toast = document.getElementById("toast");
     const completionPanel = document.getElementById("completionPanel");
+    const completionTitle = document.getElementById("completionTitle");
+    const completionMessage = document.getElementById("completionMessage");
     const demoCanvas = document.getElementById("demoCanvas");
     const demoContext = demoCanvas.getContext("2d");
     const recordingStatus = document.getElementById("recordingStatus");
@@ -2656,6 +2658,7 @@
     let restoringProgress = false;
     const autosaveKey = "rightonq-rcs-registration-progress-v1";
     const progressSaveEnabled = true;
+    const partASubmissionEndpoint = "";
     const partBPreviewContent = {
       prepare: {
         title: "Part B storyboard",
@@ -4585,16 +4588,60 @@
       showToast("Part A file prepared for RightOnQ.");
     }
 
-    function submitPartA() {
+    async function submitPartA() {
       if (!validateAllSteps()) return;
-      downloadPartAFile();
-      completionPanel.classList.add("show");
-      completionPanel.scrollIntoView({ behavior: "smooth", block: "center" });
-      showToast("Thank you. Part A is on its way to RightOnQ.");
+      const data = collectData();
+      data.submissionId = generateSubmissionId(data);
+      data.submittedAt = new Date().toISOString();
+      const sent = await sendPartAToRightOnQ(data);
+      downloadPartAFile(data);
+      showCompletionMessage(sent, data.submissionId);
     }
 
-    function downloadPartAFile() {
-      const data = collectData();
+    async function sendPartAToRightOnQ(data) {
+      if (!partASubmissionEndpoint) return false;
+      submitPartAButton.disabled = true;
+      submitPartAButton.textContent = "SENDING...";
+      try {
+        const response = await fetch(partASubmissionEndpoint, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify(data)
+        });
+        if (!response.ok) return false;
+        const result = await response.json().catch(() => ({}));
+        return result.ok !== false;
+      } catch (error) {
+        return false;
+      } finally {
+        submitPartAButton.disabled = false;
+        submitPartAButton.textContent = "SEND to RightOnQ";
+      }
+    }
+
+    function showCompletionMessage(sent, submissionId) {
+      if (sent) {
+        completionTitle.textContent = "Thank you. Part A has been received by RightOnQ.";
+        completionMessage.innerHTML = `Your copy has been saved. Your reference is <strong>${escapeHtml(submissionId)}</strong>. RightOnQ will check the written registration details first. Once Part A has been reviewed, we will prepare Part B, the review video, and send you a secure review link so you can check and approve it. Select <span class="completion-step-link"><span class="future-step-index">1</span> Part B storyboard</span> to see the next stage.`;
+        showToast("Thank you. Part A has been received by RightOnQ.");
+      } else {
+        completionTitle.textContent = "Your Part A copy has been saved.";
+        completionMessage.innerHTML = `We could not send this automatically yet. Your reference is <strong>${escapeHtml(submissionId)}</strong>. Please email the saved Part A file to adam@rightonq.co.uk so RightOnQ can review it.`;
+        showToast("Part A copy saved. Please email it to RightOnQ.");
+      }
+      completionPanel.classList.add("show");
+      completionPanel.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+
+    function generateSubmissionId(data) {
+      const date = new Date();
+      const stamp = date.toISOString().slice(0, 10).replace(/-/g, "");
+      const time = date.toTimeString().slice(0, 5).replace(":", "");
+      const brand = slugify(data.displayName || data.tradingName || data.legalBusinessName || "client").slice(0, 18).toUpperCase();
+      return `RCS-${stamp}-${time}-${brand || "CLIENT"}`;
+    }
+
+    function downloadPartAFile(data = collectData()) {
       const filenameBase = slugify(data.displayName || data.legalBusinessName || "rcs-sender");
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
       const url = URL.createObjectURL(blob);
