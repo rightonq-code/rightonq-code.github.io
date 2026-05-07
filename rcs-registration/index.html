@@ -622,7 +622,7 @@
       display: grid;
       grid-template-columns: minmax(0, 0.95fr) minmax(280px, 0.55fr);
       gap: 18px;
-      margin: 0 0 22px;
+      margin: 18px 0 22px;
     }
 
     .pack-card {
@@ -630,6 +630,10 @@
       border-radius: 8px;
       background: #fff;
       padding: 18px;
+    }
+
+    .pack-card.full {
+      grid-column: 1 / -1;
     }
 
     .pack-card h3 {
@@ -956,7 +960,7 @@
         min-height: 0;
       }
 
-      .step:not([data-step="7"]) {
+      .step:not([data-step="6"]) {
         display: none !important;
       }
 
@@ -1381,7 +1385,18 @@
 
           <section class="step" data-step="6">
             <p class="step-kicker">Step 7</p>
-            <h2 class="step-title">Declaration and sign-off</h2>
+            <h2 class="step-title">Registration pack: Part A</h2>
+            <div class="pack-grid">
+              <article class="pack-card full">
+                <p>Review the answers below. When you are happy, continue to sign off Part A so RightOnQ can check the written registration details before preparing Part B, the review video.</p>
+              </article>
+            </div>
+            <div class="review-shell" id="reviewShell"></div>
+          </section>
+
+          <section class="step" data-step="7">
+            <p class="step-kicker">Step 8</p>
+            <h2 class="step-title">Sign off and send Part A</h2>
             <p class="step-intro">A named person should confirm the information is correct and authorised for registration.</p>
             <div class="section-note">This completes Part A. RightOnQ will check the written registration details first, then prepare the review video as Part B once the information is approved.</div>
             <div class="grid">
@@ -1413,26 +1428,6 @@
                 <input id="signoffDate" name="signoffDate" type="date" required>
               </div>
             </div>
-          </section>
-
-          <section class="step" data-step="7">
-            <p class="step-kicker">Step 8</p>
-            <h2 class="step-title">Registration pack</h2>
-            <p class="step-intro">Review the Part A summary and save a copy for RightOnQ to check before the video stage begins.</p>
-            <div class="pack-grid">
-              <article class="pack-card">
-                <h3>Part A registration details</h3>
-                <p>A client-specific registration pack: business data, sender profile details, permission notes, sample messages, validated asset filenames, and sign-off.</p>
-              </article>
-              <article class="pack-card">
-                <h3>RightOnQ admin file</h3>
-                <p>This is for RightOnQ only. It downloads the completed answers in a format we can import or copy into the provider registration.</p>
-              </article>
-              <article class="pack-card">
-                <h3>Part B review video</h3>
-                <p>RightOnQ will prepare the review video separately after the written registration details have been checked and approved.</p>
-              </article>
-            </div>
             <div class="video-studio" aria-labelledby="videoStudioTitle" hidden>
               <div class="video-studio-head">
                 <div>
@@ -1458,7 +1453,6 @@
               </div>
               <p class="video-status" id="recordingStatus">Complete the form, then generate the registration demo video.</p>
             </div>
-            <div class="review-shell" id="reviewShell"></div>
           </section>
 
           <div class="action-bar">
@@ -1466,7 +1460,7 @@
             <div class="button-row">
               <button type="button" class="btn secondary" id="backButton">Previous step</button>
               <button type="button" class="btn primary" id="nextButton">Next step</button>
-              <button type="button" class="btn secondary" id="jsonButton" hidden>RightOnQ admin file</button>
+              <button type="button" class="btn secondary" id="jsonButton" hidden>Prepare Part A file</button>
               <button type="button" class="btn secondary" id="recordVideoNavButton" hidden>Generate video</button>
               <button type="button" class="btn primary" id="printButton" hidden>Save PDF copy</button>
             </div>
@@ -1486,8 +1480,8 @@
       "Use case",
       "How people agree",
       "UK launch scope",
-      "Sign-off",
-      "Review"
+      "Review",
+      "Sign-off"
     ];
 
     const schema = [
@@ -1565,16 +1559,6 @@
           ["UK-only confirmation", "ukLaunchConfirmation"],
           ["Approximate monthly website visitors", "organicTraffic"],
           ["Existing text messaging", "existingSmsTraffic"]
-        ]
-      },
-      {
-        title: "Declaration and sign-off",
-        fields: [
-          ["Accuracy declaration", "accuracyDeclaration"],
-          ["RightOnQ submission authorisation", "agencySubmissionDeclaration"],
-          ["Authorised signatory name", "signatoryName"],
-          ["Job title", "signatoryTitle"],
-          ["Date", "signoffDate"]
         ]
       }
     ];
@@ -2222,6 +2206,7 @@
     }
 
     function showStep(index) {
+      const reviewStepIndex = steps.length - 2;
       currentStep = index;
       stepNodes.forEach((step, stepIndex) => step.classList.toggle("active", stepIndex === index));
       Array.from(document.querySelectorAll(".step-tab")).forEach((tab, tabIndex) => {
@@ -2236,9 +2221,9 @@
       nextButton.hidden = index === steps.length - 1;
       jsonButton.hidden = index !== steps.length - 1;
       recordVideoNavButton.hidden = true;
-      printButton.hidden = index !== steps.length - 1;
+      printButton.hidden = index !== reviewStepIndex;
 
-      if (index === steps.length - 1) {
+      if (index === reviewStepIndex) {
         renderReview();
         drawVideoPoster();
       }
@@ -3139,7 +3124,7 @@
       link.click();
       link.remove();
       URL.revokeObjectURL(url);
-      showToast("RightOnQ admin file downloaded.");
+      showToast("Part A file prepared for RightOnQ.");
     }
 
     function resetForm() {
