@@ -354,7 +354,7 @@
       justify-content: space-between;
       gap: 18px;
       align-items: flex-start;
-      margin-bottom: 26px;
+      margin-bottom: 18px;
     }
 
     .part-b-workspace h2 {
@@ -391,6 +391,149 @@
     .part-b-board.review-layout {
       grid-template-columns: minmax(0, 1fr) minmax(320px, 0.95fr);
       align-items: stretch;
+    }
+
+    .part-b-board.submitted-layout {
+      grid-template-columns: minmax(0, 0.95fr) minmax(320px, 0.9fr);
+    }
+
+    .submitted-hero {
+      display: grid;
+      gap: 10px;
+    }
+
+    .submitted-hero h3 {
+      margin-bottom: 2px;
+    }
+
+    .submitted-hero > p {
+      margin: 0;
+      color: #40546d;
+      font-size: 0.96rem;
+      line-height: 1.42;
+    }
+
+    .submitted-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      width: fit-content;
+      border-radius: 999px;
+      background: #eaf7f0;
+      color: #0b5d3c;
+      padding: 6px 10px;
+      font-size: 0.78rem;
+      font-weight: 900;
+    }
+
+    .submitted-status span {
+      display: inline-grid;
+      place-items: center;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--green);
+      color: #fff;
+      font-size: 0.72rem;
+      line-height: 1;
+    }
+
+    .submitted-timeline {
+      display: grid;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .submitted-timeline-item {
+      display: grid;
+      grid-template-columns: 34px minmax(0, 1fr);
+      gap: 12px;
+      align-items: start;
+      border: 1px solid #d9e4f0;
+      border-radius: 8px;
+      background: #f8fbff;
+      padding: 14px;
+    }
+
+    .submitted-timeline-index {
+      display: grid;
+      place-items: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: #e8f2ff;
+      color: #18416f;
+      font-size: 0.78rem;
+      font-weight: 900;
+    }
+
+    .submitted-timeline-item strong {
+      display: block;
+      margin-bottom: 3px;
+      color: var(--field-text);
+    }
+
+    .submitted-timeline-item p {
+      margin: 0;
+      color: var(--soft-text);
+      line-height: 1.4;
+    }
+
+    .submitted-payoff {
+      display: grid;
+      gap: 14px;
+    }
+
+    .submitted-payoff.part-b-stage {
+      background: #172943;
+      border-color: #284262;
+    }
+
+    .submitted-payoff h3 {
+      color: #d6b65a;
+      font-size: 1.45rem;
+    }
+
+    .submitted-payoff > p {
+      margin-top: -8px;
+      color: #f7fbff;
+      font-size: 1rem;
+      line-height: 1.35;
+    }
+
+    .submitted-contact {
+      border: 1px solid #d9e4f0;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #eef6ff 0%, #ffffff 55%, #f8fbff 100%);
+      padding: 12px;
+      color: #40546d;
+      line-height: 1.35;
+    }
+
+    .submitted-contact strong {
+      display: block;
+      margin-bottom: 3px;
+      color: var(--field-text);
+      font-size: 0.98rem;
+    }
+
+    .submitted-contact-brand {
+      display: grid;
+      place-items: center;
+      margin: 0 0 10px;
+      border: 1px solid #d6e5f5;
+      border-radius: 8px;
+      background: #e8f1fb;
+      overflow: hidden;
+      height: 92px;
+    }
+
+    .submitted-contact-brand img {
+      width: 100%;
+      height: 92px;
+      display: block;
+      object-fit: cover;
+      object-position: center;
     }
 
     .part-b-support-grid {
@@ -506,8 +649,9 @@
 
     .part-b-check {
       display: grid;
-      grid-template-columns: 34px 28px minmax(0, 1fr);
-      gap: 12px;
+      grid-template-columns: 30px 28px minmax(0, 1fr);
+      column-gap: 12px;
+      row-gap: 10px;
       align-items: center;
       border: 1px solid #dbe6f2;
       border-radius: 8px;
@@ -516,10 +660,12 @@
     }
 
     .part-b-check-number {
-      display: inline-grid;
+      display: grid;
       place-items: center;
-      width: 26px;
-      height: 26px;
+      justify-self: stretch;
+      align-self: center;
+      width: 30px;
+      height: 30px;
       border-radius: 50%;
       background: #e8f2ff;
       color: #18416f;
@@ -538,10 +684,12 @@
       accent-color: var(--green);
     }
 
-    .part-b-check span {
+    .part-b-check-text {
+      grid-column: 3;
       display: block;
       color: var(--field-text);
       font-weight: 800;
+      min-width: 0;
     }
 
     .part-b-check small {
@@ -693,6 +841,12 @@
       overflow: hidden;
     }
 
+    .phone-demo.dark {
+      background: #111923;
+      border-color: #0a1018;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.34);
+    }
+
     .phone-demo-header {
       background: #1b3554;
       color: #fff;
@@ -704,6 +858,20 @@
       display: flex;
       align-items: center;
       gap: 7px;
+    }
+
+    .brewery-avatar {
+      display: inline-grid;
+      place-items: center;
+      width: 38px;
+      height: 38px;
+      margin-right: 8px;
+      border: 1px solid #d6b65a;
+      border-radius: 50%;
+      color: #d6b65a;
+      font-size: 0.82rem;
+      font-weight: 900;
+      letter-spacing: 0.04em;
     }
 
     .verified-dot {
@@ -757,11 +925,28 @@
       box-shadow: 0 10px 22px rgba(16, 35, 56, 0.08);
     }
 
-    .rcs-card-image {
+    .phone-demo.dark .rcs-rich-card {
+      border-color: rgba(255, 255, 255, 0.09);
+      background: #202a36;
+      color: #f7fbff;
+      box-shadow: none;
+    }
+
+    .rcs-card-image,
+    .submitted-carousel-image {
       height: 145px;
-      background-image: url("../images/hometown-brewery-open-harvest.png");
       background-position: center 52%;
       background-size: cover;
+    }
+
+    .rcs-card-image {
+      background-image: url("../images/hometown-brewery-open-harvest.png");
+    }
+
+    .submitted-carousel-image {
+      display: block;
+      width: 100%;
+      object-fit: cover;
     }
 
     .rcs-card-body {
@@ -776,11 +961,21 @@
       font-size: 1rem;
     }
 
+    .phone-demo.dark .rcs-card-body h4 {
+      color: #f7fbff;
+      font-size: 1.05rem;
+    }
+
     .rcs-card-body p {
       margin: 0;
       color: var(--soft-text);
       font-size: 0.84rem;
       line-height: 1.35;
+    }
+
+    .phone-demo.dark .rcs-card-body p {
+      color: rgba(247, 251, 255, 0.78);
+      font-size: 0.88rem;
     }
 
     .rcs-chip-row {
@@ -790,6 +985,11 @@
       margin-top: 2px;
     }
 
+    .phone-demo.dark .rcs-chip-row {
+      display: grid;
+      gap: 8px;
+    }
+
     .rcs-chip {
       border-radius: 999px;
       background: #e9f3ff;
@@ -797,6 +997,61 @@
       padding: 7px 9px;
       font-size: 0.72rem;
       font-weight: 800;
+    }
+
+    .phone-demo.dark .rcs-chip {
+      border: 1px solid #d6b65a;
+      background: transparent;
+      color: #f0d881;
+      font-size: 0.78rem;
+      text-align: center;
+    }
+
+    .phone-demo.dark .rcs-chip.secondary {
+      border-color: #5e8fd1;
+      color: #c7dbf6;
+    }
+
+    .submitted-carousel-controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 2px;
+    }
+
+    .submitted-carousel-button {
+      display: inline-grid;
+      place-items: center;
+      width: 30px;
+      height: 30px;
+      border: 1px solid #3d6fae;
+      border-radius: 50%;
+      background: #173155;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .submitted-carousel-dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .submitted-carousel-dots button {
+      width: 7px;
+      height: 7px;
+      border: 0;
+      border-radius: 999px;
+      background: rgba(247, 251, 255, 0.28);
+      padding: 0;
+      cursor: pointer;
+    }
+
+    .submitted-carousel-dots button.active {
+      width: 18px;
+      background: #67a6ff;
     }
 
     .opt-out-line {
@@ -1016,6 +1271,40 @@
       flex: 0 0 auto;
     }
 
+    .choice-detail {
+      display: block;
+      margin-top: 4px;
+      color: #63758c;
+      font-size: 0.78rem;
+      font-weight: 600;
+      line-height: 1.35;
+    }
+
+    .choice-cost {
+      display: block;
+      margin-top: 6px;
+      color: #27415f;
+      font-size: 0.78rem;
+      font-weight: 800;
+      line-height: 1.35;
+    }
+
+    .choice-cost.warning {
+      color: #8a4d00;
+    }
+
+    .cost-note {
+      margin-top: 14px;
+      padding: 14px;
+      border: 1px solid #f0c36d;
+      border-radius: 8px;
+      background: #fff8e6;
+      color: #533607;
+      font-size: 0.9rem;
+      font-weight: 700;
+      line-height: 1.5;
+    }
+
     .radio-grid {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1135,11 +1424,33 @@
       overflow: hidden;
     }
 
-    .review-card h3 {
+    .review-card-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
       padding: 16px 18px;
       background: #10223a;
       color: #fff;
+    }
+
+    .review-card h3 {
+      margin: 0;
       font-size: 1.05rem;
+    }
+
+    .review-edit {
+      min-height: 34px;
+      border-color: rgba(255, 255, 255, 0.36);
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      padding: 7px 12px;
+      white-space: nowrap;
+    }
+
+    .review-edit:hover {
+      border-color: #fff;
+      background: rgba(255, 255, 255, 0.18);
     }
 
     .review-table {
@@ -1215,6 +1526,20 @@
     .completion-panel p {
       margin: 0;
       color: #516276;
+    }
+
+    .completion-step-link {
+      color: inherit;
+      font-weight: inherit;
+    }
+
+    .completion-step-link .future-step-index {
+      width: 22px;
+      height: 22px;
+      background: rgba(63, 140, 255, 0.1);
+      color: #20364f;
+      font-size: 0.7rem;
+      font-weight: 700;
     }
 
     .video-studio {
@@ -1978,20 +2303,96 @@
 
           <section class="step" data-step="5">
             <p class="step-kicker">Step 6</p>
-            <h2 class="step-title">UK launch scope</h2>
-            <p class="step-intro">RightOnQ is currently preparing RCS sender registrations for UK companies sending to UK recipients only.</p>
+            <h2 class="step-title">RCS launch markets</h2>
+            <p class="step-intro">RightOnQ is currently preparing RCS sender registrations for UK-registered companies. Choose the countries where your business expects to send RCS messages.</p>
             <div class="grid">
-              <div class="field full">
-                <span class="group-label">Accepted launch region <span class="required">*</span></span>
-                <p class="helper">This application will be prepared for UK launch only. Other regions are not accepted in this intake.</p>
-                <div class="choice-grid">
-                  <label class="choice"><input type="checkbox" name="ukLaunchConfirmation" id="ukLaunchConfirmation" required> I confirm this is a UK company applying for UK RCS launch.</label>
+              <div class="field full" data-checkbox-required="regions">
+                <span class="group-label">Destination countries for your RCS messages <span class="required">*</span></span>
+                <p class="helper">Choose every destination country that matters at launch. The application cost note shown here is about sender registration/onboarding only, not message usage charges.</p>
+                <div class="choice-grid three">
+                  <label class="choice">
+                    <input type="checkbox" name="regions" value="United Kingdom" checked>
+                    <span>United Kingdom<span class="choice-detail">UK recipient numbers.</span><span class="choice-cost">No known RCS sender onboarding fee.</span></span>
+                  </label>
+                  <label class="choice">
+                    <input type="checkbox" name="regions" value="Austria">
+                    <span>Austria<span class="choice-cost">No known RCS sender onboarding fee.</span></span>
+                  </label>
+                  <label class="choice">
+                    <input type="checkbox" name="regions" value="Belgium">
+                    <span>Belgium<span class="choice-cost">No known RCS sender onboarding fee.</span></span>
+                  </label>
+                  <label class="choice">
+                    <input type="checkbox" name="regions" value="Czech Republic">
+                    <span>Czech Republic<span class="choice-cost">No known RCS sender onboarding fee.</span></span>
+                  </label>
+                  <label class="choice">
+                    <input type="checkbox" name="regions" value="Denmark">
+                    <span>Denmark<span class="choice-cost">No known RCS sender onboarding fee.</span></span>
+                  </label>
+                  <label class="choice">
+                    <input type="checkbox" name="regions" value="Finland / Aland Islands">
+                    <span>Finland / Aland Islands<span class="choice-cost">No known RCS sender onboarding fee.</span></span>
+                  </label>
+                  <label class="choice">
+                    <input type="checkbox" name="regions" value="France">
+                    <span>France<span class="choice-cost">No known RCS sender onboarding fee.</span></span>
+                  </label>
+                  <label class="choice">
+                    <input type="checkbox" name="regions" value="Germany">
+                    <span>Germany<span class="choice-cost">No known RCS sender onboarding fee.</span></span>
+                  </label>
+                  <label class="choice">
+                    <input type="checkbox" name="regions" value="Ireland">
+                    <span>Ireland<span class="choice-cost">No known RCS sender onboarding fee.</span></span>
+                  </label>
+                  <label class="choice">
+                    <input type="checkbox" name="regions" value="Italy">
+                    <span>Italy<span class="choice-cost">No known RCS sender onboarding fee.</span></span>
+                  </label>
+                  <label class="choice">
+                    <input type="checkbox" name="regions" value="Mexico">
+                    <span>Mexico<span class="choice-cost">No known RCS sender onboarding fee.</span></span>
+                  </label>
+                  <label class="choice">
+                    <input type="checkbox" name="regions" value="Netherlands">
+                    <span>Netherlands<span class="choice-cost">No known RCS sender onboarding fee.</span></span>
+                  </label>
+                  <label class="choice">
+                    <input type="checkbox" name="regions" value="Norway">
+                    <span>Norway<span class="choice-cost">No known RCS sender onboarding fee.</span></span>
+                  </label>
+                  <label class="choice">
+                    <input type="checkbox" name="regions" value="Poland">
+                    <span>Poland<span class="choice-cost">No known RCS sender onboarding fee.</span></span>
+                  </label>
+                  <label class="choice">
+                    <input type="checkbox" name="regions" value="Portugal">
+                    <span>Portugal<span class="choice-cost">No known RCS sender onboarding fee.</span></span>
+                  </label>
+                  <label class="choice">
+                    <input type="checkbox" name="regions" value="Romania">
+                    <span>Romania<span class="choice-cost">No known RCS sender onboarding fee.</span></span>
+                  </label>
+                  <label class="choice">
+                    <input type="checkbox" name="regions" value="Slovakia">
+                    <span>Slovakia<span class="choice-cost">No known RCS sender onboarding fee.</span></span>
+                  </label>
+                  <label class="choice">
+                    <input type="checkbox" name="regions" value="Sweden">
+                    <span>Sweden<span class="choice-cost">No known RCS sender onboarding fee.</span></span>
+                  </label>
+                  <label class="choice">
+                    <input type="checkbox" name="regions" value="United States">
+                    <span>United States <span class="required">*</span><span class="choice-detail">US recipient numbers.</span><span class="choice-cost warning">Known extra onboarding fees apply.</span></span>
+                  </label>
                 </div>
-                <input type="hidden" name="regions" value="UK">
+                <p class="cost-note"><span class="required">*</span> United States registration currently carries third-party/carrier onboarding fees of up to $700 initially and $200 annually per RCS Sender, based on current provider guidance. Selecting United States does not take payment today. RightOnQ will confirm the current fees before any US carrier submission is made, and US registration will only proceed once those fees have been agreed and paid. Some US fees may still apply even if approval is not granted.</p>
+                <p class="error-text" data-error-for="regions"></p>
               </div>
-              <div class="field">
+              <div class="field" data-us-only hidden>
                 <label for="organicTraffic">Approximate monthly website visitors</label>
-                <p class="helper">Optional. A rough estimate is fine. Choose Not sure if you do not know.</p>
+                <p class="helper">Needed for United States registration. US carriers ask for website traffic linked to this use case. This is overall website traffic, not US visitors only.</p>
                 <select id="organicTraffic" name="organicTraffic">
                   <option value="">Select an option</option>
                   <option>Not sure</option>
@@ -2000,17 +2401,17 @@
                   <option>Over 2,000</option>
                 </select>
               </div>
-              <div class="field">
-                <label for="existingSmsTraffic">Do you already send messages to people?</label>
-                <p class="helper">Optional. Choose the closest match. This helps RightOnQ understand what messaging the business already uses.</p>
+              <div class="field" data-us-only hidden>
+                <label for="existingSmsTraffic">Existing US messaging activity</label>
+                <p class="helper">Needed for United States registration. US carriers ask whether the business already uses Short Code, Toll-Free, 10DLC, SMS, or similar messaging. Choose the closest match.</p>
                 <select id="existingSmsTraffic" name="existingSmsTraffic">
                   <option value="">Select an option</option>
                   <option>Not sure</option>
-                  <option>No, not currently</option>
-                  <option>Yes, text messages</option>
-                  <option>Yes, WhatsApp or social messaging</option>
-                  <option>Yes, email only</option>
-                  <option>Yes, several channels</option>
+                  <option>No existing US messaging</option>
+                  <option>Yes, US SMS or 10DLC</option>
+                  <option>Yes, US Toll-Free messaging</option>
+                  <option>Yes, US Short Code messaging</option>
+                  <option>Yes, another US messaging route</option>
                 </select>
               </div>
             </div>
@@ -2088,7 +2489,7 @@
             </div>
             <div class="completion-panel" id="completionPanel" aria-live="polite">
               <h3>Thank you. Part A has been sent to RightOnQ.</h3>
-              <p>Your copy has been saved. RightOnQ will check the written registration details first. Once Part A has been reviewed, we will prepare Part B, the review video, and send you a secure login so you can check and approve it.</p>
+              <p>Your copy has been saved. RightOnQ will check the written registration details first. Once Part A has been reviewed, we will prepare Part B, the review video, and send you a secure login so you can check and approve it. Select <span class="completion-step-link"><span class="future-step-index">1</span> Part B storyboard</span> to see the next stage.</p>
             </div>
           </section>
 
@@ -2116,7 +2517,7 @@
       "Contact details",
       "Use case",
       "How people agree",
-      "UK launch scope",
+      "RCS launch markets",
       "Review",
       "Send Part A"
     ];
@@ -2190,12 +2591,11 @@
         ]
       },
       {
-        title: "UK launch scope",
+        title: "RCS launch markets",
         fields: [
-          ["Intended sending regions", "regions"],
-          ["UK-only confirmation", "ukLaunchConfirmation"],
+          ["Destination countries", "regions"],
           ["Approximate monthly website visitors", "organicTraffic"],
-          ["Existing text messaging", "existingSmsTraffic"]
+          ["Existing US messaging activity", "existingSmsTraffic"]
         ]
       }
     ];
@@ -2320,27 +2720,17 @@
         hideSupportCards: true
       },
       submit: {
-        title: "Submission status layout",
-        body: "After RightOnQ has checked Part A and you have approved the Part B video, RightOnQ submits the registration pack with the video URL and keeps you updated while provider and carrier review takes place.",
+        title: "Registration submitted",
+        body: "The approved registration pack has been sent for provider and carrier review.",
         workspaceTitle: "Registration submitted",
-        workspaceIntro: "This is the status page after RightOnQ has checked Part A and you have approved the Part B video. RightOnQ submits the registration pack with the accessible review video URL and tracks the provider and carrier review.",
-        stageTitle: "Submission status",
-        stageBody: "The page shows what has been submitted and what stage the registration is currently in.",
+        workspaceIntro: "Your RCS registration pack has been submitted for provider and carrier review. This is the final approval stage before your business can start sending approved RCS messages.",
+        submittedLayout: true,
+        hideSupportCards: true,
         items: [
-          "Part A registration details included",
-          "Approved Part B video URL included",
-          "Submission and review status shown",
-          "Approval outcome recorded"
-        ],
-        cards: [
-          {
-            title: "Included in submission",
-            items: ["Business and sender details", "Brand assets", "Use case and message examples", "Approved review video URL"]
-          },
-          {
-            title: "Status updates",
-            items: ["Submitted to provider", "Provider or carrier review in progress", "Corrections requested or approved"]
-          }
+          ["What happens now", "The provider and carrier reviewers check the business details, brand profile, message examples, permission route, opt-out route, and review video."],
+          ["Typical review time", "Review times vary by market and carrier. As a guide, allow around 4-6 weeks, although some applications may move faster or need follow-up questions."],
+          ["Why this matters", "RCS is a trusted branded messaging channel. The review process helps protect customers from impersonation, spam, and poor-quality messaging."],
+          ["RightOnQ keeps watch", "We will monitor the application and contact you if the reviewers ask for anything else."]
         ]
       }
     };
@@ -2387,6 +2777,7 @@
       form.addEventListener("change", event => {
         clearFieldError(event.target);
         updateSelectPlaceholders();
+        updateUsRegistrationFields();
         updateConsentRouteExplanation();
         maybeSyncDisplayName(event.target);
         maybeUpdateSenderDescription(event.target);
@@ -2431,12 +2822,18 @@
       recordVideoButton.addEventListener("click", generateDemoVideo);
       saveProgressButton.addEventListener("click", downloadProgressFile);
       resumeFileInput.addEventListener("change", restoreFromProgressFile);
+      reviewShell.addEventListener("click", event => {
+        const button = event.target.closest("[data-edit-step]");
+        if (!button) return;
+        showStep(Number(button.dataset.editStep));
+      });
 
       document.getElementById("signoffDate").valueAsDate = new Date();
       updateCharacterCounts();
       drawVideoPoster();
       const restoredProgress = progressSaveEnabled && restoreAutosavedProgress();
       updateSelectPlaceholders();
+      updateUsRegistrationFields();
       if (!restoredProgress) showStep(0);
     }
 
@@ -2451,15 +2848,13 @@
       });
       form.hidden = true;
       partBWorkspace.hidden = false;
-      const mainContent = content.storyboard ? renderPartBStoryboard(content) : renderPartBVisualWorkspace(content, checklist);
+      const mainContent = content.submittedLayout ? renderSubmittedLayout(content) : content.storyboard ? renderPartBStoryboard(content) : renderPartBVisualWorkspace(content, checklist);
       partBWorkspace.innerHTML = `
-        <p class="step-kicker">Part B preview</p>
         <div class="part-b-workspace-head">
           <div>
             <h2>${content.workspaceTitle}</h2>
             <p>${content.workspaceIntro}</p>
           </div>
-          <span class="preview-pill">Preview only</span>
         </div>
         ${mainContent}
         ${content.hideSupportCards ? "" : renderPartBSupportGrid(content, cards, checklist)}
@@ -2473,7 +2868,128 @@
         });
         updatePartBReviewAction();
       }
+      if (content.submittedLayout) setupSubmittedCarousel();
       document.querySelector(".workflow").scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function setupSubmittedCarousel() {
+      const cards = [
+        {
+          image: "../images/hometown-brewery-open-harvest.png",
+          alt: "Open Harvest bottled ale",
+          title: "Open Harvest",
+          copy: "A traditional bottled ale for pubs, farm shops and independent retailers looking for a fresh seasonal line.",
+          buttons: ["Send sample case", "Arrange a visit", "Not for us"]
+        },
+        {
+          image: "../images/hometown-brewery-open-harvest-event.png",
+          alt: "Open Harvest tasting event",
+          title: "June 2026 launch event",
+          copy: "Invite selected buyers to the Open Harvest launch, with tasting notes, event details and a direct response.",
+          buttons: ["RSVP", "Undecided", "Far too busy"]
+        },
+        {
+          image: "../images/hometown-brewery-james-mitchell.png",
+          alt: "Hometown Brewery founder James Mitchell",
+          title: "Meet James Mitchell",
+          copy: "Introduce a new sales representative to trade partners with a clear, friendly way to respond.",
+          buttons: ["Arrange a meet-up", "Wish James all the best"]
+        }
+      ];
+      const image = document.getElementById("submittedCarouselImage");
+      const title = document.getElementById("submittedCarouselTitle");
+      const copy = document.getElementById("submittedCarouselCopy");
+      const buttonRow = document.getElementById("submittedCarouselButtons");
+      const prev = document.getElementById("submittedCarouselPrev");
+      const next = document.getElementById("submittedCarouselNext");
+      const dots = Array.from(document.querySelectorAll("[data-submitted-card]"));
+      if (!image || !title || !copy || !buttonRow || !dots.length) return;
+      let currentIndex = 0;
+
+      function setCard(index) {
+        currentIndex = (index + cards.length) % cards.length;
+        const card = cards[currentIndex];
+        image.src = card.image;
+        image.alt = card.alt;
+        title.textContent = card.title;
+        copy.textContent = card.copy;
+        buttonRow.innerHTML = card.buttons.map((button, buttonIndex) => `<span class="rcs-chip ${buttonIndex === card.buttons.length - 1 ? "secondary" : ""}">${button}</span>`).join("");
+        dots.forEach((dot, dotIndex) => {
+          dot.classList.toggle("active", dotIndex === currentIndex);
+        });
+      }
+
+      dots.forEach(dot => {
+        dot.addEventListener("click", () => setCard(Number(dot.dataset.submittedCard)));
+      });
+      if (prev) prev.addEventListener("click", () => setCard(currentIndex - 1));
+      if (next) next.addEventListener("click", () => setCard(currentIndex + 1));
+      setCard(0);
+    }
+
+    function renderSubmittedLayout(content) {
+      return `
+        <div class="part-b-board submitted-layout">
+          <div class="part-b-stage submitted-hero">
+            <div class="submitted-status"><span>✓</span> Submitted for review</div>
+            <h3>Now the review work begins</h3>
+            <p>The registration pack now goes through provider and carrier checks, including the review video, brand details, message examples, permission route and opt-out route.</p>
+            <p>Once approved, RCS helps your business appear as a recognised branded contact in customers' messaging apps, with richer message layouts, clearer reply options and more trust than a plain text message.</p>
+            <div class="submitted-timeline">
+              ${content.items.map((item, index) => `
+                <div class="submitted-timeline-item">
+                  <span class="submitted-timeline-index">${index + 1}</span>
+                  <div>
+                    <strong>${item[0]}</strong>
+                    <p>${item[1]}</p>
+                  </div>
+                </div>
+              `).join("")}
+            </div>
+          </div>
+          <div class="part-b-stage submitted-payoff">
+            <h3>Brewery launch example.</h3>
+            <p>A brewery can show a new bottled ale, invite trade buyers to a launch event, then give people a clear one-tap way to respond.</p>
+            <div class="phone-demo dark" aria-label="Approved RCS sender example">
+              <div class="phone-demo-header">
+                <span class="phone-demo-header-main"><span class="brewery-avatar">HB</span> HOMETOWN BREWERY <span class="verified-dot">✓</span></span>
+                <small>Verified business sender</small>
+              </div>
+              <div class="phone-demo-body">
+                <div class="rcs-rich-card">
+                  <img id="submittedCarouselImage" class="submitted-carousel-image" src="../images/hometown-brewery-open-harvest.png" alt="Open Harvest bottled ale">
+                  <div class="rcs-card-body">
+                    <h4 id="submittedCarouselTitle">Open Harvest</h4>
+                    <p id="submittedCarouselCopy">A traditional bottled ale for pubs, farm shops and independent retailers looking for a fresh seasonal line.</p>
+                    <div class="rcs-chip-row" id="submittedCarouselButtons" aria-label="Example RCS actions">
+                      <span class="rcs-chip">Send sample case</span>
+                      <span class="rcs-chip">Arrange a visit</span>
+                      <span class="rcs-chip secondary">Not for us</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="submitted-carousel-controls" aria-label="Submitted RCS carousel controls">
+                  <button class="submitted-carousel-button" type="button" id="submittedCarouselPrev" aria-label="Previous RCS preview card">‹</button>
+                  <div class="submitted-carousel-dots" aria-label="RCS preview cards">
+                    <button type="button" class="active" aria-label="Show Open Harvest card" data-submitted-card="0"></button>
+                    <button type="button" aria-label="Show tasting event card" data-submitted-card="1"></button>
+                    <button type="button" aria-label="Show founder card" data-submitted-card="2"></button>
+                  </div>
+                  <button class="submitted-carousel-button" type="button" id="submittedCarouselNext" aria-label="Next RCS preview card">›</button>
+                </div>
+                <div class="opt-out-line">Reply STOP to opt out.</div>
+              </div>
+            </div>
+            <div class="submitted-contact">
+              <div class="submitted-contact-brand">
+                <img src="../images/rightonq-landscape-glow-logo.png" alt="RightOnQ">
+              </div>
+              <strong>Questions during review?</strong>
+              email adam@rightonq.co.uk
+            </div>
+          </div>
+        </div>
+      `;
     }
 
     function updatePartBReviewAction() {
@@ -2560,7 +3076,7 @@
               <label class="part-b-check">
                 <span class="part-b-check-number ${item[2] === "notes" ? "empty" : ""}">${item[2] === "notes" ? "" : index + 1}</span>
                 <input type="checkbox" name="partBCheck${index + 1}" ${item[2] === "notes" ? "data-change-needed" : "data-approval-check"}>
-                <span>
+                <span class="part-b-check-text">
                   ${item[0]}
                   <small>${item[1]}</small>
                   ${item[2] === "notes" ? `
@@ -2634,6 +3150,17 @@
       document.querySelectorAll("select[required]").forEach(select => {
         if (!select.value) select.selectedIndex = 0;
         select.classList.toggle("placeholder", !select.value);
+      });
+    }
+
+    function updateUsRegistrationFields() {
+      const usSelected = Boolean(document.querySelector('input[name="regions"][value="United States"]:checked'));
+      document.querySelectorAll("[data-us-only]").forEach(field => {
+        field.hidden = !usSelected;
+        field.querySelectorAll("select, input, textarea").forEach(input => {
+          input.required = usSelected;
+          if (!usSelected) clearFieldError(input);
+        });
       });
     }
 
@@ -3867,9 +4394,8 @@
         }
       }
 
-      data.regions = ["UK"];
+      data.regions = [].concat(data.regions || []);
       data.consentRoute = getSelectedConsentRoutes();
-      data.ukLaunchConfirmation = document.getElementById("ukLaunchConfirmation").checked ? "Confirmed" : "";
       data.registeredAddress = [
         data.registeredAddressLine1,
         data.registeredAddressLine2,
@@ -3967,8 +4493,14 @@
       });
 
       if (Array.isArray(data.regions)) {
-        document.getElementById("ukLaunchConfirmation").checked = data.regions.includes("UK") || data.ukLaunchConfirmation === "Confirmed";
+        document.querySelectorAll('input[name="regions"]').forEach(input => {
+          input.checked = data.regions.includes(input.value) || (input.value === "United Kingdom" && data.regions.includes("UK"));
+        });
+      } else if (data.ukLaunchConfirmation === "Confirmed") {
+        const ukRegion = document.querySelector('input[name="regions"][value="United Kingdom"]');
+        if (ukRegion) ukRegion.checked = true;
       }
+      updateUsRegistrationFields();
       if (Array.isArray(data.consentRoute)) {
         document.querySelectorAll('input[name="consentRoutes"]').forEach(input => {
           input.checked = data.consentRoute.includes(input.value);
@@ -4014,17 +4546,27 @@
 
     function renderReview() {
       const data = collectData();
-      reviewShell.innerHTML = schema.map(section => `
+      reviewShell.innerHTML = schema.map((section, index) => `
         <article class="review-card">
-          <h3>${escapeHtml(section.title)}</h3>
+          <div class="review-card-header">
+            <h3>${escapeHtml(section.title)}</h3>
+            <button type="button" class="btn review-edit" data-edit-step="${index}">Edit section</button>
+          </div>
           <div class="review-table">
-            ${section.fields.map(([label, key]) => `
+            ${section.fields.filter(([, key]) => shouldShowReviewField(key, data)).map(([label, key]) => `
               <div class="review-label">${escapeHtml(label)}</div>
               <div class="review-value">${escapeHtml(formatValue(data[key], key))}</div>
             `).join("")}
           </div>
         </article>
       `).join("");
+    }
+
+    function shouldShowReviewField(key, data) {
+      if (key === "organicTraffic" || key === "existingSmsTraffic") {
+        return Array.isArray(data.regions) && data.regions.includes("United States");
+      }
+      return true;
     }
 
     function formatValue(value, key) {
@@ -4096,6 +4638,7 @@
       autosaveStatus.textContent = "Autosave ready.";
       document.querySelectorAll(".file-feedback").forEach(node => { node.textContent = ""; });
       document.querySelectorAll(".invalid").forEach(node => node.classList.remove("invalid"));
+      updateUsRegistrationFields();
       updateConsentRouteExplanation();
       updateSenderDescriptionDraft();
       updateComplianceDrafts();
