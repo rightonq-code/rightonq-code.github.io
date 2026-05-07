@@ -1353,14 +1353,28 @@
                 <input type="hidden" name="regions" value="UK">
               </div>
               <div class="field">
-                <label for="organicTraffic">Monthly organic website traffic</label>
-                <p class="helper">Optional estimate. Some review flows ask for website traffic context.</p>
-                <input id="organicTraffic" name="organicTraffic" type="number" min="0" inputmode="numeric">
+                <label for="organicTraffic">Approximate monthly website visitors</label>
+                <p class="helper">Optional. A rough estimate is fine. Choose Not sure if you do not know.</p>
+                <select id="organicTraffic" name="organicTraffic">
+                  <option value="">Select an option</option>
+                  <option>Not sure</option>
+                  <option>Under 500</option>
+                  <option>500 - 2,000</option>
+                  <option>Over 2,000</option>
+                </select>
               </div>
               <div class="field">
-                <label for="existingSmsTraffic">Do you already send text messages?</label>
-                <p class="helper">Optional. If yes, briefly say what kind of messages you send now. If not, write NONE.</p>
-                <input id="existingSmsTraffic" name="existingSmsTraffic" placeholder="NONE">
+                <label for="existingSmsTraffic">Do you already send messages to people?</label>
+                <p class="helper">Optional. Choose the closest match. This helps RightOnQ understand what messaging the business already uses.</p>
+                <select id="existingSmsTraffic" name="existingSmsTraffic">
+                  <option value="">Select an option</option>
+                  <option>Not sure</option>
+                  <option>No, not currently</option>
+                  <option>Yes, text messages</option>
+                  <option>Yes, WhatsApp or social messaging</option>
+                  <option>Yes, email only</option>
+                  <option>Yes, several channels</option>
+                </select>
               </div>
             </div>
           </section>
@@ -1549,7 +1563,7 @@
         fields: [
           ["Intended sending regions", "regions"],
           ["UK-only confirmation", "ukLaunchConfirmation"],
-          ["Monthly organic website traffic", "organicTraffic"],
+          ["Approximate monthly website visitors", "organicTraffic"],
           ["Existing text messaging", "existingSmsTraffic"]
         ]
       },
