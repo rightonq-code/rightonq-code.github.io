@@ -1576,7 +1576,7 @@
             <li>
               <button class="future-step active" type="button" data-part-b-preview="prepare" aria-pressed="true">
                 <span class="future-step-index">1</span>
-                <span class="future-step-name">RightOnQ prepares video</span>
+                <span class="future-step-name">Part B storyboard</span>
               </button>
             </li>
             <li>
@@ -2229,7 +2229,7 @@
         title: "Part B storyboard",
         body: "A simple map of what happens after Part A has been checked: RightOnQ prepares the video, the client reviews it, edits are handled if needed, and the registration is submitted.",
         workspaceTitle: "Part B storyboard",
-        workspaceIntro: "This is the full Part B journey at a glance. Part B starts only after RightOnQ has checked Part A and agreed the written registration details are ready to support a review video.",
+        workspaceIntro: "This is the full Part B journey at a glance. Part B starts after RightOnQ has checked Part A and approved that the written registration details are ready to support the review video and RCS application.",
         storyboard: [
           ["Part A accepted", "The written details are checked and ready to support the video."],
           ["Video prepared", "RightOnQ builds the video from the approved sender details and examples."],
@@ -2237,7 +2237,7 @@
           ["Client decision", "The client approves the video or asks for edits."],
           ["Submit registration", "The approved video URL goes into the registration pack."]
         ],
-        storyboardNote: "If corrections are needed, the video loops back to RightOnQ for editing before the client approves it. Submission only happens after the client has approved the Part B video.",
+        hideSupportCards: true,
         items: [
           "Part A is checked before video work starts",
           "Video is built from approved client information",
@@ -2471,6 +2471,31 @@
           <span class="preview-pill">Preview only</span>
         </div>
         ${mainContent}
+        ${content.hideSupportCards ? "" : renderPartBSupportGrid(content, cards, checklist)}
+        <div class="part-b-actions">
+          <button type="button" class="btn secondary" id="returnToPartAButton">Return to Part A</button>
+        </div>
+      `;
+      document.getElementById("returnToPartAButton").addEventListener("click", showPartAWorkspace);
+      document.querySelector(".workflow").scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function renderPartBStoryboard(content) {
+      return `
+        <div class="storyboard-flow" aria-label="Part B storyboard">
+          ${content.storyboard.map((step, index) => `
+            <div class="story-step ${index === 3 ? "edit-loop warning" : ""} ${index === content.storyboard.length - 1 ? "success" : ""}">
+              <span class="story-index">${index + 1}</span>
+              <h3>${step[0]}</h3>
+              <p>${step[1]}</p>
+            </div>
+          `).join("")}
+        </div>
+      `;
+    }
+
+    function renderPartBSupportGrid(content, cards, checklist) {
+      return `
         <div class="part-b-support-grid">
           ${checklist.length ? `
             <div class="part-b-card">
@@ -2505,26 +2530,6 @@
             <p>Part B is not live for the client until RightOnQ has reviewed and accepted Part A. These screens are here so we can agree the workflow before building the locked review area.</p>
           </div>
         </div>
-        <div class="part-b-actions">
-          <button type="button" class="btn secondary" id="returnToPartAButton">Return to Part A</button>
-        </div>
-      `;
-      document.getElementById("returnToPartAButton").addEventListener("click", showPartAWorkspace);
-      document.querySelector(".workflow").scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-
-    function renderPartBStoryboard(content) {
-      return `
-        <div class="storyboard-flow" aria-label="Part B storyboard">
-          ${content.storyboard.map((step, index) => `
-            <div class="story-step ${index === 3 ? "edit-loop warning" : ""} ${index === content.storyboard.length - 1 ? "success" : ""}">
-              <span class="story-index">${index + 1}</span>
-              <h3>${step[0]}</h3>
-              <p>${step[1]}</p>
-            </div>
-          `).join("")}
-        </div>
-        <div class="storyboard-note">${content.storyboardNote}</div>
       `;
     }
 
