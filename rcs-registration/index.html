@@ -1483,7 +1483,7 @@
             </div>
             <div class="completion-panel" id="completionPanel" aria-live="polite">
               <h3>Thank you. Part A is ready for RightOnQ review.</h3>
-              <p>We will check the written registration details first. Once Part A has been reviewed, RightOnQ will prepare Part B, the review video, and send you a secure login so you can check and approve it.</p>
+              <p>Your Part A copy has been prepared. RightOnQ will check the written registration details first. Once Part A has been reviewed, we will prepare Part B, the review video, and send you a secure login so you can check and approve it.</p>
             </div>
           </section>
 
@@ -1492,7 +1492,6 @@
             <div class="button-row">
               <button type="button" class="btn secondary" id="backButton">Previous step</button>
               <button type="button" class="btn primary" id="nextButton">Next step</button>
-              <button type="button" class="btn primary" id="printButton" hidden>Save PDF copy</button>
               <button type="button" class="btn primary" id="submitPartAButton" hidden>Send to RightOnQ and save copy</button>
             </div>
           </div>
@@ -1601,7 +1600,6 @@
     const progressBar = document.getElementById("progressBar");
     const backButton = document.getElementById("backButton");
     const nextButton = document.getElementById("nextButton");
-    const printButton = document.getElementById("printButton");
     const submitPartAButton = document.getElementById("submitPartAButton");
     const recordVideoButton = document.getElementById("recordVideoButton");
     const saveProgressButton = document.getElementById("saveProgressButton");
@@ -1727,9 +1725,6 @@
 
       backButton.addEventListener("click", () => showStep(Math.max(0, currentStep - 1)));
       submitPartAButton.addEventListener("click", submitPartA);
-      printButton.addEventListener("click", () => {
-        if (validateAllSteps()) window.print();
-      });
       recordVideoButton.addEventListener("click", generateDemoVideo);
       saveProgressButton.addEventListener("click", downloadProgressFile);
       resumeFileInput.addEventListener("change", restoreFromProgressFile);
@@ -2249,7 +2244,6 @@
       progressBar.style.width = `${percent}%`;
       backButton.hidden = index === 0;
       nextButton.hidden = index === steps.length - 1;
-      printButton.hidden = index !== steps.length - 1;
       submitPartAButton.hidden = index !== steps.length - 1;
 
       if (index === reviewStepIndex) {
