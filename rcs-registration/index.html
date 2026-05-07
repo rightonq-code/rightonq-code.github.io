@@ -533,6 +533,20 @@
       justify-content: flex-end;
     }
 
+    .final-action-note {
+      display: none;
+      width: 100%;
+      margin: 2px 0 0;
+      color: #52667e;
+      font-size: 0.9rem;
+      font-weight: 700;
+      text-align: right;
+    }
+
+    .final-action-note.show {
+      display: block;
+    }
+
     .btn {
       display: inline-flex;
       align-items: center;
@@ -1260,7 +1274,6 @@
               <ul class="guidance-list">
                 <li>Choose the use case carefully; changing it later can mean another review.</li>
                 <li>Use examples that match what recipients will actually see.</li>
-                <li>Use examples that match what recipients will actually see.</li>
               </ul>
             </div>
             <div class="grid">
@@ -1296,8 +1309,8 @@
                 </select>
               </div>
               <div class="field full">
-                <label for="messageTrigger">What triggers messages? <span class="required">*</span></label>
-                <p class="helper">We draft this from the brand and industry. It should explain the real event or schedule that causes a message to be sent.</p>
+                <label for="messageTrigger">Why would people receive a message? <span class="required">*</span></label>
+                <p class="helper">We draft this for you using your earlier answers. It should explain the normal situations where someone would receive a message, such as an update, invitation, reminder, or follow-up.</p>
                 <textarea id="messageTrigger" name="messageTrigger" maxlength="500" required></textarea>
                 <div class="char-count" data-count-for="messageTrigger">0 / 500</div>
               </div>
@@ -1452,7 +1465,7 @@
               </div>
               <div class="field">
                 <label for="signoffDate">Date <span class="required">*</span></label>
-                <p class="helper">The date this information is approved.</p>
+                <p class="helper">The date you are signing this Part A information.</p>
                 <input id="signoffDate" name="signoffDate" type="date" required>
               </div>
             </div>
@@ -1482,8 +1495,8 @@
               <p class="video-status" id="recordingStatus">Complete the form, then generate the registration demo video.</p>
             </div>
             <div class="completion-panel" id="completionPanel" aria-live="polite">
-              <h3>Thank you. Part A is ready for RightOnQ review.</h3>
-              <p>Your Part A copy has been prepared. RightOnQ will check the written registration details first. Once Part A has been reviewed, we will prepare Part B, the review video, and send you a secure login so you can check and approve it.</p>
+              <h3>Thank you. Part A has been sent to RightOnQ.</h3>
+              <p>Your copy has been saved. RightOnQ will check the written registration details first. Once Part A has been reviewed, we will prepare Part B, the review video, and send you a secure login so you can check and approve it.</p>
             </div>
           </section>
 
@@ -1492,7 +1505,8 @@
             <div class="button-row">
               <button type="button" class="btn secondary" id="backButton">Previous step</button>
               <button type="button" class="btn primary" id="nextButton">Next step</button>
-              <button type="button" class="btn primary" id="submitPartAButton" hidden>Send to RightOnQ and save copy</button>
+              <button type="button" class="btn primary" id="submitPartAButton" hidden>SEND to RightOnQ</button>
+              <p class="final-action-note" id="finalActionNote">A copy will automatically download for your records.</p>
             </div>
           </div>
         </form>
@@ -1565,7 +1579,7 @@
           ["Main message purpose", "primaryUseCase"],
           ["Sender description", "senderDescription"],
           ["Expected monthly send volume", "monthlyVolume"],
-          ["What triggers messages", "messageTrigger"],
+          ["Why people would receive a message", "messageTrigger"],
           ["Use case description", "useCaseDescription"],
           ["Example message 1", "exampleMessageOne"],
           ["Example message 2", "exampleMessageTwo"],
@@ -1601,6 +1615,7 @@
     const backButton = document.getElementById("backButton");
     const nextButton = document.getElementById("nextButton");
     const submitPartAButton = document.getElementById("submitPartAButton");
+    const finalActionNote = document.getElementById("finalActionNote");
     const recordVideoButton = document.getElementById("recordVideoButton");
     const saveProgressButton = document.getElementById("saveProgressButton");
     const resumeFileInput = document.getElementById("resumeFileInput");
@@ -1622,6 +1637,7 @@
       notificationEmail: false,
       customerEmail: false,
       customerPhone: false,
+      customerWebsite: false,
       signatoryName: false,
       signatoryTitle: false
     };
@@ -2163,8 +2179,10 @@
       const repTitle = document.getElementById("authorizedRepTitle");
       const notificationEmail = document.getElementById("notificationEmail");
       const primaryPhone = document.getElementById("primaryContactPhone");
+      const businessWebsite = document.getElementById("businessWebsite");
       const customerEmail = document.getElementById("customerEmail");
       const customerPhone = document.getElementById("customerPhone");
+      const customerWebsite = document.getElementById("customerWebsite");
       const signatoryName = document.getElementById("signatoryName");
       const signatoryTitle = document.getElementById("signatoryTitle");
 
@@ -2187,6 +2205,9 @@
       customerPhone.addEventListener("input", () => {
         representativeTouched.customerPhone = customerPhone.value.trim() !== primaryPhone.value.trim();
       });
+      customerWebsite.addEventListener("input", () => {
+        representativeTouched.customerWebsite = customerWebsite.value.trim() !== businessWebsite.value.trim();
+      });
       signatoryName.addEventListener("input", () => {
         representativeTouched.signatoryName = signatoryName.value.trim() !== repName.value.trim();
       });
@@ -2204,11 +2225,13 @@
         syncRepresentativeField(primaryEmail, customerEmail, "customerEmail");
       });
       primaryPhone.addEventListener("input", () => syncRepresentativeField(primaryPhone, customerPhone, "customerPhone"));
+      businessWebsite.addEventListener("input", () => syncRepresentativeField(businessWebsite, customerWebsite, "customerWebsite"));
       syncRepresentativeField(primaryName, repName, "authorizedRepName");
       syncRepresentativeField(primaryEmail, repEmail, "authorizedRepEmail");
       syncRepresentativeField(primaryEmail, notificationEmail, "notificationEmail");
       syncRepresentativeField(primaryEmail, customerEmail, "customerEmail");
       syncRepresentativeField(primaryPhone, customerPhone, "customerPhone");
+      syncRepresentativeField(businessWebsite, customerWebsite, "customerWebsite");
       syncRepresentativeField(repName, signatoryName, "signatoryName");
       syncRepresentativeField(repTitle, signatoryTitle, "signatoryTitle");
     }
@@ -2245,6 +2268,7 @@
       backButton.hidden = index === 0;
       nextButton.hidden = index === steps.length - 1;
       submitPartAButton.hidden = index !== steps.length - 1;
+      finalActionNote.classList.toggle("show", index === steps.length - 1);
 
       if (index === reviewStepIndex) {
         renderReview();
@@ -3081,6 +3105,7 @@
       representativeTouched.notificationEmail = Boolean(document.getElementById("notificationEmail").value.trim());
       representativeTouched.customerEmail = Boolean(document.getElementById("customerEmail").value.trim());
       representativeTouched.customerPhone = Boolean(document.getElementById("customerPhone").value.trim() && document.getElementById("customerPhone").value.trim() !== "+44");
+      representativeTouched.customerWebsite = Boolean(document.getElementById("customerWebsite").value.trim());
       representativeTouched.signatoryName = Boolean(document.getElementById("signatoryName").value.trim());
       representativeTouched.signatoryTitle = Boolean(document.getElementById("signatoryTitle").value.trim());
 
@@ -3142,7 +3167,7 @@
       downloadPartAFile();
       completionPanel.classList.add("show");
       completionPanel.scrollIntoView({ behavior: "smooth", block: "center" });
-      showToast("Part A file saved. RightOnQ review is the next step.");
+      showToast("Thank you. Part A is on its way to RightOnQ.");
     }
 
     function downloadPartAFile() {
@@ -3171,6 +3196,7 @@
       representativeTouched.notificationEmail = false;
       representativeTouched.customerEmail = false;
       representativeTouched.customerPhone = false;
+      representativeTouched.customerWebsite = false;
       representativeTouched.signatoryName = false;
       representativeTouched.signatoryTitle = false;
       senderDescriptionTouched = false;
