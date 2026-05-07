@@ -535,6 +535,14 @@
       font-weight: 800;
     }
 
+    .phone-demo-header span {
+      display: block;
+      margin-top: 3px;
+      color: rgba(255, 255, 255, 0.66);
+      font-size: 0.72rem;
+      font-weight: 600;
+    }
+
     .phone-demo-body {
       display: grid;
       gap: 10px;
@@ -554,6 +562,64 @@
       margin-left: 52px;
       border-radius: 14px 14px 4px 14px;
       background: #dff6ec;
+    }
+
+    .rcs-rich-card {
+      overflow: hidden;
+      border: 1px solid #dce6f2;
+      border-radius: 16px;
+      background: #fff;
+      color: var(--field-text);
+      box-shadow: 0 10px 22px rgba(16, 35, 56, 0.08);
+    }
+
+    .rcs-card-image {
+      height: 145px;
+      background-image: url("../images/hometown-brewery-open-harvest.png");
+      background-position: center 52%;
+      background-size: cover;
+    }
+
+    .rcs-card-body {
+      display: grid;
+      gap: 8px;
+      padding: 12px;
+    }
+
+    .rcs-card-body h4 {
+      margin: 0;
+      color: var(--field-text);
+      font-size: 1rem;
+    }
+
+    .rcs-card-body p {
+      margin: 0;
+      color: var(--soft-text);
+      font-size: 0.84rem;
+      line-height: 1.35;
+    }
+
+    .rcs-chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-top: 2px;
+    }
+
+    .rcs-chip {
+      border-radius: 999px;
+      background: #e9f3ff;
+      color: #18416f;
+      padding: 7px 9px;
+      font-size: 0.72rem;
+      font-weight: 800;
+    }
+
+    .opt-out-line {
+      color: #6f829a;
+      font-size: 0.72rem;
+      line-height: 1.25;
+      text-align: center;
     }
 
     .part-b-actions {
@@ -1996,8 +2062,8 @@
         body: "RightOnQ uses the approved Part A details to prepare a review video that shows the RCS sender, the message experience, and how people can stop messages.",
         workspaceTitle: "Part B video preparation",
         workspaceIntro: "This is the internal preparation screen RightOnQ would use after Part A has been checked. It pulls together the approved sender details, brand assets, message examples, permission route, and STOP handling before the review video is made.",
-        stageTitle: "Review video storyboard",
-        stageBody: "The video should show who the sender is, what the recipient sees, why messages are being sent, and how the recipient can opt out.",
+        stageTitle: "Review video player",
+        stageBody: "This is where the client will watch the review video. The video should show who the sender is, what the recipient sees, why messages are being sent, and how the recipient can opt out.",
         items: [
           "Logo, banner and sender name shown clearly",
           "Example RCS messages based on the approved use case",
@@ -2227,11 +2293,21 @@
               </div>
             </div>
             <div class="phone-demo" aria-label="Example RCS message preview">
-              <div class="phone-demo-header">RCS sender preview</div>
+              <div class="phone-demo-header">Hometown Brewery <span>Verified business sender</span></div>
               <div class="phone-demo-body">
-                <div class="message-bubble">Your update from the approved sender appears here, using the brand name, logo and message examples from Part A.</div>
-                <div class="message-bubble">Reply STOP to opt out.</div>
-                <div class="message-bubble reply">STOP</div>
+                <div class="rcs-rich-card">
+                  <div class="rcs-card-image" role="img" aria-label="Open Harvest bottled ale"></div>
+                  <div class="rcs-card-body">
+                    <h4>Open Harvest</h4>
+                    <p>A traditional bottled ale for pubs, farm shops and independent retailers looking for a fresh seasonal line.</p>
+                    <div class="rcs-chip-row" aria-label="Example reply buttons">
+                      <span class="rcs-chip">Send sample case</span>
+                      <span class="rcs-chip">Arrange a visit</span>
+                      <span class="rcs-chip">Not for us</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="opt-out-line">Reply STOP to opt out.</div>
               </div>
             </div>
             <h3>${content.stageTitle}</h3>
