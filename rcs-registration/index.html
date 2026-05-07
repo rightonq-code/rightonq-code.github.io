@@ -439,9 +439,16 @@
 
     .part-b-board {
       display: grid;
-      grid-template-columns: minmax(0, 1.25fr) minmax(280px, 0.75fr);
+      grid-template-columns: minmax(0, 1.05fr) minmax(300px, 0.95fr);
       gap: 18px;
-      align-items: stretch;
+      align-items: start;
+    }
+
+    .part-b-support-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 18px;
     }
 
     .part-b-stage,
@@ -453,7 +460,7 @@
     }
 
     .part-b-stage {
-      min-height: 430px;
+      min-height: 100%;
       padding: 24px;
     }
 
@@ -519,8 +526,8 @@
     }
 
     .phone-demo {
-      max-width: 330px;
-      margin: 0 auto 18px;
+      max-width: 360px;
+      margin: 0 auto;
       border: 10px solid #14243a;
       border-radius: 28px;
       background: #f5f8fc;
@@ -535,7 +542,26 @@
       font-weight: 800;
     }
 
-    .phone-demo-header span {
+    .phone-demo-header-main {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .verified-dot {
+      display: inline-grid;
+      place-items: center;
+      width: 17px;
+      height: 17px;
+      border-radius: 50%;
+      background: var(--green);
+      color: #fff;
+      font-size: 0.72rem;
+      line-height: 1;
+      font-weight: 900;
+    }
+
+    .phone-demo-header small {
       display: block;
       margin-top: 3px;
       color: rgba(255, 255, 255, 0.66);
@@ -1264,6 +1290,10 @@
       }
 
       .part-b-board {
+        grid-template-columns: 1fr;
+      }
+
+      .part-b-support-grid {
         grid-template-columns: 1fr;
       }
     }
@@ -2286,14 +2316,23 @@
         </div>
         <div class="part-b-board">
           <div class="part-b-stage">
+            <h3>${content.stageTitle}</h3>
+            <p>${content.stageBody}</p>
             <div class="video-frame">
               <div>
                 <strong>${content.stageTitle}</strong>
                 <span>${content.stageBody}</span>
               </div>
             </div>
+          </div>
+          <div class="part-b-stage">
+            <h3>Example RCS sender</h3>
+            <p>This example is copied from the RightOnQ RCS guide so the preview feels like a real branded message, not an admin placeholder.</p>
             <div class="phone-demo" aria-label="Example RCS message preview">
-              <div class="phone-demo-header">Hometown Brewery <span>Verified business sender</span></div>
+              <div class="phone-demo-header">
+                <span class="phone-demo-header-main">Hometown Brewery <span class="verified-dot">✓</span></span>
+                <small>Verified business sender</small>
+              </div>
               <div class="phone-demo-body">
                 <div class="rcs-rich-card">
                   <div class="rcs-card-image" role="img" aria-label="Open Harvest bottled ale"></div>
@@ -2310,25 +2349,26 @@
                 <div class="opt-out-line">Reply STOP to opt out.</div>
               </div>
             </div>
-            <h3>${content.stageTitle}</h3>
-            <p>${content.stageBody}</p>
+          </div>
+        </div>
+        <div class="part-b-support-grid">
+          <div class="part-b-card">
+            <h3>What this stage must show</h3>
             <ul>
               ${content.items.map(item => `<li>${item}</li>`).join("")}
             </ul>
           </div>
-          <div>
-            ${cards.map(card => `
-              <div class="part-b-card">
-                <h3>${card.title}</h3>
-                <ul>
-                  ${card.items.map(item => `<li>${item}</li>`).join("")}
-                </ul>
-              </div>
-            `).join("")}
+          ${cards.map(card => `
             <div class="part-b-card">
-              <h3>Important note</h3>
-              <p>Part B is not live for the client until RightOnQ has reviewed and accepted Part A. These screens are here so we can agree the workflow before building the locked review area.</p>
+              <h3>${card.title}</h3>
+              <ul>
+                ${card.items.map(item => `<li>${item}</li>`).join("")}
+              </ul>
             </div>
+          `).join("")}
+          <div class="part-b-card">
+            <h3>Important note</h3>
+            <p>Part B is not live for the client until RightOnQ has reviewed and accepted Part A. These screens are here so we can agree the workflow before building the locked review area.</p>
           </div>
         </div>
         <div class="part-b-actions">
