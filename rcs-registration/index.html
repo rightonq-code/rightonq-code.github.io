@@ -1660,13 +1660,10 @@
     let currentStep = 0;
     let restoringProgress = false;
     const autosaveKey = "rightonq-rcs-registration-progress-v1";
-    const progressSaveEnabled = false;
+    const progressSaveEnabled = true;
 
     function init() {
-      if (!progressSaveEnabled) {
-        document.querySelector(".save-panel").hidden = true;
-        localStorage.removeItem(autosaveKey);
-      }
+      document.querySelector(".save-panel").hidden = !progressSaveEnabled;
 
       stepList.innerHTML = steps.map((name, index) => `
         <li>
@@ -1748,9 +1745,9 @@
       document.getElementById("signoffDate").valueAsDate = new Date();
       updateCharacterCounts();
       drawVideoPoster();
-      if (progressSaveEnabled) restoreAutosavedProgress();
+      const restoredProgress = progressSaveEnabled && restoreAutosavedProgress();
       updateSelectPlaceholders();
-      showStep(0);
+      if (!restoredProgress) showStep(0);
     }
 
     function updateSelectPlaceholders() {
@@ -3032,13 +3029,15 @@
 
     function restoreAutosavedProgress() {
       const saved = localStorage.getItem(autosaveKey);
-      if (!saved) return;
+      if (!saved) return false;
       try {
         const data = JSON.parse(saved);
         restoreProgressData(data);
         autosaveStatus.textContent = "Progress restored from this browser.";
+        return true;
       } catch (error) {
         autosaveStatus.textContent = "Saved progress could not be restored.";
+        return false;
       }
     }
 
