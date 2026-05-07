@@ -647,6 +647,30 @@
       color: #516276;
     }
 
+    .completion-panel {
+      display: none;
+      margin: 20px 0 0;
+      padding: 20px;
+      border: 1px solid #bed7f2;
+      border-radius: 8px;
+      background: #f4f9ff;
+    }
+
+    .completion-panel.show {
+      display: block;
+    }
+
+    .completion-panel h3 {
+      margin-bottom: 8px;
+      color: #0d1b2c;
+      font-size: 1.15rem;
+    }
+
+    .completion-panel p {
+      margin: 0;
+      color: #516276;
+    }
+
     .video-studio {
       margin: 22px 0;
       border: 1px solid #d9e3ee;
@@ -1453,6 +1477,10 @@
               </div>
               <p class="video-status" id="recordingStatus">Complete the form, then generate the registration demo video.</p>
             </div>
+            <div class="completion-panel" id="completionPanel" aria-live="polite">
+              <h3>Thank you. Part A is ready for RightOnQ review.</h3>
+              <p>We will check the written registration details first. Once Part A has been reviewed, RightOnQ will prepare Part B, the review video, and send you a secure login so you can check and approve it.</p>
+            </div>
           </section>
 
           <div class="action-bar">
@@ -1463,6 +1491,7 @@
               <button type="button" class="btn secondary" id="jsonButton" hidden>Prepare Part A file</button>
               <button type="button" class="btn secondary" id="recordVideoNavButton" hidden>Generate video</button>
               <button type="button" class="btn primary" id="printButton" hidden>Save PDF copy</button>
+              <button type="button" class="btn primary" id="submitPartAButton" hidden>Send to RightOnQ and save copy</button>
             </div>
           </div>
         </form>
@@ -1572,6 +1601,7 @@
     const nextButton = document.getElementById("nextButton");
     const jsonButton = document.getElementById("jsonButton");
     const printButton = document.getElementById("printButton");
+    const submitPartAButton = document.getElementById("submitPartAButton");
     const recordVideoButton = document.getElementById("recordVideoButton");
     const recordVideoNavButton = document.getElementById("recordVideoNavButton");
     const saveProgressButton = document.getElementById("saveProgressButton");
@@ -1579,6 +1609,7 @@
     const autosaveStatus = document.getElementById("autosaveStatus");
     const reviewShell = document.getElementById("reviewShell");
     const toast = document.getElementById("toast");
+    const completionPanel = document.getElementById("completionPanel");
     const demoCanvas = document.getElementById("demoCanvas");
     const demoContext = demoCanvas.getContext("2d");
     const recordingStatus = document.getElementById("recordingStatus");
@@ -1696,6 +1727,7 @@
 
       backButton.addEventListener("click", () => showStep(Math.max(0, currentStep - 1)));
       jsonButton.addEventListener("click", exportJson);
+      submitPartAButton.addEventListener("click", submitPartA);
       printButton.addEventListener("click", () => {
         if (validateAllSteps()) window.print();
       });
@@ -2219,9 +2251,10 @@
       progressBar.style.width = `${percent}%`;
       backButton.hidden = index === 0;
       nextButton.hidden = index === steps.length - 1;
-      jsonButton.hidden = index !== steps.length - 1;
+      jsonButton.hidden = true;
       recordVideoNavButton.hidden = true;
-      printButton.hidden = index !== reviewStepIndex;
+      printButton.hidden = index !== steps.length - 1;
+      submitPartAButton.hidden = index !== steps.length - 1;
 
       if (index === reviewStepIndex) {
         renderReview();
@@ -2290,10 +2323,10 @@
     function validateAllSteps() {
       if (isDeveloperBypassEnabled()) return true;
 
-      for (let index = 0; index < steps.length - 1; index += 1) {
+      for (let index = 0; index < steps.length; index += 1) {
         if (!validateStep(index, false)) {
           showStep(index);
-          showToast("Please complete the highlighted fields before exporting.");
+          showToast("Please complete the highlighted fields before continuing.");
           return false;
         }
       }
@@ -3113,6 +3146,19 @@
 
     function exportJson() {
       if (!validateAllSteps()) return;
+      downloadPartAFile();
+      showToast("Part A file prepared for RightOnQ.");
+    }
+
+    function submitPartA() {
+      if (!validateAllSteps()) return;
+      downloadPartAFile();
+      completionPanel.classList.add("show");
+      completionPanel.scrollIntoView({ behavior: "smooth", block: "center" });
+      showToast("Part A file saved. RightOnQ review is the next step.");
+    }
+
+    function downloadPartAFile() {
       const data = collectData();
       const filenameBase = slugify(data.displayName || data.legalBusinessName || "rcs-sender");
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
@@ -3124,7 +3170,6 @@
       link.click();
       link.remove();
       URL.revokeObjectURL(url);
-      showToast("Part A file prepared for RightOnQ.");
     }
 
     function resetForm() {
