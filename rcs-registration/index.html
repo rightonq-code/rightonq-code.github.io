@@ -109,10 +109,7 @@
     }
 
     .hero {
-      display: grid;
-      grid-template-columns: minmax(0, 0.86fr) minmax(300px, 0.54fr);
-      gap: 42px;
-      align-items: end;
+      display: block;
       padding: 34px 0 28px;
     }
 
@@ -135,8 +132,8 @@
     }
 
     h1 {
-      max-width: 860px;
-      font-size: clamp(2.35rem, 5.3vw, 5.55rem);
+      max-width: 760px;
+      font-size: clamp(2.4rem, 4.2vw, 4.9rem);
     }
 
     .hero-copy {
@@ -144,19 +141,6 @@
       margin: 22px 0 0;
       color: var(--muted);
       font-size: clamp(1rem, 1.25vw, 1.15rem);
-    }
-
-    .source-note {
-      border-left: 3px solid var(--gold);
-      padding: 0 0 0 16px;
-      color: #d8e2ee;
-      font-size: 0.95rem;
-    }
-
-    .source-note strong {
-      display: block;
-      color: var(--ink);
-      margin-bottom: 5px;
     }
 
     .workflow {
@@ -167,15 +151,25 @@
       padding: 22px 0 64px;
     }
 
-    .progress-panel {
+    .progress-stack {
       position: sticky;
       top: 18px;
+      display: grid;
+      gap: 14px;
+      align-self: start;
+    }
+
+    .progress-panel {
       background: rgba(17, 31, 49, 0.88);
       border: 1px solid var(--line);
       border-radius: 8px;
       box-shadow: var(--shadow);
       padding: 18px;
       backdrop-filter: blur(18px);
+    }
+
+    .progress-panel.locked {
+      background: rgba(17, 31, 49, 0.72);
     }
 
     .progress-heading {
@@ -204,6 +198,11 @@
       border-radius: inherit;
       background: linear-gradient(90deg, var(--blue), var(--green));
       transition: width 0.22s ease;
+    }
+
+    .progress-meter.locked span {
+      width: 0;
+      background: rgba(186, 202, 221, 0.36);
     }
 
     .step-list {
@@ -261,6 +260,118 @@
     .step-tab.complete .step-index {
       background: var(--green);
       color: #06150f;
+    }
+
+    .future-step-list {
+      display: grid;
+      gap: 8px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .future-step {
+      display: grid;
+      grid-template-columns: 26px minmax(0, 1fr);
+      gap: 10px;
+      width: 100%;
+      align-items: center;
+      color: rgba(186, 202, 221, 0.68);
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 6px;
+      padding: 10px 8px;
+      text-align: left;
+      cursor: pointer;
+      font: inherit;
+      transition: border-color 0.16s ease, background 0.16s ease, color 0.16s ease;
+    }
+
+    .future-step:hover,
+    .future-step.active {
+      color: var(--ink);
+      background: rgba(63, 140, 255, 0.12);
+      border-color: rgba(142, 197, 255, 0.32);
+    }
+
+    .future-step.active .future-step-index {
+      background: rgba(142, 197, 255, 0.94);
+      color: #071324;
+    }
+
+    .future-step-index {
+      display: inline-grid;
+      place-items: center;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.06);
+      color: rgba(186, 202, 221, 0.7);
+      font-size: 0.8rem;
+      font-weight: 800;
+    }
+
+    .future-step-name {
+      display: block;
+      overflow-wrap: anywhere;
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .part-b-preview {
+      margin-top: 14px;
+      border: 1px solid rgba(142, 197, 255, 0.24);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.06);
+      padding: 14px;
+      color: var(--muted);
+    }
+
+    .part-b-preview h3 {
+      margin: 0 0 8px;
+      color: var(--ink);
+      font-size: 0.98rem;
+    }
+
+    .part-b-preview p {
+      margin: 0 0 10px;
+      line-height: 1.45;
+      font-size: 0.88rem;
+    }
+
+    .part-b-preview ul {
+      display: grid;
+      gap: 6px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .part-b-preview li {
+      position: relative;
+      padding-left: 16px;
+      font-size: 0.84rem;
+      line-height: 1.35;
+    }
+
+    .part-b-preview li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0.55em;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+    }
+
+    .part-b-preview-note {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      color: rgba(186, 202, 221, 0.78);
+      font-size: 0.78rem;
+      line-height: 1.35;
     }
 
     .form-panel {
@@ -905,12 +1016,18 @@
         grid-template-columns: 1fr;
       }
 
+      .progress-stack,
       .progress-panel {
         position: static;
       }
 
-      .step-list {
+      .step-list,
+      .future-step-list {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .part-b-preview {
+        grid-column: 1 / -1;
       }
     }
 
@@ -1015,32 +1132,65 @@
 <body>
   <header class="page-shell topbar">
     <a class="brand" href="index.html" aria-label="RightOnQ home">
-      <img src="images/rightonq-logo-transparent.png" alt="RightOnQ">
+      <img src="../images/rightonq-logo-transparent.png" alt="RightOnQ">
     </a>
-    <div class="topbar-meta">RCS Registration Studio<br>Provider registration prep</div>
+    <div class="topbar-meta">RCS Registration<br>Part A application</div>
   </header>
 
   <main class="page-shell">
     <section class="hero" aria-labelledby="page-title">
       <div>
-        <p class="eyebrow">RightOnQ client workspace</p>
-        <h1 id="page-title">RCS sender registration, packaged for review.</h1>
-        <p class="hero-copy">Use this studio to collect business details, brand assets, permission details, use case notes, and sign-off before RightOnQ prepares the RCS sender registration.</p>
+        <p class="eyebrow">RCS client application</p>
+        <h1 id="page-title">RCS sender registration</h1>
+        <p class="hero-copy">Complete Part A so RightOnQ can check your RCS registration details before Part B, the review video stage.</p>
       </div>
-      <aside class="source-note">
-        <strong>Built around carrier review needs</strong>
-        Built for RightOnQ-assisted RCS registration prep, with clear answers and review notes that make the client application easier to check before submission.
-      </aside>
     </section>
 
     <section class="workflow">
-      <aside class="progress-panel" aria-label="Form progress">
-        <div class="progress-heading">
-          <span>Progress</span>
-          <span id="progressText">Step 1 of 8</span>
-        </div>
-        <div class="progress-meter" aria-hidden="true"><span id="progressBar"></span></div>
-        <ol class="step-list" id="stepList"></ol>
+      <aside class="progress-stack" aria-label="Registration progress">
+        <section class="progress-panel" aria-label="Part A progress">
+          <div class="progress-heading">
+            <span>Part A progress</span>
+            <span id="progressText">Step 1 of 8</span>
+          </div>
+          <div class="progress-meter" aria-hidden="true"><span id="progressBar"></span></div>
+          <ol class="step-list" id="stepList"></ol>
+        </section>
+
+        <section class="progress-panel locked" aria-label="Part B progress">
+          <div class="progress-heading">
+            <span>Part B progress</span>
+            <span>Available after RightOnQ review</span>
+          </div>
+          <div class="progress-meter locked" aria-hidden="true"><span></span></div>
+          <ol class="future-step-list" id="partBStepList">
+            <li>
+              <button class="future-step active" type="button" data-part-b-preview="prepare" aria-pressed="true">
+                <span class="future-step-index">1</span>
+                <span class="future-step-name">RightOnQ prepares video</span>
+              </button>
+            </li>
+            <li>
+              <button class="future-step" type="button" data-part-b-preview="send" aria-pressed="false">
+                <span class="future-step-index">2</span>
+                <span class="future-step-name">Video sent to you</span>
+              </button>
+            </li>
+            <li>
+              <button class="future-step" type="button" data-part-b-preview="approve" aria-pressed="false">
+                <span class="future-step-index">3</span>
+                <span class="future-step-name">You approve video</span>
+              </button>
+            </li>
+            <li>
+              <button class="future-step" type="button" data-part-b-preview="submit" aria-pressed="false">
+                <span class="future-step-index">4</span>
+                <span class="future-step-name">Registration submitted</span>
+              </button>
+            </li>
+          </ol>
+          <div class="part-b-preview" id="partBPreview" aria-live="polite"></div>
+        </section>
       </aside>
 
           <section class="form-panel">
@@ -1068,7 +1218,7 @@
               </div>
               <div class="field">
                 <label for="tradingName">Trading name</label>
-                <p class="helper">Use this if the public brand differs, e.g. Continuity AI Ltd trading as RightOnQ.</p>
+                <p class="helper">The name people will see on RCS messages, e.g. Walkers instead of PepsiCo.</p>
                 <input id="tradingName" name="tradingName">
               </div>
               <div class="field">
@@ -1525,7 +1675,7 @@
       "How people agree",
       "UK launch scope",
       "Review",
-      "Sign-off"
+      "Send Part A"
     ];
 
     const schema = [
@@ -1612,6 +1762,8 @@
     const stepList = document.getElementById("stepList");
     const progressText = document.getElementById("progressText");
     const progressBar = document.getElementById("progressBar");
+    const partBPreview = document.getElementById("partBPreview");
+    const partBStepList = document.getElementById("partBStepList");
     const backButton = document.getElementById("backButton");
     const nextButton = document.getElementById("nextButton");
     const submitPartAButton = document.getElementById("submitPartAButton");
@@ -1661,6 +1813,48 @@
     let restoringProgress = false;
     const autosaveKey = "rightonq-rcs-registration-progress-v1";
     const progressSaveEnabled = true;
+    const partBPreviewContent = {
+      prepare: {
+        title: "Video preparation layout",
+        body: "RightOnQ uses the approved Part A details to prepare a review video that shows the RCS sender, the message experience, and how people can stop messages.",
+        items: [
+          "Logo, banner and sender name shown clearly",
+          "Example RCS messages based on the approved use case",
+          "Permission route and STOP handling included",
+          "Accessible review video link prepared"
+        ]
+      },
+      send: {
+        title: "Client review page layout",
+        body: "You receive a secure review page with the video player and the key details we need you to check before anything is submitted.",
+        items: [
+          "Video player at the top",
+          "Sender name, brand assets and contact details",
+          "Message examples and unsubscribe wording",
+          "Simple checklist of what to confirm"
+        ]
+      },
+      approve: {
+        title: "Video approval layout",
+        body: "You confirm that the video accurately represents the sender, the intended messages, and the opt-out route before RightOnQ uses it for registration.",
+        items: [
+          "Accuracy confirmation checkbox",
+          "Authorised approver name and role",
+          "Approval date",
+          "Approve Part B video button"
+        ]
+      },
+      submit: {
+        title: "Submission status layout",
+        body: "After approval, RightOnQ submits the registration pack with the video URL and keeps the client updated while the provider and carrier review takes place.",
+        items: [
+          "Part A registration details included",
+          "Approved Part B video URL included",
+          "Submission and review status shown",
+          "Approval outcome recorded"
+        ]
+      }
+    };
 
     function init() {
       document.querySelector(".save-panel").hidden = !progressSaveEnabled;
@@ -1681,6 +1875,12 @@
         if (targetStep <= currentStep || canMoveTo(targetStep)) {
           showStep(targetStep);
         }
+      });
+
+      partBStepList.addEventListener("click", event => {
+        const button = event.target.closest("[data-part-b-preview]");
+        if (!button) return;
+        renderPartBPreview(button.dataset.partBPreview);
       });
 
       form.addEventListener("input", event => {
@@ -1747,7 +1947,26 @@
       drawVideoPoster();
       const restoredProgress = progressSaveEnabled && restoreAutosavedProgress();
       updateSelectPlaceholders();
+      renderPartBPreview("prepare");
       if (!restoredProgress) showStep(0);
+    }
+
+    function renderPartBPreview(key) {
+      const content = partBPreviewContent[key] || partBPreviewContent.prepare;
+      document.querySelectorAll("[data-part-b-preview]").forEach(button => {
+        const isActive = button.dataset.partBPreview === key;
+        button.classList.toggle("active", isActive);
+        button.setAttribute("aria-pressed", String(isActive));
+      });
+      if (!partBPreview) return;
+      partBPreview.innerHTML = `
+        <h3>${content.title}</h3>
+        <p>${content.body}</p>
+        <ul>
+          ${content.items.map(item => `<li>${item}</li>`).join("")}
+        </ul>
+        <div class="part-b-preview-note">Part B stays locked until RightOnQ has reviewed and accepted the Part A information.</div>
+      `;
     }
 
     function updateSelectPlaceholders() {

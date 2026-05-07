@@ -523,6 +523,14 @@ Current form implication:
 - The form may need to remove or soften client-facing video URL fields because most clients will not have the review video ready at Part A.
 - Suggested future wording: RightOnQ will help prepare the review video after the registration details have been checked and approved.
 
+Part B video hosting follow-up:
+
+- Add a task to confirm the final hosting route for review videos before building the Part B workflow.
+- Current working assumption, based on Twilio/Google documentation checked so far: the review video can be hosted by RightOnQ on the client's behalf, provided the URL is accessible to reviewers and the client has authorised/approved the registration materials.
+- Likely hosting options: unlisted RightOnQ YouTube video, unlisted Vimeo/private-link video, or a RightOnQ-hosted review page/file URL.
+- Avoid making client compliance/review videos publicly browsable if possible.
+- Before final implementation, re-check official Twilio/Google wording around video URL access, brand authorisation, and agent management on behalf of a client.
+
 ## Important Working Rule Going Forward
 
 The user explicitly requested:
