@@ -6,7 +6,7 @@ Project: RightOnQ RCS Registration Studio
 Primary working file: `/Users/macpro/rightonq-code.github.io/rcs-registration/index.html`  
 Current local browser URL: `file:///Users/macpro/rightonq-code.github.io/rcs-registration/index.html`  
 Git branch: `rcs-registration-part-a-b-20260507`  
-Latest GitHub commit: `224e92d Update RCS handover with GitHub and hosting plan`  
+Handover/GitHub plan commit: `224e92d Update RCS handover with GitHub and hosting plan`  
 Initial RCS form commit: `4893751 Add standalone RCS registration form`
 
 ## Summary
