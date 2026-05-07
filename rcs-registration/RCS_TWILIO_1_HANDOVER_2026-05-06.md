@@ -1,9 +1,12 @@
 # RCS-Twilio-1 Handover Diary
 
-Date: Wednesday 6 May 2026  
+Started: Wednesday 6 May 2026  
+Last updated: Thursday 7 May 2026, 09:46 BST  
 Project: RightOnQ RCS Registration Studio  
-Primary working file: `/Users/macpro/rightonq-code.github.io/rcs-sender-registration.html`  
-Current browser URL: `file:///Users/macpro/rightonq-code.github.io/rcs-sender-registration.html`
+Primary working file: `/Users/macpro/rightonq-code.github.io/rcs-registration/index.html`  
+Current local browser URL: `file:///Users/macpro/rightonq-code.github.io/rcs-registration/index.html`  
+Git branch: `rcs-registration-part-a-b-20260507`  
+GitHub commit: `4893751 Add standalone RCS registration form`
 
 ## Summary
 
@@ -19,21 +22,29 @@ The major product direction settled today:
 
 ## Files Created Or Changed
 
-### Added
+### Added / Current RCS Folder
 
-- `/Users/macpro/rightonq-code.github.io/rcs-sender-registration.html`
+- `/Users/macpro/rightonq-code.github.io/rcs-registration/index.html`
   - Main static app.
   - Contains all HTML, CSS, and JavaScript inline.
   - No backend required.
 
-- `/Users/macpro/rightonq-code.github.io/RCS_TWILIO_1_HANDOVER_2026-05-06.md`
+- `/Users/macpro/rightonq-code.github.io/rcs-registration/RCS_TWILIO_1_HANDOVER_2026-05-06.md`
   - This handover document.
+
+- `/Users/macpro/rightonq-code.github.io/rcs-registration/README.md`
+  - Folder-specific README explaining that this is a standalone beta form.
+
+- `/Users/macpro/rightonq-code.github.io/rcs-registration/backups/rcs-registration/2026-05-07-0934/`
+  - Timestamped backup made on Thursday 7 May 2026 at approximately 09:34 BST.
+  - Includes a copy of the form as it existed before moving into the standalone folder.
+  - Includes a copy of the 6 May handover note.
 
 ### Existing Dirty File Not Touched By This Work
 
 - `/Users/macpro/rightonq-code.github.io/index.html`
-  - Was already modified before this work.
-  - Left untouched during this build.
+  - Was already modified outside the RCS commit scope.
+  - It was deliberately not staged, committed, or pushed as part of the RCS branch.
 
 ## Current Form Shape
 
@@ -43,7 +54,7 @@ The app is an 8-step form:
 2. Brand profile
 3. Sender contact details
 4. Use case declaration
-5. Opt-in and opt-out evidence
+5. How people agree
 6. UK launch scope
 7. Declaration and sign-off
 8. Registration pack
@@ -244,34 +255,39 @@ Important decision:
 
 Current box 38:
 
-`How did recipients agree to share their mobile number for RCS messages?`
+`How will people agree to share their mobile number for RCS messages?`
 
 Helper:
 
-`Choose the closest real method. This should match the consent record, screenshot, web page, or document we can provide if requested.`
+`Choose every place where people will agree to receive RCS messages. Pick the options that best match how the business already collects permission.`
 
-Dropdown options:
+Current control:
 
-- Website or online form
-- Customer account or portal
-- Booking, contract, or service record
+- Checkbox group, not a dropdown.
+- Users can choose more than one route because businesses may collect permission through more than one place.
+
+Checkbox options:
+
+- Website form
+- Customer account
+- Customer record
 - Event or in-person signup
-- Recorded in CRM/customer record
-- Staff/internal consent
+- Staff list
+- Other consent record
 
 Current behaviour:
 
-- User chooses an opt-in method.
+- User chooses one or more opt-in routes.
 - The app drafts:
-  - How recipients consented
   - Opt-in mechanism description
+  - Opt-out mechanism description
 - Drafts explicitly mention mobile numbers and RCS messages.
 
 Rationale:
 
 - Official wording asks for “how users opt in” and evidence, not literally “where phone numbers came from.”
 - But the user correctly observed that plain-English clients need to know this is about permission to use mobile numbers for RCS messages.
-- The current wording is the compromise: accurate to official requirement, but clear about mobile numbers.
+- The current wording is the compromise: accurate to official requirement, clear about mobile numbers, and not frightening to a normal business owner.
 
 Open caution:
 
@@ -344,7 +360,12 @@ The top save panel was initially too prominent and confusing. It was changed to 
 
 The visible “Start again” button was removed at the user’s request.
 
-Important limitation:
+Current development note:
+
+- Progress save/restore has been temporarily disabled in the live form during build/test because browser-saved stale values were interfering with user review.
+- The code still contains save/resume support and can be re-enabled later.
+
+Important limitation when re-enabled:
 
 - Autosave works only in the same browser/device.
 - Progress files can move between devices.
@@ -409,22 +430,97 @@ Current caveat:
 Repeated checks today:
 
 ```bash
-node -e "const fs=require('fs'); const html=fs.readFileSync('rcs-sender-registration.html','utf8'); const script=html.match(/<script>([\s\S]*)<\/script>/)[1]; new Function(script); console.log('inline script syntax ok');"
+node -e "const fs=require('fs'); const html=fs.readFileSync('rcs-registration/index.html','utf8'); const script=html.match(/<script>([\s\S]*)<\/script>/)[1]; new Function(script); console.log('inline script syntax ok');"
 ```
 
 Latest status:
 
 - Inline JavaScript syntax OK.
 
-## Git Status At End Of Day
+## Git / GitHub Status
 
-Observed:
+### End Of Wednesday 6 May 2026
 
 - `index.html` modified before this work.
 - `rcs-sender-registration.html` untracked/new.
 - This handover file untracked/new.
+- No commit made on 6 May.
 
-No commit made today.
+### Thursday 7 May 2026 Update
+
+- Created local branch: `rcs-registration-part-a-b-20260507`.
+- Moved the RCS work into a standalone folder: `/rcs-registration/`.
+- Committed only the `rcs-registration/` folder.
+- Pushed the branch to GitHub.
+- Commit: `4893751 Add standalone RCS registration form`.
+- PR creation URL:
+  `https://github.com/rightonq-code/rightonq-code.github.io/pull/new/rcs-registration-part-a-b-20260507`
+
+Important:
+
+- The unrelated root `index.html` remained modified but unstaged.
+- It was not included in the RCS commit.
+- This preserves a clean separation between the main RightOnQ website and the RCS registration form.
+
+## Standalone Hosting Plan
+
+The agreed direction is that the RCS form should remain independent from the main RightOnQ site.
+
+Near-term beta plan:
+
+- Publish the form through GitHub Pages using a GitHub-hosted address if possible.
+- Intended beta path: `/rcs-registration/`.
+- Example likely URL shape: `https://rightonq-code.github.io/rcs-registration/`, subject to GitHub Pages branch/source configuration.
+- This lets the user test the form from a mobile phone and experiment with real hosted behaviour before connecting it to the main site.
+
+Longer-term plan:
+
+- The main RightOnQ site can later add a simple button or external link to the RCS form.
+- The form itself should stay as a separate mini-application rather than being merged into the homepage.
+- A future production address could be a RightOnQ path or subdomain, for example `/rcs-registration/` or a registration-focused subdomain.
+
+## Part A / Part B Product Direction
+
+The registration workflow should be treated as two phases:
+
+### Part A: Sender Registration Details
+
+The current form is primarily Part A.
+
+It collects:
+
+- Business details
+- Brand profile
+- Sender contact details
+- Use case declaration
+- How people agree to receive messages
+- Opt-out handling
+- UK launch confirmation
+- Declaration/sign-off
+
+RightOnQ should review Part A first, check for weak or missing items, and get the client to sign off the written registration information.
+
+### Part B: Review Video
+
+The review video should be prepared after Part A is checked and approved.
+
+Reason:
+
+- If Part A changes, the video may become wrong.
+- If links, policy pages, message examples, or opt-in wording need correction, producing the video too early wastes time and money.
+- Once Part A is correct, RightOnQ can create a tailored video using the approved business name, display name, logo, banner, brand colour, example messages, opt-in route, and STOP handling.
+
+The user wants the videos to feel unique per client. Potential future direction:
+
+- Use client branding and specific message examples.
+- Vary voice/presenter/style where appropriate.
+- Avoid every client video looking identical.
+- Verify official Google/provider expectations before finalising the video workflow.
+
+Current form implication:
+
+- The form may need to remove or soften client-facing video URL fields because most clients will not have the review video ready at Part A.
+- Suggested future wording: RightOnQ will help prepare the review video after the registration details have been checked and approved.
 
 ## Important Working Rule Going Forward
 
@@ -437,7 +533,7 @@ The user explicitly requested:
 Recommended next agent behaviour:
 
 1. Read this handover.
-2. Inspect current `rcs-sender-registration.html`.
+2. Inspect current `/Users/macpro/rightonq-code.github.io/rcs-registration/index.html`.
 3. Ask before changing.
 4. Treat consent/opt-in wording as high-risk and source-sensitive.
 5. Keep client language human, not patronising, not technical.
@@ -474,4 +570,3 @@ The form should not ask clients to invent compliance language. It should:
 - and let RightOnQ review before submission.
 
 This is the shape that makes the tool feel valuable rather than bureaucratic.
-
