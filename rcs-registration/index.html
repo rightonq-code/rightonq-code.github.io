@@ -508,6 +508,43 @@
       background: var(--green);
     }
 
+    .part-b-checklist {
+      display: grid;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .part-b-check {
+      display: grid;
+      grid-template-columns: 22px minmax(0, 1fr);
+      gap: 10px;
+      align-items: start;
+      border: 1px solid #dbe6f2;
+      border-radius: 8px;
+      background: #f8fbff;
+      padding: 12px;
+    }
+
+    .part-b-check input {
+      width: 18px;
+      height: 18px;
+      margin-top: 2px;
+      accent-color: var(--green);
+    }
+
+    .part-b-check span {
+      display: block;
+      color: var(--field-text);
+      font-weight: 800;
+    }
+
+    .part-b-check small {
+      display: block;
+      margin-top: 3px;
+      color: var(--soft-text);
+      line-height: 1.35;
+    }
+
     .video-frame {
       display: grid;
       place-items: center;
@@ -2118,6 +2155,16 @@
         workspaceIntro: "This is the page the client would see once RightOnQ has prepared the review video. The purpose is simple: watch the video and check that the sender, examples, and unsubscribe route are correct.",
         stageTitle: "Secure video review",
         stageBody: "The client sees the hosted video link, a short summary of what is being reviewed, and the key checks before approval.",
+        checklistTitle: "Video review checklist",
+        checklistIntro: "Before approving the video, the client should tick each item or tell RightOnQ what needs correcting.",
+        checklistItems: [
+          ["Sender name", "The RCS sender name is spelt correctly and is the name customers will recognise."],
+          ["Logo and banner", "The brand assets look correct, clear and current."],
+          ["Message examples", "The sample messages are realistic for the way the business will use RCS."],
+          ["Permission route", "The video explains how people agreed to receive messages."],
+          ["Opt-out route", "The video shows that people can stop messages, without making STOP dominate the experience."],
+          ["Corrections", "Any changes needed before approval are written clearly for RightOnQ."]
+        ],
         items: [
           "Video player at the top",
           "Sender name, brand assets and contact details",
@@ -2303,6 +2350,7 @@
     function showPartBWorkspace(key) {
       const content = partBPreviewContent[key] || partBPreviewContent.prepare;
       const cards = content.cards || [];
+      const checklist = content.checklistItems || [];
       form.hidden = true;
       partBWorkspace.hidden = false;
       partBWorkspace.innerHTML = `
@@ -2352,6 +2400,20 @@
           </div>
         </div>
         <div class="part-b-support-grid">
+          ${checklist.length ? `
+            <div class="part-b-card">
+              <h3>${content.checklistTitle}</h3>
+              <p>${content.checklistIntro}</p>
+              <div class="part-b-checklist">
+                ${checklist.map((item, index) => `
+                  <label class="part-b-check">
+                    <input type="checkbox" name="partBCheck${index + 1}">
+                    <span>${item[0]}<small>${item[1]}</small></span>
+                  </label>
+                `).join("")}
+              </div>
+            </div>
+          ` : ""}
           <div class="part-b-card">
             <h3>What this stage must show</h3>
             <ul>
