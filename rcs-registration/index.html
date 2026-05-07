@@ -32,6 +32,10 @@
       box-sizing: border-box;
     }
 
+    [hidden] {
+      display: none !important;
+    }
+
     html {
       scroll-behavior: smooth;
     }
@@ -1488,8 +1492,6 @@
             <div class="button-row">
               <button type="button" class="btn secondary" id="backButton">Previous step</button>
               <button type="button" class="btn primary" id="nextButton">Next step</button>
-              <button type="button" class="btn secondary" id="jsonButton" hidden>Prepare Part A file</button>
-              <button type="button" class="btn secondary" id="recordVideoNavButton" hidden>Generate video</button>
               <button type="button" class="btn primary" id="printButton" hidden>Save PDF copy</button>
               <button type="button" class="btn primary" id="submitPartAButton" hidden>Send to RightOnQ and save copy</button>
             </div>
@@ -1599,11 +1601,9 @@
     const progressBar = document.getElementById("progressBar");
     const backButton = document.getElementById("backButton");
     const nextButton = document.getElementById("nextButton");
-    const jsonButton = document.getElementById("jsonButton");
     const printButton = document.getElementById("printButton");
     const submitPartAButton = document.getElementById("submitPartAButton");
     const recordVideoButton = document.getElementById("recordVideoButton");
-    const recordVideoNavButton = document.getElementById("recordVideoNavButton");
     const saveProgressButton = document.getElementById("saveProgressButton");
     const resumeFileInput = document.getElementById("resumeFileInput");
     const autosaveStatus = document.getElementById("autosaveStatus");
@@ -1726,13 +1726,11 @@
       });
 
       backButton.addEventListener("click", () => showStep(Math.max(0, currentStep - 1)));
-      jsonButton.addEventListener("click", exportJson);
       submitPartAButton.addEventListener("click", submitPartA);
       printButton.addEventListener("click", () => {
         if (validateAllSteps()) window.print();
       });
       recordVideoButton.addEventListener("click", generateDemoVideo);
-      recordVideoNavButton.addEventListener("click", generateDemoVideo);
       saveProgressButton.addEventListener("click", downloadProgressFile);
       resumeFileInput.addEventListener("change", restoreFromProgressFile);
 
@@ -2251,8 +2249,6 @@
       progressBar.style.width = `${percent}%`;
       backButton.hidden = index === 0;
       nextButton.hidden = index === steps.length - 1;
-      jsonButton.hidden = true;
-      recordVideoNavButton.hidden = true;
       printButton.hidden = index !== steps.length - 1;
       submitPartAButton.hidden = index !== steps.length - 1;
 
@@ -2466,7 +2462,6 @@
 
       recording = true;
       recordVideoButton.disabled = true;
-      recordVideoNavButton.disabled = true;
       recordingStatus.textContent = "Generating branded demo video...";
       videoOutput.classList.remove("show");
 
@@ -2485,7 +2480,6 @@
       } catch (error) {
         recording = false;
         recordVideoButton.disabled = false;
-        recordVideoNavButton.disabled = false;
         recordingStatus.textContent = "This browser could not start video recording. Try Chrome or Edge.";
         showToast("Video recording could not start in this browser.");
         return;
@@ -2506,7 +2500,6 @@
         downloadBlob(blob, filename);
         recordingStatus.textContent = "Demo video generated from this client registration pack.";
         recordVideoButton.disabled = false;
-        recordVideoNavButton.disabled = false;
         recording = false;
       };
 
