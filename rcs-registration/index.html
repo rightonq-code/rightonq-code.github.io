@@ -444,11 +444,58 @@
       align-items: start;
     }
 
+    .part-b-board.review-layout {
+      grid-template-columns: minmax(0, 1fr) minmax(320px, 0.95fr);
+      align-items: stretch;
+    }
+
     .part-b-support-grid {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 14px;
       margin-top: 18px;
+    }
+
+    .part-b-next-strip {
+      margin-top: 18px;
+      border: 1px solid #d9e4f0;
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: 0 18px 38px rgba(16, 35, 56, 0.08);
+      padding: 18px;
+    }
+
+    .part-b-next-strip h3 {
+      margin-bottom: 12px;
+      color: var(--field-text);
+      font-size: 1.08rem;
+    }
+
+    .part-b-next-strip ul {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .part-b-next-strip li {
+      position: relative;
+      padding-left: 20px;
+      color: var(--soft-text);
+      line-height: 1.42;
+    }
+
+    .part-b-next-strip li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0.5em;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--green);
     }
 
     .part-b-stage,
@@ -1415,6 +1462,10 @@
         grid-template-columns: 1fr;
       }
 
+      .part-b-next-strip ul {
+        grid-template-columns: 1fr;
+      }
+
       .storyboard-flow {
         grid-template-columns: 1fr;
       }
@@ -2225,9 +2276,9 @@
         workspaceTitle: "Part B storyboard",
         workspaceIntro: "This is the full Part B journey at a glance. Part B starts after RightOnQ has checked Part A and approved that the written registration details are ready to support the review video and RCS application.",
         storyboard: [
-          ["Part A accepted", "The written details are checked and ready to support the video."],
-          ["Video prepared", "RightOnQ builds the video from the approved sender details and examples."],
-          ["Video sent to client", "The client receives a secure review page and checklist."],
+          ["Part A accepted", "The submitted details are checked and ready to support the video."],
+          ["Video prepared", "RightOnQ builds the video from the sender details and examples."],
+          ["Video sent to client", "The client receives an online review link to watch the video and complete the checklist."],
           ["Client decision", "The client approves the video or asks for edits."],
           ["Submit registration", "The approved video URL goes into the registration pack."]
         ],
@@ -2253,9 +2304,10 @@
         title: "Review and approve video",
         body: "You receive a secure review page with the video, checklist and approval details in one place.",
         workspaceTitle: "Review and approve video",
-        workspaceIntro: "This is the page the client would see once RightOnQ has prepared the review video. They watch the video, check the details, request edits if needed, or approve it for the registration submission.",
+        workspaceIntro: "RightOnQ has prepared your review video. Please watch it carefully, check the details listed, and tick each item if you are happy to proceed. If anything needs changing, add notes and we will amend the video for you.",
         stageTitle: "Review video",
-        stageBody: "The client watches the hosted video and checks that it accurately represents the sender, message examples, permission route and opt-out route.",
+        stageBody: "Watch the hosted video and check that it accurately represents the sender, message examples, permission route and opt-out route.",
+        reviewLayout: true,
         checklistTitle: "Video review checklist",
         checklistIntro: "Tick each item before approving the video, or tell RightOnQ what needs correcting.",
         checklistItems: [
@@ -2272,16 +2324,9 @@
           "Client approves the video or requests edits",
           "Approved video URL is ready for submission"
         ],
-        cards: [
-          {
-            title: "Approval statement",
-            items: ["I have reviewed the video", "The sender identity is correct", "The message examples and opt-out route are accurate"]
-          },
-          {
-            title: "What happens next",
-            items: ["If edits are needed, RightOnQ updates the video", "If approved, the video URL is used for the registration pack", "Submission does not happen until approval"]
-          }
-        ]
+        nextTitle: "What happens next",
+        nextItems: ["If edits are needed, RightOnQ updates the video", "If approved, the video URL is used for the registration pack", "Submission does not happen until approval"],
+        hideSupportCards: true
       },
       submit: {
         title: "Submission status layout",
@@ -2430,7 +2475,7 @@
       const checklist = content.checklistItems || [];
       form.hidden = true;
       partBWorkspace.hidden = false;
-      const mainContent = content.storyboard ? renderPartBStoryboard(content) : renderPartBVisualWorkspace(content);
+      const mainContent = content.storyboard ? renderPartBStoryboard(content) : renderPartBVisualWorkspace(content, checklist);
       partBWorkspace.innerHTML = `
         <p class="step-kicker">Part B preview</p>
         <div class="part-b-workspace-head">
@@ -2441,6 +2486,7 @@
           <span class="preview-pill">Preview only</span>
         </div>
         ${mainContent}
+        ${content.nextItems ? renderPartBNextStrip(content) : ""}
         ${content.hideSupportCards ? "" : renderPartBSupportGrid(content, cards, checklist)}
         <div class="part-b-actions">
           <button type="button" class="btn secondary" id="returnToPartAButton">Return to Part A</button>
@@ -2503,9 +2549,60 @@
       `;
     }
 
-    function renderPartBVisualWorkspace(content) {
+    function renderPartBNextStrip(content) {
       return `
-        <div class="part-b-board">
+        <div class="part-b-next-strip">
+          <h3>${content.nextTitle}</h3>
+          <ul>
+            ${content.nextItems.map(item => `<li>${item}</li>`).join("")}
+          </ul>
+        </div>
+      `;
+    }
+
+    function renderPartBVisualWorkspace(content, checklist = []) {
+      const rightPanel = content.reviewLayout ? `
+        <div class="part-b-stage">
+          <h3>${content.checklistTitle}</h3>
+          <p>${content.checklistIntro}</p>
+          <div class="part-b-checklist">
+            ${checklist.map((item, index) => `
+              <label class="part-b-check">
+                <input type="checkbox" name="partBCheck${index + 1}">
+                <span>${item[0]}<small>${item[1]}</small></span>
+              </label>
+            `).join("")}
+          </div>
+        </div>
+      ` : `
+        <div class="part-b-stage">
+          <h3>Example RCS sender</h3>
+          <p>This example is copied from the RightOnQ RCS guide so the preview feels like a real branded message, not an admin placeholder.</p>
+          <div class="phone-demo" aria-label="Example RCS message preview">
+            <div class="phone-demo-header">
+              <span class="phone-demo-header-main">Hometown Brewery <span class="verified-dot">✓</span></span>
+              <small>Verified business sender</small>
+            </div>
+            <div class="phone-demo-body">
+              <div class="rcs-rich-card">
+                <div class="rcs-card-image" role="img" aria-label="Open Harvest bottled ale"></div>
+                <div class="rcs-card-body">
+                  <h4>Open Harvest</h4>
+                  <p>A traditional bottled ale for pubs, farm shops and independent retailers looking for a fresh seasonal line.</p>
+                  <div class="rcs-chip-row" aria-label="Example reply buttons">
+                    <span class="rcs-chip">Send sample case</span>
+                    <span class="rcs-chip">Arrange a visit</span>
+                    <span class="rcs-chip">Not for us</span>
+                  </div>
+                </div>
+              </div>
+              <div class="opt-out-line">Reply STOP to opt out.</div>
+            </div>
+          </div>
+        </div>
+      `;
+      return `
+        <div class="part-b-board ${content.reviewLayout ? "review-layout" : ""}">
           <div class="part-b-stage">
             <h3>${content.stageTitle}</h3>
             <p>${content.stageBody}</p>
@@ -2516,31 +2613,7 @@
               </div>
             </div>
           </div>
-          <div class="part-b-stage">
-            <h3>Example RCS sender</h3>
-            <p>This example is copied from the RightOnQ RCS guide so the preview feels like a real branded message, not an admin placeholder.</p>
-            <div class="phone-demo" aria-label="Example RCS message preview">
-              <div class="phone-demo-header">
-                <span class="phone-demo-header-main">Hometown Brewery <span class="verified-dot">✓</span></span>
-                <small>Verified business sender</small>
-              </div>
-              <div class="phone-demo-body">
-                <div class="rcs-rich-card">
-                  <div class="rcs-card-image" role="img" aria-label="Open Harvest bottled ale"></div>
-                  <div class="rcs-card-body">
-                    <h4>Open Harvest</h4>
-                    <p>A traditional bottled ale for pubs, farm shops and independent retailers looking for a fresh seasonal line.</p>
-                    <div class="rcs-chip-row" aria-label="Example reply buttons">
-                      <span class="rcs-chip">Send sample case</span>
-                      <span class="rcs-chip">Arrange a visit</span>
-                      <span class="rcs-chip">Not for us</span>
-                    </div>
-                  </div>
-                </div>
-                <div class="opt-out-line">Reply STOP to opt out.</div>
-              </div>
-            </div>
-          </div>
+          ${rightPanel}
         </div>
       `;
     }
