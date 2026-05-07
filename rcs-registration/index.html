@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>RightOnQ RCS Registration Studio</title>
-  <meta name="description" content="A RightOnQ client studio for preparing RCS Business Messaging sender registrations with intake, review exports, and branded demo video generation.">
+  <meta name="description" content="A RightOnQ client studio for preparing RCS Business Messaging sender registrations with intake, review exports, and sign-off.">
   <link rel="icon" type="image/png" href="favicon.png">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -979,11 +979,11 @@
       <div>
         <p class="eyebrow">RightOnQ client workspace</p>
         <h1 id="page-title">RCS sender registration, packaged for review.</h1>
-        <p class="hero-copy">Use this studio to collect business details, brand assets, consent evidence, use case notes, sign-off, and a client-branded demo video before RightOnQ prepares the RCS sender registration.</p>
+        <p class="hero-copy">Use this studio to collect business details, brand assets, permission details, use case notes, and sign-off before RightOnQ prepares the RCS sender registration.</p>
       </div>
       <aside class="source-note">
         <strong>Built around carrier review needs</strong>
-        Built for RightOnQ-assisted RCS registration prep, with exports and evidence that make the client application easier to review before submission.
+        Built for RightOnQ-assisted RCS registration prep, with clear answers and review notes that make the client application easier to check before submission.
       </aside>
     </section>
 
@@ -1184,8 +1184,8 @@
 
           <section class="step" data-step="2">
             <p class="step-kicker">Step 3</p>
-            <h2 class="step-title">Sender contact details</h2>
-            <p class="step-intro">These are the customer-facing contact routes shown on the sender profile.</p>
+            <h2 class="step-title">Contact details people will see</h2>
+            <p class="step-intro">These are the email, phone, website, privacy, and terms links people can use when they receive messages from the brand.</p>
             <div class="grid">
               <div class="field">
                 <label for="customerEmail">Customer-facing email <span class="required">*</span></label>
@@ -1228,7 +1228,7 @@
               <ul class="guidance-list">
                 <li>Choose the use case carefully; changing it later can mean another review.</li>
                 <li>Use examples that match what recipients will actually see.</li>
-                <li>The review video should show the recipient’s view, including STOP opt-out.</li>
+                <li>Use examples that match what recipients will actually see.</li>
               </ul>
             </div>
             <div class="grid">
@@ -1302,7 +1302,7 @@
             <p class="step-kicker">Step 5</p>
             <h2 class="step-title">Confirm How People Will Agree</h2>
             <p class="step-intro">This section confirms how people will agree to receive RCS messages, and how they can stop receiving them later.</p>
-            <div class="section-note">The review video can use mockups, a test device, or a screen recording. It should show opt-in, a sample message with the sender name, and opt-out, without exposing real customer data.</div>
+            <div class="section-note">This is Part A: confirm how people agree to receive messages and how they can stop them. RightOnQ will prepare any review material after these details have been checked.</div>
             <div class="grid">
               <div class="field full" data-checkbox-required="consentRoutes">
                 <span class="group-label">How will people agree to share their mobile number for RCS messages? <span class="required">*</span></span>
@@ -1330,24 +1330,9 @@
                 <p class="helper">We draft this around STOP handling. Edit it only if the opt-out flow is different.</p>
                 <textarea id="optOutDescription" name="optOutDescription" required></textarea>
               </div>
-              <div class="field">
-                <label for="optInEvidenceUrl">Opt-in evidence URL</label>
-                <p class="helper">Optional now, but carrier review may ask for a public page, screenshot, or document showing the opt-in.</p>
-                <input id="optInEvidenceUrl" name="optInEvidenceUrl" type="url" placeholder="https://example.com/opt-in-evidence">
-              </div>
-              <div class="field">
-                <label for="useCaseVideoUrl">Use case video URL</label>
-                <p class="helper">A publicly accessible review link, such as YouTube, Vimeo, Loom, or a hosted file.</p>
-                <input id="useCaseVideoUrl" name="useCaseVideoUrl" type="url" placeholder="https://example.com/review-video">
-              </div>
               <div class="field full">
-                <label for="videoEvidenceNotes">What the video shows</label>
-                <p class="helper">Briefly note whether the video shows opt-in, sample RCS messages, primary and secondary message examples, and STOP or unsubscribe handling.</p>
-                <textarea id="videoEvidenceNotes" name="videoEvidenceNotes"></textarea>
-              </div>
-              <div class="field full">
-                <label for="reviewerAccess">Reviewer access instructions</label>
-                <p class="helper">If reviewers need a test login or special steps, explain them here. Do not include live passwords in this form.</p>
+                <label for="reviewerAccess">Anything RightOnQ should know for review</label>
+                <p class="helper">Optional. Add anything that may help RightOnQ check the registration details or prepare the next stage.</p>
                 <textarea id="reviewerAccess" name="reviewerAccess" maxlength="500"></textarea>
                 <div class="char-count" data-count-for="reviewerAccess">0 / 500</div>
               </div>
@@ -1373,8 +1358,8 @@
                 <input id="organicTraffic" name="organicTraffic" type="number" min="0" inputmode="numeric">
               </div>
               <div class="field">
-                <label for="existingSmsTraffic">Current SMS or shortcode traffic</label>
-                <p class="helper">If none, write NONE. This helps explain whether RCS is replacing or adding to existing messaging.</p>
+                <label for="existingSmsTraffic">Do you already send text messages?</label>
+                <p class="helper">Optional. If yes, briefly say what kind of messages you send now. If not, write NONE.</p>
                 <input id="existingSmsTraffic" name="existingSmsTraffic" placeholder="NONE">
               </div>
             </div>
@@ -1384,6 +1369,7 @@
             <p class="step-kicker">Step 7</p>
             <h2 class="step-title">Declaration and sign-off</h2>
             <p class="step-intro">A named person should confirm the information is correct and authorised for registration.</p>
+            <div class="section-note">This completes Part A. RightOnQ will check the written registration details first, then prepare the review video as Part B once the information is approved.</div>
             <div class="grid">
               <div class="field full">
                 <label class="choice">
@@ -1418,22 +1404,22 @@
           <section class="step" data-step="7">
             <p class="step-kicker">Step 8</p>
             <h2 class="step-title">Registration pack</h2>
-            <p class="step-intro">Review the summary, save a PDF copy, and generate a branded demo video for the registration pack.</p>
+            <p class="step-intro">Review the Part A summary and save a copy for RightOnQ to check before the video stage begins.</p>
             <div class="pack-grid">
               <article class="pack-card">
-                <h3>What this creates</h3>
-                <p>A client-specific evidence pack: business data, sender profile details, consent notes, sample messages, validated asset filenames, and a representative review video.</p>
+                <h3>Part A registration details</h3>
+                <p>A client-specific registration pack: business data, sender profile details, permission notes, sample messages, validated asset filenames, and sign-off.</p>
               </article>
               <article class="pack-card">
                 <h3>RightOnQ admin file</h3>
                 <p>This is for RightOnQ only. It downloads the completed answers in a format we can import or copy into the provider registration.</p>
               </article>
               <article class="pack-card">
-                <h3>Hosting step</h3>
-                <p>The generated video is downloaded locally. RightOnQ can then host it as an unlisted/public URL and paste that URL into the registration flow.</p>
+                <h3>Part B review video</h3>
+                <p>RightOnQ will prepare the review video separately after the written registration details have been checked and approved.</p>
               </article>
             </div>
-            <div class="video-studio" aria-labelledby="videoStudioTitle">
+            <div class="video-studio" aria-labelledby="videoStudioTitle" hidden>
               <div class="video-studio-head">
                 <div>
                   <h3 id="videoStudioTitle">Branded review video generator</h3>
@@ -1482,7 +1468,7 @@
     const steps = [
       "Business details",
       "Brand profile",
-      "Sender contacts",
+      "Contact details",
       "Use case",
       "How people agree",
       "UK launch scope",
@@ -1525,7 +1511,7 @@
         ]
       },
       {
-        title: "Sender contact details",
+        title: "Contact details people will see",
         fields: [
           ["Customer-facing email", "customerEmail"],
           ["Customer-facing phone", "customerPhone"],
@@ -1555,10 +1541,7 @@
           ["How people will agree", "consentRoute"],
           ["Opt-in description", "optInDescription"],
           ["Opt-out mechanism", "optOutDescription"],
-          ["Opt-in evidence URL", "optInEvidenceUrl"],
-          ["Use case video URL", "useCaseVideoUrl"],
-          ["What the video shows", "videoEvidenceNotes"],
-          ["Reviewer access instructions", "reviewerAccess"]
+          ["Anything RightOnQ should know for review", "reviewerAccess"]
         ]
       },
       {
@@ -1567,7 +1550,7 @@
           ["Intended sending regions", "regions"],
           ["UK-only confirmation", "ukLaunchConfirmation"],
           ["Monthly organic website traffic", "organicTraffic"],
-          ["Current SMS or shortcode traffic", "existingSmsTraffic"]
+          ["Existing text messaging", "existingSmsTraffic"]
         ]
       },
       {
@@ -1611,7 +1594,9 @@
       authorizedRepEmail: false,
       notificationEmail: false,
       customerEmail: false,
-      customerPhone: false
+      customerPhone: false,
+      signatoryName: false,
+      signatoryTitle: false
     };
     const draftedFieldTouched = {};
     const draftedFieldIds = [
@@ -1623,7 +1608,6 @@
       "stopSampleMessage",
       "optInDescription",
       "optOutDescription",
-      "videoEvidenceNotes",
       "reviewerAccess"
     ];
     const draftStateKey = "_draftedFieldTouched";
@@ -1957,8 +1941,7 @@
         stopSampleMessage: `You have been unsubscribed from ${brand} messages. You will not receive further messages from this sender unless you opt in again.`,
         optInDescription: consentDraft.optIn,
         optOutDescription: `Recipients can opt out by replying STOP. When STOP is received, ${brand} stops sending messages to that recipient and sends a confirmation that they have been unsubscribed.`,
-        videoEvidenceNotes: "The review video should show the opt-in route, the sender profile, at least one sample message, any links or reply options used, and the STOP unsubscribe flow.",
-        reviewerAccess: "RightOnQ will provide a hosted review video and any test instructions needed for registration review. No real customer data is used in the review materials."
+        reviewerAccess: "RightOnQ will check these details first and prepare the review video separately after the written registration information is approved. No real customer data is used in the review materials."
       };
 
       return drafts[id] || "";
@@ -2154,16 +2137,23 @@
       const primaryEmail = document.getElementById("primaryContactEmail");
       const repName = document.getElementById("authorizedRepName");
       const repEmail = document.getElementById("authorizedRepEmail");
+      const repTitle = document.getElementById("authorizedRepTitle");
       const notificationEmail = document.getElementById("notificationEmail");
       const primaryPhone = document.getElementById("primaryContactPhone");
       const customerEmail = document.getElementById("customerEmail");
       const customerPhone = document.getElementById("customerPhone");
+      const signatoryName = document.getElementById("signatoryName");
+      const signatoryTitle = document.getElementById("signatoryTitle");
 
       repName.addEventListener("input", () => {
         representativeTouched.authorizedRepName = repName.value.trim() !== primaryName.value.trim();
+        syncRepresentativeField(repName, signatoryName, "signatoryName");
       });
       repEmail.addEventListener("input", () => {
         representativeTouched.authorizedRepEmail = repEmail.value.trim() !== primaryEmail.value.trim();
+      });
+      repTitle.addEventListener("input", () => {
+        syncRepresentativeField(repTitle, signatoryTitle, "signatoryTitle");
       });
       notificationEmail.addEventListener("input", () => {
         representativeTouched.notificationEmail = notificationEmail.value.trim() !== primaryEmail.value.trim();
@@ -2174,8 +2164,17 @@
       customerPhone.addEventListener("input", () => {
         representativeTouched.customerPhone = customerPhone.value.trim() !== primaryPhone.value.trim();
       });
+      signatoryName.addEventListener("input", () => {
+        representativeTouched.signatoryName = signatoryName.value.trim() !== repName.value.trim();
+      });
+      signatoryTitle.addEventListener("input", () => {
+        representativeTouched.signatoryTitle = signatoryTitle.value.trim() !== repTitle.value.trim();
+      });
 
-      primaryName.addEventListener("input", () => syncRepresentativeField(primaryName, repName, "authorizedRepName"));
+      primaryName.addEventListener("input", () => {
+        syncRepresentativeField(primaryName, repName, "authorizedRepName");
+        syncRepresentativeField(repName, signatoryName, "signatoryName");
+      });
       primaryEmail.addEventListener("input", () => {
         syncRepresentativeField(primaryEmail, repEmail, "authorizedRepEmail");
         syncRepresentativeField(primaryEmail, notificationEmail, "notificationEmail");
@@ -2187,6 +2186,8 @@
       syncRepresentativeField(primaryEmail, notificationEmail, "notificationEmail");
       syncRepresentativeField(primaryEmail, customerEmail, "customerEmail");
       syncRepresentativeField(primaryPhone, customerPhone, "customerPhone");
+      syncRepresentativeField(repName, signatoryName, "signatoryName");
+      syncRepresentativeField(repTitle, signatoryTitle, "signatoryTitle");
     }
 
     function syncRepresentativeField(source, target, touchedKey) {
@@ -2220,7 +2221,7 @@
       backButton.hidden = index === 0;
       nextButton.hidden = index === steps.length - 1;
       jsonButton.hidden = index !== steps.length - 1;
-      recordVideoNavButton.hidden = index !== steps.length - 1;
+      recordVideoNavButton.hidden = true;
       printButton.hidden = index !== steps.length - 1;
 
       if (index === steps.length - 1) {
@@ -3061,6 +3062,8 @@
       representativeTouched.notificationEmail = Boolean(document.getElementById("notificationEmail").value.trim());
       representativeTouched.customerEmail = Boolean(document.getElementById("customerEmail").value.trim());
       representativeTouched.customerPhone = Boolean(document.getElementById("customerPhone").value.trim() && document.getElementById("customerPhone").value.trim() !== "+44");
+      representativeTouched.signatoryName = Boolean(document.getElementById("signatoryName").value.trim());
+      representativeTouched.signatoryTitle = Boolean(document.getElementById("signatoryTitle").value.trim());
 
       updateConsentRouteExplanation();
       updateCharacterCounts();
@@ -3137,6 +3140,8 @@
       representativeTouched.notificationEmail = false;
       representativeTouched.customerEmail = false;
       representativeTouched.customerPhone = false;
+      representativeTouched.signatoryName = false;
+      representativeTouched.signatoryTitle = false;
       senderDescriptionTouched = false;
       displayNameTouched = false;
       draftedFieldIds.forEach(id => { draftedFieldTouched[id] = false; });
