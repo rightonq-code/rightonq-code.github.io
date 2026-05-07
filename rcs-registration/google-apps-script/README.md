@@ -30,6 +30,22 @@ Tab:
 const partASubmissionEndpoint = "PASTE_WEB_APP_URL_HERE";
 ```
 
+## Current Deployment
+
+Apps Script project:
+
+https://script.google.com/d/1RUuIglGVcVpNSveeXlzw6O0wJ_A5QTtGCHwRMrJoUSSiyZ0TD_DD9ad8/edit
+
+Live web app URL:
+
+https://script.google.com/macros/s/AKfycbyI81Ir2xvHLar0R0iFBBWyXa1Nj93T4_8Ni5_eX3XEYDA-AKQbVYbPHnTROLm8e4a6/exec
+
+Deployment:
+
+- Execute as: `adam@rightonq.co.uk`
+- Access: `Anyone`
+- Current published version after CLI redeploy: `3`
+
 ## Behaviour
 
 The static form posts the Part A JSON payload to the Web app URL.

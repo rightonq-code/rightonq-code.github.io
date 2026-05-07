@@ -28,29 +28,29 @@ function doPost(event) {
       now,
       submissionId,
       "New",
-      firstValue(payload.displayName, payload.tradingName, payload.legalBusinessName),
-      payload.legalBusinessName || "",
-      payload.tradingName || "",
-      payload.displayName || "",
-      payload.companiesHouseNumber || "",
-      payload.businessWebsite || "",
-      payload.primaryContactName || "",
-      payload.primaryContactEmail || "",
-      payload.primaryContactPhone || "",
-      payload.authorizedRepName || "",
-      payload.authorizedRepEmail || "",
-      payload.businessIndustry || "",
-      payload.primaryUseCase || "",
-      payload.monthlyVolume || "",
-      countries.join(", "),
+      safeCell(firstValue(payload.displayName, payload.tradingName, payload.legalBusinessName)),
+      safeCell(payload.legalBusinessName),
+      safeCell(payload.tradingName),
+      safeCell(payload.displayName),
+      safeCell(payload.companiesHouseNumber),
+      safeCell(payload.businessWebsite),
+      safeCell(payload.primaryContactName),
+      safeCell(payload.primaryContactEmail),
+      safeCell(payload.primaryContactPhone),
+      safeCell(payload.authorizedRepName),
+      safeCell(payload.authorizedRepEmail),
+      safeCell(payload.businessIndustry),
+      safeCell(payload.primaryUseCase),
+      safeCell(payload.monthlyVolume),
+      safeCell(countries.join(", ")),
       usSelected,
       usSelected === "Yes" ? "Not yet agreed" : "Not applicable",
-      payload.organicTraffic || "",
-      payload.existingSmsTraffic || "",
-      payload.privacyPolicyUrl || "",
-      payload.termsUrl || "",
-      asList(payload.consentRoute).join(", "),
-      payload.optOutDescription || "",
+      safeCell(payload.organicTraffic),
+      safeCell(payload.existingSmsTraffic),
+      safeCell(payload.privacyPolicyUrl),
+      safeCell(payload.termsUrl),
+      safeCell(asList(payload.consentRoute).join(", ")),
+      safeCell(payload.optOutDescription),
       JSON.stringify(payload),
       "",
       "Not started",
@@ -128,6 +128,12 @@ function firstValue() {
     if (arguments[i]) return arguments[i];
   }
   return "";
+}
+
+function safeCell(value) {
+  if (value === null || value === undefined) return "";
+  const text = String(value);
+  return /^[=+\-@]/.test(text) ? "'" + text : text;
 }
 
 function jsonResponse(data) {
