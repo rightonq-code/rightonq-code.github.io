@@ -562,13 +562,29 @@
 
     .part-b-check {
       display: grid;
-      grid-template-columns: 22px minmax(0, 1fr);
+      grid-template-columns: 28px 22px minmax(0, 1fr);
       gap: 10px;
       align-items: start;
       border: 1px solid #dbe6f2;
       border-radius: 8px;
       background: #f8fbff;
       padding: 12px;
+    }
+
+    .part-b-check-number {
+      display: inline-grid;
+      place-items: center;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: #e8f2ff;
+      color: #18416f;
+      font-size: 0.78rem;
+      font-weight: 900;
+    }
+
+    .part-b-check-number.empty {
+      background: transparent;
     }
 
     .part-b-check input {
@@ -612,6 +628,17 @@
 
     .part-b-check:has(input:checked) .part-b-correction-notes {
       display: block;
+    }
+
+    .part-b-review-action {
+      display: none;
+      margin-top: 14px;
+      width: 100%;
+    }
+
+    .part-b-review-action.show {
+      display: inline-flex;
+      justify-content: center;
     }
 
     .storyboard-flow {
@@ -2324,14 +2351,14 @@
       },
       send: {
         title: "Review and approve video",
-        body: "You receive a secure review page with the video, checklist and approval details in one place.",
+        body: "You receive an online review page with the video, checklist and approval details in one place.",
         workspaceTitle: "Review and approve video",
         workspaceIntro: "RightOnQ has prepared your review video. Please watch it carefully, check the details listed, and tick each item if you are happy to proceed. If anything needs changing, add notes and we will amend the video for you.",
         stageTitle: "Review video",
         stageBody: "Watch the hosted video and check that it accurately represents the sender, message examples, permission route and opt-out route.",
         reviewLayout: true,
         checklistTitle: "Video review checklist",
-        checklistIntro: "Tick each item before approving the video, or tell RightOnQ what needs correcting.",
+        checklistIntro: "Please watch the video first. If you are happy with it, tick items 1 to 5 and send your approval to RightOnQ. If anything needs changing, tick Changes needed and tell us what to amend.",
         checklistItems: [
           ["Sender name", "The RCS sender name is spelt correctly and is the name customers will recognise."],
           ["Logo and banner", "The brand assets look correct, clear and current."],
@@ -2341,7 +2368,7 @@
           ["Changes needed", "Tick this only if something needs amending before approval.", "notes"]
         ],
         items: [
-          "Video player and sender example are shown",
+          "Video player and checklist are shown",
           "Client checklist is completed",
           "Client approves the video or requests edits",
           "Approved video URL is ready for submission"
@@ -2518,7 +2545,26 @@
         </div>
       `;
       document.getElementById("returnToPartAButton").addEventListener("click", showPartAWorkspace);
+      if (content.reviewLayout) {
+        partBWorkspace.addEventListener("change", updatePartBReviewAction);
+        const reviewButton = document.getElementById("partBReviewActionButton");
+        reviewButton.addEventListener("click", () => {
+          const changesNeeded = Boolean(partBWorkspace.querySelector("[data-change-needed]:checked"));
+          showToast(changesNeeded ? "Changes noted for RightOnQ." : "Video approval noted for RightOnQ.");
+        });
+        updatePartBReviewAction();
+      }
       document.querySelector(".workflow").scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function updatePartBReviewAction() {
+      const actionButton = document.getElementById("partBReviewActionButton");
+      if (!actionButton) return;
+      const requiredChecks = Array.from(partBWorkspace.querySelectorAll("[data-approval-check]"));
+      const changesNeeded = Boolean(partBWorkspace.querySelector("[data-change-needed]:checked"));
+      const allApproved = requiredChecks.length > 0 && requiredChecks.every(input => input.checked);
+      actionButton.classList.toggle("show", changesNeeded || allApproved);
+      actionButton.textContent = changesNeeded ? "Send changes for amendment" : "Send approval to RightOnQ";
     }
 
     function renderPartBStoryboard(content) {
@@ -2593,7 +2639,8 @@
           <div class="part-b-checklist">
             ${checklist.map((item, index) => `
               <label class="part-b-check">
-                <input type="checkbox" name="partBCheck${index + 1}">
+                <span class="part-b-check-number ${item[2] === "notes" ? "empty" : ""}">${item[2] === "notes" ? "" : index + 1}</span>
+                <input type="checkbox" name="partBCheck${index + 1}" ${item[2] === "notes" ? "data-change-needed" : "data-approval-check"}>
                 <span>
                   ${item[0]}
                   <small>${item[1]}</small>
@@ -2607,6 +2654,7 @@
               </label>
             `).join("")}
           </div>
+          <button type="button" class="btn primary part-b-review-action" id="partBReviewActionButton">Send approval to RightOnQ</button>
         </div>
       ` : `
         <div class="part-b-stage">
