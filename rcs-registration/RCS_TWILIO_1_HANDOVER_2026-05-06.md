@@ -1,13 +1,445 @@
 # RCS-Twilio-1 Handover Diary
 
 Started: Wednesday 6 May 2026  
-Last updated: Thursday 7 May 2026, 09:46 BST  
+Last updated: Thursday 7 May 2026, 20:25 BST
 Project: RightOnQ RCS Registration Studio  
 Primary working file: `/Users/macpro/rightonq-code.github.io/rcs-registration/index.html`  
 Current local browser URL: `file:///Users/macpro/rightonq-code.github.io/rcs-registration/index.html`  
 Git branch: `rcs-registration-part-a-b-20260507`  
+Latest pushed app commit before this handover: `f04c22f Refine RCS registration Part B flow`
 Handover/GitHub plan commit: `224e92d Update RCS handover with GitHub and hosting plan`  
 Initial RCS form commit: `4893751 Add standalone RCS registration form`
+
+## End Of Day 2 Diary - Thursday 7 May 2026, 20:25 BST
+
+This section is the current state of play and supersedes older notes below where they conflict. Earlier notes are retained for history because they explain why the form took its current shape.
+
+### Recovery Status
+
+The RCS registration work is safely pushed to GitHub.
+
+Repository:
+
+- `rightonq-code/rightonq-code.github.io`
+
+Branch:
+
+- `rcs-registration-part-a-b-20260507`
+
+Latest confirmed app commit before this handover:
+
+- `f04c22f Refine RCS registration Part B flow`
+
+Files confirmed on GitHub by a second agent:
+
+- `rcs-registration/index.html`
+- `images/rightonq-landscape-glow-logo.png`
+
+The Chrome/GitHub verification agent confirmed:
+
+- the branch exists,
+- commit `f04c22f` is the latest visible commit,
+- `rcs-registration/index.html` is visible at 4,669 lines / 176 KB,
+- `images/rightonq-landscape-glow-logo.png` is visible at approximately 2 MB.
+
+If this computer, Codex Desktop, or the current context window fails, another agent can recover the current RCS registration work from that branch.
+
+Important caveat:
+
+- The root site file `/Users/macpro/rightonq-code.github.io/index.html` is still locally modified and unrelated.
+- It was deliberately not staged, committed, or pushed as part of the RCS work.
+- Continue to avoid staging it unless the user explicitly asks to work on the main website.
+
+### Current Local / Git Status At Handover
+
+Working directory:
+
+- `/Users/macpro/rightonq-code.github.io`
+
+Current branch:
+
+- `rcs-registration-part-a-b-20260507`
+
+Expected status after the last push:
+
+- branch is up to date with `origin/rcs-registration-part-a-b-20260507`;
+- only unrelated root `index.html` remains modified locally.
+
+Commands used repeatedly for verification:
+
+```bash
+node -e "const fs=require('fs'); const html=fs.readFileSync('rcs-registration/index.html','utf8'); const match=html.match(/<script>([\s\S]*)<\/script>/); new Function(match[1]); console.log('script syntax ok');"
+git diff --check -- rcs-registration/index.html
+```
+
+Both checks passed before the latest push.
+
+### High-Level Product State
+
+The project is now a standalone RightOnQ RCS registration application, not part of the main marketing homepage.
+
+Current file:
+
+- `/Users/macpro/rightonq-code.github.io/rcs-registration/index.html`
+
+Browser URL:
+
+- `file:///Users/macpro/rightonq-code.github.io/rcs-registration/index.html`
+
+Intended beta hosting shape:
+
+- GitHub Pages / standalone branch/path first.
+- Later, the main RightOnQ website can link out to the registration app.
+- The app should remain independent rather than being merged into the homepage.
+
+The app now presents the journey as two phases:
+
+- **Part A**: client completes registration details and sends the Part A pack to RightOnQ.
+- **Part B**: RightOnQ prepares the review video, client reviews/approves it, then registration is submitted and monitored.
+
+### Part A Current Shape
+
+Part A has 8 visible steps:
+
+1. Business details
+2. Brand profile
+3. Contact details people will see
+4. Use case declaration
+5. How people agree
+6. RCS launch markets
+7. Review
+8. Send Part A
+
+Key current behaviours:
+
+- Continuous field numbering runs across the form.
+- `ROQ` / `R-O-Q` in legal business name still acts as a testing bypass.
+- Browser autosave is re-enabled.
+- Save progress file / resume from file remains available.
+- UK is ticked by default in Step 6.
+- United States is not ticked by default, but may appear ticked in the user browser because autosave restores test selections.
+
+### Review / Sign-Off Improvements
+
+Step 7 Review now has one `Edit section` button per review card.
+
+Behaviour:
+
+- Button takes the user straight back to the relevant step.
+- Existing answers remain intact.
+- This avoids noisy per-field edit controls while still giving an HMRC-style correction route.
+
+### Step 6: RCS Launch Markets
+
+The old `UK launch scope` wording was replaced.
+
+Current title:
+
+- `RCS launch markets`
+
+Current main instruction:
+
+- `RightOnQ is currently preparing RCS sender registrations for UK-registered companies. Choose the countries where your business expects to send RCS messages.`
+
+Current field label:
+
+- `Destination countries for your RCS messages`
+
+The form now uses individual destination country checkboxes based on Twilio's RCS onboarding country list, rather than vague regions.
+
+Countries/options currently shown:
+
+- United Kingdom - checked by default
+- Austria
+- Belgium
+- Czech Republic
+- Denmark
+- Finland / Aland Islands
+- France
+- Germany
+- Ireland
+- Italy
+- Mexico
+- Netherlands
+- Norway
+- Poland
+- Portugal
+- Romania
+- Slovakia
+- Sweden
+- United States
+
+Each non-US option states:
+
+- `No known RCS sender onboarding fee.`
+
+United States is marked with a red asterisk and warning:
+
+- Known extra onboarding fees apply.
+
+Current US cost note:
+
+- `United States registration currently carries third-party/carrier onboarding fees of up to $700 initially and $200 annually per RCS Sender, based on current provider guidance. Selecting United States does not take payment today. RightOnQ will confirm the current fees before any US carrier submission is made, and US registration will only proceed once those fees have been agreed and paid. Some US fees may still apply even if approval is not granted.`
+
+Source logic:
+
+- Twilio asks for selected recipient/destination countries during onboarding.
+- US has extra RCS sender onboarding fees based on Twilio Help / US RCS guidance.
+- Non-US RCS sender onboarding fees are not currently published/known in the same way.
+
+Important wording principle:
+
+- Do not use `North America` casually because it hides the US fee problem.
+- Do not include `Not sure yet`; it creates a review headache and does not map cleanly to final provider submission.
+
+Conditional US fields:
+
+- Boxes 43/44 only appear if `United States` is ticked.
+- When shown, they are required.
+- They are hidden from the Review page if United States is not selected.
+
+Box 43:
+
+- `Approximate monthly website visitors`
+- Helper: `Needed for United States registration. US carriers ask for website traffic linked to this use case. This is overall website traffic, not US visitors only.`
+
+Box 44:
+
+- `Existing US messaging activity`
+- Helper: `Needed for United States registration. US carriers ask whether the business already uses Short Code, Toll-Free, 10DLC, SMS, or similar messaging. Choose the closest match.`
+
+### Part A Completion Message
+
+After pressing `SEND to RightOnQ`, the completion panel says Part A has been sent and the copy saved.
+
+It now invites the user to look at Part B without layout-specific wording:
+
+- `Select 1 Part B storyboard to see the next stage.`
+
+The `1` is shown as a small circular badge. The surrounding text inherits the same typography as the rest of the paragraph.
+
+### Part B Progress / Navigation
+
+Part B panel is visible from the start so clients understand the whole journey.
+
+Current Part B progress heading:
+
+- `Video stage after Part A`
+
+Part B has 3 steps:
+
+1. Part B storyboard
+2. Review and approve video
+3. Registration submitted
+
+The earlier lower preview card in the left rail was removed because it distracted the user and duplicated the right-hand workspace.
+
+The `Return to Part A` button was removed from Part B pages.
+
+### Part B1: Storyboard
+
+Current purpose:
+
+- Explain Part B before the client reaches it.
+- Show the full journey from Part A accepted through video preparation, review, edits if needed, and submission.
+
+Current B1 intro includes:
+
+- RightOnQ prepares the review video on the client's behalf.
+- The video forms part of the RCS sender approval process.
+- RightOnQ structures it around what reviewers expect to see.
+- This reduces avoidable questions, corrections and delays during review.
+
+Official wording preference:
+
+- Use `RCS sender approval`, not `licence`, unless official docs require the other term.
+
+### Part B2: Review And Approve Video
+
+B2 now behaves like a client-facing review page.
+
+Layout:
+
+- Left: review video area / what happens next.
+- Right: numbered video review checklist.
+
+Checklist intro:
+
+- Watch the video first.
+- If happy, tick items 1 to 5.
+- If anything needs changing, tick `Changes needed` and add notes.
+
+Checklist items:
+
+1. Sender name
+2. Logo and banner
+3. Message examples
+4. Permission route
+5. Opt-out route
+
+`Changes needed` is unnumbered.
+
+Button behaviour:
+
+- If items 1-5 are all ticked and `Changes needed` is not ticked, button appears as `Send approval to RightOnQ`.
+- If `Changes needed` is ticked, button appears as `Send changes for amendment`.
+
+Recent visual fix:
+
+- The numbered checklist circles were misaligned because a generic `.part-b-check span` CSS rule was fighting the badge layout.
+- Fixed by giving the text its own `.part-b-check-text` class and keeping the number badge separate.
+
+### Part B3: Registration Submitted
+
+B3 was heavily redesigned today.
+
+Current top title:
+
+- `Registration submitted`
+
+Current intro:
+
+- `Your RCS registration pack has been submitted for provider and carrier review. This is the final approval stage before your business can start sending approved RCS messages.`
+
+The old generic `Part B preview` kicker was removed.
+
+Left-hand status card:
+
+- Green status pill: `Submitted for review`
+- Heading: `Now the review work begins`
+- Paragraph 1:
+  - `The registration pack now goes through provider and carrier checks, including the review video, brand details, message examples, permission route and opt-out route.`
+- Paragraph 2:
+  - `Once approved, RCS helps your business appear as a recognised branded contact in customers' messaging apps, with richer message layouts, clearer reply options and more trust than a plain text message.`
+
+Timeline items:
+
+1. What happens now
+2. Typical review time
+3. Why this matters
+4. RightOnQ keeps watch
+
+Typical review time currently says:
+
+- `Review times vary by market and carrier. As a guide, allow around 4-6 weeks, although some applications may move faster or need follow-up questions.`
+
+Right-hand side:
+
+- A dark `Brewery launch example.` panel.
+- It now emulates the carousel style from the main RightOnQ page.
+- It uses Hometown Brewery as the example.
+- It has a live 3-card carousel with arrows and dots.
+
+Carousel cards:
+
+1. Open Harvest
+   - Copy: `A traditional bottled ale for pubs, farm shops and independent retailers looking for a fresh seasonal line.`
+   - Buttons: `Send sample case`, `Arrange a visit`, `Not for us`
+2. June 2026 launch event
+   - Copy: `Invite selected buyers to the Open Harvest launch, with tasting notes, event details and a direct response.`
+   - Buttons: `RSVP`, `Undecided`, `Far too busy`
+3. Meet James Mitchell
+   - Copy: `Introduce a new sales representative to trade partners with a clear, friendly way to respond.`
+   - Buttons: `Arrange a meet-up`, `Wish James all the best`
+
+Carousel assets used:
+
+- `images/hometown-brewery-open-harvest.png`
+- `images/hometown-brewery-open-harvest-event.png`
+- `images/hometown-brewery-james-mitchell.png`
+
+Contact card:
+
+- Uses new logo asset `images/rightonq-landscape-glow-logo.png`.
+- Current heading/copy:
+  - `Questions during review?`
+  - `email adam@rightonq.co.uk`
+
+Important: the user may still want further visual tuning of B3 tomorrow, especially the balance of left and right column heights and the contact card polish.
+
+### New Asset Added Today
+
+Added and pushed:
+
+- `/Users/macpro/rightonq-code.github.io/images/rightonq-landscape-glow-logo.png`
+
+Source file copied from:
+
+- `/Users/macpro/Downloads/a_vector_style_digital_logo_features_the_word_rig.png`
+
+Used in:
+
+- Part B3 contact card.
+
+### Wording / Style Preferences Reinforced Today
+
+User strongly prefers:
+
+- Plain human language.
+- Avoid provider/legal jargon unless necessary.
+- Avoid `sender` when speaking from the client's point of view; use `your business`, `your RCS messages`, or similar.
+- Avoid patronising helper text.
+- Avoid vague words like `scope`, `evidence`, `portal`, `sender` where a normal business owner would hesitate.
+- Be transparent about fees and responsibility.
+- Ask before significant changes.
+
+Specific wording decisions:
+
+- `Contact details people will see` is good and should be preserved.
+- `Public contact details for this sender` was rejected as too confusing.
+- `RCS launch markets` replaced `UK launch scope`.
+- `Destination countries for your RCS messages` replaced `Destination countries for this RCS sender`.
+- `Questions during review? email adam@rightonq.co.uk` is currently preferred over longer contact copy.
+
+### Official / Research Notes From Today
+
+Docs checked or relied on during today:
+
+- Twilio RCS onboarding.
+- Twilio RCS regional availability.
+- Twilio US RCS guidelines.
+- Twilio RCS Messaging Best Practices and FAQ.
+- Google RCS Business Messaging launch approval.
+
+Key findings:
+
+- Provider registration requires destination/recipient countries before launch.
+- US RCS registration has extra carrier/third-party onboarding fees.
+- Current known Twilio-specific US fee picture:
+  - Aegis Sender Review Fee: $200 at submission and annually after approval, per RCS Sender.
+  - T-Mobile Sender Activation Fee: $500 one-time once submitted for review.
+  - Some fees can apply regardless of approval outcome.
+- Non-US RCS sender onboarding fees are currently not known/published in the same way.
+- Final wording should avoid pretending all destinations are automatic.
+
+### Things To Review Tomorrow
+
+Recommended next work with user:
+
+1. Visually inspect Part B3 again after the latest spacing/logo/carousel changes.
+2. Decide whether the RightOnQ logo card should be further reduced or replaced with a cleaner final asset.
+3. Confirm Hometown Brewery carousel copy/buttons exactly match the main RightOnQ page or desired final mockup.
+4. Test Part B2 checklist after the circle alignment fix.
+5. Test Step 6 US checkbox behaviour:
+   - US unchecked: boxes 43/44 hidden and review page omits them.
+   - US checked: boxes 43/44 appear and become required.
+6. Test autosave restore and explain to user that restored test choices can make US appear ticked.
+7. Consider whether to add a visible or hidden “clear saved test progress” button for development only.
+8. Do a full end-to-end Part A test with `ROQ` bypass and then one honest completed test.
+9. Consider whether `SEND to RightOnQ` should eventually trigger a real email/backend workflow.
+10. Do not merge into main site yet; keep standalone.
+
+### Current Implementation Is Still Static
+
+There is still no backend.
+
+When the user presses the final send button:
+
+- The form prepares/downloads a local JSON registration file.
+- The completion panel says Part A has been sent.
+- No real email or server submission happens yet.
+
+This has been accepted for the current beta build, but must be solved before real client use.
 
 ## Summary
 
