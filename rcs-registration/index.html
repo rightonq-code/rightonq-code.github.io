@@ -1582,18 +1582,12 @@
             <li>
               <button class="future-step" type="button" data-part-b-preview="send" aria-pressed="false">
                 <span class="future-step-index">2</span>
-                <span class="future-step-name">Video sent to you</span>
-              </button>
-            </li>
-            <li>
-              <button class="future-step" type="button" data-part-b-preview="approve" aria-pressed="false">
-                <span class="future-step-index">3</span>
-                <span class="future-step-name">You approve video</span>
+                <span class="future-step-name">Review and approve video</span>
               </button>
             </li>
             <li>
               <button class="future-step" type="button" data-part-b-preview="submit" aria-pressed="false">
-                <span class="future-step-index">4</span>
+                <span class="future-step-index">3</span>
                 <span class="future-step-name">Registration submitted</span>
               </button>
             </li>
@@ -2251,19 +2245,19 @@
           },
           {
             title: "What comes next",
-            items: ["Step 2 shows the client review checklist", "Step 3 shows approval", "Step 4 shows submission tracking"]
+            items: ["Step 2 shows client review and approval", "Step 3 shows submission tracking"]
           }
         ]
       },
       send: {
-        title: "Client review page layout",
-        body: "You receive a secure review page with the video player and the key details we need you to check before anything is submitted.",
-        workspaceTitle: "Video sent to client",
-        workspaceIntro: "This is the page the client would see once RightOnQ has prepared the review video. The purpose is simple: watch the video and check that the sender, examples, and unsubscribe route are correct.",
-        stageTitle: "Secure video review",
-        stageBody: "The client sees the hosted video link, a short summary of what is being reviewed, and the key checks before approval.",
+        title: "Review and approve video",
+        body: "You receive a secure review page with the video, checklist and approval details in one place.",
+        workspaceTitle: "Review and approve video",
+        workspaceIntro: "This is the page the client would see once RightOnQ has prepared the review video. They watch the video, check the details, request edits if needed, or approve it for the registration submission.",
+        stageTitle: "Review video",
+        stageBody: "The client watches the hosted video and checks that it accurately represents the sender, message examples, permission route and opt-out route.",
         checklistTitle: "Video review checklist",
-        checklistIntro: "Before approving the video, the client should tick each item or tell RightOnQ what needs correcting.",
+        checklistIntro: "Tick each item before approving the video, or tell RightOnQ what needs correcting.",
         checklistItems: [
           ["Sender name", "The RCS sender name is spelt correctly and is the name customers will recognise."],
           ["Logo and banner", "The brand assets look correct, clear and current."],
@@ -2273,34 +2267,10 @@
           ["Corrections", "Any changes needed before approval are written clearly for RightOnQ."]
         ],
         items: [
-          "Video player at the top",
-          "Sender name, brand assets and contact details",
-          "Message examples and unsubscribe wording",
-          "Simple checklist of what to confirm"
-        ],
-        cards: [
-          {
-            title: "Client checks",
-            items: ["Sender name looks right", "Logo and banner look right", "Messages reflect normal use", "STOP or unsubscribe route is shown"]
-          },
-          {
-            title: "What stays locked",
-            items: ["Submission does not happen yet", "Client can request corrections", "RightOnQ keeps the approved Part A details unchanged unless agreed"]
-          }
-        ]
-      },
-      approve: {
-        title: "Video approval layout",
-        body: "You confirm that the video accurately represents the sender, the intended messages, and the opt-out route before RightOnQ uses it for registration.",
-        workspaceTitle: "Client approves Part B video",
-        workspaceIntro: "This is the approval screen. The client confirms the review video is accurate and authorises RightOnQ to use the hosted video URL in the registration submission.",
-        stageTitle: "Approval confirmation",
-        stageBody: "The approval records who checked the video, their role, and the date of sign-off.",
-        items: [
-          "Accuracy confirmation checkbox",
-          "Authorised approver name and role",
-          "Approval date",
-          "Approve Part B video button"
+          "Video player and sender example are shown",
+          "Client checklist is completed",
+          "Client approves the video or requests edits",
+          "Approved video URL is ready for submission"
         ],
         cards: [
           {
@@ -2308,8 +2278,8 @@
             items: ["I have reviewed the video", "The sender identity is correct", "The message examples and opt-out route are accurate"]
           },
           {
-            title: "Recorded for the file",
-            items: ["Approver name", "Job title", "Approval date", "Approved video URL"]
+            title: "What happens next",
+            items: ["If edits are needed, RightOnQ updates the video", "If approved, the video URL is used for the registration pack", "Submission does not happen until approval"]
           }
         ]
       },
