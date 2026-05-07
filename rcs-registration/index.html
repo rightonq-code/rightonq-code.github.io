@@ -473,7 +473,6 @@
 
     .part-b-next-strip ul {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 10px;
       margin: 0;
       padding: 0;
@@ -590,6 +589,29 @@
       margin-top: 3px;
       color: var(--soft-text);
       line-height: 1.35;
+    }
+
+    .part-b-correction-notes {
+      display: none;
+      margin-top: 10px;
+    }
+
+    .part-b-correction-notes label {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--field-text);
+      font-size: 0.84rem;
+      font-weight: 800;
+    }
+
+    .part-b-correction-notes textarea {
+      width: 100%;
+      min-height: 96px;
+      resize: vertical;
+    }
+
+    .part-b-check:has(input:checked) .part-b-correction-notes {
+      display: block;
     }
 
     .storyboard-flow {
@@ -2316,7 +2338,7 @@
           ["Message examples", "The sample messages are realistic for the way the business will use RCS."],
           ["Permission route", "The video explains how people agreed to receive messages."],
           ["Opt-out route", "The video shows that people can stop messages, without making STOP dominate the experience."],
-          ["Corrections", "Any changes needed before approval are written clearly for RightOnQ."]
+          ["Changes needed", "Tick this only if something needs amending before approval.", "notes"]
         ],
         items: [
           "Video player and sender example are shown",
@@ -2486,7 +2508,6 @@
           <span class="preview-pill">Preview only</span>
         </div>
         ${mainContent}
-        ${content.nextItems ? renderPartBNextStrip(content) : ""}
         ${content.hideSupportCards ? "" : renderPartBSupportGrid(content, cards, checklist)}
         <div class="part-b-actions">
           <button type="button" class="btn secondary" id="returnToPartAButton">Return to Part A</button>
@@ -2569,7 +2590,16 @@
             ${checklist.map((item, index) => `
               <label class="part-b-check">
                 <input type="checkbox" name="partBCheck${index + 1}">
-                <span>${item[0]}<small>${item[1]}</small></span>
+                <span>
+                  ${item[0]}
+                  <small>${item[1]}</small>
+                  ${item[2] === "notes" ? `
+                    <div class="part-b-correction-notes">
+                      <label for="partBCorrectionNotes">What needs changing?</label>
+                      <textarea id="partBCorrectionNotes" name="partBCorrectionNotes" placeholder="Tell us what needs amending before you approve the video."></textarea>
+                    </div>
+                  ` : ""}
+                </span>
               </label>
             `).join("")}
           </div>
@@ -2612,6 +2642,7 @@
                 <span>${content.stageBody}</span>
               </div>
             </div>
+            ${content.nextItems ? renderPartBNextStrip(content) : ""}
           </div>
           ${rightPanel}
         </div>
