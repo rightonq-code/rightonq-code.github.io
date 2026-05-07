@@ -395,6 +395,173 @@
       display: block;
     }
 
+    .part-b-workspace {
+      min-height: 760px;
+      padding: clamp(22px, 4vw, 46px);
+      background: linear-gradient(180deg, #f8fbff 0%, #eef4fb 100%);
+    }
+
+    .part-b-workspace[hidden] {
+      display: none;
+    }
+
+    .part-b-workspace-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      align-items: flex-start;
+      margin-bottom: 26px;
+    }
+
+    .part-b-workspace h2 {
+      max-width: 760px;
+      margin-bottom: 10px;
+      color: var(--field-text);
+      font-size: clamp(1.8rem, 3vw, 2.55rem);
+    }
+
+    .part-b-workspace p {
+      color: var(--soft-text);
+    }
+
+    .preview-pill {
+      display: inline-flex;
+      flex: 0 0 auto;
+      align-items: center;
+      border-radius: 999px;
+      background: #e8f2ff;
+      color: #18416f;
+      padding: 8px 12px;
+      font-size: 0.82rem;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .part-b-board {
+      display: grid;
+      grid-template-columns: minmax(0, 1.25fr) minmax(280px, 0.75fr);
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .part-b-stage,
+    .part-b-card {
+      border: 1px solid #d9e4f0;
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: 0 18px 38px rgba(16, 35, 56, 0.08);
+    }
+
+    .part-b-stage {
+      min-height: 430px;
+      padding: 24px;
+    }
+
+    .part-b-card {
+      padding: 18px;
+    }
+
+    .part-b-card + .part-b-card {
+      margin-top: 14px;
+    }
+
+    .part-b-card h3,
+    .part-b-stage h3 {
+      margin-bottom: 10px;
+      color: var(--field-text);
+      font-size: 1.08rem;
+    }
+
+    .part-b-card ul,
+    .part-b-stage ul {
+      display: grid;
+      gap: 10px;
+      margin: 14px 0 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .part-b-card li,
+    .part-b-stage li {
+      position: relative;
+      padding-left: 22px;
+      color: var(--soft-text);
+      line-height: 1.42;
+    }
+
+    .part-b-card li::before,
+    .part-b-stage li::before {
+      content: "";
+      position: absolute;
+      top: 0.5em;
+      left: 0;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--green);
+    }
+
+    .video-frame {
+      display: grid;
+      place-items: center;
+      min-height: 250px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      background: linear-gradient(145deg, #101f33, #1b3554);
+      color: #fff;
+      text-align: center;
+    }
+
+    .video-frame strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 1.35rem;
+    }
+
+    .phone-demo {
+      max-width: 330px;
+      margin: 0 auto 18px;
+      border: 10px solid #14243a;
+      border-radius: 28px;
+      background: #f5f8fc;
+      box-shadow: 0 18px 40px rgba(16, 35, 56, 0.22);
+      overflow: hidden;
+    }
+
+    .phone-demo-header {
+      background: #1b3554;
+      color: #fff;
+      padding: 14px;
+      font-weight: 800;
+    }
+
+    .phone-demo-body {
+      display: grid;
+      gap: 10px;
+      padding: 14px;
+    }
+
+    .message-bubble {
+      border-radius: 14px 14px 14px 4px;
+      background: #fff;
+      border: 1px solid #dce6f2;
+      padding: 12px;
+      color: var(--field-text);
+      line-height: 1.35;
+    }
+
+    .message-bubble.reply {
+      margin-left: 52px;
+      border-radius: 14px 14px 4px 14px;
+      background: #dff6ec;
+    }
+
+    .part-b-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 22px;
+    }
+
     .step-kicker {
       margin: 0 0 10px;
       color: #406086;
@@ -1029,6 +1196,10 @@
       .part-b-preview {
         grid-column: 1 / -1;
       }
+
+      .part-b-board {
+        grid-template-columns: 1fr;
+      }
     }
 
     @media (max-width: 680px) {
@@ -1045,6 +1216,10 @@
       .choice-grid,
       .radio-grid {
         grid-template-columns: 1fr;
+      }
+
+      .part-b-workspace-head {
+        flex-direction: column;
       }
 
       .step-list {
@@ -1660,6 +1835,7 @@
             </div>
           </div>
         </form>
+        <section class="part-b-workspace" id="partBWorkspace" aria-live="polite" hidden></section>
       </section>
     </section>
   </main>
@@ -1764,6 +1940,7 @@
     const progressBar = document.getElementById("progressBar");
     const partBPreview = document.getElementById("partBPreview");
     const partBStepList = document.getElementById("partBStepList");
+    const partBWorkspace = document.getElementById("partBWorkspace");
     const backButton = document.getElementById("backButton");
     const nextButton = document.getElementById("nextButton");
     const submitPartAButton = document.getElementById("submitPartAButton");
@@ -1817,41 +1994,97 @@
       prepare: {
         title: "Video preparation layout",
         body: "RightOnQ uses the approved Part A details to prepare a review video that shows the RCS sender, the message experience, and how people can stop messages.",
+        workspaceTitle: "Part B video preparation",
+        workspaceIntro: "This is the internal preparation screen RightOnQ would use after Part A has been checked. It pulls together the approved sender details, brand assets, message examples, permission route, and STOP handling before the review video is made.",
+        stageTitle: "Review video storyboard",
+        stageBody: "The video should show who the sender is, what the recipient sees, why messages are being sent, and how the recipient can opt out.",
         items: [
           "Logo, banner and sender name shown clearly",
           "Example RCS messages based on the approved use case",
           "Permission route and STOP handling included",
           "Accessible review video link prepared"
+        ],
+        cards: [
+          {
+            title: "What RightOnQ checks first",
+            items: ["Brand name matches the public sender identity", "Message examples match the approved use case", "Opt-in and STOP wording are clear"]
+          },
+          {
+            title: "Output from this stage",
+            items: ["Draft video script", "Visual sender mockup", "Private review video ready for the client"]
+          }
         ]
       },
       send: {
         title: "Client review page layout",
         body: "You receive a secure review page with the video player and the key details we need you to check before anything is submitted.",
+        workspaceTitle: "Video sent to client",
+        workspaceIntro: "This is the page the client would see once RightOnQ has prepared the review video. The purpose is simple: watch the video and check that the sender, examples, and unsubscribe route are correct.",
+        stageTitle: "Secure video review",
+        stageBody: "The client sees the hosted video link, a short summary of what is being reviewed, and the key checks before approval.",
         items: [
           "Video player at the top",
           "Sender name, brand assets and contact details",
           "Message examples and unsubscribe wording",
           "Simple checklist of what to confirm"
+        ],
+        cards: [
+          {
+            title: "Client checks",
+            items: ["Sender name looks right", "Logo and banner look right", "Messages reflect normal use", "STOP or unsubscribe route is shown"]
+          },
+          {
+            title: "What stays locked",
+            items: ["Submission does not happen yet", "Client can request corrections", "RightOnQ keeps the approved Part A details unchanged unless agreed"]
+          }
         ]
       },
       approve: {
         title: "Video approval layout",
         body: "You confirm that the video accurately represents the sender, the intended messages, and the opt-out route before RightOnQ uses it for registration.",
+        workspaceTitle: "Client approves Part B video",
+        workspaceIntro: "This is the approval screen. The client confirms the review video is accurate and authorises RightOnQ to use the hosted video URL in the registration submission.",
+        stageTitle: "Approval confirmation",
+        stageBody: "The approval records who checked the video, their role, and the date of sign-off.",
         items: [
           "Accuracy confirmation checkbox",
           "Authorised approver name and role",
           "Approval date",
           "Approve Part B video button"
+        ],
+        cards: [
+          {
+            title: "Approval statement",
+            items: ["I have reviewed the video", "The sender identity is correct", "The message examples and opt-out route are accurate"]
+          },
+          {
+            title: "Recorded for the file",
+            items: ["Approver name", "Job title", "Approval date", "Approved video URL"]
+          }
         ]
       },
       submit: {
         title: "Submission status layout",
         body: "After approval, RightOnQ submits the registration pack with the video URL and keeps the client updated while the provider and carrier review takes place.",
+        workspaceTitle: "Registration submitted",
+        workspaceIntro: "This is the status page after Part A and Part B have both been approved. RightOnQ submits the registration pack with the accessible review video URL and tracks the review outcome.",
+        stageTitle: "Submission status",
+        stageBody: "The page shows what has been submitted and what stage the registration is currently in.",
         items: [
           "Part A registration details included",
           "Approved Part B video URL included",
           "Submission and review status shown",
           "Approval outcome recorded"
+        ],
+        cards: [
+          {
+            title: "Included in submission",
+            items: ["Business and sender details", "Brand assets", "Use case and message examples", "Approved review video URL"]
+          },
+          {
+            title: "Status updates",
+            items: ["Submitted to provider", "Provider or carrier review in progress", "Corrections requested or approved"]
+          }
         ]
       }
     };
@@ -1871,6 +2104,7 @@
       stepList.addEventListener("click", event => {
         const button = event.target.closest("[data-step-jump]");
         if (!button) return;
+        showPartAWorkspace();
         const targetStep = Number(button.dataset.stepJump);
         if (targetStep <= currentStep || canMoveTo(targetStep)) {
           showStep(targetStep);
@@ -1881,6 +2115,7 @@
         const button = event.target.closest("[data-part-b-preview]");
         if (!button) return;
         renderPartBPreview(button.dataset.partBPreview);
+        showPartBWorkspace(button.dataset.partBPreview);
       });
 
       form.addEventListener("input", event => {
@@ -1967,6 +2202,75 @@
         </ul>
         <div class="part-b-preview-note">Part B stays locked until RightOnQ has reviewed and accepted the Part A information.</div>
       `;
+    }
+
+    function showPartBWorkspace(key) {
+      const content = partBPreviewContent[key] || partBPreviewContent.prepare;
+      const cards = content.cards || [];
+      form.hidden = true;
+      partBWorkspace.hidden = false;
+      partBWorkspace.innerHTML = `
+        <p class="step-kicker">Part B preview</p>
+        <div class="part-b-workspace-head">
+          <div>
+            <h2>${content.workspaceTitle}</h2>
+            <p>${content.workspaceIntro}</p>
+          </div>
+          <span class="preview-pill">Preview only</span>
+        </div>
+        <div class="part-b-board">
+          <div class="part-b-stage">
+            <div class="video-frame">
+              <div>
+                <strong>${content.stageTitle}</strong>
+                <span>${content.stageBody}</span>
+              </div>
+            </div>
+            <div class="phone-demo" aria-label="Example RCS message preview">
+              <div class="phone-demo-header">RCS sender preview</div>
+              <div class="phone-demo-body">
+                <div class="message-bubble">Your update from the approved sender appears here, using the brand name, logo and message examples from Part A.</div>
+                <div class="message-bubble">Reply STOP to opt out.</div>
+                <div class="message-bubble reply">STOP</div>
+              </div>
+            </div>
+            <h3>${content.stageTitle}</h3>
+            <p>${content.stageBody}</p>
+            <ul>
+              ${content.items.map(item => `<li>${item}</li>`).join("")}
+            </ul>
+          </div>
+          <div>
+            ${cards.map(card => `
+              <div class="part-b-card">
+                <h3>${card.title}</h3>
+                <ul>
+                  ${card.items.map(item => `<li>${item}</li>`).join("")}
+                </ul>
+              </div>
+            `).join("")}
+            <div class="part-b-card">
+              <h3>Important note</h3>
+              <p>Part B is not live for the client until RightOnQ has reviewed and accepted Part A. These screens are here so we can agree the workflow before building the locked review area.</p>
+            </div>
+          </div>
+        </div>
+        <div class="part-b-actions">
+          <button type="button" class="btn secondary" id="returnToPartAButton">Return to Part A</button>
+        </div>
+      `;
+      document.getElementById("returnToPartAButton").addEventListener("click", showPartAWorkspace);
+      document.querySelector(".workflow").scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function showPartAWorkspace() {
+      partBWorkspace.hidden = true;
+      form.hidden = false;
+      document.querySelectorAll("[data-part-b-preview]").forEach(button => {
+        button.classList.remove("active");
+        button.setAttribute("aria-pressed", "false");
+      });
+      document.querySelector(".workflow").scrollIntoView({ behavior: "smooth", block: "start" });
     }
 
     function updateSelectPlaceholders() {
@@ -2470,6 +2774,8 @@
     }
 
     function showStep(index) {
+      form.hidden = false;
+      partBWorkspace.hidden = true;
       const reviewStepIndex = steps.length - 2;
       currentStep = index;
       stepNodes.forEach((step, stepIndex) => step.classList.toggle("active", stepIndex === index));
