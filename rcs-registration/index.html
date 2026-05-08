@@ -3757,8 +3757,9 @@
     }
 
     function isDeveloperBypassEnabled() {
-      const value = document.getElementById("legalBusinessName").value.trim().toUpperCase().replace(/[^A-Z]/g, "");
-      return value === "ROQ";
+      const rawValue = document.getElementById("legalBusinessName").value.trim().toUpperCase();
+      const compactValue = rawValue.replace(/[^A-Z]/g, "");
+      return compactValue === "ROQ";
     }
 
     function isFieldFilled(field) {
