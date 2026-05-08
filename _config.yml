@@ -16,8 +16,12 @@ exclude:
   - Gemfile.lock
   - RightOnQ_Web_Handover_2026-05-01.txt
   - WEB2_HANDOVER_2026-05-04.md
+  - WEB3_HANDOVER_2026-05-05.md
   - index.recovered-from-codex-log.html
   - recovery-backups
+  - rcs-registration/README.md
+  - rcs-registration/RCS_TWILIO_1_HANDOVER_2026-05-06.md
+  - rcs-registration/backups
   - vendor
 
 keep_files:
