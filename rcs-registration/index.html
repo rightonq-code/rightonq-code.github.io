@@ -745,6 +745,7 @@
       display: grid;
       grid-template-columns: 38px minmax(0, 1fr);
       column-gap: 14px;
+      row-gap: 4px;
       align-items: start;
       border: 1px solid #d9e4f0;
       border-radius: 8px;
@@ -789,13 +790,27 @@
     .story-step h3 {
       grid-column: 2;
       grid-row: 1;
-      margin-bottom: 4px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      margin: 0;
       color: var(--field-text);
       font-size: 0.98rem;
     }
 
+    .story-current-text {
+      color: #116243;
+      font-size: 0.72rem;
+      font-weight: 900;
+      line-height: 1;
+      white-space: nowrap;
+    }
+
     .story-step p {
       grid-column: 2;
+      margin: 0;
       color: var(--soft-text);
       font-size: 0.88rem;
       line-height: 1.34;
@@ -804,6 +819,11 @@
     .story-step.success {
       border-color: rgba(54, 191, 126, 0.45);
       background: #f3fbf7;
+    }
+
+    .story-step.current {
+      border-color: #a9dec7;
+      background: #e8f8f0;
     }
 
     .story-step.warning {
@@ -1122,6 +1142,10 @@
 
     .grid.single {
       grid-template-columns: 1fr;
+    }
+
+    .signoff-grid {
+      margin-top: 22px;
     }
 
     .field {
@@ -2443,7 +2467,7 @@
           <section class="step" data-step="7">
             <p class="step-kicker">Step 8</p>
             <h2 class="step-title">Sign off and send Part A</h2>
-            <div class="grid">
+            <div class="grid signoff-grid">
               <div class="field full">
                 <label class="choice">
                   <input id="accuracyDeclaration" name="accuracyDeclaration" type="checkbox" required>
@@ -2468,15 +2492,15 @@
               </div>
               <div class="field full" data-phone-preview-required>
                 <span class="group-label">Phone number/s for RCS logo preview approval <span class="required">*</span></span>
-                <p class="helper">RightOnQ will use these numbers after Part A to show how your sender name and logo appear on a real phone.</p>
+                <p class="helper">Choose at least one phone number for the preview. If you are not sure whether a phone is iPhone or Android, choose either box — we can check the device type when the test invitation is sent.</p>
                 <div class="grid">
                   <div>
                     <label for="iphonePreviewNumber">iPhone test number</label>
-                    <input id="iphonePreviewNumber" name="iphonePreviewNumber" type="tel" autocomplete="tel" value="+44 ">
+                    <input id="iphonePreviewNumber" name="iphonePreviewNumber" type="tel" autocomplete="tel" placeholder="+44 " value="+44 ">
                   </div>
                   <div>
                     <label for="androidPreviewNumber">Android test number</label>
-                    <input id="androidPreviewNumber" name="androidPreviewNumber" type="tel" autocomplete="tel" value="+44 ">
+                    <input id="androidPreviewNumber" name="androidPreviewNumber" type="tel" autocomplete="tel" placeholder="+44 " value="+44 ">
                   </div>
                 </div>
                 <p class="error-text" data-error-for="phonePreviewNumbers"></p>
@@ -2487,7 +2511,7 @@
                 <input id="signoffDate" name="signoffDate" type="date" required>
               </div>
             </div>
-            <div class="section-note">This completes Part A. RightOnQ will check the written registration details first, then begin Part B. Part B starts with the phone logo preview, so you can approve how your sender name and logo appear on a real phone before the RCS application video is prepared.</div>
+            <div class="section-note">This completes Part A. RightOnQ will check and process the written registration details first, then begin Part B with the phone logo preview. You will then be able to receive and approve how your sender name and logo appear on your phone before the RCS application video is prepared.</div>
             <div class="video-studio" aria-labelledby="videoStudioTitle" hidden>
               <div class="video-studio-head">
                 <div>
@@ -2690,14 +2714,14 @@
         title: "Part B storyboard",
         body: "A simple map of what happens after Part A has been checked: RightOnQ tests the phone preview, the client approves the logo, the video is prepared, and the registration is submitted.",
         workspaceTitle: "Part B storyboard",
-        workspaceIntro: "This is the full Part B journey at a glance. Part B starts after RightOnQ has checked Part A and confirmed the submitted details are ready. Before the review video is prepared, RightOnQ checks how the sender name and logo appear on a real phone, then asks the client to approve that phone preview in Part B.",
+        workspaceIntro: "This is the full Part B journey at a glance. It begins once RightOnQ has checked Part A and confirmed the submitted details are ready. Before the review video is built, RightOnQ previews the sender name and logo on your phone and asks you to approve what you see.",
         storyboard: [
-          ["Part A accepted", "The submitted details have been checked, so RightOnQ can prepare the phone logo preview and RCS application video."],
-          ["Phone logo approval", "RightOnQ checks the sender name and logo on a real phone, then the client confirms approval in Part B because the test message is not a normal reply channel."],
-          ["Video prepared", "RightOnQ builds the review video from the approved sender profile, message examples, permission route and opt-out route."],
-          ["Video sent to client", "The client receives an online review link to watch the video and complete the checklist."],
-          ["Client decision", "The client approves the video or asks for edits before submission."],
-          ["Submit registration", "The approved phone preview and video URL go into the registration pack."]
+          ["Part A accepted", "The submitted details have been checked, so RightOnQ can prepare the phone logo preview and the RCS application video."],
+          ["Phone logo approval", "The phone number/s you provided will first receive an invitation from RBM Tester Management asking you to join the test. Once you accept, a second message arrives — this time from your own branded sender, showing your logo and sender name on your phone. That message will tell you to come back to Part B, section B2 to approve, request a change, or leave a note. The test sender can only send messages, not receive them, so please don't reply — approval only counts on this form."],
+          ["Video prepared", "Using your approved logo and sender profile, RightOnQ prepares the review video that goes to Google and the mobile carriers as part of your registration. It's a detailed step — they need to see exactly how your branded messages will behave in the wild. We film it in our own mini studio using real phones sending and receiving your messages, and showing how recipients opt in and opt out. The finished video runs under a minute, and it's all done for you — nothing for you to film or set up."],
+          ["Video sent to you for review", "Once the video is produced, it's hosted at an unlisted URL. Before we submit anything, we send that link to you first. Have a watch, check your logo, your sender name, the message examples, and the opt-in and opt-out steps. If anything's off — even something small — tell us and we'll stop and fix it before submission. Better to catch it now than after it's in the registration pack."],
+          ["You give the go-ahead", "This is your final check before submission. Logo, video, sender profile — all confirmed by you. Once you approve, we move to step 6. If anything's still off, tell us now."],
+          ["Submit registration", "With your branding and video approved, RightOnQ submits the full registration pack to Google and the mobile carriers on your behalf. From here it's in their hands — we'll keep you posted on progress and flag anything they come back with."]
         ],
         hideSupportCards: true,
         items: [
@@ -2864,6 +2888,7 @@
       updateCharacterCounts();
       drawVideoPoster();
       const restoredProgress = progressSaveEnabled && restoreAutosavedProgress();
+      ensurePreviewNumberDefaults();
       updateSelectPlaceholders();
       updateUsRegistrationFields();
       if (!restoredProgress) showStep(0);
@@ -3038,9 +3063,9 @@
       return `
         <div class="storyboard-flow" aria-label="Part B storyboard">
           ${content.storyboard.map((step, index) => `
-            <div class="story-step ${index === 4 ? "edit-loop warning" : ""} ${index === content.storyboard.length - 1 ? "success" : ""}">
+            <div class="story-step ${index === 0 ? "current" : ""} ${index === 4 ? "edit-loop warning" : ""} ${index === content.storyboard.length - 1 ? "success" : ""}">
               <span class="story-index">${index + 1}</span>
-              <h3>${step[0]}</h3>
+              <h3>${step[0]}${index === 0 ? '<span class="story-current-text">You are here</span>' : ""}</h3>
               <p>${step[1]}</p>
             </div>
           `).join("")}
@@ -3816,6 +3841,13 @@
 
     function cleanPreviewNumber(value) {
       return hasRealPreviewNumber(value) ? String(value || "").trim() : "";
+    }
+
+    function ensurePreviewNumberDefaults() {
+      ["iphonePreviewNumber", "androidPreviewNumber"].forEach(id => {
+        const field = document.getElementById(id);
+        if (field && !field.value.trim()) field.value = "+44 ";
+      });
     }
 
     function markInvalid(field, message) {
