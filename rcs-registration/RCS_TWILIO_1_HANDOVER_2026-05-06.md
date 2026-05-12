@@ -26,6 +26,64 @@ Files refreshed in this morning sync:
 - `/Users/macpro/rightonq-code.github.io/rcs-registration/index.html`
 - `/Users/macpro/rightonq-code.github.io/rcs-registration/google-apps-script/Code.gs`
 
+### File And Preview Protocol - Do Not Skip
+
+This project contains more than one `index.html`. Always verify the file path before editing.
+
+### Golden Rule For Working With Adam
+
+Do not rush ahead from half-formed ideas into edits.
+
+Adam wants a collaborative working relationship, not a cold or passive agent. It is fine to inspect, think, suggest, and bring good ideas. But before changing product flow, wording, layout, files, commits, pushes, or anything that could affect the project state:
+
+1. stop;
+2. explain the exact proposed change;
+3. discuss the reasoning in plain language;
+4. wait for Adam's approval;
+5. then edit only the approved scope.
+
+This is especially important because the RCS work is commercially important and multiple agents may be active in nearby files. Unapproved changes, wrong preview URLs, wrong files, or accidental overwrites create anxiety and can cost hours or days of recovery work. The safest rhythm is: inspect first, propose clearly, wait for confirmation, then make the agreed change and verify it on the correct preview URL.
+
+Correct RCS application file:
+
+- `/Users/macpro/rightonq-code.github.io/rcs-registration/index.html`
+
+Main website file, not the RCS app:
+
+- `/Users/macpro/rightonq-code.github.io/index.html`
+
+Correct repo root for preview server:
+
+- `/Users/macpro/rightonq-code.github.io`
+
+Correct local preview command:
+
+```bash
+cd /Users/macpro/rightonq-code.github.io
+python3 -m http.server 8902
+```
+
+Correct local preview URL:
+
+- `http://localhost:8902/rcs-registration/index.html`
+
+Avoid using a server started from inside `/Users/macpro/rightonq-code.github.io/rcs-registration` for visual review. It can make root-relative assets such as `/images/...` resolve incorrectly and can make the page look subtly wrong. If the browser shows a `file://` URL or a localhost URL that does not include `/rcs-registration/index.html`, stop and correct the preview before judging the design.
+
+Before editing:
+
+- confirm branch with `git branch --show-current`;
+- confirm the target file path is `rcs-registration/index.html`;
+- check `git status --short` and note unrelated dirty files;
+- do not stage root `index.html`, legal pages, or future-amendment notes unless the user explicitly asks.
+
+Before saving work as a commit:
+
+- run the inline script syntax check for `rcs-registration/index.html`;
+- run `git diff --check` on the exact files being committed;
+- check `git diff --cached --name-only` before committing;
+- commit only the files in the approved scope;
+- do not push experimental layout work until the user has seen the correct `http://localhost:8902/rcs-registration/index.html` preview and approved it.
+
 Known unrelated local work at the time of this sync:
 
 - root `/Users/macpro/rightonq-code.github.io/index.html` is modified and should still be treated as unrelated to the RCS registration app unless the user explicitly asks to work on the main website.
@@ -77,6 +135,13 @@ Current local upload-ready asset files created for the Twilio public profile:
 Practical file-delivery rule learned:
 
 - When the user needs to upload an asset manually, create an obvious final file in the working folder, verify dimensions and size, then give that exact path. Avoid sending the user to ambiguous source/review filenames.
+
+Logo preview rule learned from real Twilio test device:
+
+- Do not judge the sender logo only from the upload/crop preview. Test it at real inbox size on both light and dark phone screens before submission.
+- The RightOnQ dark logo tile is acceptable for the pilot, especially on light mode. It is not worth over-tuning now.
+- For client applications, logo contrast may matter more than the artwork looking perfect at full size. A client's logo should be checked in the message list/inbox view before final submission.
+- Twilio's test-device flow is commercially useful: RightOnQ can nominate an internal RCS-capable phone, view the client's sender profile in a real inbox, and adjust logo/background/size before submission. This is part of the value of a managed registration service, because many clients will not know how to judge these details from provider upload screens alone.
 
 ### Part A App Update From This Sync
 
@@ -147,6 +212,17 @@ Current direction:
 - Do not put secrets in files.
 - Do not send real messages until Twilio sender/test-device credentials and explicit approval exist.
 - Do not assume Twilio public details completion means Compliance Registration or carrier approval has happened.
+
+New Part B workflow idea from 12 May test-device learning:
+
+- The first practical Part B step should likely be a real-device sender-profile check before video production.
+- After Part A is received and RightOnQ has the client's logo/brand details, RightOnQ can upload/test the client's sender profile in Twilio, nominate an internal RCS-capable phone, and check the logo at real inbox size.
+- Twilio's Public Details phone preview appears useful but may not be accurate for final inbox thumbnail scale. The real phone is the truth.
+- RightOnQ should consider keeping a small set of test phones, including at least one Android device and more than one display mode/device type, to check thumbnail scale and contrast before formal submission.
+- After RightOnQ has adjusted the client's logo/background/size, the client can be invited to become a tester and receive the test sender/profile on their own preferred phone.
+- Because this test route is outbound/test-only, the client may not be able to reply in-message with approval. The Part B workflow should therefore include an explicit checkbox/sign-off such as "I have viewed the sender profile/logo on my phone and approve it for the review video/submission."
+- This should sit at the beginning of Part B, after Part A intake/review and before the final review video is prepared.
+- This is a strong managed-service value point: RightOnQ is not merely collecting a logo; it is checking how the sender identity actually appears on real devices and reducing the risk of a poor-looking or rejected submission.
 
 ### Use Case / Category Decision
 
