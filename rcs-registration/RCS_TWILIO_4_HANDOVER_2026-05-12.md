@@ -96,6 +96,93 @@ Do not use `git add .`, broad restore/reset/clean commands, rebase, or merge to 
 
 ## Work Completed By RCS-Twilio-4 So Far
 
+### B2 Approve Name And Logo Screen
+
+After the Level 2 handover commit, Bugs approved building the static B2 shape.
+
+Implemented in `/Users/macpro/rightonq-code.github.io/rcs-registration/index.html`:
+
+- Part B left-nav Step 2 changed from `Approve phone preview` to `Approve name and logo`.
+- Part B storyboard Step 2 title changed from `Phone logo approval` to `Name and logo approval`.
+- Added a real B2 screen under `data-part-b-preview="profile"` instead of letting Step 2 fall back to the storyboard.
+- B2 now shows the full approval form while visually marking the stage as `Available after RightOnQ sends your test message`.
+- B2 explains that RCS registration review can take several weeks, often around 4-6 weeks, so name/logo issues should be fixed before the video is prepared and submitted.
+- This was later strengthened to say it is essential to fix name/logo issues before the video is prepared because even small delays at this point can add time to the application.
+- B2 asks whether the client accepted the `RBM Tester Management` invitation and received the branded test message.
+- Bugs supplied a photo of the distinctive RBM Tester Management logo: mustard square with dark gear. The app now uses a clean in-app recreation of that mark beside the `RBM Tester Management` wording so clients recognise the invitation when it arrives.
+- B2 asks whether the client is happy with how the sender name and logo appear on their phone.
+- Positive path button becomes `Send approval to RightOnQ`.
+- Issue/note path button becomes `Send issue to RightOnQ`.
+- B2 controls were changed from radio buttons to tick-style checkbox options because Bugs noticed radio controls felt wrong compared with the rest of the form. The options are still mutually exclusive within each question, but clicking the same option again now clears it.
+- `Not yet` and `I need help` are no longer dead ends:
+  - `Not yet` enables `Tell RightOnQ it has not arrived`.
+  - `I need help` enables `Ask RightOnQ for help`.
+  - positive received + approval enables `Send approval to RightOnQ`.
+  - received + issue/note enables `Send issue to RightOnQ`.
+- Issue/note path reveals issue categories:
+  - Logo colour
+  - Logo size
+  - Logo looks blurry or unclear
+  - Sender name is wrong
+  - Message did not arrive
+  - RBM Tester Management invite problem
+  - Other
+- Issue/note path also includes a free-text notes box.
+
+Prototype interaction was checked in localhost:
+
+- selecting `Yes, I have received it` plus `Yes, approve name and logo` enables `Send approval to RightOnQ`;
+- selecting `No, I need a change` enables `Send issue to RightOnQ` and reveals the issue panel.
+
+This work is not yet committed as of this diary update.
+
+### Box 29 Use Case Alignment
+
+Bugs compared the app's old Box 29 dropdown with Twilio's live RCS dropdown and asked whether RightOnQ should follow Twilio/Google more closely so there is no ambiguous mapping later.
+
+Evidence checked:
+
+- Google RBM agent use cases: `https://developers.google.com/business-communications/rcs-business-messaging/guides/learn/agent-use-cases`
+- Google create-agent guidance: `https://developers.google.com/business-communications/rcs-business-messaging/guides/build/agents`
+
+Google and Twilio both use the same core use-case family:
+
+- OTP / one-time password
+- Transactional
+- Promotional
+- Multi-use
+
+RightOnQ does not want to ask for OTP in this intake because that is not the intended market for this service flow.
+
+Implemented Box 29 visible choices:
+
+- `Promotional`
+- `Transactional`
+- `Both promotional and transactional`
+
+Client-facing helper now explains:
+
+- Promotional means marketing or sales messages.
+- Transactional means customer updates, alerts, appointments, order updates, account or service information.
+
+Drafting logic was also updated so public profile description, trigger text, use-case description, and example messages are generated from these three new categories. The visible client label `Both promotional and transactional` should map to Twilio/Google `Multi-use` later in the backend/export layer.
+
+### Public Profile Description Moved To Brand Profile
+
+Bugs supplied Twilio and Google profile screenshots showing that the short description appears directly under the sender/business name in the messaging profile. The field already existed in the app as `senderDescription`, but it was in Step 4 Use case declaration, which made it feel less important than it is.
+
+Implemented:
+
+- Moved `Public profile description` from Step 4 Use case declaration into Step 2 Brand profile.
+- It now sits directly after `Sender display name`, before brand colour/logo/banner.
+- It keeps `maxlength="100"` and the `0 / 100` character counter.
+- Helper now says it may appear under the sender name in the messaging profile and should be clear, useful, and under 100 characters.
+- Review summary was updated so `Public profile description` appears under Brand profile rather than Use case declaration.
+- Box 19 was retitled `Sender display name`.
+- Box 19 helper now says: `The name people will see when your RCS message arrives. Use the public brand name they already recognise, for example Hometown Brewery.`
+
+Current field number after moving is Box 20, not Box 23, because it sits immediately after Display name in the existing numbering order.
+
 ### Part B Storyboard Wording
 
 The Part B storyboard intro and six-step wording were replaced with Bugs' more complete flow.
@@ -256,6 +343,54 @@ If approved:
 If issue/note:
 
 - send feedback to RightOnQ and flag the application so video production stops until the issue is reviewed.
+
+### Step 3 Contact Wording Tightened
+
+Bugs challenged the wording `Contact details people will see` because not every field is literally shown inside an RCS message. The section was reframed to separate public profile/contact-policy details from RightOnQ-only registration notifications.
+
+Implemented:
+
+- Step 3 title changed to `Public contact and policy links`.
+- Step 3 intro now explains that the details support the public RCS sender profile and registration checks, and that people may see them when viewing the sender profile or asking for help.
+- Sidebar/review title was updated to match.
+- `Registration notification email` was renamed `RightOnQ registration updates email`.
+- Its helper now says it is only for RightOnQ registration updates and is not shown to customers.
+
+### Step 4 Message Example Drafting Polished
+
+Bugs asked whether the pre-emptive sample message examples were still being drafted from earlier answers. They were still present, but the newer `Promotional` / `Transactional` / `Both promotional and transactional` choices were overriding the older industry-specific examples too heavily.
+
+Implemented:
+
+- Step 4 guidance now says the first draft is based on sender name, business industry, and message purpose.
+- Example message helpers now explain that drafts use sender name, industry, and message purpose.
+- Reworked the example generator so message purpose chooses the lane:
+  - `Promotional` gives two promotional-style examples.
+  - `Transactional` gives two transactional-style examples.
+  - `Both promotional and transactional` gives one transactional example and one promotional example.
+- Business industry now supplies the flavour of those examples, so a hospitality/brewery-style sender gets booking/menu/event wording rather than generic car/handover wording.
+
+### Fresh-Eyes Critique Fixes Applied
+
+Bugs asked Twilio-4 to walk the current app from the start and critique it now that the product shape was clearer. Agreed fixes from that critique were applied in a narrow pass:
+
+- Removed `Sole trader` from the company type dropdown.
+- Renamed `Company type` to `Registered company type`.
+- Company type helper now says sole traders are not accepted for this registration flow.
+- Sharpened `Trading name` helper so it is distinct from the exact RCS `Sender display name`.
+- Sharpened `Sender display name` helper to say this is the exact name people will see when the RCS message arrives.
+- Box 29 helper now explains that `RightOnQ registration updates email` defaults from Box 13 and is not shown to customers.
+- Step 4 heading changed from `Use case declaration` to `Message purpose and examples`.
+- Added a `Regenerate draft wording` button for Step 4/5 drafted wording and examples.
+- A8 phone preview label changed to `Phone number for name and logo preview`.
+- Client-facing RBM wording was standardised to `RBM Tester invitation`.
+
+Items deliberately not done in this pass:
+
+- Country list compression. Bugs wants to check that later.
+- Part B lock/status control. Needs separate discussion.
+- Client-specific private links. Separate project.
+- Public profile description placement. Needs a product choice: keep in Step 2 with a general draft, or move after message purpose.
 
 ## Immediate Next Build Recommendation
 

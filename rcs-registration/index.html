@@ -733,6 +733,133 @@
       justify-content: center;
     }
 
+    .name-logo-layout {
+      grid-template-columns: minmax(0, 0.92fr) minmax(340px, 1.08fr);
+    }
+
+    .stage-status-note {
+      display: flex;
+      width: 100%;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 14px;
+      border: 1px solid #cfe0f4;
+      border-radius: 8px;
+      background: #e8f2ff;
+      color: #18416f;
+      padding: 12px 14px;
+      font-size: 0.9rem;
+      font-weight: 900;
+    }
+
+    .rbm-tester-mark {
+      display: inline-grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      flex: 0 0 auto;
+      border-radius: 9px;
+      overflow: hidden;
+      background: #d69d16;
+      box-shadow: inset 0 0 0 1px rgba(72, 50, 8, 0.12);
+    }
+
+    .rbm-tester-mark img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .rbm-tester-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      vertical-align: middle;
+    }
+
+    .name-logo-form {
+      display: grid;
+      gap: 14px;
+    }
+
+    .approval-question {
+      border: 1px solid #dbe6f2;
+      border-radius: 8px;
+      background: #f8fbff;
+      padding: 14px;
+    }
+
+    .approval-question h4 {
+      margin-bottom: 10px;
+      color: var(--field-text);
+      font-size: 1rem;
+    }
+
+    .approval-options {
+      display: grid;
+      gap: 8px;
+    }
+
+    .approval-option {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      border: 1px solid #dbe6f2;
+      border-radius: 8px;
+      background: #fff;
+      padding: 10px 12px;
+      color: var(--field-text);
+      font-weight: 800;
+    }
+
+    .approval-option input {
+      width: 18px;
+      height: 18px;
+      margin-top: 2px;
+      accent-color: var(--green);
+    }
+
+    .issue-detail-panel {
+      display: none;
+      border: 1px solid #efd9a6;
+      border-radius: 8px;
+      background: #fffaf0;
+      padding: 14px;
+    }
+
+    .name-logo-form:has(input[name="testerReceived"][value="not-yet"]:checked) .issue-detail-panel,
+    .name-logo-form:has(input[name="testerReceived"][value="help"]:checked) .issue-detail-panel,
+    .name-logo-form:has(input[name="nameLogoDecision"][value="issue"]:checked) .issue-detail-panel,
+    .name-logo-form:has(input[name="nameLogoDecision"][value="note"]:checked) .issue-detail-panel {
+      display: block;
+    }
+
+    .issue-detail-panel h4 {
+      margin-bottom: 8px;
+      color: var(--field-text);
+      font-size: 1rem;
+    }
+
+    .issue-check-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .issue-detail-panel textarea {
+      width: 100%;
+      min-height: 104px;
+      margin-top: 12px;
+      resize: vertical;
+    }
+
+    .name-logo-action {
+      width: 100%;
+      justify-content: center;
+    }
+
     .storyboard-flow {
       display: grid;
       grid-template-columns: minmax(0, 1fr);
@@ -1796,6 +1923,10 @@
         grid-template-columns: 1fr;
       }
 
+      .issue-check-grid {
+        grid-template-columns: 1fr;
+      }
+
       .part-b-next-strip ul {
         grid-template-columns: 1fr;
       }
@@ -1977,7 +2108,7 @@
             <li>
               <button class="future-step" type="button" data-part-b-preview="profile" aria-pressed="false">
                 <span class="future-step-index">2</span>
-                <span class="future-step-name">Approve phone preview</span>
+                <span class="future-step-name">Approve name and logo</span>
               </button>
             </li>
             <li>
@@ -2021,7 +2152,7 @@
               </div>
               <div class="field">
                 <label for="tradingName">Trading name</label>
-                <p class="helper">The name people will see on RCS messages, e.g. Walkers instead of PepsiCo.</p>
+                <p class="helper">Use the trading or brand name behind the sender, if it differs from the legal company name. The exact RCS sender display name is confirmed in Step 2.</p>
                 <input id="tradingName" name="tradingName">
               </div>
               <div class="field">
@@ -2030,8 +2161,8 @@
                 <input id="companiesHouseNumber" name="companiesHouseNumber" required>
               </div>
               <div class="field">
-                <label for="companyType">Company type <span class="required">*</span></label>
-                <p class="helper">Choose the closest legal structure for the business being registered.</p>
+                <label for="companyType">Registered company type <span class="required">*</span></label>
+                <p class="helper">Choose the closest registered business structure. Sole traders are not accepted for this registration flow.</p>
                 <select id="companyType" name="companyType" required>
                   <option value="">Select a company type</option>
                   <option>Private limited company</option>
@@ -2040,7 +2171,6 @@
                   <option>Limited partnership</option>
                   <option>Community interest company</option>
                   <option>Charity</option>
-                  <option>Sole trader</option>
                 </select>
               </div>
               <div class="field">
@@ -2142,12 +2272,19 @@
             <p class="step-kicker">Step 2</p>
             <h2 class="step-title">Brand profile</h2>
             <p class="step-intro">This is the public sender identity customers will see in their messaging app.</p>
-            <div class="section-note">Logo and banner files stay in this browser. The export records filenames and validation status so RightOnQ can request the final upload-ready assets separately.</div>
+            <div class="section-note">Add the sender name, short public description, logo, banner and brand colour you want people to see in their messaging app. RightOnQ will check the final profile on a real phone before anything is submitted.</div>
             <div class="grid">
               <div class="field">
-                <label for="displayName">Display name <span class="required">*</span></label>
-                <p class="helper">The name customers should see in their inbox. It should clearly match your brand. <span class="helper-aside">(This is the sender name shown in the RCS conversation.)</span></p>
+                <label for="displayName">Sender display name <span class="required">*</span></label>
+                <p class="helper">This is the exact name people will see when your RCS message arrives. Use the public brand name they already recognise, for example Hometown Brewery.</p>
                 <input id="displayName" name="displayName" maxlength="64" required>
+              </div>
+              <div class="field full">
+                <label for="senderDescription">Public profile description <span class="required">*</span></label>
+                <p class="helper">Appears under your sender name in the messaging profile. Include what people can expect or how they will interact with your messages. Maximum 100 characters.</p>
+                <p class="helper helper-aside">Example: See how branded RCS messages can make two-way conversations clearer from the first hello. (89/100)</p>
+                <textarea id="senderDescription" name="senderDescription" maxlength="100" required></textarea>
+                <div class="char-count" data-count-for="senderDescription">0 / 100</div>
               </div>
               <div class="field">
                 <label for="brandColour">Brand colour <span class="required">*</span></label>
@@ -2183,8 +2320,8 @@
 
           <section class="step" data-step="2">
             <p class="step-kicker">Step 3</p>
-            <h2 class="step-title">Contact details people will see</h2>
-            <p class="step-intro">These are the email, phone, website, privacy, and terms links people can use when they receive messages from the brand.</p>
+            <h2 class="step-title">Public contact and policy links</h2>
+            <p class="step-intro">These details support the public RCS sender profile and registration checks. People may see the brand contact details, website, privacy policy or terms when they view the sender profile or ask for help.</p>
             <div class="grid">
               <div class="field">
                 <label for="customerEmail">Customer-facing email <span class="required">*</span></label>
@@ -2212,8 +2349,8 @@
                 <input id="termsUrl" name="termsUrl" type="url" placeholder="https://example.com/terms" required>
               </div>
               <div class="field">
-                <label for="notificationEmail">Registration notification email <span class="required">*</span></label>
-                <p class="helper">Where RightOnQ should send registration updates and review questions.</p>
+                <label for="notificationEmail">RightOnQ registration updates email <span class="required">*</span></label>
+                <p class="helper">Defaults to the primary contact email from Box 13. Change it only if RightOnQ should send registration updates to a different email address. This is not shown to customers.</p>
                 <input id="notificationEmail" name="notificationEmail" type="email" required>
               </div>
             </div>
@@ -2221,32 +2358,28 @@
 
           <section class="step" data-step="3">
             <p class="step-kicker">Step 4</p>
-            <h2 class="step-title">Use case declaration</h2>
+            <h2 class="step-title">Message purpose and examples</h2>
             <p class="step-intro">Carriers need a plain description of why messages are sent, when they are sent, and what customers will receive.</p>
             <div class="section-note">
               <ul class="guidance-list">
                 <li>Choose the use case carefully; changing it later can mean another review.</li>
                 <li>Use examples that match what recipients will actually see.</li>
+                <li>The first draft is based on the sender name, business industry, and message purpose.</li>
               </ul>
+              <div class="button-row" style="margin-top: 14px;">
+                <button type="button" class="btn secondary" id="regenerateDraftsButton">Regenerate draft wording</button>
+              </div>
             </div>
             <div class="grid">
               <div class="field">
                 <label for="primaryUseCase">Main message purpose <span class="required">*</span></label>
-                <p class="helper">Choose the closest overall purpose for the sender.</p>
+                <p class="helper">Choose what RightOnQ should select in the RCS application. Promotional means marketing or sales messages. Transactional means customer updates, alerts, appointments, order updates, account or service information.</p>
                 <select id="primaryUseCase" name="primaryUseCase" required>
-                  <option value="">Select a use case</option>
-                  <option>Customer updates</option>
-                  <option>Staff communications</option>
-                  <option>Marketing / mailing list</option>
-                  <option>Client care</option>
-                  <option>All of the above</option>
+                  <option value="">Select a message type</option>
+                  <option>Promotional</option>
+                  <option>Transactional</option>
+                  <option>Both promotional and transactional</option>
                 </select>
-              </div>
-              <div class="field full">
-                <label for="senderDescription">Public profile description <span class="required">*</span></label>
-                <p class="helper">This short description may appear in the messaging app profile. Keep it clear, factual, and under 100 characters.</p>
-                <textarea id="senderDescription" name="senderDescription" maxlength="100" required></textarea>
-                <div class="char-count" data-count-for="senderDescription">0 / 100</div>
               </div>
               <div class="field">
                 <label for="monthlyVolume">Expected monthly send volume <span class="required">*</span></label>
@@ -2275,12 +2408,12 @@
               </div>
               <div class="field full">
                 <label for="exampleMessageOne">Example message 1 <span class="required">*</span></label>
-                <p class="helper">We draft a plain operational example. Keep it close to the messages the business will actually send.</p>
+                <p class="helper">We draft this from the sender name, industry, and message purpose. Keep it close to the messages the business will actually send.</p>
                 <textarea id="exampleMessageOne" name="exampleMessageOne" required></textarea>
               </div>
               <div class="field full">
                 <label for="exampleMessageTwo">Example message 2 <span class="required">*</span></label>
-                <p class="helper">Use this to show a second normal interaction, such as a follow-up or confirmation request.</p>
+                <p class="helper">Use this to show a second realistic message, such as a follow-up, offer, reminder, or confirmation request.</p>
                 <textarea id="exampleMessageTwo" name="exampleMessageTwo" required></textarea>
               </div>
               <div class="field">
@@ -2491,7 +2624,7 @@
                 <input id="signatoryTitle" name="signatoryTitle" required>
               </div>
               <div class="field full" data-phone-preview-required>
-                <span class="group-label">Phone number/s for RCS logo preview approval <span class="required">*</span></span>
+                <span class="group-label">Phone number for name and logo preview <span class="required">*</span></span>
                 <p class="helper">Choose at least one phone number for the preview. If you are not sure whether a phone is iPhone or Android, choose either box — we can check the device type when the test invitation is sent.</p>
                 <div class="grid">
                   <div>
@@ -2564,7 +2697,7 @@
     const steps = [
       "Business details",
       "Brand profile",
-      "Contact details",
+      "Public links",
       "Use case",
       "How people agree",
       "RCS launch markets",
@@ -2579,7 +2712,7 @@
           ["Legal business name", "legalBusinessName"],
           ["Trading name", "tradingName"],
           ["Companies House number", "companiesHouseNumber"],
-          ["Company type", "companyType"],
+          ["Registered company type", "companyType"],
           ["Registration issuing country", "registrationCountry"],
           ["Registered address", "registeredAddress"],
           ["Address line 1", "registeredAddressLine1"],
@@ -2600,28 +2733,28 @@
       {
         title: "Brand profile",
         fields: [
-          ["Display name", "displayName"],
+          ["Sender display name", "displayName"],
+          ["Public profile description", "senderDescription"],
           ["Brand colour", "brandColour"],
           ["Logo upload", "logoUpload"],
           ["Banner upload", "bannerUpload"]
         ]
       },
       {
-        title: "Contact details people will see",
+        title: "Public contact and policy links",
         fields: [
           ["Customer-facing email", "customerEmail"],
           ["Customer-facing phone", "customerPhone"],
           ["Customer-facing website", "customerWebsite"],
           ["Privacy policy URL", "privacyPolicyUrl"],
           ["Terms and conditions URL", "termsUrl"],
-          ["Registration notification email", "notificationEmail"]
+          ["RightOnQ registration updates email", "notificationEmail"]
         ]
       },
       {
-        title: "Use case declaration",
+        title: "Message purpose and examples",
         fields: [
           ["Main message purpose", "primaryUseCase"],
-          ["Public profile description", "senderDescription"],
           ["Expected monthly send volume", "monthlyVolume"],
           ["Why people would receive a message", "messageTrigger"],
           ["Use case description", "useCaseDescription"],
@@ -2700,6 +2833,16 @@
       "optOutDescription",
       "reviewerAccess"
     ];
+    const regeneratableDraftFieldIds = [
+      "messageTrigger",
+      "useCaseDescription",
+      "exampleMessageOne",
+      "exampleMessageTwo",
+      "helpSampleMessage",
+      "stopSampleMessage",
+      "optInDescription",
+      "optOutDescription"
+    ];
     const draftStateKey = "_draftedFieldTouched";
     let senderDescriptionTouched = false;
     let displayNameTouched = false;
@@ -2717,7 +2860,7 @@
         workspaceIntro: "This is the full Part B journey at a glance. It begins once RightOnQ has checked Part A and confirmed the submitted details are ready. Before the review video is built, RightOnQ previews the sender name and logo on your phone and asks you to approve what you see.",
         storyboard: [
           ["Part A accepted", "The submitted details have been checked, so RightOnQ can prepare the phone logo preview and the RCS application video."],
-          ["Phone logo approval", "The phone number/s you provided will first receive an invitation from RBM Tester Management asking you to join the test. Once you accept, a second message arrives — this time from your own branded sender, showing your logo and sender name on your phone. That message will tell you to come back to Part B, section B2 to approve, request a change, or leave a note. The test sender can only send messages, not receive them, so please don't reply — approval only counts on this form."],
+          ["Name and logo approval", "The phone number/s you provided will first receive an RBM Tester invitation asking you to join the test. Once you accept, a second message arrives — this time from your own branded sender, showing your logo and sender name on your phone. That message will tell you to come back to Part B, section B2 to approve, request a change, or leave a note. The test sender can only send messages, not receive them, so please don't reply — approval only counts on this form."],
           ["Video prepared", "Using your approved logo and sender profile, RightOnQ prepares the review video that goes to Google and the mobile carriers as part of your registration. It's a detailed step — they need to see exactly how your branded messages will behave in the wild. We film it in our own mini studio using real phones sending and receiving your messages, and showing how recipients opt in and opt out. The finished video runs under a minute, and it's all done for you — nothing for you to film or set up."],
           ["Video sent to you for review", "Once the video is produced, it's hosted at an unlisted URL. Before we submit anything, we send that link to you first. Have a watch, check your logo, your sender name, the message examples, and the opt-in and opt-out steps. If anything's off — even something small — tell us and we'll stop and fix it before submission. Better to catch it now than after it's in the registration pack."],
           ["You give the go-ahead", "This is your final check before submission. Logo, video, sender profile — all confirmed by you. Once you approve, we move to step 6. If anything's still off, tell us now."],
@@ -2727,7 +2870,7 @@
         items: [
           "Part A is checked before video work starts",
           "Sender name and logo are checked on a real phone before video work",
-          "Client approves the phone preview in Part B",
+          "Client approves the sender name and logo in Part B",
           "Video is built from approved client information",
           "Client reviews and either approves or requests edits",
           "Submission happens only after video approval"
@@ -2739,9 +2882,35 @@
           },
           {
             title: "What comes next",
-            items: ["Step 2 shows phone preview approval", "Step 3 shows video review", "Step 4 shows submission tracking"]
+            items: ["Step 2 shows name and logo approval", "Step 3 shows video review", "Step 4 shows submission tracking"]
           }
         ]
+      },
+      profile: {
+        title: "Approve name and logo",
+        body: "This step becomes available after RightOnQ has checked Part A and sent the test invitation and branded message.",
+        workspaceTitle: "Approve name and logo",
+        workspaceIntro: "After RightOnQ sends your test message, use this page to confirm whether the sender name and business logo look right on your agreed phone number/s. If something is wrong, tell us here before the RCS application video is prepared.",
+        nameLogoLayout: true,
+        statusNote: "Available after RightOnQ sends your test message",
+        stageTitle: "Approve name and logo",
+        stageBody: "RCS registration takes around 4-6 weeks, so it is essential to fix name or logo issues before the video is prepared and submitted.",
+        steps: [
+          "Accept the RBM Tester invitation.",
+          "Wait for the branded test message from your own sender name.",
+          "Check the sender name and logo on your phone.",
+          "Approve it here, or send an issue to RightOnQ so we can fix it before video work starts."
+        ],
+        issueOptions: [
+          "Logo colour",
+          "Logo size",
+          "Logo looks blurry or unclear",
+          "Sender name is wrong",
+          "Message did not arrive",
+          "RBM Tester invitation problem",
+          "Other"
+        ],
+        hideSupportCards: true
       },
       send: {
         title: "Review and approve video",
@@ -2867,6 +3036,7 @@
       setupComplianceDrafts();
       clearUseCaseDraftsIfNoUseCase();
       updateConsentRouteExplanation();
+      document.getElementById("regenerateDraftsButton").addEventListener("click", regenerateDraftWording);
 
       nextButton.addEventListener("click", () => {
         if (!validateStep(currentStep)) return;
@@ -2905,7 +3075,7 @@
       });
       form.hidden = true;
       partBWorkspace.hidden = false;
-      const mainContent = content.submittedLayout ? renderSubmittedLayout(content) : content.storyboard ? renderPartBStoryboard(content) : renderPartBVisualWorkspace(content, checklist);
+      const mainContent = content.submittedLayout ? renderSubmittedLayout(content) : content.nameLogoLayout ? renderNameLogoApproval(content) : content.storyboard ? renderPartBStoryboard(content) : renderPartBVisualWorkspace(content, checklist);
       partBWorkspace.innerHTML = `
         <div class="part-b-workspace-head">
           <div>
@@ -2924,6 +3094,17 @@
           showToast(changesNeeded ? "Changes noted for RightOnQ." : "Video approval noted for RightOnQ.");
         });
         updatePartBReviewAction();
+      }
+      if (content.nameLogoLayout) {
+        setupExclusiveCheckboxes(partBWorkspace, "testerReceived");
+        setupExclusiveCheckboxes(partBWorkspace, "nameLogoDecision");
+        partBWorkspace.addEventListener("change", updateNameLogoAction);
+        const approvalButton = document.getElementById("nameLogoActionButton");
+        approvalButton.addEventListener("click", () => {
+          const route = getNameLogoRoute();
+          showToast(route === "approve" ? "Name and logo approval noted for RightOnQ." : "Name and logo update noted for RightOnQ.");
+        });
+        updateNameLogoAction();
       }
       if (content.submittedLayout) setupSubmittedCarousel();
       document.querySelector(".workflow").scrollIntoView({ behavior: "smooth", block: "start" });
@@ -3057,6 +3238,87 @@
       const allApproved = requiredChecks.length > 0 && requiredChecks.every(input => input.checked);
       actionButton.classList.toggle("show", changesNeeded || allApproved);
       actionButton.textContent = changesNeeded ? "Send changes for amendment" : "Send approval to RightOnQ";
+    }
+
+    function updateNameLogoAction() {
+      const actionButton = document.getElementById("nameLogoActionButton");
+      if (!actionButton) return;
+      const route = getNameLogoRoute();
+      actionButton.disabled = !route;
+      const labels = {
+        approve: "Send approval to RightOnQ",
+        notYet: "Tell RightOnQ it has not arrived",
+        help: "Ask RightOnQ for help",
+        issue: "Send issue to RightOnQ"
+      };
+      actionButton.textContent = labels[route] || "Send issue to RightOnQ";
+    }
+
+    function getNameLogoRoute() {
+      const received = partBWorkspace.querySelector('input[name="testerReceived"]:checked');
+      const decision = partBWorkspace.querySelector('input[name="nameLogoDecision"]:checked');
+      if (!received) return "";
+      if (received.value === "not-yet") return "notYet";
+      if (received.value === "help") return "help";
+      if (!decision) return "";
+      return decision.value === "approve" ? "approve" : "issue";
+    }
+
+    function setupExclusiveCheckboxes(root, name) {
+      root.querySelectorAll(`input[name="${name}"]`).forEach(input => {
+        input.addEventListener("change", () => {
+          if (!input.checked) return;
+          root.querySelectorAll(`input[name="${name}"]`).forEach(other => {
+            if (other !== input) other.checked = false;
+          });
+        });
+      });
+    }
+
+    function renderNameLogoApproval(content) {
+      return `
+        <div class="part-b-board name-logo-layout">
+          <div class="part-b-stage">
+            <div class="stage-status-note">${content.statusNote}</div>
+            <h3>${content.stageTitle}</h3>
+            <p>${content.stageBody}</p>
+            <ul>
+              ${content.steps.map(item => `<li>${item}</li>`).join("")}
+            </ul>
+          </div>
+          <div class="part-b-stage">
+            <div class="name-logo-form">
+              <div class="approval-question">
+                <h4>Have you accepted the <span class="rbm-tester-label"><span class="rbm-tester-mark" aria-hidden="true"><img src="../images/rbm-tester-management-icon.jpg" alt=""></span>RBM Tester</span> invitation and received your branded test message?</h4>
+                <div class="approval-options">
+                  <label class="approval-option"><input type="checkbox" name="testerReceived" value="yes"> Yes, I have received it</label>
+                  <label class="approval-option"><input type="checkbox" name="testerReceived" value="not-yet"> Not yet</label>
+                  <label class="approval-option"><input type="checkbox" name="testerReceived" value="help"> I need help</label>
+                </div>
+              </div>
+              <div class="approval-question">
+                <h4>Are you happy with how your sender name and logo appear on your phone?</h4>
+                <div class="approval-options">
+                  <label class="approval-option"><input type="checkbox" name="nameLogoDecision" value="approve"> Yes, approve name and logo</label>
+                  <label class="approval-option"><input type="checkbox" name="nameLogoDecision" value="issue"> No, I need a change</label>
+                  <label class="approval-option"><input type="checkbox" name="nameLogoDecision" value="note"> I have a note or question</label>
+                </div>
+              </div>
+              <div class="issue-detail-panel">
+                <h4>If something does not look right, tell us now</h4>
+                <p>Choose anything that applies so RightOnQ can quickly understand what to check.</p>
+                <div class="issue-check-grid">
+                  ${content.issueOptions.map((item, index) => `
+                    <label class="approval-option"><input type="checkbox" name="nameLogoIssue${index + 1}"> ${item}</label>
+                  `).join("")}
+                </div>
+                <textarea name="nameLogoIssueNotes" placeholder="Tell us what you saw and what you would like us to check."></textarea>
+              </div>
+              <button type="button" class="btn primary name-logo-action" id="nameLogoActionButton" disabled>Send issue to RightOnQ</button>
+            </div>
+          </div>
+        </div>
+      `;
     }
 
     function renderPartBStoryboard(content) {
@@ -3306,11 +3568,9 @@
       const useCase = document.getElementById("primaryUseCase").value;
       if (!useCase) return "";
       const descriptions = {
-        "Customer updates": "Customer updates, confirmations and follow-up messages people have agreed to receive.",
-        "Staff communications": "Staff updates, confirmations and internal follow-up messages.",
-        "Marketing / mailing list": "Marketing updates and follow-up messages for people who have asked to hear more.",
-        "Client care": "Client care updates, handover details and follow-up messages.",
-        "All of the above": "Agreed updates, marketing, care messages and follow-ups for the right people."
+        Promotional: "Marketing, offers, announcements and sales follow-up messages.",
+        Transactional: "Customer updates, alerts, appointments, order updates and service information.",
+        "Both promotional and transactional": "Marketing messages plus customer updates, alerts and service information."
       };
       return descriptions[useCase] || `${brand} sends agreed messages to people who have chosen to receive them.`;
     }
@@ -3349,11 +3609,9 @@
     function getUseCaseTrigger(useCase, industry, brand) {
       const industryPhrase = industry ? ` for its ${industry.toLowerCase()} activity` : "";
       const triggers = {
-        "Customer updates": `${brand} sends messages when there is a customer update, service notice, confirmation request, or follow-up${industryPhrase}. Messages are sent only to people who have agreed to receive them.`,
-        "Staff communications": `${brand} sends messages when staff need an operational update, shift notice, safety check, task confirmation, or internal follow-up${industryPhrase}. Messages are sent only to team members who have agreed to receive them.`,
-        "Marketing / mailing list": `${brand} sends messages when there is a planned audience update, campaign message, event notice, mailing list update, or follow-up${industryPhrase}. Messages are sent only to people who have agreed to receive these updates.`,
-        "Client care": `${brand} sends messages when there is a personal client update, collection note, handover detail, concierge follow-up, or high-touch service message${industryPhrase}. Messages are sent only to people who have agreed to receive them.`,
-        "All of the above": `${brand} sends messages for customer updates, staff communications, marketing or mailing list updates, and client care follow-ups${industryPhrase}. Messages are sent only to people who have agreed to receive the relevant message type.`
+        Promotional: `${brand} sends messages when there is a marketing update, offer, announcement, event notice, mailing list update, or sales follow-up${industryPhrase}. Messages are sent only to people who have agreed to receive these updates.`,
+        Transactional: `${brand} sends messages when there is a customer update, alert, appointment, order update, account update, service notice, confirmation request, or follow-up${industryPhrase}. Messages are sent only to people who have agreed to receive them.`,
+        "Both promotional and transactional": `${brand} sends both promotional messages and transactional updates${industryPhrase}, such as marketing announcements, offers, customer updates, appointments, alerts, order updates, and service information. Messages are sent only to people who have agreed to receive the relevant message type.`
       };
 
       return triggers[useCase] || `${brand} sends messages when there is a scheduled operational update, confirmation request, service notice, safety notice, or follow-up${industryPhrase}. Messages are sent only to people who have agreed to receive them.`;
@@ -3361,11 +3619,9 @@
 
     function getUseCaseDescription(useCase, purpose, brand) {
       const descriptions = {
-        "Customer updates": `${brand} will use this sender for customer updates, service notices, confirmations, and follow-up messages. Recipients will only receive messages connected to their customer relationship or the updates they have agreed to receive.`,
-        "Staff communications": `${brand} will use this sender for staff and internal team communications, including operational updates, confirmations, and follow-ups. Messages will be sent only to team members who have agreed to receive them.`,
-        "Marketing / mailing list": `${brand} will use this sender for marketing or mailing list updates to people who have agreed to receive those messages. Messages may include audience updates, event notices, campaign messages, and follow-ups, with a clear way to stop future messages.`,
-        "Client care": `${brand} will use this sender for client care messages, such as personal updates, collection notes, handover details, and follow-ups. Recipients will only receive messages connected to their relationship with ${brand}.`,
-        "All of the above": `${brand} will use this sender for customer updates, staff communications, marketing or mailing list updates, and client care messages. Recipients will only receive messages relevant to the relationship or list they have agreed to, with a clear way to stop future messages.`
+        Promotional: `${brand} will use this sender for promotional messages, such as marketing updates, offers, announcements, events, mailing list messages, and sales follow-up. Recipients will only receive promotional messages they have agreed to receive, with a clear way to stop future messages.`,
+        Transactional: `${brand} will use this sender for transactional messages, such as customer updates, alerts, appointments, order updates, account updates, service information, confirmations, and follow-up messages. Recipients will only receive messages connected to their customer relationship or the updates they have agreed to receive.`,
+        "Both promotional and transactional": `${brand} will use this sender for both promotional and transactional messages. Promotional messages may include marketing updates, offers, announcements, and sales follow-up. Transactional messages may include customer updates, alerts, appointments, order updates, account updates, service information, confirmations, and follow-up messages. Recipients will only receive messages relevant to the relationship or list they have agreed to, with a clear way to stop future messages.`
       };
 
       return descriptions[useCase] || `${brand} will use this sender to send ${purpose}. Recipients will only receive messages connected to the relationship or updates they have agreed to receive.`;
@@ -3413,6 +3669,20 @@
         clearFieldError(field);
       });
       updateCharacterCounts();
+    }
+
+    function regenerateDraftWording() {
+      regeneratableDraftFieldIds.forEach(id => {
+        draftedFieldTouched[id] = false;
+        const field = document.getElementById(id);
+        if (!field) return;
+        field.value = buildDraftValue(id);
+        clearFieldError(field);
+      });
+      updateCharacterCounts();
+      queueAutosave();
+      if (currentStep === steps.length - 1) renderReview();
+      showToast("Draft wording regenerated from the current answers.");
     }
 
     function buildDraftValue(id) {
@@ -3488,125 +3758,230 @@
     }
 
     function getIndustryExampleMessage(industry, brand, variant, useCase) {
-      const useCaseExamples = getUseCaseExampleMessages(useCase, brand);
-      if (useCaseExamples) return useCaseExamples[variant];
+      const messages = getIndustryMessageSet(industry, brand);
 
-      const defaults = {
-        1: `${brand}: your scheduled update is ready. Please reply YES to confirm you have received this message. Reply STOP to opt out.`,
-        2: `${brand}: quick follow-up. We have not received your confirmation yet. Please reply YES, NO, or HELP. Reply STOP to opt out.`
+      if (useCase === "Promotional") {
+        return messages.promotional[variant - 1] || messages.promotional[0];
+      }
+
+      if (useCase === "Transactional") {
+        return messages.transactional[variant - 1] || messages.transactional[0];
+      }
+
+      if (useCase === "Both promotional and transactional") {
+        return variant === 1 ? messages.transactional[0] : messages.promotional[0];
+      }
+
+      return messages.transactional[variant - 1] || messages.transactional[0];
+    }
+
+    function getIndustryMessageSet(industry, brand) {
+      const fallback = {
+        promotional: [
+          `${brand}: new update for subscribers. Reply YES if you would like the details, or STOP to opt out.`,
+          `${brand}: reminder about our latest news and offers. Reply MORE for details, or STOP to opt out.`
+        ],
+        transactional: [
+          `${brand}: your scheduled update is ready. Reply YES to confirm you have received this message, or STOP to opt out.`,
+          `${brand}: quick follow-up. Please reply DONE when read, or HELP if you need support. Reply STOP to opt out.`
+        ]
       };
 
       const examples = {
         Agriculture: {
-          1: `${brand}: field update for today is ready. Please reply YES to confirm you have received this message. Reply STOP to opt out.`,
-          2: `${brand}: weather or supply notice follow-up. Reply DONE when read, or HELP if you need support. Reply STOP to opt out.`
+          promotional: [
+            `${brand}: seasonal supply update is now available. Reply YES if you would like details, or STOP to opt out.`,
+            `${brand}: our next open day and product news are ready. Reply MORE for details, or STOP to opt out.`
+          ],
+          transactional: [
+            `${brand}: today's field or delivery update is ready. Reply YES to confirm you have received it. Reply STOP to opt out.`,
+            `${brand}: weather or supply follow-up. Reply DONE when read, or HELP if you need support. Reply STOP to opt out.`
+          ]
         },
         Automotive: {
-          1: `${brand}: your vehicle service update is ready. Please reply YES to confirm you have received this message. Reply STOP to opt out.`,
-          2: `${brand}: reminder to confirm your collection or follow-up preference. Reply YES, NO, or HELP. Reply STOP to opt out.`
+          promotional: [
+            `${brand}: our latest vehicle offers and private viewing slots are available. Reply YES for details, or STOP to opt out.`,
+            `${brand}: new stock update for invited customers. Reply MORE to see options, or STOP to opt out.`
+          ],
+          transactional: [
+            `${brand}: your vehicle service update is ready. Reply YES to confirm you have seen it, or HELP if you need us. Reply STOP to opt out.`,
+            `${brand}: reminder to confirm your collection or follow-up preference. Reply YES, NO, or HELP. Reply STOP to opt out.`
+          ]
         },
         Communication: {
-          1: `${brand}: service update is ready. Please reply YES to confirm you have received this message. Reply STOP to opt out.`,
-          2: `${brand}: support follow-up. Reply DONE if this is resolved, or HELP if you still need assistance. Reply STOP to opt out.`
+          promotional: [
+            `${brand}: new service options are available for subscribers. Reply YES for details, or STOP to opt out.`,
+            `${brand}: product news and offers are ready. Reply MORE if you would like details, or STOP to opt out.`
+          ],
+          transactional: [
+            `${brand}: service update is ready. Reply YES to confirm you have received it. Reply STOP to opt out.`,
+            `${brand}: support follow-up. Reply DONE if this is resolved, or HELP if you still need assistance. Reply STOP to opt out.`
+          ]
         },
         Construction: {
-          1: `${brand}: site update for today is ready. Please reply YES to confirm you have received it. Reply STOP to opt out.`,
-          2: `${brand}: safety notice follow-up. Reply DONE when read, or HELP if you need support. Reply STOP to opt out.`
+          promotional: [
+            `${brand}: project availability and service news are ready. Reply YES for details, or STOP to opt out.`,
+            `${brand}: new build or maintenance update for subscribers. Reply MORE for details, or STOP to opt out.`
+          ],
+          transactional: [
+            `${brand}: site update for today is ready. Reply YES to confirm you have received it. Reply STOP to opt out.`,
+            `${brand}: safety notice follow-up. Reply DONE when read, or HELP if you need support. Reply STOP to opt out.`
+          ]
         },
         Education: {
-          1: `${brand}: important update for today is ready. Please reply YES to confirm you have received it. Reply STOP to opt out.`,
-          2: `${brand}: event or attendance follow-up. Reply DONE when read, or HELP if you need support. Reply STOP to opt out.`
+          promotional: [
+            `${brand}: event and course updates are now available. Reply YES for details, or STOP to opt out.`,
+            `${brand}: open day reminder for subscribers. Reply MORE if you would like details, or STOP to opt out.`
+          ],
+          transactional: [
+            `${brand}: important update for today is ready. Reply YES to confirm you have received it. Reply STOP to opt out.`,
+            `${brand}: event or attendance follow-up. Reply DONE when read, or HELP if you need support. Reply STOP to opt out.`
+          ]
         },
         Entertainment: {
-          1: `${brand}: event update is ready. Please reply YES to confirm you have received it. Reply STOP to opt out.`,
-          2: `${brand}: access information follow-up. Reply DONE when read, or HELP if you need support. Reply STOP to opt out.`
+          promotional: [
+            `${brand}: priority access is open for our next event. Reply YES for details, or STOP to opt out.`,
+            `${brand}: subscriber offer now available. Reply MORE if you would like details, or STOP to opt out.`
+          ],
+          transactional: [
+            `${brand}: event update is ready. Reply YES to confirm you have received it. Reply STOP to opt out.`,
+            `${brand}: access information follow-up. Reply DONE when read, or HELP if you need support. Reply STOP to opt out.`
+          ]
         },
         Financial: {
-          1: `${brand}: important account notice is ready. Please reply YES to confirm you have received it. Reply STOP to opt out.`,
-          2: `${brand}: security or account follow-up. Reply HELP if you need support. Reply STOP to opt out.`
+          promotional: [
+            `${brand}: product update for existing subscribers is available. Reply YES for details, or STOP to opt out.`,
+            `${brand}: new service information is ready. Reply MORE if you would like details, or STOP to opt out.`
+          ],
+          transactional: [
+            `${brand}: important account notice is ready. Reply YES to confirm you have received it. Reply STOP to opt out.`,
+            `${brand}: security or account follow-up. Reply HELP if you need support. Reply STOP to opt out.`
+          ]
         },
         Government: {
-          1: `${brand}: public service update is ready. Please reply YES to confirm you have received it. Reply STOP to opt out.`,
-          2: `${brand}: appointment or case follow-up. Reply DONE when read, or HELP if you need support. Reply STOP to opt out.`
+          promotional: [
+            `${brand}: community event update is available. Reply YES for details, or STOP to opt out.`,
+            `${brand}: public information update is ready. Reply MORE for details, or STOP to opt out.`
+          ],
+          transactional: [
+            `${brand}: public service update is ready. Reply YES to confirm you have received it. Reply STOP to opt out.`,
+            `${brand}: appointment or case follow-up. Reply DONE when read, or HELP if you need support. Reply STOP to opt out.`
+          ]
         },
         Healthcare: {
-          1: `${brand}: your care update is ready. Please reply YES to confirm you have received this message. Reply STOP to opt out.`,
-          2: `${brand}: welfare check reminder. Please reply DONE when read, or HELP if you need support. Reply STOP to opt out.`
+          promotional: [
+            `${brand}: health and service update for subscribers is available. Reply YES for details, or STOP to opt out.`,
+            `${brand}: new clinic or service information is ready. Reply MORE for details, or STOP to opt out.`
+          ],
+          transactional: [
+            `${brand}: your care update is ready. Reply YES to confirm you have received this message. Reply STOP to opt out.`,
+            `${brand}: appointment or welfare check reminder. Reply DONE when read, or HELP if you need support. Reply STOP to opt out.`
+          ]
         },
         Hospitality: {
-          1: `${brand}: guest update is ready. Please reply YES to confirm you have received it. Reply STOP to opt out.`,
-          2: `${brand}: arrival or service follow-up. Reply DONE when read, or HELP if you need support. Reply STOP to opt out.`
+          promotional: [
+            `${brand}: our latest menu, event, or guest offer is available. Reply YES for details, or STOP to opt out.`,
+            `${brand}: priority booking update for subscribers. Reply MORE if you would like details, or STOP to opt out.`
+          ],
+          transactional: [
+            `${brand}: your booking or guest update is ready. Reply YES to confirm you have received it. Reply STOP to opt out.`,
+            `${brand}: arrival or service follow-up. Reply DONE when read, or HELP if you need support. Reply STOP to opt out.`
+          ]
         },
         Insurance: {
-          1: `${brand}: policy or claim update is ready. Please reply YES to confirm you have received it. Reply STOP to opt out.`,
-          2: `${brand}: claim follow-up. Reply DONE when read, or HELP if you need support. Reply STOP to opt out.`
+          promotional: [
+            `${brand}: policy review information is available for subscribers. Reply YES for details, or STOP to opt out.`,
+            `${brand}: new cover or service update is ready. Reply MORE for details, or STOP to opt out.`
+          ],
+          transactional: [
+            `${brand}: policy or claim update is ready. Reply YES to confirm you have received it. Reply STOP to opt out.`,
+            `${brand}: claim follow-up. Reply DONE when read, or HELP if you need support. Reply STOP to opt out.`
+          ]
         },
         Legal: {
-          1: `${brand}: client update is ready. Please reply YES to confirm you have received it. Reply STOP to opt out.`,
-          2: `${brand}: document or appointment follow-up. Reply DONE when read, or HELP if you need support. Reply STOP to opt out.`
+          promotional: [
+            `${brand}: legal update for subscribers is available. Reply YES for details, or STOP to opt out.`,
+            `${brand}: event or service news is ready. Reply MORE if you would like details, or STOP to opt out.`
+          ],
+          transactional: [
+            `${brand}: client update is ready. Reply YES to confirm you have received it. Reply STOP to opt out.`,
+            `${brand}: document or appointment follow-up. Reply DONE when read, or HELP if you need support. Reply STOP to opt out.`
+          ]
         },
         Manufacturing: {
-          1: `${brand}: production update for today is ready. Please reply YES to confirm attendance or receipt. Reply STOP to opt out.`,
-          2: `${brand}: follow-up on the team notice sent earlier. Reply DONE when read, or HELP if you need support. Reply STOP to opt out.`
+          promotional: [
+            `${brand}: product and availability update is ready. Reply YES for details, or STOP to opt out.`,
+            `${brand}: new service or production news is available. Reply MORE for details, or STOP to opt out.`
+          ],
+          transactional: [
+            `${brand}: production update for today is ready. Reply YES to confirm attendance or receipt. Reply STOP to opt out.`,
+            `${brand}: follow-up on the team notice sent earlier. Reply DONE when read, or HELP if you need support. Reply STOP to opt out.`
+          ]
         },
         Nonprofit: {
-          1: `${brand}: supporter or volunteer update is ready. Please reply YES to confirm you have received it. Reply STOP to opt out.`,
-          2: `${brand}: event or volunteer follow-up. Reply DONE when read, or HELP if you need support. Reply STOP to opt out.`
+          promotional: [
+            `${brand}: campaign or supporter update is ready. Reply YES for details, or STOP to opt out.`,
+            `${brand}: event and volunteer news is available. Reply MORE if you would like details, or STOP to opt out.`
+          ],
+          transactional: [
+            `${brand}: supporter or volunteer update is ready. Reply YES to confirm you have received it. Reply STOP to opt out.`,
+            `${brand}: event or volunteer follow-up. Reply DONE when read, or HELP if you need support. Reply STOP to opt out.`
+          ]
         },
         Professional: {
-          1: `${brand}: client update is ready. Please reply YES to confirm you have received it. Reply STOP to opt out.`,
-          2: `${brand}: document or follow-up request. Reply DONE when read, or HELP if you need support. Reply STOP to opt out.`
+          promotional: [
+            `${brand}: service update for subscribers is available. Reply YES for details, or STOP to opt out.`,
+            `${brand}: event or client news is ready. Reply MORE if you would like details, or STOP to opt out.`
+          ],
+          transactional: [
+            `${brand}: client update is ready. Reply YES to confirm you have received it. Reply STOP to opt out.`,
+            `${brand}: document or follow-up request. Reply DONE when read, or HELP if you need support. Reply STOP to opt out.`
+          ]
         },
         "Real estate": {
-          1: `${brand}: property update is ready. Please reply YES to confirm you have received it. Reply STOP to opt out.`,
-          2: `${brand}: viewing or enquiry follow-up. Reply DONE when read, or HELP if you need support. Reply STOP to opt out.`
+          promotional: [
+            `${brand}: new property update is available for subscribers. Reply YES for details, or STOP to opt out.`,
+            `${brand}: viewing event or market update is ready. Reply MORE for details, or STOP to opt out.`
+          ],
+          transactional: [
+            `${brand}: property update is ready. Reply YES to confirm you have received it. Reply STOP to opt out.`,
+            `${brand}: viewing or enquiry follow-up. Reply DONE when read, or HELP if you need support. Reply STOP to opt out.`
+          ]
         },
         Retail: {
-          1: `${brand}: your order or collection update is ready. Please reply YES to confirm you have received it. Reply STOP to opt out.`,
-          2: `${brand}: follow-up on your customer update. Reply HELP if you need support. Reply STOP to opt out.`
+          promotional: [
+            `${brand}: new product update and subscriber offer are available. Reply YES for details, or STOP to opt out.`,
+            `${brand}: stock and collection news is ready. Reply MORE if you would like details, or STOP to opt out.`
+          ],
+          transactional: [
+            `${brand}: your order or collection update is ready. Reply YES to confirm you have received it. Reply STOP to opt out.`,
+            `${brand}: follow-up on your customer update. Reply HELP if you need support. Reply STOP to opt out.`
+          ]
         },
         Technology: {
-          1: `${brand}: service update is ready. Please reply YES to confirm you have received it. Reply STOP to opt out.`,
-          2: `${brand}: support or account follow-up. Reply DONE if resolved, or HELP if you need support. Reply STOP to opt out.`
+          promotional: [
+            `${brand}: product update for subscribers is available. Reply YES for details, or STOP to opt out.`,
+            `${brand}: new feature or service news is ready. Reply MORE if you would like details, or STOP to opt out.`
+          ],
+          transactional: [
+            `${brand}: service update is ready. Reply YES to confirm you have received it. Reply STOP to opt out.`,
+            `${brand}: support or account follow-up. Reply DONE if resolved, or HELP if you need support. Reply STOP to opt out.`
+          ]
         },
         Transportation: {
-          1: `${brand}: journey or schedule update is ready. Please reply YES to confirm you have received it. Reply STOP to opt out.`,
-          2: `${brand}: follow-up on the service notice sent earlier. Reply DONE when read, or HELP if you need support. Reply STOP to opt out.`
+          promotional: [
+            `${brand}: travel or service offer is available. Reply YES for details, or STOP to opt out.`,
+            `${brand}: route and service news is ready. Reply MORE for details, or STOP to opt out.`
+          ],
+          transactional: [
+            `${brand}: journey or schedule update is ready. Reply YES to confirm you have received it. Reply STOP to opt out.`,
+            `${brand}: follow-up on the service notice sent earlier. Reply DONE when read, or HELP if you need support. Reply STOP to opt out.`
+          ]
         },
-        Other: {
-          1: `${brand}: your scheduled update is ready. Please reply YES to confirm you have received it. Reply STOP to opt out.`,
-          2: `${brand}: follow-up on the message sent earlier. Reply DONE when read, or HELP if you need support. Reply STOP to opt out.`
-        }
+        Other: fallback
       };
 
-      return (examples[industry] && examples[industry][variant]) || defaults[variant];
-    }
-
-    function getUseCaseExampleMessages(useCase, brand) {
-      const examples = {
-        "Client care": {
-          1: `${brand}: your car is ready for collection. We have prepared everything for your handover. Reply YES to confirm you have seen this, or HELP if you need us. Reply STOP to opt out.`,
-          2: `${brand}: thank you for visiting us today. We have your follow-up ready. Reply YES if you would like us to send the details. Reply STOP to opt out.`
-        },
-        "Staff communications": {
-          1: `${brand}: today's client handover list is ready. Please reply YES once reviewed, or HELP if anything needs attention. Reply STOP to opt out.`,
-          2: `${brand}: reminder that the 09:30 team briefing has moved to Bay 2. Reply YES once seen. Reply STOP to opt out.`
-        },
-        "Marketing / mailing list": {
-          1: `${brand}: our private viewing evening is now open to invited guests. Reply YES if you would like details, or STOP to opt out.`,
-          2: `${brand}: we have a limited collection update for our mailing list. Reply YES for the details, or STOP to opt out.`
-        },
-        "Customer updates": {
-          1: `${brand}: your handover details are ready. Please reply YES to confirm you have seen them, or HELP if you would like us to call. Reply STOP to opt out.`,
-          2: `${brand}: we have updated your collection plan for tomorrow. Reply YES if this still works for you, or HELP if you need us. Reply STOP to opt out.`
-        },
-        "All of the above": {
-          1: `${brand}: your car is ready for collection. We have prepared everything for your handover. Reply YES to confirm you have seen this, or HELP if you need us. Reply STOP to opt out.`,
-          2: `${brand}: today's client handover list is ready. Please reply YES once reviewed, or HELP if anything needs attention. Reply STOP to opt out.`
-        }
-      };
-
-      return examples[useCase] || null;
+      return examples[industry] || fallback;
     }
 
     function numberFields() {
