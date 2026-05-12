@@ -27,6 +27,37 @@ This is not optional. Wrong-file edits, wrong previews, unapproved layout change
 
 Use normal chat for wording proposals. Do not put ordinary wording suggestions in code blocks unless Adam needs to copy a command or file path.
 
+## Local Checkpoint Rule - Do Not Leave Important Work At Level 3
+
+Adam uses the following mental model for safety:
+
+- Level 1: pushed to GitHub.
+- Level 2: committed locally in Git, but not pushed.
+- Level 3: only present as uncommitted working-tree changes.
+
+For important RCS app work, do not leave valuable progress sitting at Level 3 for long. Adam has had previous experiences where uncommitted work broke or became hard to recover, so he expects regular local checkpoint commits during substantial work.
+
+Practical rule:
+
+- after a meaningful block of approved work;
+- roughly every hour during active editing;
+- before breaks, context switches, shutdowns, or handing over;
+- before risky layout or flow changes;
+
+move the approved current state from Level 3 to Level 2 with a narrow local commit.
+
+This does not mean push automatically. It means make a local checkpoint commit that includes only the approved files for that work stream. Always show or verify the staged file list first, and never use broad staging.
+
+Example safe checkpoint pattern for the RCS app:
+
+```bash
+git add -- rcs-registration/index.html
+git diff --cached --name-status
+git commit -m "Checkpoint current RCS registration app state"
+```
+
+Do not include unrelated dirty files in these checkpoints. In particular, do not accidentally stage root `index.html`, legal pages, future-amendment notes, or handover files unless Adam has specifically approved that scope.
+
 ## Correct Files And Preview
 
 ## Handover Files Now Together
