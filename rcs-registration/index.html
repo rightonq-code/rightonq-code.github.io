@@ -2207,10 +2207,10 @@
                 </select>
               </div>
               <div class="field full">
-                <label for="senderDescription">Sender description <span class="required">*</span></label>
-                <p class="helper">We draft this from the sender name and message purpose. This is the short public profile description.</p>
-                <textarea id="senderDescription" name="senderDescription" maxlength="500" required></textarea>
-                <div class="char-count" data-count-for="senderDescription">0 / 500</div>
+                <label for="senderDescription">Public profile description <span class="required">*</span></label>
+                <p class="helper">This short description may appear in the messaging app profile. Keep it clear, factual, and under 100 characters.</p>
+                <textarea id="senderDescription" name="senderDescription" maxlength="100" required></textarea>
+                <div class="char-count" data-count-for="senderDescription">0 / 100</div>
               </div>
               <div class="field">
                 <label for="monthlyVolume">Expected monthly send volume <span class="required">*</span></label>
@@ -2571,7 +2571,7 @@
         title: "Use case declaration",
         fields: [
           ["Main message purpose", "primaryUseCase"],
-          ["Sender description", "senderDescription"],
+          ["Public profile description", "senderDescription"],
           ["Expected monthly send volume", "monthlyVolume"],
           ["Why people would receive a message", "messageTrigger"],
           ["Use case description", "useCaseDescription"],
@@ -3252,13 +3252,13 @@
       const useCase = document.getElementById("primaryUseCase").value;
       if (!useCase) return "";
       const descriptions = {
-        "Customer updates": `${brand} uses this RCS sender to share agreed customer updates, confirmations, and follow-up messages.`,
-        "Staff communications": `${brand} uses this RCS sender to share agreed staff updates, confirmations, and internal follow-up messages.`,
-        "Marketing / mailing list": `${brand} uses this RCS sender to share agreed marketing and mailing list updates with people who have opted in.`,
-        "Client care": `${brand} uses this RCS sender to share agreed client care updates, handover details, and follow-up messages.`,
-        "All of the above": `${brand} uses this RCS sender to share agreed customer, staff, marketing, and client care messages.`
+        "Customer updates": "Customer updates, confirmations and follow-up messages people have agreed to receive.",
+        "Staff communications": "Staff updates, confirmations and internal follow-up messages.",
+        "Marketing / mailing list": "Marketing updates and follow-up messages for people who have asked to hear more.",
+        "Client care": "Client care updates, handover details and follow-up messages.",
+        "All of the above": "Agreed updates, marketing, care messages and follow-ups for the right people."
       };
-      return descriptions[useCase] || `${brand} uses this RCS sender to share agreed messages with people who have chosen to receive them.`;
+      return descriptions[useCase] || `${brand} sends agreed messages to people who have chosen to receive them.`;
     }
 
     function getSenderBrandName() {

@@ -96,6 +96,8 @@ function notifyAdam(payload, submissionId, countries, usSelected) {
     "Contact: " + (payload.primaryContactName || ""),
     "Email: " + (payload.primaryContactEmail || ""),
     "Phone: " + (payload.primaryContactPhone || ""),
+    "Use case: " + (payload.primaryUseCase || ""),
+    "Public profile description: " + (payload.senderDescription || ""),
     "Launch countries: " + countries.join(", "),
     "United States selected: " + usSelected,
     "",

@@ -1,7 +1,7 @@
 # RCS-Twilio-1 Handover Diary
 
 Started: Wednesday 6 May 2026  
-Last updated: Thursday 7 May 2026, 20:25 BST
+Last updated: Tuesday 12 May 2026, morning BST
 Project: RightOnQ RCS Registration Studio  
 Primary working file: `/Users/macpro/rightonq-code.github.io/rcs-registration/index.html`  
 Current local browser URL: `file:///Users/macpro/rightonq-code.github.io/rcs-registration/index.html`  
@@ -9,6 +9,182 @@ Git branch: `rcs-registration-part-a-b-20260507`
 Latest pushed app commit before this handover: `f04c22f Refine RCS registration Part B flow`
 Handover/GitHub plan commit: `224e92d Update RCS handover with GitHub and hosting plan`  
 Initial RCS form commit: `4893751 Add standalone RCS registration form`
+
+## Morning Sync - Tuesday 12 May 2026
+
+This is the newest state for agents working around the RightOnQ website, RCS registration app, Twilio sender setup, and Part B storyboard work. It supersedes older notes below where they conflict.
+
+### Current Branch / Files
+
+Working branch:
+
+- `rcs-registration-part-a-b-20260507`
+
+Files refreshed in this morning sync:
+
+- `/Users/macpro/rightonq-code.github.io/rcs-registration/RCS_TWILIO_1_HANDOVER_2026-05-06.md`
+- `/Users/macpro/rightonq-code.github.io/rcs-registration/index.html`
+- `/Users/macpro/rightonq-code.github.io/rcs-registration/google-apps-script/Code.gs`
+
+Known unrelated local work at the time of this sync:
+
+- root `/Users/macpro/rightonq-code.github.io/index.html` is modified and should still be treated as unrelated to the RCS registration app unless the user explicitly asks to work on the main website.
+- root `privacy.html` and `terms.html` are modified on this branch because the cleaned legal-page wording from `main` was synced into the RCS branch.
+- untracked future-amendment notes exist at repo root and should not be staged by accident.
+
+### Twilio Console State Learned On 11 May
+
+The user inspected the live Twilio Console for the existing RightOnQ RCS sender draft. Do not repeat account SIDs, sender SIDs, agent IDs, billing details, private device numbers, or uploaded Twilio asset URLs in shared notes or public docs.
+
+Confirmed live-console facts:
+
+- RCS is available in the Twilio account.
+- An existing `RightOnQ` RCS sender draft exists and is still `Not Submitted`.
+- Tabs visible for the sender: `Public details`, `Test`, `Configuration`, `Compliance registration`.
+- Public details can be edited and re-saved while the sender is still not submitted.
+- Compliance registration was blocked until required public profile fields were completed.
+- Test tab exists and offers adding an RCS-compatible test device.
+- Configuration tab asks for webhook URLs, fallback URL, status callback URL, and assigned Messaging Service. These were inspected but not configured.
+- No compliance submission, live launch submission, production messaging, or webhook send path has been approved yet.
+
+Current RightOnQ Twilio Public Details values used/approved in the live console:
+
+- Sender display name: `RightOnQ™`
+- Use case: `Promotional`
+- Description: `See how branded RCS messages can make two-way conversations clearer from the first hello.`
+- Accent colour: `#1763ba`
+- Contact type: `Email`
+- Primary email: `adam@rightonq.co.uk`
+- Email label: `Support`
+- Privacy policy: `https://www.rightonq.co.uk/privacy/`
+- Terms of service: `https://www.rightonq.co.uk/terms/`
+
+Important description lesson:
+
+- Twilio's visible helper says the description should include how users interact with the sender.
+- The earlier storyboard line, `The RCS software layer for effective business messaging.`, is elegant brand/profile copy, but the final Twilio description is better because it describes the experience and remains under 100 characters.
+- The Part A app now treats this as a `Public profile description` with a 100-character maximum, rather than a loose 500-character sender description.
+
+Current local upload-ready asset files created for the Twilio public profile:
+
+- Logo: `/Users/macpro/Downloads/design_handoff_rcs_storyboard/assets/rightonq-rcs-logo-upload-224-padded.png`
+  - verified as 224 x 224 PNG, about 21 KB.
+  - this is the correct padded upload file, not the older comparison/review sheet.
+- Banner: `/Users/macpro/Downloads/design_handoff_rcs_storyboard/assets/rightonq-rcs-banner-upload-1440x448.jpg`
+  - verified as 1440 x 448 JPG, about 5.1 KB.
+  - this was copied to an obvious final upload filename so it is easy for the user to find from Finder/upload dialogs.
+
+Practical file-delivery rule learned:
+
+- When the user needs to upload an asset manually, create an obvious final file in the working folder, verify dimensions and size, then give that exact path. Avoid sending the user to ambiguous source/review filenames.
+
+### Part A App Update From This Sync
+
+`rcs-registration/index.html` has been updated so the existing `senderDescription` field now matches the live Twilio learning:
+
+- label changed from `Sender description` to `Public profile description`;
+- helper now explains it may appear in the messaging app profile and must be clear, factual, and under 100 characters;
+- `maxlength` changed from `500` to `100`;
+- character counter changed from `0 / 500` to `0 / 100`;
+- review label changed to `Public profile description`;
+- automated draft descriptions were shortened so they fit the 100-character profile field.
+
+The longer reviewer/compliance explanation remains separate as `Message use case description`; do not collapse the public profile description and longer use-case explanation into one field.
+
+### Apps Script Intake Update From This Sync
+
+`rcs-registration/google-apps-script/Code.gs` now includes these lines in Adam's notification email for new Part A submissions:
+
+- `Use case`
+- `Public profile description`
+
+The Google Sheet append order was not changed in this sync to avoid shifting existing spreadsheet columns. The full payload JSON already remains in the appended row, so the public profile description is still preserved in the raw submission data.
+
+### Twilio Support Email Evidence
+
+Twilio Support replied to Adam's ticket on 11 May 2026 and confirmed the useful Part B/video assumptions:
+
+- RightOnQ can produce the RCS verification video on behalf of clients.
+- The actual client does not need to appear in the video.
+- The video must accurately demonstrate the end-user opt-in and opt-out flows.
+- If a client brand is not registered yet, a staged or simulated flow is acceptable, provided the brand identity and user journey are clear.
+- Twilio does not currently provide an official sandbox/test agent or official example verification video for this process.
+- Twilio said they are happy to review a draft video/storyboard and provide suggestions.
+
+Adam replied to the ticket to confirm that understanding and keep the guidance in the support record.
+
+### Current Part B / Storyboard Workspace
+
+Current Part B design/storyboard workspace:
+
+- `/Users/macpro/Downloads/design_handoff_rcs_storyboard/storyboard.html`
+- preview: `http://localhost:8899/storyboard.html`
+
+If the preview server is not running:
+
+```bash
+cd /Users/macpro/Downloads/design_handoff_rcs_storyboard
+python3 -m http.server 8899
+```
+
+Important related files in that workspace:
+
+- `/Users/macpro/Downloads/design_handoff_rcs_storyboard/RCS_TWILIO_2_HANDOVER_2026-05-11.md`
+- `/Users/macpro/Downloads/design_handoff_rcs_storyboard/google-rcs-video-readiness-audit.md`
+- `/Users/macpro/Downloads/design_handoff_rcs_storyboard/rightonq-rbm-test-agent-plan.md`
+- `/Users/macpro/Downloads/design_handoff_rcs_storyboard/rightonq-part-b-rbm-registration-playbook.md`
+- `/Users/macpro/Downloads/design_handoff_rcs_storyboard/rightonq-rbm-use-case-classification-note.md`
+- `/Users/macpro/Downloads/design_handoff_rcs_storyboard/rightonq-rbm-google-submission-narrative.md`
+- `/Users/macpro/Downloads/design_handoff_rcs_storyboard/rightonq-twilio-public-details-fill-sheet.md`
+
+Current direction:
+
+- Twilio Console is the current application/control-plane route for the RightOnQ pilot.
+- Google/RBM requirements still sit underneath the process and should guide evidence quality.
+- Direct Google RBM API/test-agent work is useful as technical background, but the current operational route is Twilio first.
+- Do not spend on AI video yet.
+- Do not add runnable sender code yet.
+- Do not put secrets in files.
+- Do not send real messages until Twilio sender/test-device credentials and explicit approval exist.
+- Do not assume Twilio public details completion means Compliance Registration or carrier approval has happened.
+
+### Use Case / Category Decision
+
+Current first-launch category:
+
+- `Promotional`
+
+Reason:
+
+- The first RightOnQ sender is for people/businesses exploring RCS, seeing examples, and receiving follow-up.
+- It should not be labelled `Multi-use` for the first submission unless the evidence genuinely supports both promotional and transactional use.
+- Future client registration/application updates may be transactional, but that is a later service pattern and should not be mixed into this first RightOnQ pilot sender unless deliberately approved.
+
+### Legal Pages / Brand Notes
+
+Privacy and Terms pages exist and have been synced into the RCS branch with public provider names removed. They are suitable for continued RCS/RBM preparation, subject to final human/legal review before formal submission.
+
+Use these public URLs for the RightOnQ pilot unless a later legal review changes them:
+
+- `https://www.rightonq.co.uk/privacy/`
+- `https://www.rightonq.co.uk/terms/`
+
+Brand/trademark note:
+
+- RightOnQ is currently treated with `™` in the Twilio draft sender name.
+- Do not change to `®` in live submission material unless the trademark registration position has been confirmed by the human/account owner before submission.
+
+### Notes For RightOnQ.co.uk-Web-4
+
+The RCS registration app is still a standalone mini-application and should not be merged into the main website homepage by accident.
+
+Useful website-design context:
+
+- RightOnQ's public website, legal pages, and any RCS registration entry point should tell the same basic story: RightOnQ helps businesses understand and use RCS for clearer two-way conversations.
+- Avoid publicly naming implementation providers unless there is a deliberate reason.
+- Do not imply RCS is already live for public traffic; the Twilio sender is still a draft/not-submitted sender.
+- If the main site later links to the RCS form, link out to the standalone registration path/app rather than embedding the whole workflow into the homepage.
+- If adding public opt-in copy for the RightOnQ pilot, align it with the storyboard idea: the person asks to receive RightOnQ RCS examples and follow-up messages and can reply STOP to cancel / HELP for help.
 
 ## End Of Day 2 Diary - Thursday 7 May 2026, 20:25 BST
 
