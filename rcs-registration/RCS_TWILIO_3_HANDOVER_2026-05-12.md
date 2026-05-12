@@ -374,6 +374,109 @@ git diff --check -- rcs-registration/index.html
 
 If Adam asks to restore something, show the exact proposed reverse diff first. Do not run restore/reset commands casually.
 
+## Final Safety Branch And Push Update
+
+After this handover was first written, Adam asked for the handover files to be safely preserved on GitHub without pushing any app/layout work.
+
+The safe route used was a separate Git worktree, not the dirty checkout.
+
+Safety worktree:
+
+- `/Users/macpro/rightonq-code-handover-20260512`
+
+Safety branch:
+
+- `rcs-twilio-handover-20260512`
+
+Base used for that worktree:
+
+- `origin/rcs-registration-part-a-b-20260507`
+- commit `bfeceb8 Sync RCS Twilio handover and profile description field`
+
+The dirty checkout at `/Users/macpro/rightonq-code.github.io` was not used for committing or pushing.
+
+The following files were staged, committed and pushed on the safety branch:
+
+- `rcs-registration/RCS_TWILIO_1_HANDOVER_2026-05-06.md`
+- `rcs-registration/RCS_TWILIO_2_HANDOVER_2026-05-11.md`
+- `rcs-registration/RCS_TWILIO_3_HANDOVER_2026-05-12.md`
+
+Commit pushed:
+
+- `22e2651 docs: add RCS Twilio handover chain`
+
+GitHub branch:
+
+- `https://github.com/rightonq-code/rightonq-code.github.io/tree/rcs-twilio-handover-20260512`
+
+Pull request creation URL:
+
+- `https://github.com/rightonq-code/rightonq-code.github.io/pull/new/rcs-twilio-handover-20260512`
+
+The pushed diff contained only:
+
+- modified `rcs-registration/RCS_TWILIO_1_HANDOVER_2026-05-06.md`
+- added `rcs-registration/RCS_TWILIO_2_HANDOVER_2026-05-11.md`
+- added `rcs-registration/RCS_TWILIO_3_HANDOVER_2026-05-12.md`
+
+No app/layout work was pushed on that safety branch. In particular, the safety branch did not include:
+
+- `rcs-registration/index.html`
+- root `index.html`
+- `privacy.html`
+- `terms.html`
+- `RightOnQ RCS Application Future Amendments.md`
+- `RightOnQ Website Future Amendments.md`
+
+## Dirty Checkout Status After Handover Push
+
+The main working checkout still has mixed local work. This is expected and should not be "cleaned" with broad Git commands.
+
+Dirty checkout:
+
+- `/Users/macpro/rightonq-code.github.io`
+
+Known local branch state:
+
+- branch `rcs-registration-part-a-b-20260507`
+- ahead of `origin/rcs-registration-part-a-b-20260507` by one local commit: `b4a8acc Checkpoint Part B phone preview step`
+
+Known dirty / untracked groups:
+
+- `rcs-registration/index.html` - RCS app work, including current Part B/A8 phone-preview changes. This is the sensitive product file.
+- `rcs-registration/RCS_TWILIO_1_HANDOVER_2026-05-06.md` - earlier handover/protocol updates.
+- `rcs-registration/RCS_TWILIO_2_HANDOVER_2026-05-11.md` - Twilio-2 handover copy added locally.
+- `rcs-registration/RCS_TWILIO_3_HANDOVER_2026-05-12.md` - this Twilio-3 handover file added locally.
+- `privacy.html` and `terms.html` - provider-name/legal wording cleanup. Treat as web/legal lane, not app layout.
+- root `index.html` - main website/homepage work. Treat as website lane, not RCS app lane.
+- `RightOnQ RCS Application Future Amendments.md` and `RightOnQ Website Future Amendments.md` - planning notes from another lane.
+
+Do not use `git add .`, `git reset`, `git clean`, broad checkout/restore commands, rebase, or merge to "fix" this. If cleanup is required, classify each file with Adam first and handle one approved group at a time.
+
+## Recommended Cleanup Sequence For RCS-Twilio-4
+
+Start by telling Adam the handover chain is safe on GitHub at branch `rcs-twilio-handover-20260512`.
+
+Then inspect the dirty checkout read-only:
+
+```bash
+cd /Users/macpro/rightonq-code.github.io
+git status --short --branch
+git log --oneline origin/rcs-registration-part-a-b-20260507..HEAD
+git diff --stat
+git diff --name-status
+```
+
+Classify the files before touching anything:
+
+1. RCS app decision: `rcs-registration/index.html`
+2. RCS handover files: already preserved on safety branch
+3. legal/web cleanup: `privacy.html`, `terms.html`
+4. website lane: root `index.html`
+5. future-amendment notes: the two untracked Markdown files
+
+The first real product decision should still be whether Adam wants to keep, adjust, or roll back the current A8 Box 47/48 phone-preview work in `rcs-registration/index.html`.
+
 ## Final Warning
 
 The previous agent caused confusion by talking as if a chat handover had been saved when it had not. This file is the saved handover. Continue from this file and the actual Git state, not from assumptions.
