@@ -78,6 +78,13 @@ Practical file-delivery rule learned:
 
 - When the user needs to upload an asset manually, create an obvious final file in the working folder, verify dimensions and size, then give that exact path. Avoid sending the user to ambiguous source/review filenames.
 
+Logo preview rule learned from real Twilio test device:
+
+- Do not judge the sender logo only from the upload/crop preview. Test it at real inbox size on both light and dark phone screens before submission.
+- The RightOnQ dark logo tile is acceptable for the pilot, especially on light mode. It is not worth over-tuning now.
+- For client applications, logo contrast may matter more than the artwork looking perfect at full size. A client's logo should be checked in the message list/inbox view before final submission.
+- Twilio's test-device flow is commercially useful: RightOnQ can nominate an internal RCS-capable phone, view the client's sender profile in a real inbox, and adjust logo/background/size before submission. This is part of the value of a managed registration service, because many clients will not know how to judge these details from provider upload screens alone.
+
 ### Part A App Update From This Sync
 
 `rcs-registration/index.html` has been updated so the existing `senderDescription` field now matches the live Twilio learning:
@@ -147,6 +154,17 @@ Current direction:
 - Do not put secrets in files.
 - Do not send real messages until Twilio sender/test-device credentials and explicit approval exist.
 - Do not assume Twilio public details completion means Compliance Registration or carrier approval has happened.
+
+New Part B workflow idea from 12 May test-device learning:
+
+- The first practical Part B step should likely be a real-device sender-profile check before video production.
+- After Part A is received and RightOnQ has the client's logo/brand details, RightOnQ can upload/test the client's sender profile in Twilio, nominate an internal RCS-capable phone, and check the logo at real inbox size.
+- Twilio's Public Details phone preview appears useful but may not be accurate for final inbox thumbnail scale. The real phone is the truth.
+- RightOnQ should consider keeping a small set of test phones, including at least one Android device and more than one display mode/device type, to check thumbnail scale and contrast before formal submission.
+- After RightOnQ has adjusted the client's logo/background/size, the client can be invited to become a tester and receive the test sender/profile on their own preferred phone.
+- Because this test route is outbound/test-only, the client may not be able to reply in-message with approval. The Part B workflow should therefore include an explicit checkbox/sign-off such as "I have viewed the sender profile/logo on my phone and approve it for the review video/submission."
+- This should sit at the beginning of Part B, after Part A intake/review and before the final review video is prepared.
+- This is a strong managed-service value point: RightOnQ is not merely collecting a logo; it is checking how the sender identity actually appears on real devices and reducing the risk of a poor-looking or rejected submission.
 
 ### Use Case / Category Decision
 
