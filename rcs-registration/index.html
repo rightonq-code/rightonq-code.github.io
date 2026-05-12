@@ -735,30 +735,34 @@
 
     .storyboard-flow {
       display: grid;
-      grid-template-columns: repeat(5, minmax(0, 1fr));
-      gap: 16px;
-      margin-top: 22px;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 10px;
+      margin-top: 18px;
     }
 
     .story-step {
       position: relative;
+      display: grid;
+      grid-template-columns: 38px minmax(0, 1fr);
+      column-gap: 14px;
+      align-items: start;
       border: 1px solid #d9e4f0;
       border-radius: 8px;
       background: #fff;
       box-shadow: 0 18px 38px rgba(16, 35, 56, 0.08);
-      padding: 18px;
-      min-height: 190px;
+      padding: 12px 16px;
+      min-height: 0;
     }
 
     .story-step::after {
-      content: "→";
+      content: "↓";
       position: absolute;
-      top: 50%;
-      right: -15px;
-      transform: translateY(-50%);
+      left: 32px;
+      bottom: -18px;
       color: #3f8cff;
-      font-size: 1.7rem;
+      font-size: 1.2rem;
       font-weight: 900;
+      z-index: 1;
     }
 
     .story-step:last-child::after {
@@ -766,32 +770,35 @@
     }
 
     .story-step.edit-loop::after {
-      content: "↺";
+      content: "↓";
       color: var(--gold);
     }
 
     .story-index {
       display: inline-grid;
       place-items: center;
-      width: 34px;
-      height: 34px;
-      margin-bottom: 12px;
+      width: 30px;
+      height: 30px;
       border-radius: 50%;
       background: #e8f2ff;
       color: #18416f;
       font-weight: 900;
+      font-size: 0.86rem;
     }
 
     .story-step h3 {
-      margin-bottom: 8px;
+      grid-column: 2;
+      grid-row: 1;
+      margin-bottom: 4px;
       color: var(--field-text);
-      font-size: 1rem;
+      font-size: 0.98rem;
     }
 
     .story-step p {
+      grid-column: 2;
       color: var(--soft-text);
-      font-size: 0.9rem;
-      line-height: 1.42;
+      font-size: 0.88rem;
+      line-height: 1.34;
     }
 
     .story-step.success {
@@ -1753,19 +1760,8 @@
     }
 
     @media (max-width: 920px) {
-      .hero,
-      .workflow {
+      .hero {
         grid-template-columns: 1fr;
-      }
-
-      .progress-stack,
-      .progress-panel {
-        position: static;
-      }
-
-      .step-list,
-      .future-step-list {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
       }
 
       .part-b-board {
@@ -1811,6 +1807,15 @@
         text-align: left;
       }
 
+      .workflow {
+        grid-template-columns: 1fr;
+      }
+
+      .progress-stack,
+      .progress-panel {
+        position: static;
+      }
+
       .grid,
       .choice-grid,
       .radio-grid {
@@ -1821,7 +1826,8 @@
         flex-direction: column;
       }
 
-      .step-list {
+      .step-list,
+      .future-step-list {
         grid-template-columns: 1fr;
       }
 
@@ -2437,8 +2443,6 @@
           <section class="step" data-step="7">
             <p class="step-kicker">Step 8</p>
             <h2 class="step-title">Sign off and send Part A</h2>
-            <p class="step-intro">A named person should confirm the information is correct and authorised for registration.</p>
-            <div class="section-note">This completes Part A. RightOnQ will check the written registration details first, then prepare the review video as Part B once the information is approved.</div>
             <div class="grid">
               <div class="field full">
                 <label class="choice">
@@ -2462,12 +2466,28 @@
                 <p class="helper">Use the signatory’s official role or title.</p>
                 <input id="signatoryTitle" name="signatoryTitle" required>
               </div>
+              <div class="field full" data-phone-preview-required>
+                <span class="group-label">Phone number/s for RCS logo preview approval <span class="required">*</span></span>
+                <p class="helper">RightOnQ will use these numbers after Part A to show how your sender name and logo appear on a real phone.</p>
+                <div class="grid">
+                  <div>
+                    <label for="iphonePreviewNumber">iPhone test number</label>
+                    <input id="iphonePreviewNumber" name="iphonePreviewNumber" type="tel" autocomplete="tel" value="+44 ">
+                  </div>
+                  <div>
+                    <label for="androidPreviewNumber">Android test number</label>
+                    <input id="androidPreviewNumber" name="androidPreviewNumber" type="tel" autocomplete="tel" value="+44 ">
+                  </div>
+                </div>
+                <p class="error-text" data-error-for="phonePreviewNumbers"></p>
+              </div>
               <div class="field">
                 <label for="signoffDate">Date <span class="required">*</span></label>
                 <p class="helper">The date you are signing this Part A information.</p>
                 <input id="signoffDate" name="signoffDate" type="date" required>
               </div>
             </div>
+            <div class="section-note">This completes Part A. RightOnQ will check the written registration details first, then begin Part B. Part B starts with the phone logo preview, so you can approve how your sender name and logo appear on a real phone before the RCS application video is prepared.</div>
             <div class="video-studio" aria-labelledby="videoStudioTitle" hidden>
               <div class="video-studio-head">
                 <div>
@@ -2668,19 +2688,22 @@
     const partBPreviewContent = {
       prepare: {
         title: "Part B storyboard",
-        body: "A simple map of what happens after Part A has been checked: RightOnQ prepares the video, the client reviews it, edits are handled if needed, and the registration is submitted.",
+        body: "A simple map of what happens after Part A has been checked: RightOnQ tests the phone preview, the client approves the logo, the video is prepared, and the registration is submitted.",
         workspaceTitle: "Part B storyboard",
-        workspaceIntro: "This is the full Part B journey at a glance. Part B starts after RightOnQ has checked Part A and confirmed the submitted registration details are ready to support the review video and RCS application. RightOnQ prepares the review video on your behalf because it forms part of the RCS sender approval process. We structure it around what reviewers expect to see, helping reduce avoidable questions, corrections and delays during review.",
+        workspaceIntro: "This is the full Part B journey at a glance. Part B starts after RightOnQ has checked Part A and confirmed the submitted details are ready. Before the review video is prepared, RightOnQ checks how the sender name and logo appear on a real phone, then asks the client to approve that phone preview in Part B.",
         storyboard: [
-          ["Part A accepted", "The submitted details are checked and ready to support the video."],
-          ["Video prepared", "RightOnQ builds the video from the sender details and examples."],
+          ["Part A accepted", "The submitted details have been checked, so RightOnQ can prepare the phone logo preview and RCS application video."],
+          ["Phone logo approval", "RightOnQ checks the sender name and logo on a real phone, then the client confirms approval in Part B because the test message is not a normal reply channel."],
+          ["Video prepared", "RightOnQ builds the review video from the approved sender profile, message examples, permission route and opt-out route."],
           ["Video sent to client", "The client receives an online review link to watch the video and complete the checklist."],
-          ["Client decision", "The client approves the video or asks for edits."],
-          ["Submit registration", "The approved video URL goes into the registration pack."]
+          ["Client decision", "The client approves the video or asks for edits before submission."],
+          ["Submit registration", "The approved phone preview and video URL go into the registration pack."]
         ],
         hideSupportCards: true,
         items: [
           "Part A is checked before video work starts",
+          "Sender name and logo are checked on a real phone before video work",
+          "Client approves the phone preview in Part B",
           "Video is built from approved client information",
           "Client reviews and either approves or requests edits",
           "Submission happens only after video approval"
@@ -2688,11 +2711,11 @@
         cards: [
           {
             title: "Why this order matters",
-            items: ["It avoids making a video from incorrect details", "It gives the client a clear review point", "It keeps submission separate from client approval"]
+            items: ["It avoids making a video from incorrect details", "It prevents weeks being wasted on a logo or sender look the client dislikes", "It keeps submission separate from client approval"]
           },
           {
             title: "What comes next",
-            items: ["Step 2 shows client review and approval", "Step 3 shows submission tracking"]
+            items: ["Step 2 shows phone preview approval", "Step 3 shows video review", "Step 4 shows submission tracking"]
           }
         ]
       },
@@ -3015,7 +3038,7 @@
       return `
         <div class="storyboard-flow" aria-label="Part B storyboard">
           ${content.storyboard.map((step, index) => `
-            <div class="story-step ${index === 3 ? "edit-loop warning" : ""} ${index === content.storyboard.length - 1 ? "success" : ""}">
+            <div class="story-step ${index === 4 ? "edit-loop warning" : ""} ${index === content.storyboard.length - 1 ? "success" : ""}">
               <span class="story-index">${index + 1}</span>
               <h3>${step[0]}</h3>
               <p>${step[1]}</p>
@@ -3740,6 +3763,19 @@
         }
       });
 
+      step.querySelectorAll("[data-phone-preview-required]").forEach(group => {
+        const iphone = group.querySelector("#iphonePreviewNumber");
+        const android = group.querySelector("#androidPreviewNumber");
+        const hasPreviewNumber = Boolean((iphone && hasRealPreviewNumber(iphone.value)) || (android && hasRealPreviewNumber(android.value)));
+        if (!hasPreviewNumber) {
+          valid = false;
+          invalidFields.push(iphone || android);
+          group.classList.add("invalid");
+          const error = group.querySelector('[data-error-for="phonePreviewNumbers"]');
+          if (error) error.textContent = "Enter at least one iPhone or Android test number.";
+        }
+      });
+
       if (!valid && focusFirst && invalidFields[0]) {
         invalidFields[0].focus({ preventScroll: true });
         invalidFields[0].scrollIntoView({ behavior: "smooth", block: "center" });
@@ -3771,6 +3807,15 @@
     function isFieldFilled(field) {
       if (field.type === "checkbox") return field.checked;
       return field.value.trim().length > 0;
+    }
+
+    function hasRealPreviewNumber(value) {
+      const digits = String(value || "").replace(/\D/g, "");
+      return digits.length > 2;
+    }
+
+    function cleanPreviewNumber(value) {
+      return hasRealPreviewNumber(value) ? String(value || "").trim() : "";
     }
 
     function markInvalid(field, message) {
@@ -4406,6 +4451,8 @@
 
       data.regions = [].concat(data.regions || []);
       data.consentRoute = getSelectedConsentRoutes();
+      data.iphonePreviewNumber = cleanPreviewNumber(data.iphonePreviewNumber);
+      data.androidPreviewNumber = cleanPreviewNumber(data.androidPreviewNumber);
       data.registeredAddress = [
         data.registeredAddressLine1,
         data.registeredAddressLine2,
