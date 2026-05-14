@@ -1030,18 +1030,6 @@ Important caveat:
 - Do not store the PIN in the repo or static HTML.
 - This is not yet a finished operator/admin interface; it is the guarded backend plumbing for one.
 
-### Next Recommended Step
-
-Create another scoped local Level 2 checkpoint commit for the latest Apps Script / docs work, without touching unrelated root website files.
-
-After that, the next build slice should be one of:
-
-1. Wire B3 video approval/change responses into storage.
-2. Choose/configure the real operational `ONBOARDING_CREATE_PIN`, or build a small internal operator wrapper so agents do not handle the PIN manually.
-3. Build the manual internal status update process/operator sheet view.
-
-Recommended order: B3 storage is the cleanest continuation from the B2 work, but the operational PIN/wrapper should be settled before any real client private links are issued.
-
 ### Slice 6 Partial Completed - B2 Name/Logo Approval Storage
 
 RCS-Twilio-4 wired the B2 `Approve name and logo` form to the live Apps Script receiver.
@@ -1090,3 +1078,41 @@ Important caveat:
 
 - Three duplicate labelled B2 test rows exist because Apps Script's redirect behaviour still wrote during early curl attempts. Leave them unless Bugs approves live Sheet cleanup.
 - B3 video approval/change storage is still pending and should be the next storage slice.
+
+### Current State After B2 Storage Checkpoint
+
+Updated by RCS-Twilio-4 on Thursday 14 May 2026.
+
+Repository state:
+
+- Branch: `rcs-registration-part-a-b-20260507`.
+- Local B2 storage checkpoint commit exists:
+  - `062cee9 Wire B2 name logo approval storage`.
+- A local handover/build-plan update commit sits on top of it.
+- Remote branch is still at:
+  - `924d252 Prove RCS private token PIN flow`.
+- Therefore the branch is ahead of origin by 2 commits.
+- Neither local commit has been pushed yet.
+- Scoped RCS files are clean after the commit.
+- Unrelated root website files remain dirty and should not be swept into RCS commits:
+  - `index.html`;
+  - `privacy.html`;
+  - `terms.html`;
+  - untracked `RightOnQ RCS Application Future Amendments.md`;
+  - untracked `RightOnQ Website Future Amendments.md`.
+
+Live service state:
+
+- Apps Script deployment `AKfycbyI81Ir2xvHLar0R0iFBBWyXa1Nj93T4_8Ni5_eX3XEYDA-AKQbVYbPHnTROLm8e4a6` is live at version `12`.
+- Local app preview remains:
+  - `http://localhost:8902/rcs-registration/index.html`.
+- Test application `ROQ-RCS-TEST-SLICE5-20260514` is now at `name_logo_approved` in the live `Applications` tab due to the B2 proof.
+
+Next recommended step:
+
+1. Push the two local RCS commits to `origin/rcs-registration-part-a-b-20260507` when Bugs approves.
+2. Then wire B3 video approval/change responses into storage.
+3. After B3 storage, choose/configure the real operational `ONBOARDING_CREATE_PIN` or build a small internal operator wrapper so agents do not handle the PIN manually.
+4. Then build the manual internal status update process/operator sheet view.
+
+Recommended order: push the B2/storage documentation checkpoints first, then B3 storage is the cleanest continuation. The operational PIN/wrapper should still be settled before any real client private links are issued.

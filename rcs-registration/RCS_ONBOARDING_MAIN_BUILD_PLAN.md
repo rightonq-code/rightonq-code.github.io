@@ -981,6 +981,12 @@ Persist client approval/issue responses.
 
 Status: B2 name/logo storage implemented and proof-tested by RCS-Twilio-4 on Thursday 14 May 2026. B3 video approval storage is still pending.
 
+Checkpoint:
+
+- Local commit `062cee9 Wire B2 name logo approval storage` contains the B2 static app wiring, Apps Script receiver changes, README update, first build-plan update, and first Twilio-4 handover update.
+- A local handover/build-plan update commit sits on top of it to clarify where the work stopped.
+- At the time of writing, both local commits still need pushing to `origin/rcs-registration-part-a-b-20260507` after Bugs approves.
+
 Output:
 
 - B2 name/logo approval record - done via `Part B approvals`;
@@ -1011,6 +1017,12 @@ Test evidence:
 Important caveat:
 
 - Three duplicate labelled test rows exist in `Part B approvals` because Apps Script's redirect behaviour wrote during the first curl attempts. Leave them as proof rows unless Bugs approves cleanup.
+
+Next:
+
+- Push the B2 checkpoint and handover/build-plan update commits when approved.
+- Continue Slice 6 by wiring B3 video approval/change responses into storage.
+- Keep B3 as the same pattern unless there is a strong reason to change it: append-only approval/change event log plus current-state update on `Applications`.
 
 ### Slice 6A - Communications Cadence
 
