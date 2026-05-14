@@ -3,6 +3,7 @@ const SHEET_NAME = "Part A submissions";
 const APPLICATIONS_SHEET_NAME = "Applications";
 const PART_B_APPROVALS_SHEET_NAME = "Part B approvals";
 const PART_B_VIDEO_APPROVALS_SHEET_NAME = "Part B video approvals";
+const STATUS_EVENTS_SHEET_NAME = "Status events";
 const PUBLIC_FORM_URL = "https://rightonq-code.github.io/rcs-registration/index.html";
 const NOTIFY_EMAIL = "adam@rightonq.co.uk";
 const APPLICATION_HEADERS = [
@@ -64,6 +65,28 @@ const PART_B_VIDEO_APPROVAL_HEADERS = [
   "Change notes",
   "Registration status",
   "Part B status",
+  "Submission JSON",
+  "Last updated"
+];
+const STATUS_EVENT_HEADERS = [
+  "Received at",
+  "Application ID",
+  "Event type",
+  "Previous registration status",
+  "New registration status",
+  "Previous Part A status",
+  "New Part A status",
+  "Previous Part B status",
+  "New Part B status",
+  "Billing status",
+  "Twilio status",
+  "Provider status",
+  "Next action owner",
+  "Next action note",
+  "Internal owner",
+  "Internal notes",
+  "Changed by",
+  "Source",
   "Submission JSON",
   "Last updated"
 ];
@@ -226,6 +249,10 @@ function doPost(event) {
     if (payload.action === "submitVideoApproval") {
       return jsonResponse(submitVideoApproval(spreadsheet, payload));
     }
+    if (payload.action === "updateApplicationStatus") {
+      requireOperatorPin(payload);
+      return jsonResponse(updateApplicationStatus(spreadsheet, payload));
+    }
 
     const sheet = spreadsheet.getSheetByName(SHEET_NAME);
     if (!sheet) throw new Error("Sheet tab not found: " + SHEET_NAME);
@@ -269,7 +296,7 @@ function doPost(event) {
       safeCell(payload.termsUrl),
       safeCell(asList(payload.consentRoute).join(", ")),
       safeCell(payload.optOutDescription),
-      JSON.stringify(payload),
+      JSON.stringify(sanitiseAuditPayload(payload)),
       "",
       "Not started",
       "",
@@ -315,6 +342,14 @@ function requireCreatePin(payload) {
   if (!configuredPin) throw new Error("ONBOARDING_CREATE_PIN is not configured");
   if (!payload.createPin || String(payload.createPin) !== String(configuredPin)) {
     throw new Error("Invalid onboarding create PIN");
+  }
+}
+
+function requireOperatorPin(payload) {
+  const configuredPin = PropertiesService.getScriptProperties().getProperty("ONBOARDING_OPERATOR_PIN");
+  if (!configuredPin) throw new Error("ONBOARDING_OPERATOR_PIN is not configured");
+  if (!payload.operatorPin || String(payload.operatorPin) !== String(configuredPin)) {
+    throw new Error("Invalid onboarding operator PIN");
   }
 }
 
@@ -374,7 +409,7 @@ function submitNameLogoApproval(spreadsheet, payload) {
     safeCell(payload.issueNotes),
     safeCell(registrationStatus),
     safeCell(partBStatus),
-    JSON.stringify(payload),
+    JSON.stringify(sanitiseAuditPayload(payload)),
     now
   ]);
 
@@ -435,7 +470,7 @@ function submitVideoApproval(spreadsheet, payload) {
     safeCell(payload.changeNotes),
     safeCell(registrationStatus),
     safeCell(partBStatus),
-    JSON.stringify(payload),
+    JSON.stringify(sanitiseAuditPayload(payload)),
     now
   ]);
 
@@ -458,6 +493,92 @@ function submitVideoApproval(spreadsheet, payload) {
     partBStatus: partBStatus,
     receivedAt: now.toISOString()
   };
+}
+
+function updateApplicationStatus(spreadsheet, payload) {
+  const now = new Date();
+  const applicationId = payload.applicationId;
+  if (!applicationId) throw new Error("Missing application ID");
+
+  const previous = findApplicationRecord(spreadsheet, { applicationId: applicationId });
+  if (!previous) throw new Error("Application ID not found");
+
+  validateRegistrationStatus(payload.registrationStatus);
+  const updates = buildStatusUpdates(payload, now);
+  if (!Object.keys(updates).length) throw new Error("No status fields supplied");
+
+  updateApplicationControlFields(spreadsheet, applicationId, updates);
+
+  const registrationStatus = finalValue(updates["Registration status"], previous["Registration status"]);
+  const partAStatus = finalValue(updates["Part A status"], previous["Part A status"]);
+  const partBStatus = finalValue(updates["Part B status"], previous["Part B status"]);
+
+  const sheet = getOrCreateSheet(spreadsheet, STATUS_EVENTS_SHEET_NAME, STATUS_EVENT_HEADERS);
+  sheet.appendRow([
+    now,
+    safeCell(applicationId),
+    safeCell(payload.eventType || "manual_status_update"),
+    safeCell(previous["Registration status"]),
+    safeCell(registrationStatus),
+    safeCell(previous["Part A status"]),
+    safeCell(partAStatus),
+    safeCell(previous["Part B status"]),
+    safeCell(partBStatus),
+    safeCell(finalValue(updates["Billing status"], previous["Billing status"])),
+    safeCell(finalValue(updates["Twilio status"], previous["Twilio status"])),
+    safeCell(finalValue(updates["Provider status"], previous["Provider status"])),
+    safeCell(finalValue(updates["Next action owner"], previous["Next action owner"])),
+    safeCell(finalValue(updates["Next action note"], previous["Next action note"])),
+    safeCell(finalValue(updates["Internal owner"], previous["Internal owner"])),
+    safeCell(finalValue(updates["Internal notes"], previous["Internal notes"])),
+    safeCell(firstValue(payload.changedBy, payload.operatorName, "RightOnQ")),
+    safeCell(firstValue(payload.source, "operator")),
+    JSON.stringify(sanitiseAuditPayload(payload)),
+    now
+  ]);
+
+  return {
+    ok: true,
+    applicationId: applicationId,
+    registrationStatus: registrationStatus,
+    partAStatus: partAStatus,
+    partBStatus: partBStatus,
+    updatedAt: now.toISOString()
+  };
+}
+
+function validateRegistrationStatus(status) {
+  if (!status) return;
+  if (REGISTRATION_STATUS_ORDER.indexOf(status) !== -1) return;
+  throw new Error("Unknown registration status: " + status);
+}
+
+function buildStatusUpdates(payload, now) {
+  const updates = {};
+  const fieldMap = {
+    registrationStatus: "Registration status",
+    billingStatus: "Billing status",
+    partAStatus: "Part A status",
+    partBStatus: "Part B status",
+    twilioStatus: "Twilio status",
+    providerStatus: "Provider status",
+    internalOwner: "Internal owner",
+    nextActionOwner: "Next action owner",
+    nextActionNote: "Next action note",
+    internalNotes: "Internal notes"
+  };
+
+  Object.keys(fieldMap).forEach(function(payloadKey) {
+    if (!Object.prototype.hasOwnProperty.call(payload, payloadKey)) return;
+    updates[fieldMap[payloadKey]] = payload[payloadKey];
+  });
+
+  if (Object.keys(updates).length) {
+    updates["Updated at"] = now;
+    updates["Last internal action at"] = now;
+  }
+
+  return updates;
 }
 
 function validateApplicationTokenForSubmission(spreadsheet, applicationId, suppliedToken) {
@@ -760,6 +881,25 @@ function serialiseDate(value) {
   if (!value) return "";
   if (Object.prototype.toString.call(value) === "[object Date]") return value.toISOString();
   return String(value);
+}
+
+function finalValue(incoming, fallback) {
+  return incoming === undefined || incoming === null || incoming === "" ? fallback || "" : incoming;
+}
+
+function sanitiseAuditPayload(payload) {
+  const copy = { ...payload };
+  [
+    "operatorPin",
+    "createPin",
+    "privateApplicationToken",
+    "applicationToken",
+    "private_application_token",
+    "token"
+  ].forEach(function(key) {
+    if (Object.prototype.hasOwnProperty.call(copy, key)) copy[key] = "[redacted]";
+  });
+  return copy;
 }
 
 function safeCell(value) {

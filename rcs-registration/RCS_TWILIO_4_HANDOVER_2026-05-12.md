@@ -1188,3 +1188,81 @@ Next recommended step:
 1. Push the local B3 commits to `origin/rcs-registration-part-a-b-20260507`.
 2. Then move to Slice 6A communications cadence or the manual internal status update/operator view.
 3. Before real client private links are issued, configure the real operational `ONBOARDING_CREATE_PIN` or build the small internal operator wrapper.
+
+### Slice 6A Partial Completed - Guarded Internal Status Operator Path
+
+RCS-Twilio-4 added the guarded backend route for RightOnQ-controlled status changes.
+
+Implemented:
+
+- Apps Script now supports `action = updateApplicationStatus`.
+- The action requires script property `ONBOARDING_OPERATOR_PIN`.
+- Successful updates can change selected `Applications` control-row fields:
+  - `Registration status`;
+  - `Billing status`;
+  - `Part A status`;
+  - `Part B status`;
+  - `Twilio status`;
+  - `Provider status`;
+  - `Internal owner`;
+  - `Next action owner`;
+  - `Next action note`;
+  - `Internal notes`.
+- Successful updates write `Updated at` and `Last internal action at`.
+- Successful updates append an audit row to a new `Status events` tab.
+- Audit JSON now redacts:
+  - `operatorPin`;
+  - `createPin`;
+  - `privateApplicationToken`;
+  - `applicationToken`;
+  - `private_application_token`;
+  - `token`.
+- Existing Part A/B2/B3 audit JSON writes now go through the same sanitiser for future submissions.
+- Static app status label/order list now recognises the full backend registration status order, so internal statuses like `part_a_changes_needed`, `provider_review`, and `paused_billing` display clearly.
+- Apps Script deployment was pushed and redeployed in place to version `14`.
+- README and `RCS_ONBOARDING_MAIN_BUILD_PLAN.md` were updated.
+
+Test evidence:
+
+- Apps Script syntax passed via `new Function(...)`.
+- Inline `index.html` script syntax passed via extracted script parse.
+- `git diff --check` passed for scoped files.
+- Live unauthorised `updateApplicationStatus` attempt against `ROQ-RCS-TEST-SLICE5-20260514` returned:
+  - `ok: false`;
+  - `error = ONBOARDING_OPERATOR_PIN is not configured`.
+- Live `Applications` readback confirmed the guard did not mutate the test application:
+  - `Registration status = video_approved`;
+  - `Part B status = video_approved`;
+  - `Next action note = Submit the RCS registration pack.`
+
+Current state after operator-path work:
+
+- Branch: `rcs-registration-part-a-b-20260507`.
+- Remote branch is currently at:
+  - `759201a Update RCS handover before B3 push`.
+- Operator-path work is local and not yet checkpointed/pushed at the time of this entry.
+- Scoped files changed:
+  - `rcs-registration/index.html`;
+  - `rcs-registration/google-apps-script/Code.gs`;
+  - `rcs-registration/google-apps-script/README.md`;
+  - `rcs-registration/RCS_ONBOARDING_MAIN_BUILD_PLAN.md`;
+  - `rcs-registration/RCS_TWILIO_4_HANDOVER_2026-05-12.md`.
+- Unrelated root website files remain dirty and should not be swept into RCS commits:
+  - `index.html`;
+  - `privacy.html`;
+  - `terms.html`;
+  - untracked `RightOnQ RCS Application Future Amendments.md`;
+  - untracked `RightOnQ Website Future Amendments.md`.
+
+Important caveat:
+
+- This is not yet an operator UI.
+- Positive live status-change proof is pending until Bugs chooses how to configure `ONBOARDING_OPERATOR_PIN` or asks for a small internal wrapper.
+- Do not store the operator PIN in this repo, in static HTML, or in Sheet audit JSON.
+
+Next recommended step:
+
+1. Create a scoped local checkpoint commit for the operator-path files.
+2. Push that commit when Bugs approves.
+3. Decide whether to configure the real `ONBOARDING_OPERATOR_PIN` directly or build a small internal wrapper.
+4. Then move to communications cadence.

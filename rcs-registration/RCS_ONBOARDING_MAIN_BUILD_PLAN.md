@@ -1039,7 +1039,48 @@ Next:
 - Push the local B3 commits to `origin/rcs-registration-part-a-b-20260507`.
 - Next build slice should move to Slice 6A communications cadence or the manual internal status update/operator view.
 
-### Slice 6A - Communications Cadence
+### Slice 6A - Internal Status Operator Path
+
+Give RightOnQ a guarded backend route for moving applications through the manual gates without editing the `Applications` row directly.
+
+Status: guarded backend route implemented and deployed by RCS-Twilio-4 on Thursday 14 May 2026. Real operational use still needs `ONBOARDING_OPERATOR_PIN` configured or a wrapper built.
+
+Implemented:
+
+- Apps Script now supports `action = updateApplicationStatus`.
+- The action requires script property `ONBOARDING_OPERATOR_PIN`.
+- It can update selected `Applications` control-row fields:
+  - `Registration status`;
+  - `Billing status`;
+  - `Part A status`;
+  - `Part B status`;
+  - `Twilio status`;
+  - `Provider status`;
+  - `Internal owner`;
+  - `Next action owner`;
+  - `Next action note`;
+  - `Internal notes`.
+- It writes `Updated at` and `Last internal action at`.
+- Successful updates append an audit row to `Status events`.
+- Audit JSON now redacts private application tokens, application tokens, create PINs, and operator PINs before storage.
+- The browser status label list now recognises the full current backend registration status order, including internal review/change/provider/live/paused statuses.
+- Existing live Apps Script deployment was redeployed in place to version `14`.
+
+Test evidence:
+
+- Apps Script syntax passed via `new Function(...)`.
+- Inline `index.html` script syntax passed via extracted script parse.
+- `git diff --check` passed for scoped files.
+- Live unauthorised `updateApplicationStatus` attempt against `ROQ-RCS-TEST-SLICE5-20260514` returned `ok: false` with `ONBOARDING_OPERATOR_PIN is not configured`.
+- The same test application remained at `Registration status = video_approved` and `Part B status = video_approved`, proving the guard did not mutate the control row without the operator PIN.
+
+Important caveat:
+
+- This is not yet an operator UI.
+- Positive live status-change proof is still pending until Bugs chooses how to configure `ONBOARDING_OPERATOR_PIN` or asks for a small internal wrapper.
+- Recommended next activation step: configure the real operator PIN in Apps Script properties, or build an internal wrapper so agents do not handle the PIN manually.
+
+### Slice 6B - Communications Cadence
 
 Define and implement customer communication templates and triggers.
 

@@ -44,7 +44,7 @@ Deployment:
 
 - Execute as: `adam@rightonq.co.uk`
 - Access: `Anyone`
-- Current published version after CLI redeploy: `13`
+- Current published version after CLI redeploy: `14`
 - Version `4` added Application ID, registration status, and Part A status columns to the intake row.
 - Version `5` adds Application ID status lookup via `GET ?applicationId=...`.
 - Version `6` adds the `Applications` control-row tab and writes/reads one row per Application ID.
@@ -53,6 +53,7 @@ Deployment:
 - Version `11` is the clean deployment after proof; token-protected application status now requires the matching token.
 - Version `12` adds B2 name/logo approval storage in the `Part B approvals` tab and updates the matching `Applications` control row.
 - Version `13` adds B3 video approval/change storage in the `Part B video approvals` tab and updates the matching `Applications` control row.
+- Version `14` adds a guarded internal `updateApplicationStatus` action, a `Status events` audit log, and redacts sensitive tokens/PINs from stored audit JSON.
 
 ## Behaviour
 
@@ -69,6 +70,9 @@ The script:
 - updates the matching `Applications` row to `name_logo_approved` or `name_logo_changes_requested`,
 - appends B3 video approval or change responses to `Part B video approvals`,
 - updates the matching `Applications` row to `video_approved` or `video_changes_requested`,
+- supports guarded internal status updates through `action = updateApplicationStatus`,
+- appends successful internal status changes to `Status events`,
+- redacts private application tokens and operator/create PINs from stored audit JSON,
 - sets review status to `New`,
 - sets US fee status to `Not yet agreed` if United States is selected,
 - stores the raw JSON payload in the `Part A JSON` column,
@@ -80,4 +84,8 @@ If the endpoint is not configured or the POST fails, the form downloads the clie
 
 Do not put secrets in the static HTML page. The Apps Script URL is not a password; it is a receiver endpoint. Keep the Sheet private to RightOnQ.
 
-The internal `createApplicationDraft` action is guarded by the script property `ONBOARDING_CREATE_PIN`. Do not store that PIN in this repo or in the static HTML.
+The internal `createApplicationDraft` action is guarded by the script property `ONBOARDING_CREATE_PIN`.
+
+The internal `updateApplicationStatus` action is guarded by the script property `ONBOARDING_OPERATOR_PIN`.
+
+Do not store either PIN in this repo, in static HTML, or in Sheet audit JSON. If `ONBOARDING_OPERATOR_PIN` is not configured, internal status updates correctly return `ONBOARDING_OPERATOR_PIN is not configured`.
