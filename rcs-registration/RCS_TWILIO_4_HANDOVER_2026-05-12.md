@@ -1166,8 +1166,11 @@ Current state after B3 storage:
 - Remote branch already includes the B2 commits:
   - `062cee9 Wire B2 name logo approval storage`;
   - `0b04957 Update RCS handover after B2 storage`.
-- B3 work is local and not yet checkpointed/pushed at the time of this entry.
-- Scoped files changed by B3:
+- Local B3 implementation checkpoint exists:
+  - `9dd3206 Wire B3 video approval storage`.
+- This final handover/build-plan update sits on top of the B3 implementation checkpoint.
+- Bugs approved pushing the B3 checkpoint and this handover/build-plan update.
+- Scoped RCS files changed by B3:
   - `rcs-registration/index.html`;
   - `rcs-registration/google-apps-script/Code.gs`;
   - `rcs-registration/google-apps-script/README.md`;
@@ -1182,6 +1185,6 @@ Current state after B3 storage:
 
 Next recommended step:
 
-1. Create a scoped local checkpoint commit for the B3 storage files.
-2. Push that commit when Bugs approves.
-3. Then move to Slice 6A communications cadence or the manual internal status update/operator view.
+1. Push the local B3 commits to `origin/rcs-registration-part-a-b-20260507`.
+2. Then move to Slice 6A communications cadence or the manual internal status update/operator view.
+3. Before real client private links are issued, configure the real operational `ONBOARDING_CREATE_PIN` or build the small internal operator wrapper.

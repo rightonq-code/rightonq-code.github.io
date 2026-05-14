@@ -986,7 +986,10 @@ Checkpoint:
 - Remote branch already includes the B2 checkpoint commits:
   - `062cee9 Wire B2 name logo approval storage`;
   - `0b04957 Update RCS handover after B2 storage`.
-- B3 storage was added after those commits and should be checkpointed/pushed separately once Bugs approves.
+- Local B3 implementation checkpoint exists:
+  - `9dd3206 Wire B3 video approval storage`.
+- This final build-plan/handover update sits on top of the B3 implementation checkpoint.
+- Bugs approved pushing the B3 checkpoint and this build-plan/handover update.
 
 Output:
 
@@ -1033,7 +1036,7 @@ Important caveat:
 
 Next:
 
-- Checkpoint and push the B3 storage work when approved.
+- Push the local B3 commits to `origin/rcs-registration-part-a-b-20260507`.
 - Next build slice should move to Slice 6A communications cadence or the manual internal status update/operator view.
 
 ### Slice 6A - Communications Cadence
