@@ -1855,6 +1855,39 @@ Important caveat:
 - This slice does not call Twilio APIs or submit compliance profiles/bundles.
 - This slice does not add sensitive ID upload fields.
 
+### Slice 6K - Operator Tool Usage Notes
+
+Status: implemented by RCS-Twilio-4 on Thursday 14 May 2026.
+
+Purpose:
+
+- make the local operator workflow usable without reading tool source code;
+- give future agents/operators a clear safe order of operations;
+- keep PIN handling and private-link handling explicit.
+
+Implemented behaviour:
+
+- add `rcs-registration/tools/README.md`;
+- document all three local operator tools:
+  - `operator-create-application.mjs`;
+  - `operator-status.mjs`;
+  - `operator-review.mjs`;
+- include dry-run examples before live examples;
+- explain local environment PIN variables without storing any real PIN;
+- list expected results and common failure messages.
+
+Verification:
+
+- `operator-create-application.mjs` dry-run example produced the expected `createApplicationDraft` payload.
+- `operator-status.mjs` dry-run example produced the expected `getOperatorSnapshot` payload.
+- `operator-review.mjs` dry-run example produced the expected `updateInternalReview` payload.
+- `git diff --check` passed for the scoped documentation files.
+
+Important caveat:
+
+- This is documentation only.
+- It does not configure Apps Script PINs or run a positive live operator workflow.
+
 ### Slice 7 - Customer Commercial/Payment Entry Page
 
 Design/build the onboarding page before the RCS form.

@@ -1795,3 +1795,33 @@ Important caveat:
 - It does not call Twilio APIs.
 - It does not add passport, driving licence, government ID, proof-of-address, or DOB fields.
 - Existing applications/test rows are not backfilled automatically.
+
+### Slice 6K Completed - Operator Tool Usage Notes
+
+Bugs approved polishing the operator workflow docs before configuring real PINs.
+
+RCS-Twilio-4 completed a documentation-only slice:
+
+- new file: `rcs-registration/tools/README.md`;
+- documents:
+  - `operator-create-application.mjs`;
+  - `operator-status.mjs`;
+  - `operator-review.mjs`;
+- includes dry-run examples and live examples;
+- explains local environment variables:
+  - `RCS_ONBOARDING_CREATE_PIN`;
+  - `RCS_ONBOARDING_OPERATOR_PIN`;
+- reiterates that PINs must not be stored in the repo, chat, docs, commits, or command arguments;
+- reiterates that ID documents / DOB must not be stored in the static app or Sheet path.
+
+Verification:
+
+- `operator-create-application.mjs` dry-run example produced the expected `createApplicationDraft` payload.
+- `operator-status.mjs` dry-run example produced the expected `getOperatorSnapshot` payload.
+- `operator-review.mjs` dry-run example produced the expected `updateInternalReview` payload.
+- `git diff --check` passed for the scoped documentation files.
+
+Important caveat:
+
+- This work is local and uncommitted at the time of this note.
+- It is docs-only and does not configure Apps Script PINs.
