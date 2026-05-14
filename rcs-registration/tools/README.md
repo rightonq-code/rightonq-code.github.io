@@ -11,6 +11,7 @@ They call the deployed Apps Script web app, but they do not store PINs in this r
 | `operator-create-application.mjs` | Create a private application record/link from a qualified CRM or outreach handoff. | `RCS_ONBOARDING_CREATE_PIN` |
 | `operator-status.mjs` | Read the guarded operator snapshot for one application. | `RCS_ONBOARDING_OPERATOR_PIN` |
 | `operator-review.mjs` | Update the internal review checklist and optionally mark Part A accepted. | `RCS_ONBOARDING_OPERATOR_PIN` |
+| `proof-public-part-a-submit.mjs` | Create a private test link, submit Part A through the public path, then prove Trust Hub KYC and UK RC Bundle tracking rows were created. | `RCS_ONBOARDING_CREATE_PIN` and `RCS_ONBOARDING_OPERATOR_PIN` |
 
 ## Safety Rules
 
@@ -130,6 +131,33 @@ Expected live result: JSON showing `partAAccepted: true`, with `registrationStat
 3. After the customer submits Part A, check status again.
 4. Complete RightOnQ review using `operator-review.mjs`.
 5. Check status again with `operator-status.mjs`.
+
+## Public Part A Submission Proof
+
+Dry run:
+
+```bash
+node rcs-registration/tools/proof-public-part-a-submit.mjs --dry-run
+```
+
+Live proof:
+
+```bash
+RCS_ONBOARDING_CREATE_PIN="..." RCS_ONBOARDING_OPERATOR_PIN="..." node rcs-registration/tools/proof-public-part-a-submit.mjs
+```
+
+Expected live result:
+
+- a private test application is created;
+- a Part A test payload is submitted through the normal public Apps Script path using the private application token;
+- the redacted operator snapshot shows:
+  - `registrationStatus = part_a_submitted`;
+  - an `Internal reviews` row;
+  - a `Trust Hub KYC` row;
+  - a `UK RC bundles` row;
+  - a queued `part_a_received` communication.
+
+The helper does not print the private application token, private link, create PIN, or operator PIN.
 
 ## If A Tool Fails
 

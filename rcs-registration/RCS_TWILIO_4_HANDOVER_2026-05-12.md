@@ -1874,3 +1874,56 @@ Security note:
 
 - PINs were not stored in chat, committed files, or repo docs.
 - The final proof used Bugs' normal Mac Terminal and local environment variables.
+
+### Slice 6M Completed - Public Part A Submission Proof
+
+RCS-Twilio-4 closed the evidence gap left after Apps Script version `20`.
+
+New local helper:
+
+- `rcs-registration/tools/proof-public-part-a-submit.mjs`
+
+Purpose:
+
+- create a private test application using the guarded `createApplicationDraft` path;
+- extract the private application token from the returned private link without printing it;
+- submit a full Part A test payload through the normal public Apps Script submission path;
+- read back the guarded operator snapshot;
+- print only a redacted/summarised proof result.
+
+Proof application:
+
+- `ROQ-RCS-TEST-PUBLIC-PARTA-20260514211901`
+
+Live proof result:
+
+- private application creation succeeded:
+  - `registrationStatus = application_created`;
+  - `partAStatus = draft`;
+  - private application link was present but not printed by the helper.
+- public Part A submission succeeded:
+  - `submissionId = RCS-20260514-PUBLIC-PARTA-PROOF`;
+  - `registrationStatus = part_a_submitted`;
+  - received at `2026-05-14T21:19:06.317Z`.
+- guarded operator snapshot confirmed:
+  - `Applications.registrationStatus = part_a_submitted`;
+  - `Applications.partAStatus = part_a_submitted`;
+  - `Applications.Trust Hub status = not_started`;
+  - latest `Internal reviews` row exists with `Review status = pending_review`;
+  - `KYC/Trust Hub check = pending_trust_hub_review`;
+  - `SMS fallback/RC bundle check = pending`;
+  - latest `Trust Hub KYC` row exists with `Trust Hub status = not_started`;
+  - latest `UK RC bundles` row exists with `RC bundle status = not_started`;
+  - `UK RC bundles.Fallback required = to_be_confirmed`;
+  - `UK RC bundles.Compliance owner = end_business`;
+  - queued communication code includes `part_a_received`.
+
+Security note:
+
+- Bugs entered both PINs silently in local Terminal.
+- PINs, private token, and private link were not printed by the helper and were not stored in repo files.
+
+Outcome:
+
+- The v20 public Part A path is now proven to create the new internal Trust Hub KYC and UK RC Bundle tracking rows.
+- Next sensible build slice is guarded operator update actions for `Trust Hub KYC` and `UK RC bundles`.

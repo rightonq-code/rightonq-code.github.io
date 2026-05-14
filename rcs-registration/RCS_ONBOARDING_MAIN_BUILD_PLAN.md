@@ -1941,6 +1941,61 @@ Security note:
 - PINs were not committed or written to repo files.
 - The final proof used Bugs' local Terminal environment variables, then unset them.
 
+### Slice 6M - Public Part A Submission Proof
+
+Goal:
+
+- prove the customer-facing/public Part A submission path after Apps Script version `20`;
+- confirm that a real Part A submission through a private application link creates the internal Trust Hub KYC and UK RC Bundle tracking rows.
+
+Added helper:
+
+- `rcs-registration/tools/proof-public-part-a-submit.mjs`
+
+Helper behaviour:
+
+- creates a private test application using the existing guarded `createApplicationDraft` action;
+- extracts the private application token from the returned link without printing it;
+- submits a complete Part A test payload through the normal public submission branch;
+- reads the guarded operator snapshot;
+- prints a redacted summary only.
+
+Proof application:
+
+- `ROQ-RCS-TEST-PUBLIC-PARTA-20260514211901`
+
+Proof result:
+
+- private application creation returned:
+  - `registrationStatus = application_created`;
+  - `partAStatus = draft`;
+  - private application link present.
+- public Part A submission returned:
+  - `ok = true`;
+  - `submissionId = RCS-20260514-PUBLIC-PARTA-PROOF`;
+  - `registrationStatus = part_a_submitted`;
+  - `receivedAt = 2026-05-14T21:19:06.317Z`.
+- operator snapshot confirmed:
+  - `Applications.registrationStatus = part_a_submitted`;
+  - `Applications.partAStatus = part_a_submitted`;
+  - `Applications.Trust Hub status = not_started`;
+  - latest `Internal reviews` row exists with `pending_review`;
+  - latest `Trust Hub KYC` row exists with `Trust Hub status = not_started`;
+  - latest `UK RC bundles` row exists with `RC bundle status = not_started`;
+  - `UK RC bundles.Fallback required = to_be_confirmed`;
+  - `UK RC bundles.Compliance owner = end_business`;
+  - queued communication code includes `part_a_received`.
+
+Security:
+
+- PINs were entered by Bugs in local Terminal and unset after the proof.
+- The helper does not print the private token, private application link, create PIN, or operator PIN.
+
+Outcome:
+
+- The previous evidence gap is closed.
+- The next build slice can safely focus on guarded operator update actions for Trust Hub KYC and UK RC Bundle statuses.
+
 ### Slice 7 - Customer Commercial/Payment Entry Page
 
 Design/build the onboarding page before the RCS form.
