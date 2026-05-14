@@ -1116,3 +1116,72 @@ Next recommended step:
 4. Then build the manual internal status update process/operator sheet view.
 
 Recommended order: push the B2/storage documentation checkpoints first, then B3 storage is the cleanest continuation. The operational PIN/wrapper should still be settled before any real client private links are issued.
+
+### Slice 6 Completed - B3 Video Approval/Change Storage
+
+RCS-Twilio-4 wired the B3 `Review and approve video` screen to the live Apps Script receiver.
+
+Implemented:
+
+- Static B3 review form now posts `action = submitVideoApproval`.
+- Payload includes:
+  - `applicationId`;
+  - `privateApplicationToken` when present;
+  - approval checklist items;
+  - approval/change decision;
+  - change notes;
+  - submitted timestamp.
+- Apps Script now has a `Part B video approvals` event-log tab.
+- Each B3 response appends one audit row.
+- Apps Script updates the matching `Applications` control row:
+  - approval sets `registrationStatus = video_approved`;
+  - approval sets `partBStatus = video_approved`;
+  - change request sets both to `video_changes_requested`;
+  - `Next action owner = RightOnQ`;
+  - next-action note tells RightOnQ whether to submit the pack or amend the video.
+- Apps Script deployment was pushed and redeployed in place to version `13`.
+- README and `RCS_ONBOARDING_MAIN_BUILD_PLAN.md` were updated.
+
+Test evidence:
+
+- Apps Script syntax passed via `new Function(...)`.
+- Inline `index.html` script syntax passed via extracted script parse.
+- `git diff --check` passed for scoped B3 files.
+- Live POST against `ROQ-RCS-TEST-SLICE5-20260514` returned `ok: true`, `registrationStatus = video_approved`, and `partBStatus = video_approved`.
+- Live Sheet `Part B video approvals` contains a labelled B3 approval test row.
+- Live Sheet `Applications` row for `ROQ-RCS-TEST-SLICE5-20260514` shows:
+  - `Registration status = video_approved`;
+  - `Part B status = video_approved`;
+  - `Next action owner = RightOnQ`;
+  - `Next action note = Submit the RCS registration pack.`
+- Browser check at `http://localhost:8902/rcs-registration/index.html?applicationId=ROQ-RCS-TEST-SLICE5-20260514` showed:
+  - status refreshed to `Video approved`;
+  - B3 opened from the rail;
+  - selecting the five approval checklist items enabled `Send approval to RightOnQ`;
+  - browser console error log was empty.
+
+Current state after B3 storage:
+
+- Branch: `rcs-registration-part-a-b-20260507`.
+- Remote branch already includes the B2 commits:
+  - `062cee9 Wire B2 name logo approval storage`;
+  - `0b04957 Update RCS handover after B2 storage`.
+- B3 work is local and not yet checkpointed/pushed at the time of this entry.
+- Scoped files changed by B3:
+  - `rcs-registration/index.html`;
+  - `rcs-registration/google-apps-script/Code.gs`;
+  - `rcs-registration/google-apps-script/README.md`;
+  - `rcs-registration/RCS_ONBOARDING_MAIN_BUILD_PLAN.md`;
+  - `rcs-registration/RCS_TWILIO_4_HANDOVER_2026-05-12.md`.
+- Unrelated root website files remain dirty and should not be swept into RCS commits:
+  - `index.html`;
+  - `privacy.html`;
+  - `terms.html`;
+  - untracked `RightOnQ RCS Application Future Amendments.md`;
+  - untracked `RightOnQ Website Future Amendments.md`.
+
+Next recommended step:
+
+1. Create a scoped local checkpoint commit for the B3 storage files.
+2. Push that commit when Bugs approves.
+3. Then move to Slice 6A communications cadence or the manual internal status update/operator view.

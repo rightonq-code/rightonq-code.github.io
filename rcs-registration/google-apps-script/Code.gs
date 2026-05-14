@@ -2,6 +2,7 @@ const SPREADSHEET_ID = "1_C85rMaDWS0-VnXbtYQzRBS1trgN8kFf4hAnHfT3R-0";
 const SHEET_NAME = "Part A submissions";
 const APPLICATIONS_SHEET_NAME = "Applications";
 const PART_B_APPROVALS_SHEET_NAME = "Part B approvals";
+const PART_B_VIDEO_APPROVALS_SHEET_NAME = "Part B video approvals";
 const PUBLIC_FORM_URL = "https://rightonq-code.github.io/rcs-registration/index.html";
 const NOTIFY_EMAIL = "adam@rightonq.co.uk";
 const APPLICATION_HEADERS = [
@@ -48,6 +49,19 @@ const PART_B_APPROVAL_HEADERS = [
   "Name/logo decision",
   "Issue categories",
   "Issue notes",
+  "Registration status",
+  "Part B status",
+  "Submission JSON",
+  "Last updated"
+];
+const PART_B_VIDEO_APPROVAL_HEADERS = [
+  "Received at",
+  "Application ID",
+  "Stage",
+  "Decision",
+  "Approval checklist",
+  "Changes requested",
+  "Change notes",
   "Registration status",
   "Part B status",
   "Submission JSON",
@@ -208,6 +222,9 @@ function doPost(event) {
     }
     if (payload.action === "submitNameLogoApproval") {
       return jsonResponse(submitNameLogoApproval(spreadsheet, payload));
+    }
+    if (payload.action === "submitVideoApproval") {
+      return jsonResponse(submitVideoApproval(spreadsheet, payload));
     }
 
     const sheet = spreadsheet.getSheetByName(SHEET_NAME);
@@ -388,6 +405,59 @@ function deriveNameLogoDecision(payload) {
   if (payload.nameLogoDecision === "approve") return "approve";
   if (payload.nameLogoDecision === "note") return "note";
   return "issue";
+}
+
+function submitVideoApproval(spreadsheet, payload) {
+  const now = new Date();
+  const applicationId = payload.applicationId;
+  if (!applicationId) throw new Error("Missing application ID");
+
+  validateApplicationTokenForSubmission(spreadsheet, applicationId, payload.privateApplicationToken);
+
+  const decision = payload.decision === "changes_requested" ? "changes_requested" : "approve";
+  const approved = decision === "approve";
+  const approvalChecklist = asList(payload.approvalChecklist);
+  const changeCategories = asList(payload.changeCategories);
+  const registrationStatus = approved ? "video_approved" : "video_changes_requested";
+  const partBStatus = registrationStatus;
+  const nextActionNote = approved
+    ? "Submit the RCS registration pack."
+    : "Review requested video changes and prepare an amended review video.";
+
+  const sheet = getOrCreateSheet(spreadsheet, PART_B_VIDEO_APPROVALS_SHEET_NAME, PART_B_VIDEO_APPROVAL_HEADERS);
+  sheet.appendRow([
+    now,
+    safeCell(applicationId),
+    "B3 video review",
+    safeCell(decision),
+    safeCell(approvalChecklist.join(", ")),
+    safeCell(changeCategories.join(", ")),
+    safeCell(payload.changeNotes),
+    safeCell(registrationStatus),
+    safeCell(partBStatus),
+    JSON.stringify(payload),
+    now
+  ]);
+
+  updateApplicationControlFields(spreadsheet, applicationId, {
+    "Registration status": registrationStatus,
+    "Part B status": partBStatus,
+    "Updated at": now,
+    "Last client action at": now,
+    "Next action owner": "RightOnQ",
+    "Next action note": nextActionNote
+  });
+
+  notifyVideoApproval(payload, decision, approvalChecklist, changeCategories, registrationStatus);
+
+  return {
+    ok: true,
+    applicationId: applicationId,
+    decision: decision,
+    registrationStatus: registrationStatus,
+    partBStatus: partBStatus,
+    receivedAt: now.toISOString()
+  };
 }
 
 function validateApplicationTokenForSubmission(spreadsheet, applicationId, suppliedToken) {
@@ -605,6 +675,27 @@ function notifyNameLogoApproval(payload, decision, issueCategories, registration
     "Name/logo decision: " + (payload.nameLogoDecision || ""),
     "Issue categories: " + issueCategories.join(", "),
     "Issue notes: " + (payload.issueNotes || ""),
+    "Registration status: " + registrationStatus,
+    "",
+    "Open the intake sheet:",
+    "https://docs.google.com/spreadsheets/d/" + SPREADSHEET_ID + "/edit"
+  ].join("\n");
+
+  MailApp.sendEmail(NOTIFY_EMAIL, subjectPrefix + ": " + (payload.applicationId || "unknown application"), body);
+}
+
+function notifyVideoApproval(payload, decision, approvalChecklist, changeCategories, registrationStatus) {
+  if (!NOTIFY_EMAIL) return;
+
+  const subjectPrefix = decision === "approve" ? "RCS video approved" : "RCS video changes requested";
+  const body = [
+    "A Part B video review response has been received.",
+    "",
+    "Application ID: " + (payload.applicationId || ""),
+    "Decision: " + decision,
+    "Approval checklist: " + approvalChecklist.join(", "),
+    "Changes requested: " + changeCategories.join(", "),
+    "Change notes: " + (payload.changeNotes || ""),
     "Registration status: " + registrationStatus,
     "",
     "Open the intake sheet:",

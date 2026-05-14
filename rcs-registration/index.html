@@ -3037,6 +3037,7 @@
       "name_logo_changes_requested",
       "video_ready_for_review",
       "video_approved",
+      "video_changes_requested",
       "registration_submitted"
     ];
     const statusLabels = {
@@ -3049,6 +3050,7 @@
       name_logo_changes_requested: "Name/logo needs attention",
       video_ready_for_review: "Video ready",
       video_approved: "Video approved",
+      video_changes_requested: "Video changes requested",
       registration_submitted: "Registration submitted"
     };
     const partBStatusRules = {
@@ -3325,10 +3327,7 @@
       if (content.reviewLayout) {
         partBWorkspace.addEventListener("change", updatePartBReviewAction);
         const reviewButton = document.getElementById("partBReviewActionButton");
-        reviewButton.addEventListener("click", () => {
-          const changesNeeded = Boolean(partBWorkspace.querySelector("[data-change-needed]:checked"));
-          showToast(changesNeeded ? "Changes noted for RightOnQ." : "Video approval noted for RightOnQ.");
-        });
+        reviewButton.addEventListener("click", submitVideoApproval);
         updatePartBReviewAction();
       }
       if (content.nameLogoLayout) {
@@ -3542,7 +3541,50 @@
       const changesNeeded = Boolean(partBWorkspace.querySelector("[data-change-needed]:checked"));
       const allApproved = requiredChecks.length > 0 && requiredChecks.every(input => input.checked);
       actionButton.classList.toggle("show", changesNeeded || allApproved);
+      actionButton.disabled = !(changesNeeded || allApproved);
       actionButton.textContent = changesNeeded ? "Send changes for amendment" : "Send approval to RightOnQ";
+    }
+
+    async function submitVideoApproval() {
+      const actionButton = document.getElementById("partBReviewActionButton");
+      if (!actionButton || actionButton.disabled) return;
+
+      const changesNeeded = Boolean(partBWorkspace.querySelector("[data-change-needed]:checked"));
+      const approvalChecklist = Array.from(partBWorkspace.querySelectorAll("[data-approval-check]:checked")).map(input => input.value);
+      const changeNotes = partBWorkspace.querySelector('textarea[name="partBCorrectionNotes"]');
+      const payload = {
+        action: "submitVideoApproval",
+        applicationId,
+        decision: changesNeeded ? "changes_requested" : "approve",
+        approvalChecklist,
+        changeCategories: changesNeeded ? ["Changes needed"] : [],
+        changeNotes: changeNotes ? changeNotes.value.trim() : "",
+        submittedAt: new Date().toISOString()
+      };
+      if (applicationToken) payload.privateApplicationToken = applicationToken;
+
+      actionButton.disabled = true;
+      actionButton.textContent = "SENDING...";
+      try {
+        const response = await fetch(partASubmissionEndpoint, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify(payload)
+        });
+        if (!response.ok) throw new Error("Network response was not OK");
+        const result = await response.json().catch(() => ({}));
+        if (result.ok === false) throw new Error(result.error || "Submission was not accepted");
+
+        setApplicationStatus({
+          registrationStatus: result.registrationStatus || (changesNeeded ? "video_changes_requested" : "video_approved"),
+          partBStatus: result.partBStatus || ""
+        });
+        showToast(changesNeeded ? "Video changes sent to RightOnQ." : "Video approval sent to RightOnQ.");
+      } catch (error) {
+        showToast("We could not send this yet. Please try again or contact RightOnQ.");
+      } finally {
+        updatePartBReviewAction();
+      }
     }
 
     function updateNameLogoAction() {
@@ -3744,7 +3786,7 @@
             ${checklist.map((item, index) => `
               <label class="part-b-check">
                 <span class="part-b-check-number ${item[2] === "notes" ? "empty" : ""}">${item[2] === "notes" ? "" : index + 1}</span>
-                <input type="checkbox" name="partBCheck${index + 1}" ${item[2] === "notes" ? "data-change-needed" : "data-approval-check"}>
+                <input type="checkbox" name="partBCheck${index + 1}" value="${escapeHtml(item[0])}" ${item[2] === "notes" ? "data-change-needed" : "data-approval-check"}>
                 <span class="part-b-check-text">
                   ${item[0]}
                   <small>${item[1]}</small>

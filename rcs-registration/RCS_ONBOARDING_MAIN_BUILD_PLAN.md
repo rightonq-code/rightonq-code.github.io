@@ -979,22 +979,23 @@ Output:
 
 Persist client approval/issue responses.
 
-Status: B2 name/logo storage implemented and proof-tested by RCS-Twilio-4 on Thursday 14 May 2026. B3 video approval storage is still pending.
+Status: B2 name/logo storage and B3 video approval/change storage implemented and proof-tested by RCS-Twilio-4 on Thursday 14 May 2026.
 
 Checkpoint:
 
-- Local commit `062cee9 Wire B2 name logo approval storage` contains the B2 static app wiring, Apps Script receiver changes, README update, first build-plan update, and first Twilio-4 handover update.
-- A local handover/build-plan update commit sits on top of it to clarify where the work stopped.
-- At the time of writing, both local commits still need pushing to `origin/rcs-registration-part-a-b-20260507` after Bugs approves.
+- Remote branch already includes the B2 checkpoint commits:
+  - `062cee9 Wire B2 name logo approval storage`;
+  - `0b04957 Update RCS handover after B2 storage`.
+- B3 storage was added after those commits and should be checkpointed/pushed separately once Bugs approves.
 
 Output:
 
 - B2 name/logo approval record - done via `Part B approvals`;
 - B2 issue record with categories/notes - done via `Part B approvals`;
 - B2 status updates based on response - done via `Applications`;
-- B3 video approval record - pending;
-- B3 change request record - pending;
-- B3 status updates based on response - pending.
+- B3 video approval record - done via `Part B video approvals`;
+- B3 change request record - done via `Part B video approvals`;
+- B3 status updates based on response - done via `Applications`.
 
 Implemented:
 
@@ -1006,6 +1007,14 @@ Implemented:
   - not-arrived/help/issue/note sets both to `name_logo_changes_requested`;
   - `Next action owner` becomes `RightOnQ`.
 - Existing live Apps Script deployment `AKfycbyI81Ir2xvHLar0R0iFBBWyXa1Nj93T4_8Ni5_eX3XEYDA-AKQbVYbPHnTROLm8e4a6` was redeployed in place to version `12`.
+- Static app B3 `Review and approve video` now posts `action = submitVideoApproval`.
+- Payload includes Application ID, private application token when present, approval checklist, change decision, change notes, and submitted timestamp.
+- Apps Script appends each B3 response to a new `Part B video approvals` event-log tab.
+- Apps Script updates the matching `Applications` row:
+  - approval sets `registrationStatus` and `partBStatus` to `video_approved`;
+  - change request sets both to `video_changes_requested`;
+  - `Next action owner` becomes `RightOnQ`.
+- Existing live Apps Script deployment was redeployed in place to version `13`.
 
 Test evidence:
 
@@ -1013,6 +1022,10 @@ Test evidence:
 - Live Sheet now has the `Part B approvals` tab with labelled B2 test approval rows.
 - `Applications` row for `ROQ-RCS-TEST-SLICE5-20260514` now shows `Registration status = name_logo_approved`, `Part B status = name_logo_approved`, `Next action owner = RightOnQ`, and `Next action note = Prepare the RCS application review video.`
 - Browser check on `http://localhost:8902/rcs-registration/index.html?applicationId=ROQ-RCS-TEST-SLICE5-20260514` showed B2 opening correctly, approval choices enabling the `Send approval to RightOnQ` button, status reading `Name and logo approved`, and no console errors.
+- Live B3 test POST against `ROQ-RCS-TEST-SLICE5-20260514` returned `ok: true` and `video_approved`.
+- Live Sheet now has the `Part B video approvals` tab with a labelled B3 test approval row.
+- `Applications` row for `ROQ-RCS-TEST-SLICE5-20260514` now shows `Registration status = video_approved`, `Part B status = video_approved`, `Next action owner = RightOnQ`, and `Next action note = Submit the RCS registration pack.`
+- Browser check on the same URL showed B3 opening correctly, the five approval checklist items enabling `Send approval to RightOnQ`, status reading `Video approved`, and no console errors.
 
 Important caveat:
 
@@ -1020,9 +1033,8 @@ Important caveat:
 
 Next:
 
-- Push the B2 checkpoint and handover/build-plan update commits when approved.
-- Continue Slice 6 by wiring B3 video approval/change responses into storage.
-- Keep B3 as the same pattern unless there is a strong reason to change it: append-only approval/change event log plus current-state update on `Applications`.
+- Checkpoint and push the B3 storage work when approved.
+- Next build slice should move to Slice 6A communications cadence or the manual internal status update/operator view.
 
 ### Slice 6A - Communications Cadence
 
