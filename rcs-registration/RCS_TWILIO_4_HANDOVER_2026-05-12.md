@@ -1762,3 +1762,36 @@ Verification:
 Important caveat:
 
 - No live test Part A submission was created for this default-value change, to avoid adding another Sheet/email proof row unnecessarily.
+
+### Slice 6J Deployed - Internal Trust Hub / RC Bundle Tracking Rows
+
+Bugs approved moving forward with internal Trust Hub / RC Bundle tracking fields and statuses, without adding ID collection to the public form.
+
+RCS-Twilio-4 implemented and deployed a thin backend/Sheet implementation:
+
+- Apps Script now defines a `Trust Hub KYC` internal tracking tab.
+- Apps Script now defines a `UK RC bundles` internal tracking tab.
+- Future Part A submissions append one row to each tracking tab.
+- Guarded operator snapshots now include:
+  - latest `Trust Hub KYC` row;
+  - latest `UK RC bundles` row.
+- `RCS_ONBOARDING_MAIN_BUILD_PLAN.md` now includes a dedicated `UK RC Bundles` tab section.
+- `google-apps-script/README.md` now marks current version `20`.
+
+Verification:
+
+- `Code.gs` syntax check passed.
+- `git diff --check` passed for the scoped files.
+- Local mocked-Sheet proof confirmed `Trust Hub KYC` row length matches headers.
+- Local mocked-Sheet proof confirmed `UK RC bundles` row length matches headers.
+- Apps Script was pushed with `clasp push`.
+- Apps Script version `20` was created with `clasp version "Add Trust Hub and RC Bundle tracking rows"`.
+- Existing deployment `AKfycbyI81Ir2xvHLar0R0iFBBWyXa1Nj93T4_8Ni5_eX3XEYDA-AKQbVYbPHnTROLm8e4a6` was redeployed at version `20`.
+
+Important caveat:
+
+- This work is local and uncommitted at the time of this note. Next step should be a scoped commit/push if Bugs approves.
+- No live Part A submission was created for this tracking-structure slice, to avoid another Sheet/email proof row.
+- It does not call Twilio APIs.
+- It does not add passport, driving licence, government ID, proof-of-address, or DOB fields.
+- Existing applications/test rows are not backfilled automatically.

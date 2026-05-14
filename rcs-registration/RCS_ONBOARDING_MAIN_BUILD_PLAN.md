@@ -938,6 +938,55 @@ Launch privacy rule:
 - Do not store representative date of birth, ID images, or proof-of-address files in the current static form / Google Sheet workflow unless Bugs explicitly approves a secure storage design.
 - If Twilio requires sensitive representative evidence, prefer Twilio-managed compliance collection where available, or handle it as a secure manual follow-up/later backend-admin flow.
 
+### Tab: UK RC Bundles
+
+Purpose: UK long-code Regulatory Compliance Bundle tracking for SMS fallback numbers.
+
+This is separate from the Secondary Compliance Profile. The Secondary Compliance Profile models/verifies the end-client business; the UK RC Bundle is the number-compliance approval for UK local, national, mobile, or toll-free long-code usage.
+
+Primary writer:
+
+- RightOnQ manually for pilot;
+- later automation using Twilio Regulatory Compliance APIs.
+
+Suggested columns:
+
+- `application_id`
+- `client_id`
+- `rc_bundle_sid`
+- `rc_bundle_status`
+- `rc_bundle_status_updated_at`
+- `rc_bundle_rejection_reason`
+- `rc_bundle_error_code`
+- `rc_bundle_error_detail`
+- `end_business_legal_name`
+- `business_registration_number`
+- `number_type`
+- `phone_number_sid`
+- `phone_number`
+- `phone_number_assignment_status`
+- `address_sid`
+- `supporting_document_sid`
+- `compliance_owner`
+- `fallback_required`
+- `internal_notes`
+- `updated_at`
+
+Recommended `rc_bundle_status` values:
+
+- `not_started`
+- `draft`
+- `pending_review`
+- `in_review`
+- `twilio_approved`
+- `twilio_rejected`
+- `not_required_unless_uk_long_code`
+
+Launch note:
+
+- UK long-code fallback numbers must be assigned to the end-business bundle before use.
+- This tab stores Twilio IDs, statuses, and rejection reasons; it must not store raw ID documents.
+
 ### Tab: Internal Reviews
 
 Purpose: RightOnQ operator checklist for reviewing Part A before phone preview, Trust Hub/KYC work, or RCS submission moves forward.
@@ -1771,6 +1820,40 @@ Verification:
 Important caveat:
 
 - Existing test rows with `pending_isa_reply` are historical proof rows and do not need mutation unless Bugs asks for cleanup.
+
+### Slice 6J - Internal Trust Hub / RC Bundle Tracking Rows
+
+Status: implemented and deployed by RCS-Twilio-4 on Thursday 14 May 2026.
+
+Purpose:
+
+- move Trust Hub and UK RC Bundle tracking from planning-only into the internal Sheet/backend layer;
+- keep KYC/number-compliance work separate from the public Part A form;
+- make operator snapshots show the current Trust Hub and UK RC Bundle state for each application;
+- avoid collecting or storing raw ID evidence.
+
+Implemented behaviour:
+
+- Apps Script defines internal `Trust Hub KYC` headers.
+- Apps Script defines internal `UK RC bundles` headers.
+- Future Part A submissions append one internal row to each tracking tab.
+- Guarded operator snapshots include the latest Trust Hub KYC row and latest UK RC Bundle row.
+- Future rows store IDs, statuses, exception codes, rejection summaries, and notes only.
+
+Verification:
+
+- `Code.gs` syntax check passed.
+- `git diff --check` passed for the scoped files.
+- Local mocked-Sheet proof confirmed `Trust Hub KYC` row length matches headers.
+- Local mocked-Sheet proof confirmed `UK RC bundles` row length matches headers.
+- Apps Script version `20` was created and deployed to the existing web app deployment.
+- No live Part A submission was created for this tracking-structure slice, to avoid another Sheet/email proof row.
+
+Important caveat:
+
+- Existing applications/test rows will not be backfilled automatically.
+- This slice does not call Twilio APIs or submit compliance profiles/bundles.
+- This slice does not add sensitive ID upload fields.
 
 ### Slice 7 - Customer Commercial/Payment Entry Page
 

@@ -6,6 +6,8 @@ const PART_B_VIDEO_APPROVALS_SHEET_NAME = "Part B video approvals";
 const STATUS_EVENTS_SHEET_NAME = "Status events";
 const COMMUNICATIONS_SHEET_NAME = "Communications";
 const INTERNAL_REVIEWS_SHEET_NAME = "Internal reviews";
+const TRUST_HUB_KYC_SHEET_NAME = "Trust Hub KYC";
+const UK_RC_BUNDLES_SHEET_NAME = "UK RC bundles";
 const PUBLIC_FORM_URL = "https://rightonq-code.github.io/rcs-registration/index.html";
 const NOTIFY_EMAIL = "adam@rightonq.co.uk";
 const APPLICATION_HEADERS = [
@@ -125,6 +127,73 @@ const INTERNAL_REVIEW_HEADERS = [
   "Next action",
   "Notes",
   "Source status",
+  "Last updated"
+];
+const TRUST_HUB_KYC_HEADERS = [
+  "Created at",
+  "Application ID",
+  "Client ID",
+  "Primary customer profile SID",
+  "Secondary compliance profile SID",
+  "Trust Hub policy SID",
+  "Trust Hub profile friendly name",
+  "Trust Hub status",
+  "Trust Hub status updated at",
+  "Trust Hub status callback configured",
+  "Trust Hub rejection reason",
+  "Trust Hub error code",
+  "Trust Hub error detail",
+  "Business identity",
+  "Business type",
+  "Business industry",
+  "Business registration identifier",
+  "Business registration number",
+  "Business regions of operation",
+  "Business website match status",
+  "Address SID",
+  "Address validation status",
+  "Supporting document SID",
+  "Business info end user SID",
+  "Authorised rep 1 end user SID",
+  "Authorised rep 2 end user SID",
+  "Authorised rep 1 validation status",
+  "Authorised rep 2 validation status",
+  "Authorised rep exception code",
+  "Authorised rep exception action",
+  "Primary profile assignment status",
+  "Business info assignment status",
+  "Rep 1 assignment status",
+  "Rep 2 assignment status",
+  "Address assignment status",
+  "Evaluation status",
+  "Evaluation last run at",
+  "Evaluation error summary",
+  "Channel endpoint assignment status",
+  "Phone number SID",
+  "KYC internal notes",
+  "Last updated"
+];
+const UK_RC_BUNDLE_HEADERS = [
+  "Created at",
+  "Application ID",
+  "Client ID",
+  "RC bundle SID",
+  "RC bundle status",
+  "RC bundle status updated at",
+  "RC bundle rejection reason",
+  "RC bundle error code",
+  "RC bundle error detail",
+  "End business legal name",
+  "Business registration number",
+  "Number type",
+  "Phone number SID",
+  "Phone number",
+  "Phone number assignment status",
+  "Address SID",
+  "Supporting document SID",
+  "Compliance owner",
+  "Fallback required",
+  "Internal notes",
   "Last updated"
 ];
 const REGISTRATION_STATUS_ORDER = [
@@ -361,6 +430,18 @@ function doPost(event) {
       applicationId: applicationId,
       applicationRecord: payload,
       triggerStatus: registrationStatus,
+      now: now
+    });
+
+    queueTrustHubKyc(spreadsheet, {
+      applicationId: applicationId,
+      applicationRecord: payload,
+      now: now
+    });
+
+    queueUkRcBundle(spreadsheet, {
+      applicationId: applicationId,
+      applicationRecord: payload,
       now: now
     });
 
@@ -639,6 +720,8 @@ function getOperatorSnapshot(spreadsheet, payload) {
     applicationId: applicationId,
     application: buildOperatorApplicationSummary(applicationRecord),
     internalReview: findLatestRecordByApplicationId(spreadsheet, INTERNAL_REVIEWS_SHEET_NAME, applicationId),
+    trustHubKyc: findLatestRecordByApplicationId(spreadsheet, TRUST_HUB_KYC_SHEET_NAME, applicationId),
+    ukRcBundle: findLatestRecordByApplicationId(spreadsheet, UK_RC_BUNDLES_SHEET_NAME, applicationId),
     recentStatusEvents: findRecentRecordsByApplicationId(spreadsheet, STATUS_EVENTS_SHEET_NAME, applicationId, 5),
     queuedCommunications: findRecentRecordsByApplicationId(spreadsheet, COMMUNICATIONS_SHEET_NAME, applicationId, 5),
     generatedAt: new Date().toISOString()
@@ -861,6 +944,108 @@ function queueInternalReview(spreadsheet, options) {
     safeCell(options.triggerStatus),
     now
   ]);
+}
+
+function queueTrustHubKyc(spreadsheet, options) {
+  const now = options.now || new Date();
+  const record = options.applicationRecord || {};
+  const sheet = getOrCreateSheet(spreadsheet, TRUST_HUB_KYC_SHEET_NAME, TRUST_HUB_KYC_HEADERS);
+  sheet.appendRow([
+    now,
+    safeCell(options.applicationId),
+    safeCell(record.clientId),
+    "",
+    "",
+    "",
+    safeCell(firstValue(record.legalBusinessName, record.tradingName, record.displayName)),
+    "not_started",
+    now,
+    "not_configured",
+    "",
+    "",
+    "",
+    "direct_customer",
+    safeCell(record.companyType),
+    safeCell(record.businessIndustry),
+    "UK:CRN",
+    safeCell(record.companiesHouseNumber),
+    "",
+    "pending_review",
+    "",
+    "pending",
+    "",
+    "",
+    "",
+    "",
+    "pending",
+    "not_collected",
+    "",
+    "",
+    "pending",
+    "pending",
+    "pending",
+    "not_required_for_launch",
+    "pending",
+    "not_run",
+    "",
+    "",
+    "not_started",
+    "",
+    safeCell(buildTrustHubKycNotes(record)),
+    now
+  ]);
+}
+
+function buildTrustHubKycNotes(record) {
+  const notes = [
+    "Legal: " + firstValue(record.legalBusinessName, "not supplied"),
+    "CRN: " + firstValue(record.companiesHouseNumber, "not supplied"),
+    "Website: " + firstValue(record.businessWebsite, record.customerWebsite, "not supplied"),
+    "Primary rep: " + firstValue(record.authorizedRepName, record.primaryContactName, "not supplied"),
+    "ID evidence is exception-only; do not store raw ID documents in this Sheet."
+  ];
+  return notes.join(" | ");
+}
+
+function queueUkRcBundle(spreadsheet, options) {
+  const now = options.now || new Date();
+  const record = options.applicationRecord || {};
+  const markets = asList(record.regions);
+  const hasUk = markets.indexOf("United Kingdom") !== -1;
+  const sheet = getOrCreateSheet(spreadsheet, UK_RC_BUNDLES_SHEET_NAME, UK_RC_BUNDLE_HEADERS);
+  sheet.appendRow([
+    now,
+    safeCell(options.applicationId),
+    safeCell(record.clientId),
+    "",
+    hasUk ? "not_started" : "not_required_unless_uk_long_code",
+    now,
+    "",
+    "",
+    "",
+    safeCell(record.legalBusinessName),
+    safeCell(record.companiesHouseNumber),
+    "uk_long_code",
+    "",
+    "",
+    "not_started",
+    "",
+    "",
+    "end_business",
+    hasUk ? "to_be_confirmed" : "not_required_unless_sms_fallback",
+    safeCell(buildUkRcBundleNotes(record, hasUk)),
+    now
+  ]);
+}
+
+function buildUkRcBundleNotes(record, hasUk) {
+  const notes = [
+    "UK launch market selected: " + (hasUk ? "yes" : "no"),
+    "RC Bundle is separate from Secondary Compliance Profile.",
+    "Assign UK long-code fallback numbers to the end-business bundle before use."
+  ];
+  if (record.usFeeStatus) notes.push("US fee status: " + record.usFeeStatus);
+  return notes.join(" | ");
 }
 
 function buildInternalReviewNotes(record) {

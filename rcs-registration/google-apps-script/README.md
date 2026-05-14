@@ -44,7 +44,7 @@ Deployment:
 
 - Execute as: `adam@rightonq.co.uk`
 - Access: `Anyone`
-- Current published version after CLI redeploy: `19`
+- Current published version after CLI redeploy: `20`
 - Version `4` added Application ID, registration status, and Part A status columns to the intake row.
 - Version `5` adds Application ID status lookup via `GET ?applicationId=...`.
 - Version `6` adds the `Applications` control-row tab and writes/reads one row per Application ID.
@@ -59,6 +59,7 @@ Deployment:
 - Version `17` adds a guarded `updateInternalReview` action for RightOnQ checklist updates and optional Part A acceptance.
 - Version `18` adds a guarded `getOperatorSnapshot` action for RightOnQ application readback.
 - Version `19` updates the default internal KYC checklist state from `pending_isa_reply` to `pending_trust_hub_review` after Twilio's Isa Bell reply.
+- Version `20` adds internal `Trust Hub KYC` and `UK RC bundles` tracking rows for future Part A submissions and includes them in guarded operator snapshots.
 
 ## Behaviour
 
@@ -82,6 +83,7 @@ The script:
 - redacts private application tokens and operator/create PINs from stored audit JSON,
 - appends customer communication drafts to `Communications` for manual send/review,
 - appends a RightOnQ operator checklist row to `Internal reviews` when Part A is received,
+- appends internal Trust Hub and UK RC Bundle tracking rows when Part A is received,
 - stores `Trust Hub status` on the `Applications` control row,
 - sets review status to `New`,
 - sets US fee status to `Not yet agreed` if United States is selected,
