@@ -157,6 +157,23 @@
       display: grid;
       gap: 14px;
       align-self: start;
+      max-height: calc(100vh - 36px);
+      overflow-y: auto;
+      padding-right: 4px;
+      scrollbar-gutter: stable;
+    }
+
+    .progress-stack::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .progress-stack::-webkit-scrollbar-thumb {
+      border-radius: 999px;
+      background: rgba(186, 202, 221, 0.32);
+    }
+
+    .progress-stack::-webkit-scrollbar-track {
+      background: transparent;
     }
 
     .progress-panel {
@@ -1276,11 +1293,19 @@
     }
 
     .field {
+      display: grid;
+      grid-template-rows: auto minmax(5.2em, auto) auto auto;
+      align-content: start;
       min-width: 0;
     }
 
     .field.full {
       grid-column: 1 / -1;
+      display: block;
+    }
+
+    .field.custom-layout {
+      display: block;
     }
 
     label,
@@ -1346,12 +1371,6 @@
       color: #71849b;
     }
 
-    @media (min-width: 681px) {
-      .grid > .field:not(.full) .helper {
-        min-height: 2.65em;
-      }
-    }
-
     input,
     select,
     textarea {
@@ -1408,6 +1427,42 @@
 
     .choice-grid.three {
       grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .market-picker {
+      display: grid;
+      gap: 14px;
+    }
+
+    .market-picker-title {
+      margin: 8px 0 -4px;
+      color: #405876;
+      font-size: 0.86rem;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .market-quick-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .market-us-choice {
+      border-color: #f0c36d;
+      background: #fff8e6;
+    }
+
+    .market-country-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .market-country-grid .choice {
+      min-height: 44px;
+      padding: 10px 12px;
     }
 
     .choice {
@@ -1803,9 +1858,9 @@
     }
 
     .save-panel {
-      display: flex;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
       align-items: center;
-      justify-content: space-between;
       gap: 14px;
       margin: 0;
       padding: 12px clamp(22px, 4vw, 46px);
@@ -1818,20 +1873,27 @@
 
     .save-panel h3 {
       color: #0d1b2c;
-      font-size: 1rem;
+      font-family: "DM Sans", sans-serif;
+      font-size: 0.95rem;
+      line-height: 1.15;
       margin-bottom: 2px;
     }
 
     .save-panel p {
       margin: 0;
+      font-size: 0.9rem;
     }
 
     .save-actions {
       display: flex;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
       gap: 10px;
       align-items: center;
       justify-content: flex-end;
+    }
+
+    .save-actions .btn {
+      white-space: nowrap;
     }
 
     .save-actions input[type="file"] {
@@ -1971,8 +2033,16 @@
         position: static;
       }
 
+      .progress-stack {
+        max-height: none;
+        overflow: visible;
+        padding-right: 0;
+      }
+
       .grid,
       .choice-grid,
+      .market-quick-grid,
+      .market-country-grid,
       .radio-grid {
         grid-template-columns: 1fr;
       }
@@ -2054,7 +2124,7 @@
         min-height: 0;
       }
 
-      .step:not([data-step="6"]) {
+      .step:not([data-step="7"]) {
         display: none !important;
       }
 
@@ -2131,7 +2201,7 @@
         <form id="registrationForm" novalidate autocomplete="off">
           <div class="save-panel">
             <div>
-              <h3>Progress is saved in this browser</h3>
+              <h3>Progress saved</h3>
               <p class="helper" id="autosaveStatus">Autosave ready.</p>
             </div>
             <div class="save-actions">
@@ -2272,23 +2342,16 @@
             <p class="step-kicker">Step 2</p>
             <h2 class="step-title">Brand profile</h2>
             <p class="step-intro">This is the public sender identity customers will see in their messaging app.</p>
-            <div class="section-note">Add the sender name, short public description, logo, banner and brand colour you want people to see in their messaging app. RightOnQ will check the final profile on a real phone before anything is submitted.</div>
+            <div class="section-note">Add the sender name, logo, banner and brand colour you want people to see in their messaging app. RightOnQ will check the final profile on a real phone before anything is submitted.</div>
             <div class="grid">
               <div class="field">
                 <label for="displayName">Sender display name <span class="required">*</span></label>
                 <p class="helper">This is the exact name people will see when your RCS message arrives. Use the public brand name they already recognise, for example Hometown Brewery.</p>
                 <input id="displayName" name="displayName" maxlength="64" required>
               </div>
-              <div class="field full">
-                <label for="senderDescription">Public profile description <span class="required">*</span></label>
-                <p class="helper">Appears under your sender name in the messaging profile. Include what people can expect or how they will interact with your messages. Maximum 100 characters.</p>
-                <p class="helper helper-aside">Example: See how branded RCS messages can make two-way conversations clearer from the first hello. (89/100)</p>
-                <textarea id="senderDescription" name="senderDescription" maxlength="100" required></textarea>
-                <div class="char-count" data-count-for="senderDescription">0 / 100</div>
-              </div>
               <div class="field">
                 <label for="brandColour">Brand colour <span class="required">*</span></label>
-                <p class="helper">Choose one accent colour for the sender frame. <span class="helper-aside">(Logos, banners, and message images can still use your full brand palette.)</span></p>
+                <p class="helper">Choose one accent colour for the sender frame. To enter a hex code, click the colour code box, then use the ⌄ format arrow until the picker shows Hex.</p>
                 <div class="color-row">
                   <input id="brandColourPicker" type="color" value="#3f8cff" aria-label="Brand colour picker">
                   <input id="brandColour" name="brandColour" pattern="^#[0-9a-fA-F]{6}$" value="#3f8cff" required>
@@ -2296,17 +2359,17 @@
               </div>
               <div class="field">
                 <label for="logoUpload">Brand logo <span class="required">*</span></label>
-                <p class="helper">Square PNG or JPG. Minimum 256 x 256 px. The final registration may require a public URL and tighter file size.</p>
-                <input id="logoUpload" name="logoUpload" type="file" accept="image/png,image/jpeg" data-min-width="256" data-min-height="256" data-shape="square" required>
+                <p class="helper">PNG, JPG or JPEG. Must be exactly 224 x 224 px and no larger than 50 KB.</p>
+                <input id="logoUpload" name="logoUpload" type="file" accept="image/png,image/jpeg" data-required-width="224" data-required-height="224" data-max-kb="50" data-shape="square" required>
                 <div class="file-feedback" id="logoUploadFeedback"></div>
               </div>
               <div class="field">
                 <label for="bannerUpload">Banner image <span class="required">*</span></label>
-                <p class="helper">Landscape PNG or JPG. Minimum 1440 x 448 px. Use a clean image that represents the brand.</p>
-                <input id="bannerUpload" name="bannerUpload" type="file" accept="image/png,image/jpeg" data-min-width="1440" data-min-height="448" data-shape="landscape" required>
+                <p class="helper">PNG, JPG or JPEG. Must be exactly 1440 x 448 px and no larger than 200 KB. Use a clean image that represents the brand.</p>
+                <input id="bannerUpload" name="bannerUpload" type="file" accept="image/png,image/jpeg" data-required-width="1440" data-required-height="448" data-max-kb="200" data-shape="landscape" required>
                 <div class="file-feedback" id="bannerUploadFeedback"></div>
               </div>
-              <div class="field full">
+              <div class="field full custom-layout">
                 <div class="preview-strip">
                   <div class="logo-preview" id="logoPreview">Logo</div>
                   <div>
@@ -2321,11 +2384,11 @@
           <section class="step" data-step="2">
             <p class="step-kicker">Step 3</p>
             <h2 class="step-title">Public contact and policy links</h2>
-            <p class="step-intro">These details support the public RCS sender profile and registration checks. People may see the brand contact details, website, privacy policy or terms when they view the sender profile or ask for help.</p>
+            <p class="step-intro">These details support the public RCS sender profile and registration checks. The website, support contact details, privacy policy and terms should all clearly belong to the brand being registered.</p>
             <div class="grid">
               <div class="field">
                 <label for="customerEmail">Customer-facing email <span class="required">*</span></label>
-                <p class="helper">Use an inbox customers can contact for help or questions.</p>
+                <p class="helper">Use an email address customers can contact for help or questions.</p>
                 <input id="customerEmail" name="customerEmail" type="email" required>
               </div>
               <div class="field">
@@ -2350,7 +2413,7 @@
               </div>
               <div class="field">
                 <label for="notificationEmail">RightOnQ registration updates email <span class="required">*</span></label>
-                <p class="helper">Defaults to the primary contact email from Box 13. Change it only if RightOnQ should send registration updates to a different email address. This is not shown to customers.</p>
+                <p class="helper">Defaults from Box 13. Used only for RightOnQ registration updates; not customer-facing.</p>
                 <input id="notificationEmail" name="notificationEmail" type="email" required>
               </div>
             </div>
@@ -2358,16 +2421,16 @@
 
           <section class="step" data-step="3">
             <p class="step-kicker">Step 4</p>
-            <h2 class="step-title">Message purpose and examples</h2>
-            <p class="step-intro">Carriers need a plain description of why messages are sent, when they are sent, and what customers will receive.</p>
+            <h2 class="step-title">Message purpose</h2>
+            <p class="step-intro">Carriers need a plain description of why messages are sent, when they are sent, and what people will actually receive.</p>
             <div class="section-note">
               <ul class="guidance-list">
-                <li>Choose the use case carefully; changing it later can mean another review.</li>
-                <li>Use examples that match what recipients will actually see.</li>
+                <li>This is review-critical wording; vague descriptions can slow down or fail the application.</li>
+                <li>Describe the messages people will actually receive, not just the business or industry.</li>
                 <li>The first draft is based on the sender name, business industry, and message purpose.</li>
               </ul>
               <div class="button-row" style="margin-top: 14px;">
-                <button type="button" class="btn secondary" id="regenerateDraftsButton">Regenerate draft wording</button>
+                <button type="button" class="btn secondary regenerate-drafts-button">Regenerate draft wording</button>
               </div>
             </div>
             <div class="grid">
@@ -2380,6 +2443,13 @@
                   <option>Transactional</option>
                   <option>Both promotional and transactional</option>
                 </select>
+              </div>
+              <div class="field full">
+                <label for="senderDescription">Public profile description <span class="required">*</span></label>
+                <p class="helper">Appears under your sender name in the messaging profile. Describe what messages people will actually receive, not just the company or industry. Maximum 100 characters.</p>
+                <p class="helper helper-aside">Example: Booking updates, arrival reminders, menu news and guest offers from Hometown Brewery. (81/100)</p>
+                <textarea id="senderDescription" name="senderDescription" maxlength="100" required></textarea>
+                <div class="char-count" data-count-for="senderDescription">0 / 100</div>
               </div>
               <div class="field">
                 <label for="monthlyVolume">Expected monthly send volume <span class="required">*</span></label>
@@ -2406,6 +2476,24 @@
                 <textarea id="useCaseDescription" name="useCaseDescription" maxlength="500" required></textarea>
                 <div class="char-count" data-count-for="useCaseDescription">0 / 500</div>
               </div>
+            </div>
+          </section>
+
+          <section class="step" data-step="4">
+            <p class="step-kicker">Step 5</p>
+            <h2 class="step-title">Message examples</h2>
+            <p class="step-intro">These examples show reviewers what people could actually receive from the RCS sender. Keep them realistic and close to the final messaging style.</p>
+            <div class="section-note">
+              <ul class="guidance-list">
+                <li>Example messages should match the message purpose and public profile description.</li>
+                <li>HELP should tell people how to get support using the public contact details.</li>
+                <li>STOP should make the opt-out confirmation clear and final.</li>
+              </ul>
+              <div class="button-row" style="margin-top: 14px;">
+                <button type="button" class="btn secondary regenerate-drafts-button">Regenerate draft wording</button>
+              </div>
+            </div>
+            <div class="grid">
               <div class="field full">
                 <label for="exampleMessageOne">Example message 1 <span class="required">*</span></label>
                 <p class="helper">We draft this from the sender name, industry, and message purpose. Keep it close to the messages the business will actually send.</p>
@@ -2429,8 +2517,8 @@
             </div>
           </section>
 
-          <section class="step" data-step="4">
-            <p class="step-kicker">Step 5</p>
+          <section class="step" data-step="5">
+            <p class="step-kicker">Step 6</p>
             <h2 class="step-title">Confirm How People Will Agree</h2>
             <p class="step-intro">This section confirms how people will agree to receive RCS messages, and how they can stop receiving them later.</p>
             <div class="section-note">This is Part A: confirm how people agree to receive messages and how they can stop them. RightOnQ will prepare any review material after these details have been checked.</div>
@@ -2470,93 +2558,103 @@
             </div>
           </section>
 
-          <section class="step" data-step="5">
-            <p class="step-kicker">Step 6</p>
+          <section class="step" data-step="6">
+            <p class="step-kicker">Step 7</p>
             <h2 class="step-title">RCS launch markets</h2>
             <p class="step-intro">RightOnQ is currently preparing RCS sender registrations for UK-registered companies. Choose the countries where your business expects to send RCS messages.</p>
             <div class="grid">
               <div class="field full" data-checkbox-required="regions">
                 <span class="group-label">Destination countries for your RCS messages <span class="required">*</span></span>
                 <p class="helper">Choose every destination country that matters at launch. The application cost note shown here is about sender registration/onboarding only, not message usage charges.</p>
-                <div class="choice-grid three">
-                  <label class="choice">
-                    <input type="checkbox" name="regions" value="United Kingdom" checked>
-                    <span>United Kingdom<span class="choice-detail">UK recipient numbers.</span><span class="choice-cost">No known RCS sender onboarding fee.</span></span>
-                  </label>
-                  <label class="choice">
-                    <input type="checkbox" name="regions" value="Austria">
-                    <span>Austria<span class="choice-cost">No known RCS sender onboarding fee.</span></span>
-                  </label>
-                  <label class="choice">
-                    <input type="checkbox" name="regions" value="Belgium">
-                    <span>Belgium<span class="choice-cost">No known RCS sender onboarding fee.</span></span>
-                  </label>
-                  <label class="choice">
-                    <input type="checkbox" name="regions" value="Czech Republic">
-                    <span>Czech Republic<span class="choice-cost">No known RCS sender onboarding fee.</span></span>
-                  </label>
-                  <label class="choice">
-                    <input type="checkbox" name="regions" value="Denmark">
-                    <span>Denmark<span class="choice-cost">No known RCS sender onboarding fee.</span></span>
-                  </label>
-                  <label class="choice">
-                    <input type="checkbox" name="regions" value="Finland / Aland Islands">
-                    <span>Finland / Aland Islands<span class="choice-cost">No known RCS sender onboarding fee.</span></span>
-                  </label>
-                  <label class="choice">
-                    <input type="checkbox" name="regions" value="France">
-                    <span>France<span class="choice-cost">No known RCS sender onboarding fee.</span></span>
-                  </label>
-                  <label class="choice">
-                    <input type="checkbox" name="regions" value="Germany">
-                    <span>Germany<span class="choice-cost">No known RCS sender onboarding fee.</span></span>
-                  </label>
-                  <label class="choice">
-                    <input type="checkbox" name="regions" value="Ireland">
-                    <span>Ireland<span class="choice-cost">No known RCS sender onboarding fee.</span></span>
-                  </label>
-                  <label class="choice">
-                    <input type="checkbox" name="regions" value="Italy">
-                    <span>Italy<span class="choice-cost">No known RCS sender onboarding fee.</span></span>
-                  </label>
-                  <label class="choice">
-                    <input type="checkbox" name="regions" value="Mexico">
-                    <span>Mexico<span class="choice-cost">No known RCS sender onboarding fee.</span></span>
-                  </label>
-                  <label class="choice">
-                    <input type="checkbox" name="regions" value="Netherlands">
-                    <span>Netherlands<span class="choice-cost">No known RCS sender onboarding fee.</span></span>
-                  </label>
-                  <label class="choice">
-                    <input type="checkbox" name="regions" value="Norway">
-                    <span>Norway<span class="choice-cost">No known RCS sender onboarding fee.</span></span>
-                  </label>
-                  <label class="choice">
-                    <input type="checkbox" name="regions" value="Poland">
-                    <span>Poland<span class="choice-cost">No known RCS sender onboarding fee.</span></span>
-                  </label>
-                  <label class="choice">
-                    <input type="checkbox" name="regions" value="Portugal">
-                    <span>Portugal<span class="choice-cost">No known RCS sender onboarding fee.</span></span>
-                  </label>
-                  <label class="choice">
-                    <input type="checkbox" name="regions" value="Romania">
-                    <span>Romania<span class="choice-cost">No known RCS sender onboarding fee.</span></span>
-                  </label>
-                  <label class="choice">
-                    <input type="checkbox" name="regions" value="Slovakia">
-                    <span>Slovakia<span class="choice-cost">No known RCS sender onboarding fee.</span></span>
-                  </label>
-                  <label class="choice">
-                    <input type="checkbox" name="regions" value="Sweden">
-                    <span>Sweden<span class="choice-cost">No known RCS sender onboarding fee.</span></span>
-                  </label>
-                  <label class="choice">
+                <div class="market-picker">
+                  <p class="market-picker-title">Quick choices</p>
+                  <div class="market-quick-grid">
+                    <label class="choice">
+                      <input type="checkbox" name="regions" value="United Kingdom" checked>
+                      <span>United Kingdom<span class="choice-detail">UK recipient numbers.</span><span class="choice-cost">No known RCS sender onboarding fee.</span></span>
+                    </label>
+                    <label class="choice">
+                      <input type="checkbox" id="allListedEuropeanCountries" data-region-bundle="europe">
+                      <span>All listed European countries<span class="choice-detail">Ticks every European country listed below.</span><span class="choice-cost">No known RCS sender onboarding fee.</span></span>
+                    </label>
+                    <label class="choice">
+                      <input type="checkbox" name="regions" value="Mexico">
+                      <span>Mexico<span class="choice-detail">Mexico recipient numbers.</span><span class="choice-cost">No known RCS sender onboarding fee.</span></span>
+                    </label>
+                  </div>
+                  <label class="choice market-us-choice">
                     <input type="checkbox" name="regions" value="United States">
-                    <span>United States <span class="required">*</span><span class="choice-detail">US recipient numbers.</span><span class="choice-cost warning">Known extra onboarding fees apply.</span></span>
+                    <span>United States <span class="required">*</span><span class="choice-detail">US recipient numbers. Extra onboarding checks and fees apply.</span><span class="choice-cost warning">Known extra onboarding fees apply.</span></span>
                   </label>
+                  <p class="cost-note"><span class="required">*</span> United States registration currently carries third-party/carrier onboarding fees of up to $700 initially and $200 annually per RCS Sender, based on current provider guidance. Selecting United States does not take payment today. RightOnQ will confirm the current fees before any US carrier submission is made, and US registration will only proceed once those fees have been agreed and paid. Fees paid for US registration will not be refunded if approval is not granted.</p>
+                  <p class="market-picker-title">Choose individual European countries instead</p>
+                  <div class="market-country-grid">
+                    <label class="choice">
+                      <input type="checkbox" name="regions" value="Austria" data-europe-region>
+                      <span>Austria</span>
+                    </label>
+                    <label class="choice">
+                      <input type="checkbox" name="regions" value="Belgium" data-europe-region>
+                      <span>Belgium</span>
+                    </label>
+                    <label class="choice">
+                      <input type="checkbox" name="regions" value="Czech Republic" data-europe-region>
+                      <span>Czech Republic</span>
+                    </label>
+                    <label class="choice">
+                      <input type="checkbox" name="regions" value="Denmark" data-europe-region>
+                      <span>Denmark</span>
+                    </label>
+                    <label class="choice">
+                      <input type="checkbox" name="regions" value="Finland / Aland Islands" data-europe-region>
+                      <span>Finland / Aland Islands</span>
+                    </label>
+                    <label class="choice">
+                      <input type="checkbox" name="regions" value="France" data-europe-region>
+                      <span>France</span>
+                    </label>
+                    <label class="choice">
+                      <input type="checkbox" name="regions" value="Germany" data-europe-region>
+                      <span>Germany</span>
+                    </label>
+                    <label class="choice">
+                      <input type="checkbox" name="regions" value="Ireland" data-europe-region>
+                      <span>Ireland</span>
+                    </label>
+                    <label class="choice">
+                      <input type="checkbox" name="regions" value="Italy" data-europe-region>
+                      <span>Italy</span>
+                    </label>
+                    <label class="choice">
+                      <input type="checkbox" name="regions" value="Netherlands" data-europe-region>
+                      <span>Netherlands</span>
+                    </label>
+                    <label class="choice">
+                      <input type="checkbox" name="regions" value="Norway" data-europe-region>
+                      <span>Norway</span>
+                    </label>
+                    <label class="choice">
+                      <input type="checkbox" name="regions" value="Poland" data-europe-region>
+                      <span>Poland</span>
+                    </label>
+                    <label class="choice">
+                      <input type="checkbox" name="regions" value="Portugal" data-europe-region>
+                      <span>Portugal</span>
+                    </label>
+                    <label class="choice">
+                      <input type="checkbox" name="regions" value="Romania" data-europe-region>
+                      <span>Romania</span>
+                    </label>
+                    <label class="choice">
+                      <input type="checkbox" name="regions" value="Slovakia" data-europe-region>
+                      <span>Slovakia</span>
+                    </label>
+                    <label class="choice">
+                      <input type="checkbox" name="regions" value="Sweden" data-europe-region>
+                      <span>Sweden</span>
+                    </label>
+                  </div>
                 </div>
-                <p class="cost-note"><span class="required">*</span> United States registration currently carries third-party/carrier onboarding fees of up to $700 initially and $200 annually per RCS Sender, based on current provider guidance. Selecting United States does not take payment today. RightOnQ will confirm the current fees before any US carrier submission is made, and US registration will only proceed once those fees have been agreed and paid. Some US fees may still apply even if approval is not granted.</p>
                 <p class="error-text" data-error-for="regions"></p>
               </div>
               <div class="field" data-us-only hidden>
@@ -2586,19 +2684,19 @@
             </div>
           </section>
 
-          <section class="step" data-step="6">
-            <p class="step-kicker">Step 7</p>
+          <section class="step" data-step="7">
+            <p class="step-kicker">Step 8</p>
             <h2 class="step-title">Registration pack: Part A</h2>
             <div class="pack-grid">
               <article class="pack-card full">
-                <p>Review the answers below. When you are happy, continue to sign off Part A so RightOnQ can check the written registration details before preparing Part B, the review video.</p>
+                <p>Review the answers below. When you are happy, continue to sign off Part A so RightOnQ can check and process the written registration details. Once Part A is accepted, we will send a phone logo preview to your agreed number/s so you can approve how your sender name and logo appear on a real phone before the RCS application video is prepared.</p>
               </article>
             </div>
             <div class="review-shell" id="reviewShell"></div>
           </section>
 
-          <section class="step" data-step="7">
-            <p class="step-kicker">Step 8</p>
+          <section class="step" data-step="8">
+            <p class="step-kicker">Step 9</p>
             <h2 class="step-title">Sign off and send Part A</h2>
             <div class="grid signoff-grid">
               <div class="field full">
@@ -2698,7 +2796,8 @@
       "Business details",
       "Brand profile",
       "Public links",
-      "Use case",
+      "Message purpose",
+      "Message examples",
       "How people agree",
       "RCS launch markets",
       "Review",
@@ -2734,7 +2833,6 @@
         title: "Brand profile",
         fields: [
           ["Sender display name", "displayName"],
-          ["Public profile description", "senderDescription"],
           ["Brand colour", "brandColour"],
           ["Logo upload", "logoUpload"],
           ["Banner upload", "bannerUpload"]
@@ -2752,12 +2850,18 @@
         ]
       },
       {
-        title: "Message purpose and examples",
+        title: "Message purpose",
         fields: [
           ["Main message purpose", "primaryUseCase"],
+          ["Public profile description", "senderDescription"],
           ["Expected monthly send volume", "monthlyVolume"],
           ["Why people would receive a message", "messageTrigger"],
-          ["Use case description", "useCaseDescription"],
+          ["Use case description", "useCaseDescription"]
+        ]
+      },
+      {
+        title: "Message examples",
+        fields: [
           ["Example message 1", "exampleMessageOne"],
           ["Example message 2", "exampleMessageTwo"],
           ["HELP sample message", "helpSampleMessage"],
@@ -3002,6 +3106,7 @@
       form.addEventListener("change", event => {
         clearFieldError(event.target);
         updateSelectPlaceholders();
+        syncRegionBundle(event.target);
         updateUsRegistrationFields();
         updateConsentRouteExplanation();
         maybeSyncDisplayName(event.target);
@@ -3036,7 +3141,9 @@
       setupComplianceDrafts();
       clearUseCaseDraftsIfNoUseCase();
       updateConsentRouteExplanation();
-      document.getElementById("regenerateDraftsButton").addEventListener("click", regenerateDraftWording);
+      document.querySelectorAll(".regenerate-drafts-button").forEach(button => {
+        button.addEventListener("click", regenerateDraftWording);
+      });
 
       nextButton.addEventListener("click", () => {
         if (!validateStep(currentStep)) return;
@@ -3060,6 +3167,7 @@
       const restoredProgress = progressSaveEnabled && restoreAutosavedProgress();
       ensurePreviewNumberDefaults();
       updateSelectPlaceholders();
+      updateEuropeBundleState();
       updateUsRegistrationFields();
       if (!restoredProgress) showStep(0);
     }
@@ -3289,7 +3397,7 @@
           <div class="part-b-stage">
             <div class="name-logo-form">
               <div class="approval-question">
-                <h4>Have you accepted the <span class="rbm-tester-label"><span class="rbm-tester-mark" aria-hidden="true"><img src="../images/rbm-tester-management-icon.jpg" alt=""></span>RBM Tester</span> invitation and received your branded test message?</h4>
+                <h4>Have you accepted the <span class="rbm-tester-label"><span class="rbm-tester-mark" aria-hidden="true"><img src="../images/rbm-tester-management-icon.jpg" data-fallback-src="images/rbm-tester-management-icon.jpg" onerror="if (this.dataset.fallbackSrc) { this.src = this.dataset.fallbackSrc; delete this.dataset.fallbackSrc; }" alt=""></span>RBM Tester</span> invitation and received your branded test message?</h4>
                 <div class="approval-options">
                   <label class="approval-option"><input type="checkbox" name="testerReceived" value="yes"> Yes, I have received it</label>
                   <label class="approval-option"><input type="checkbox" name="testerReceived" value="not-yet"> Not yet</label>
@@ -3483,6 +3591,30 @@
       });
     }
 
+    function syncRegionBundle(target) {
+      if (!target) return;
+      if (target.id === "allListedEuropeanCountries") {
+        document.querySelectorAll("[data-europe-region]").forEach(input => {
+          input.checked = target.checked;
+          clearFieldError(input);
+        });
+        return;
+      }
+
+      if (target.matches && target.matches("[data-europe-region]")) {
+        updateEuropeBundleState();
+      }
+    }
+
+    function updateEuropeBundleState() {
+      const bundle = document.getElementById("allListedEuropeanCountries");
+      if (!bundle) return;
+      const europeanRegions = Array.from(document.querySelectorAll("[data-europe-region]"));
+      const checkedCount = europeanRegions.filter(input => input.checked).length;
+      bundle.checked = europeanRegions.length > 0 && checkedCount === europeanRegions.length;
+      bundle.indeterminate = false;
+    }
+
     function updateConsentRouteExplanation() {
       syncConsentRouteField();
       const routes = getSelectedConsentRoutes();
@@ -3567,12 +3699,131 @@
       if (!brand) return "";
       const useCase = document.getElementById("primaryUseCase").value;
       if (!useCase) return "";
-      const descriptions = {
-        Promotional: "Marketing, offers, announcements and sales follow-up messages.",
-        Transactional: "Customer updates, alerts, appointments, order updates and service information.",
-        "Both promotional and transactional": "Marketing messages plus customer updates, alerts and service information."
+      const industry = document.getElementById("businessIndustry").value;
+      const descriptionSet = getIndustryDescriptionSet(industry);
+
+      if (useCase === "Promotional") {
+        return `${descriptionSet.promotional} from ${brand}.`;
+      }
+
+      if (useCase === "Transactional") {
+        return `${descriptionSet.transactional} from ${brand}.`;
+      }
+
+      if (useCase === "Both promotional and transactional") {
+        return `${descriptionSet.multiUse} from ${brand}.`;
+      }
+
+      return `Useful updates and follow-up messages from ${brand}.`;
+    }
+
+    function getIndustryDescriptionSet(industry) {
+      const fallback = {
+        promotional: "News, offers and subscriber updates",
+        transactional: "Customer updates, reminders and service messages",
+        multiUse: "Customer updates, reminders, news and offers"
       };
-      return descriptions[useCase] || `${brand} sends agreed messages to people who have chosen to receive them.`;
+
+      const descriptions = {
+        Agriculture: {
+          promotional: "Seasonal supply updates, open day news and product offers",
+          transactional: "Field updates, delivery notices and safety reminders",
+          multiUse: "Field updates, delivery notices, seasonal news and product offers"
+        },
+        Automotive: {
+          promotional: "Vehicle offers, stock updates and private viewing invitations",
+          transactional: "Service updates, collection notices and customer reminders",
+          multiUse: "Service updates, collection notices, stock alerts and vehicle offers"
+        },
+        Communication: {
+          promotional: "Service news, product updates and subscriber offers",
+          transactional: "Service updates, support notices and customer follow-ups",
+          multiUse: "Service updates, support notices, product news and subscriber offers"
+        },
+        Construction: {
+          promotional: "Project news, availability updates and service offers",
+          transactional: "Site updates, safety notices and attendance confirmations",
+          multiUse: "Site updates, safety notices, project news and service offers"
+        },
+        Education: {
+          promotional: "Open day news, event updates and course information",
+          transactional: "Important notices, attendance updates and event reminders",
+          multiUse: "Important notices, event reminders, open day news and course updates"
+        },
+        Entertainment: {
+          promotional: "Event news, priority access and subscriber offers",
+          transactional: "Event updates, access information and customer reminders",
+          multiUse: "Event updates, access information, priority access and offers"
+        },
+        Financial: {
+          promotional: "Product updates, service news and subscriber information",
+          transactional: "Account notices, security alerts and customer follow-ups",
+          multiUse: "Account notices, security alerts, product updates and service news"
+        },
+        Government: {
+          promotional: "Community updates, event notices and public information",
+          transactional: "Public service updates, appointment notices and case follow-ups",
+          multiUse: "Public service updates, appointment notices, community news and event alerts"
+        },
+        Healthcare: {
+          promotional: "Clinic news, service updates and health information",
+          transactional: "Care updates, appointment reminders and welfare checks",
+          multiUse: "Care updates, appointment reminders, clinic news and service information"
+        },
+        Hospitality: {
+          promotional: "Menu updates, event news and guest offers",
+          transactional: "Booking updates, arrival information and service reminders",
+          multiUse: "Booking updates, arrival reminders, menu news and guest offers"
+        },
+        Insurance: {
+          promotional: "Policy review updates, cover information and service news",
+          transactional: "Policy updates, claim notices and appointment reminders",
+          multiUse: "Policy updates, claim notices, cover information and service news"
+        },
+        Legal: {
+          promotional: "Legal updates, event news and service information",
+          transactional: "Case updates, appointment notices and document reminders",
+          multiUse: "Case updates, document reminders, legal news and service information"
+        },
+        Manufacturing: {
+          promotional: "Product news, availability updates and service information",
+          transactional: "Production updates, shift notices and safety checks",
+          multiUse: "Production updates, shift notices, product news and availability alerts"
+        },
+        Nonprofit: {
+          promotional: "Campaign updates, event news and supporter information",
+          transactional: "Supporter updates, volunteer messages and confirmation requests",
+          multiUse: "Supporter updates, volunteer messages, campaign news and event alerts"
+        },
+        Professional: {
+          promotional: "Service news, event updates and client information",
+          transactional: "Client updates, appointment notices and document reminders",
+          multiUse: "Client updates, appointment notices, service news and event updates"
+        },
+        "Real estate": {
+          promotional: "Property alerts, viewing events and market updates",
+          transactional: "Viewing updates, property notices and appointment confirmations",
+          multiUse: "Viewing updates, property notices, market news and property alerts"
+        },
+        Retail: {
+          promotional: "Product updates, stock news and subscriber offers",
+          transactional: "Order updates, collection notices and service messages",
+          multiUse: "Order updates, collection notices, product news and subscriber offers"
+        },
+        Technology: {
+          promotional: "Product updates, feature news and service offers",
+          transactional: "Service updates, account notices and support follow-ups",
+          multiUse: "Service updates, account notices, product news and feature alerts"
+        },
+        Transportation: {
+          promotional: "Route news, service updates and travel offers",
+          transactional: "Journey updates, schedule changes and service notices",
+          multiUse: "Journey updates, schedule changes, route news and travel offers"
+        },
+        Other: fallback
+      };
+
+      return descriptions[industry] || fallback;
     }
 
     function getSenderBrandName() {
@@ -4059,8 +4310,12 @@
         syncRepresentativeField(primaryEmail, repEmail, "authorizedRepEmail");
         syncRepresentativeField(primaryEmail, notificationEmail, "notificationEmail");
         syncRepresentativeField(primaryEmail, customerEmail, "customerEmail");
+        updateComplianceDrafts();
       });
-      primaryPhone.addEventListener("input", () => syncRepresentativeField(primaryPhone, customerPhone, "customerPhone"));
+      primaryPhone.addEventListener("input", () => {
+        syncRepresentativeField(primaryPhone, customerPhone, "customerPhone");
+        updateComplianceDrafts();
+      });
       businessWebsite.addEventListener("input", () => syncRepresentativeField(businessWebsite, customerWebsite, "customerWebsite"));
       syncRepresentativeField(primaryName, repName, "authorizedRepName");
       syncRepresentativeField(primaryEmail, repEmail, "authorizedRepEmail");
@@ -4258,8 +4513,6 @@
     function validateImageUpload(input) {
       const file = input.files[0];
       const feedback = document.getElementById(`${input.id}Feedback`);
-      const minWidth = Number(input.dataset.minWidth);
-      const minHeight = Number(input.dataset.minHeight);
       const shape = input.dataset.shape;
 
       if (!file) {
@@ -4279,9 +4532,12 @@
       reader.onload = event => {
         const image = new Image();
         image.onload = () => {
+          const requiredWidth = Number(input.dataset.requiredWidth || input.dataset.minWidth);
+          const requiredHeight = Number(input.dataset.requiredHeight || input.dataset.minHeight);
+          const maxBytes = Number(input.dataset.maxKb || 0) * 1024;
           const isSquare = Math.abs(image.width - image.height) <= 2;
           const isLandscape = image.width > image.height;
-          let valid = image.width >= minWidth && image.height >= minHeight;
+          let valid = image.width === requiredWidth && image.height === requiredHeight;
           let message = `${file.name} selected. ${image.width} x ${image.height}px, ${(file.size / 1024).toFixed(0)}KB.`;
 
           if (shape === "square" && !isSquare) {
@@ -4294,9 +4550,14 @@
             message = "Please use a landscape banner image.";
           }
 
-          if (image.width < minWidth || image.height < minHeight) {
+          if (image.width !== requiredWidth || image.height !== requiredHeight) {
             valid = false;
-            message = `Image is too small. Minimum size is ${minWidth} x ${minHeight}px.`;
+            message = `Image must be exactly ${requiredWidth} x ${requiredHeight}px.`;
+          }
+
+          if (maxBytes && file.size > maxBytes) {
+            valid = false;
+            message = `File is too large. Maximum file size is ${input.dataset.maxKb}KB.`;
           }
 
           fileState[input.id] = {
@@ -4881,6 +5142,7 @@
       const data = collectData();
       data[draftStateKey] = { ...draftedFieldTouched };
       data.currentStep = currentStep;
+      data.progressStepCount = steps.length;
       data.progressSavedAt = new Date().toISOString();
       return data;
     }
@@ -4945,7 +5207,7 @@
     function restoreProgressData(data) {
       restoringProgress = true;
       Object.entries(data).forEach(([key, value]) => {
-        if (["logoUpload", "bannerUpload", "regions", "consentRoute", draftStateKey, "generatedAt", "templateVersion", "registeredAddress", "currentStep", "progressSavedAt"].includes(key)) return;
+        if (["logoUpload", "bannerUpload", "regions", "consentRoute", draftStateKey, "generatedAt", "templateVersion", "registeredAddress", "currentStep", "progressStepCount", "progressSavedAt"].includes(key)) return;
         const field = form.elements[key];
         if (!field || typeof value === "object") return;
 
@@ -4965,6 +5227,7 @@
         if (ukRegion) ukRegion.checked = true;
       }
       updateUsRegistrationFields();
+      updateEuropeBundleState();
       if (Array.isArray(data.consentRoute)) {
         document.querySelectorAll('input[name="consentRoutes"]').forEach(input => {
           input.checked = data.consentRoute.includes(input.value);
@@ -4992,7 +5255,8 @@
       clearUseCaseDraftsIfNoUseCase();
       drawVideoPoster();
       restoringProgress = false;
-      const step = Number.isInteger(data.currentStep) ? data.currentStep : 0;
+      let step = Number.isInteger(data.currentStep) ? data.currentStep : 0;
+      if (!data.progressStepCount && step >= 4) step += 1;
       showStep(Math.max(0, Math.min(step, steps.length - 1)));
     }
 
@@ -5152,6 +5416,7 @@
       updateComplianceDrafts();
       updateCharacterCounts();
       drawVideoPoster();
+      updateEuropeBundleState();
       showStep(0);
     }
 

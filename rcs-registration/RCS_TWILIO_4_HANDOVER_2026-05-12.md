@@ -21,9 +21,12 @@ The working rhythm with Bugs/Adam is:
 
 Do not touch PR #1. Do not push the current app/layout work. Do not stage unrelated dirty files.
 
-Correct preview URL:
+Correct preview URLs:
 
+- `http://127.0.0.1:8902/rcs-registration/index.html`
 - `http://localhost:8902/rcs-registration/index.html`
+
+Use `127.0.0.1` if `localhost` is slow or refuses the connection.
 
 Correct app file:
 
@@ -60,25 +63,32 @@ RCS-Twilio-4 treated `14db1c5` as the app baseline and did not touch PR #1.
 
 ## Current Level 2 Checkpoint
 
-After Bugs approved the current work as worth saving locally, RCS-Twilio-4 created a narrow local checkpoint commit:
+After Bugs approved the current work as worth saving locally, RCS-Twilio-4 created narrow local checkpoint commits. The latest Level 2 checkpoint currently at `HEAD` is:
 
-- `9392559 Checkpoint RCS Part B storyboard and A8 wording`
+- `fced766 Checkpoint RCS registration Part B review flow`
 
-It includes only:
+That checkpoint includes:
 
 - `rcs-registration/index.html`
+- `rcs-registration/RCS_TWILIO_4_HANDOVER_2026-05-12.md`
+- `images/rbm-tester-management-icon.jpg`
 
 No push was made.
 
-The branch is now ahead of `origin/rcs-registration-part-a-b-20260507` by 3 local commits:
+The branch is now ahead of `origin/rcs-registration-part-a-b-20260507` by 5 local commits:
 
 1. `b4a8acc Checkpoint Part B phone preview step`
 2. `14db1c5 Checkpoint current RCS registration app state`
 3. `9392559 Checkpoint RCS Part B storyboard and A8 wording`
+4. `6811063 Add RCS Twilio 4 handover diary`
+5. `fced766 Checkpoint RCS registration Part B review flow`
 
 ## Current Dirty / Untracked Files
 
-After the Level 2 checkpoint, the RCS app file is clean relative to HEAD.
+After the Level 2 checkpoint, Bugs continued shaping Step 4/5, brand assets, helper wording, layout alignment, and phone/email drafting. There are now fresh uncommitted changes in:
+
+- `rcs-registration/index.html`
+- `rcs-registration/RCS_TWILIO_4_HANDOVER_2026-05-12.md`
 
 Known dirty/untracked files in the checkout still include other lanes and handover copies:
 
@@ -254,9 +264,47 @@ git diff --check -- rcs-registration/index.html
 
 Both checks passed after the latest app edits before commit `9392559`.
 
-The current localhost preview was repeatedly refreshed at:
+After the later uncommitted Step 4/5 split, Twilio-4 re-ran:
+
+```bash
+node -e "const fs=require('fs'); const html=fs.readFileSync('rcs-registration/index.html','utf8'); const match=html.match(/<script>([\s\S]*)<\/script>/); new Function(match[1]); console.log('inline script syntax ok');"
+git diff --check -- rcs-registration/index.html rcs-registration/RCS_TWILIO_4_HANDOVER_2026-05-12.md
+curl -I http://127.0.0.1:8902/rcs-registration/index.html
+```
+
+Those checks passed. The server returned HTTP 200 from `127.0.0.1:8902`.
+
+Twilio-4 also ran a small structural check against `rcs-registration/index.html`. It confirmed:
+
+- `data-step` sections run from `0` through `8`.
+- Visible kickers run from `Step 1` through `Step 9`.
+- Step titles are now:
+  - `Business details`
+  - `Brand profile`
+  - `Public contact and policy links`
+  - `Message purpose`
+  - `Message examples`
+  - `Confirm How People Will Agree`
+  - `RCS launch markets`
+  - `Registration pack: Part A`
+  - `Sign off and send Part A`
+- Sidebar steps are now:
+  - `Business details`
+  - `Brand profile`
+  - `Public links`
+  - `Message purpose`
+  - `Message examples`
+  - `How people agree`
+  - `RCS launch markets`
+  - `Review`
+  - `Send Part A`
+
+The in-app browser was opened to:
 
 - `http://localhost:8902/rcs-registration/index.html`
+- `http://127.0.0.1:8902/rcs-registration/index.html`
+
+The fresh `127.0.0.1` tab loaded the app title `RightOnQ RCS Registration Studio` and showed the 9-step sidebar. Future sidebar steps stay gated by normal form validation, so Twilio-4 did not force browser state through unfinished required fields during this verification pass.
 
 ## Product Direction Agreed During Twilio-4
 
@@ -392,17 +440,174 @@ Items deliberately not done in this pass:
 - Client-specific private links. Separate project.
 - Public profile description placement. Needs a product choice: keep in Step 2 with a general draft, or move after message purpose.
 
+### Sender Description Guidance From Twilio/Puylio Applied
+
+Bugs supplied onboarding guidance saying the sender description should describe what messages users actually receive, not the company or industry. This exposed that Box 20 `Public profile description` was still drafting generic wording like `Marketing, offers...`, which was too close to provider examples of weak descriptions.
+
+Implemented:
+
+- `buildSenderDescription()` now uses message purpose plus business industry.
+- Added `getIndustryDescriptionSet()` for industry-aware public profile descriptions.
+- Drafts now describe actual recipient-visible message types, for example:
+  - Hospitality promotional: `Menu updates, event news and guest offers from Hometown Brewery.`
+  - Hospitality transactional: `Booking updates, arrival information and service reminders from Hometown Brewery.`
+  - Hospitality multi-use: `Booking updates, arrival reminders, menu news and guest offers from Hometown Brewery.`
+- Checked generated examples against the 100-character Box 20 limit using `Hometown Brewery`; the longest generated test string was 99 characters.
+
+### Step 6 Market Picker Reshaped
+
+Bugs wanted Box 42 / Step 6 to be easier to scan while preserving individual country selection. The UI was reworked without changing the submitted data model.
+
+Implemented:
+
+- Added top quick choices:
+  - `United Kingdom`
+  - `All listed European countries`
+  - `Mexico`
+- Moved `United States` into its own full-width warning choice with the existing fee note directly underneath.
+- Moved individual European countries into a separate compact grid headed `Choose individual European countries instead`.
+- `All listed European countries` is a helper checkbox only; it does not submit a fake region value. It ticks/unticks the individual European country checkboxes, so exports still contain actual country names.
+- If one individual European country is unticked after selecting all, the helper checkbox becomes indeterminate.
+
+### Public Profile Description Moved To Message Purpose
+
+Bugs agreed to tackle the larger placement issue for `Public profile description`. The field was originally in Step 2 Brand profile, but its strongest draft depends on Step 4 `Main message purpose`, so asking for it before message purpose was awkward.
+
+Implemented:
+
+- Moved `Public profile description` from Step 2 Brand profile to Step 4 `Message purpose and examples`.
+- It now sits directly after `Main message purpose` and before expected monthly send volume.
+- The field ID remains `senderDescription`, so saved/exported data stays compatible.
+- Review summary now lists it under `Message purpose and examples`, not Brand profile.
+- Step 2 blue note no longer mentions short public description.
+- Helper now follows the provider guidance: describe what messages people actually receive, not just the company or industry.
+- The example now uses a concrete message-type description: `Booking updates, arrival reminders, menu news and guest offers from Hometown Brewery. (81/100)`
+
+### Brand Asset Size Requirements Corrected
+
+Bugs supplied a Twilio onboarding screenshot showing the logo requirement as 224 x 224 px, not the app's earlier 256 x 256 minimum. Twilio and Google docs both confirm the logo is 224 x 224 px with a 50 KB max. Google also confirms the banner image is 1440 x 448 px with a 200 KB max.
+
+Implemented:
+
+- Box 21 `Brand logo` helper changed to exactly `224 x 224 px` and `50 KB`.
+- Logo upload validation now requires exactly 224 x 224 px, not minimum 256 x 256 px.
+- Logo validation now rejects files over 50 KB.
+- Box 22 `Banner image` helper changed to exactly `1440 x 448 px` and `200 KB`.
+- Banner upload validation now requires exactly 1440 x 448 px and rejects files over 200 KB.
+
+### Form Pair Alignment Pass
+
+Bugs noticed that after recent wording updates the visible control boxes in paired fields, especially Box 21 `Brand logo` and Box 22 `Banner image`, were no longer aligned because helper text had different heights.
+
+Implemented:
+
+- `.field` now uses an internal grid with a stable helper row for two-column fields.
+- This keeps the input/select/file controls aligned across each row even when one helper wraps to more lines.
+- `.field.full` and `.field.custom-layout` opt out so full-width textareas, checkbox blocks, and preview strips keep their natural layout.
+
+### Message Purpose Split Into Two Steps
+
+Bugs noted that the message-purpose page had become congested and that this is a likely registration failure point if the wording/examples are weak. Twilio-4 split the old single `Message purpose and examples` step into two real steps.
+
+Implemented:
+
+- Step 4 is now `Message purpose`.
+- Step 4 carries a direct warning that the wording is review-critical and that vague descriptions can slow down or fail the application.
+- Step 5 is now `Message examples`.
+- Later steps were renumbered:
+  - Step 6 `Confirm How People Will Agree`
+  - Step 7 `RCS launch markets`
+  - Step 8 `Registration pack: Part A`
+  - Step 9 `Sign off and send Part A`
+- Sidebar `steps` array was updated to 9 steps.
+- Review schema was split so review cards/edit buttons map back to the correct new step.
+- Print-only CSS was updated so the review step now prints from `data-step="7"`.
+- Regenerate draft wording buttons now work from both Step 4 and Step 5 via `.regenerate-drafts-button`.
+- Progress restore now stores `progressStepCount`; older saved browser progress without that marker shifts old steps 4+ forward by one so previous autosave positions do not reopen on the wrong page after the split.
+
+### Public Links And Top Bar Tidy
+
+Bugs noticed Step 3 and the autosave strip had become clumsy after the recent layout changes.
+
+Implemented:
+
+- Step 3 intro now says the details support the public RCS sender profile and registration checks, then clearly says the website, support contact details, privacy policy and terms should belong to the brand being registered.
+- Box 23 customer-facing email helper now says `Use an email address customers can contact for help or questions.`
+- Box 28 helper was shortened to `Defaults from Box 13. Used only for RightOnQ registration updates; not customer-facing.`
+- The autosave strip now uses a more compact `Progress saved` heading.
+- The save/resume buttons are kept side by side on normal desktop widths by preventing the save action row from wrapping.
+
+### Step 8 Review Intro Clarified
+
+Bugs wanted the Step 8 `Registration pack: Part A` white-box paragraph to explain the phone logo preview before the video, not jump straight from written details to the review video.
+
+Implemented:
+
+- Step 8 now says RightOnQ will check and process the written registration details.
+- It then explains that once Part A is accepted, RightOnQ sends a phone logo preview to the agreed number/s so the client can approve the sender name and logo on a real phone before the RCS application video is prepared.
+
+### Left Progress Rail Scroll Fixed
+
+Bugs pointed out a long-standing irritation: when the mouse was over the left Part A / Part B progress rail, the rail did not scroll cleanly on shorter screens. The user had to scroll the main form area first before the left column became usable.
+
+Implemented:
+
+- `.progress-stack` now has a viewport-based max height and its own vertical scrolling.
+- Wheel/trackpad scrolling over the left rail now scrolls the rail itself first, then naturally continues the full page once the rail reaches its own bottom.
+- Mobile layout resets the rail to normal page flow with no internal scroll.
+
+### Part A Internal Audit Before Push
+
+Bugs asked for a thorough internal check before pushing to GitHub and moving focus back to finishing Part B.
+
+Audit/fix outcome:
+
+- Ran a structural Part A audit over `rcs-registration/index.html`.
+- Confirmed no duplicate IDs.
+- Confirmed visible steps run from Step 1 to Step 9 and internal `data-step` sections run from `0` to `8`.
+- Confirmed the sidebar includes the Step 4/5 split: `Message purpose` and `Message examples`.
+- Confirmed explicit labels resolve to real controls.
+- Confirmed character counters resolve.
+- Confirmed review schema fields resolve, with intentional virtual summaries for `registeredAddress`, `regions`, `consentRoute`, and upload summaries.
+- Confirmed review schema includes sender description, purpose wording, example messages, HELP sample, and STOP sample.
+- Confirmed logo/banner inputs carry exact dimension and max KB validation data.
+- Confirmed key copy checks:
+  - logo 224 x 224 px / 50 KB;
+  - banner 1440 x 448 px / 200 KB;
+  - Step 4 review-critical warning;
+  - Box 28 internal-only wording;
+  - Step 8 phone logo preview wording;
+  - US non-refundable fee warning;
+  - RBM Tester invitation wording.
+- Confirmed key auto-fill/draft connections:
+  - primary contact name to authorised representative;
+  - authorised representative name to signatory;
+  - primary contact email to authorised rep email;
+  - primary contact email to RightOnQ updates email;
+  - primary contact email to customer email;
+  - primary contact phone to customer phone;
+  - business website to customer website;
+  - primary email/phone changes refresh drafted HELP wording;
+  - old saved progress migrates after the Step 4/5 split.
+- Audit caught one stale wording issue: Box 23 still said `inbox`. It now says `Use an email address customers can contact for help or questions.`
+
+Final verification before push:
+
+- Inline script syntax check passed.
+- `git diff --check -- rcs-registration/index.html rcs-registration/RCS_TWILIO_4_HANDOVER_2026-05-12.md` passed.
+- `curl -I http://127.0.0.1:8902/rcs-registration/index.html` returned HTTP 200.
+- Fresh in-app browser preview loaded the app title, 9-step sidebar, compact top bar, and Part B progress rail.
+
 ## Immediate Next Build Recommendation
 
-Do the visible static Part B shape next:
+Review the latest uncommitted Step 4/5 split with Bugs in the browser:
 
-1. Rename Part B Step 2 from `Approve phone preview` to `Approve name and logo`.
-2. Update the storyboard Step 2 title to `Name and logo approval`.
-3. Add real B2 content instead of letting the Step 2 nav button fall back to the storyboard.
-4. Make B2 honest about lock/unlock state:
-   - locked until RightOnQ has checked Part A and sent the test invite/message;
-   - approval form available once `phone_preview_sent` exists in the future application status.
-5. Keep it static for now, but shape it like the future live workflow.
+1. Confirm Step 4 `Message purpose` feels clear enough for the high-risk sender-description wording.
+2. Confirm Step 5 `Message examples` has enough room and does not feel like a squeezed continuation of Step 4.
+3. Check whether the new Step 9 total feels acceptable now that Part A has one extra screen.
+4. If Bugs approves, create another narrow local Level 2 checkpoint commit for:
+   - `rcs-registration/index.html`
+   - `rcs-registration/RCS_TWILIO_4_HANDOVER_2026-05-12.md`
 
 Only after that should the app move into deeper plumbing for:
 
@@ -416,10 +621,10 @@ Only after that should the app move into deeper plumbing for:
 - No push of app/layout work.
 - No PR created or touched.
 - No backend/status implementation.
-- No real B2 approval form implementation yet.
+- B2 has a static approval form shape, but it is not yet wired to storage, email/alerting, or application status.
 - No client-specific private link implementation.
 - No update to Google Apps Script payload/schema for B2 yet.
-- No commit of this Twilio-4 handover file yet unless a later step does so.
+- The latest Step 4/5 split and this handover update are uncommitted after `fced766`.
 
 ## Reminder For RCS-Twilio-5
 
