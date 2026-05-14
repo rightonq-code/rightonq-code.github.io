@@ -2,12 +2,60 @@ const SPREADSHEET_ID = "1_C85rMaDWS0-VnXbtYQzRBS1trgN8kFf4hAnHfT3R-0";
 const SHEET_NAME = "Part A submissions";
 const NOTIFY_EMAIL = "adam@rightonq.co.uk";
 
-function doGet() {
+function doGet(event) {
+  const applicationId = event && event.parameter && event.parameter.applicationId;
+  if (applicationId) return jsonResponse(getApplicationStatus(applicationId));
+
   return jsonResponse({
     ok: true,
     service: "RightOnQ RCS Part A Intake",
     sheetName: SHEET_NAME
   });
+}
+
+function getApplicationStatus(applicationId) {
+  const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAME);
+  if (!sheet) throw new Error("Sheet tab not found: " + SHEET_NAME);
+
+  const values = sheet.getDataRange().getValues();
+  if (values.length < 2) {
+    return {
+      ok: true,
+      found: false,
+      applicationId: applicationId,
+      registrationStatus: "draft",
+      partAStatus: "draft"
+    };
+  }
+
+  const headers = values[0].map(function(header) { return String(header); });
+  const applicationIdColumn = headers.indexOf("Application ID");
+  if (applicationIdColumn === -1) throw new Error("Application ID column not found");
+
+  for (let rowIndex = values.length - 1; rowIndex >= 1; rowIndex -= 1) {
+    const row = values[rowIndex];
+    if (String(row[applicationIdColumn]) !== String(applicationId)) continue;
+
+    return {
+      ok: true,
+      found: true,
+      applicationId: applicationId,
+      registrationStatus: readColumn(row, headers, "Registration status") || "part_a_submitted",
+      partAStatus: readColumn(row, headers, "Part A status") || "part_a_submitted",
+      reviewStatus: readColumn(row, headers, "Review status"),
+      partBVideoStatus: readColumn(row, headers, "Part B video status"),
+      notes: readColumn(row, headers, "Notes"),
+      lastUpdated: serialiseDate(readColumn(row, headers, "Last updated"))
+    };
+  }
+
+  return {
+    ok: true,
+    found: false,
+    applicationId: applicationId,
+    registrationStatus: "draft",
+    partAStatus: "draft"
+  };
 }
 
 function doPost(event) {
@@ -21,12 +69,18 @@ function doPost(event) {
 
     const now = new Date();
     const submissionId = payload.submissionId || buildSubmissionId(payload, now);
+    const applicationId = payload.applicationId || buildApplicationId(payload, now);
+    const registrationStatus = payload.registrationStatus || "part_a_submitted";
+    const partAStatus = payload.partAStatus || "part_a_submitted";
     const countries = asList(payload.regions);
     const usSelected = countries.indexOf("United States") !== -1 ? "Yes" : "No";
 
     sheet.appendRow([
       now,
+      safeCell(applicationId),
       submissionId,
+      safeCell(registrationStatus),
+      safeCell(partAStatus),
       "New",
       safeCell(firstValue(payload.displayName, payload.tradingName, payload.legalBusinessName)),
       safeCell(payload.legalBusinessName),
@@ -63,7 +117,9 @@ function doPost(event) {
 
     return jsonResponse({
       ok: true,
+      applicationId: applicationId,
       submissionId: submissionId,
+      registrationStatus: registrationStatus,
       receivedAt: now.toISOString()
     });
   } catch (error) {
@@ -119,6 +175,17 @@ function buildSubmissionId(payload, date) {
   return "RCS-" + stamp + "-" + name;
 }
 
+function buildApplicationId(payload, date) {
+  const stamp = Utilities.formatDate(date, "Europe/London", "yyyyMMddHHmmss");
+  const seed = firstValue(payload.displayName, payload.tradingName, payload.legalBusinessName, "CLIENT")
+    .toString()
+    .toUpperCase()
+    .replace(/[^A-Z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")
+    .slice(0, 18) || "CLIENT";
+  return "ROQ-RCS-" + stamp + "-" + seed;
+}
+
 function asList(value) {
   if (Array.isArray(value)) return value.filter(Boolean);
   if (!value) return [];
@@ -130,6 +197,18 @@ function firstValue() {
     if (arguments[i]) return arguments[i];
   }
   return "";
+}
+
+function readColumn(row, headers, name) {
+  const index = headers.indexOf(name);
+  if (index === -1) return "";
+  return row[index] || "";
+}
+
+function serialiseDate(value) {
+  if (!value) return "";
+  if (Object.prototype.toString.call(value) === "[object Date]") return value.toISOString();
+  return String(value);
 }
 
 function safeCell(value) {

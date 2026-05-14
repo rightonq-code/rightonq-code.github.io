@@ -311,9 +311,22 @@
       border-color: rgba(142, 197, 255, 0.32);
     }
 
+    .future-step.available {
+      border-color: rgba(54, 191, 126, 0.22);
+    }
+
+    .future-step.waiting {
+      border-style: dashed;
+    }
+
     .future-step.active .future-step-index {
       background: rgba(142, 197, 255, 0.94);
       color: #071324;
+    }
+
+    .future-step.available .future-step-index {
+      background: rgba(54, 191, 126, 0.92);
+      color: #06150f;
     }
 
     .future-step-index {
@@ -333,6 +346,23 @@
       overflow-wrap: anywhere;
       font-size: 0.9rem;
       font-weight: 700;
+    }
+
+    .future-step-state {
+      display: block;
+      margin-top: 2px;
+      color: rgba(186, 202, 221, 0.68);
+      font-size: 0.72rem;
+      font-weight: 800;
+      line-height: 1.2;
+    }
+
+    .future-step.available .future-step-state {
+      color: #9af0c7;
+    }
+
+    .future-step.active .future-step-state {
+      color: rgba(236, 247, 255, 0.84);
     }
 
     .form-panel {
@@ -396,6 +426,24 @@
       font-size: 0.82rem;
       font-weight: 800;
       white-space: nowrap;
+    }
+
+    .part-b-status-banner {
+      margin-bottom: 18px;
+      border: 1px solid #cfe0f4;
+      border-radius: 8px;
+      background: #eef6ff;
+      color: #18416f;
+      padding: 12px 14px;
+      font-size: 0.92rem;
+      font-weight: 800;
+      line-height: 1.4;
+    }
+
+    .part-b-status-banner.available {
+      border-color: #b8dfc8;
+      background: #e8f8f0;
+      color: #116243;
     }
 
     .part-b-board {
@@ -2165,32 +2213,44 @@
         <section class="progress-panel locked" aria-label="Part B progress">
           <div class="progress-heading">
             <span>Part B progress</span>
-            <span>Profile and video stage after Part A</span>
+            <span id="partBStatusText">Waiting for Part A</span>
           </div>
           <div class="progress-meter locked" aria-hidden="true"><span></span></div>
           <ol class="future-step-list" id="partBStepList">
             <li>
               <button class="future-step active" type="button" data-part-b-preview="prepare" aria-pressed="true">
                 <span class="future-step-index">1</span>
-                <span class="future-step-name">Part B storyboard</span>
+                <span>
+                  <span class="future-step-name">Part B storyboard</span>
+                  <span class="future-step-state">Available now</span>
+                </span>
               </button>
             </li>
             <li>
               <button class="future-step" type="button" data-part-b-preview="profile" aria-pressed="false">
                 <span class="future-step-index">2</span>
-                <span class="future-step-name">Approve name and logo</span>
+                <span>
+                  <span class="future-step-name">Approve name and logo</span>
+                  <span class="future-step-state">Waiting for test message</span>
+                </span>
               </button>
             </li>
             <li>
               <button class="future-step" type="button" data-part-b-preview="send" aria-pressed="false">
                 <span class="future-step-index">3</span>
-                <span class="future-step-name">Review and approve video</span>
+                <span>
+                  <span class="future-step-name">Review and approve video</span>
+                  <span class="future-step-state">Waiting for video</span>
+                </span>
               </button>
             </li>
             <li>
               <button class="future-step" type="button" data-part-b-preview="submit" aria-pressed="false">
                 <span class="future-step-index">4</span>
-                <span class="future-step-name">Registration submitted</span>
+                <span>
+                  <span class="future-step-name">Registration submitted</span>
+                  <span class="future-step-state">Waiting for approval</span>
+                </span>
               </button>
             </li>
           </ol>
@@ -2893,6 +2953,7 @@
     const progressText = document.getElementById("progressText");
     const progressBar = document.getElementById("progressBar");
     const partBStepList = document.getElementById("partBStepList");
+    const partBStatusText = document.getElementById("partBStatusText");
     const partBWorkspace = document.getElementById("partBWorkspace");
     const backButton = document.getElementById("backButton");
     const nextButton = document.getElementById("nextButton");
@@ -2954,8 +3015,66 @@
     let currentStep = 0;
     let restoringProgress = false;
     const autosaveKey = "rightonq-rcs-registration-progress-v1";
+    const applicationIdKey = "rightonq-rcs-application-id-v1";
     const progressSaveEnabled = true;
     const partASubmissionEndpoint = "https://script.google.com/macros/s/AKfycbyI81Ir2xvHLar0R0iFBBWyXa1Nj93T4_8Ni5_eX3XEYDA-AKQbVYbPHnTROLm8e4a6/exec";
+    let applicationId = loadOrCreateApplicationId();
+    let applicationStatus = {
+      registrationStatus: "draft",
+      partAStatus: "draft",
+      reviewStatus: "",
+      partBVideoStatus: ""
+    };
+    const statusOrder = [
+      "draft",
+      "part_a_submitted",
+      "part_a_accepted",
+      "phone_preview_sent",
+      "name_logo_approved",
+      "video_ready_for_review",
+      "video_approved",
+      "registration_submitted"
+    ];
+    const statusLabels = {
+      draft: "Part A not submitted",
+      part_a_submitted: "Part A received",
+      part_a_accepted: "Part A accepted",
+      phone_preview_sent: "Phone preview sent",
+      name_logo_approved: "Name and logo approved",
+      video_ready_for_review: "Video ready",
+      video_approved: "Video approved",
+      registration_submitted: "Registration submitted"
+    };
+    const partBStatusRules = {
+      prepare: {
+        availableFrom: "draft",
+        available: "Available now",
+        waiting: "Available now",
+        bannerAvailable: "This overview is available now. It shows the full Part B journey before each live action is unlocked.",
+        bannerWaiting: "This overview is available now. It shows the full Part B journey before each live action is unlocked."
+      },
+      profile: {
+        availableFrom: "phone_preview_sent",
+        available: "Available now",
+        waiting: "Waiting for test message",
+        bannerAvailable: "Available now: RightOnQ has sent the RBM Tester invitation and branded test message.",
+        bannerWaiting: "Visible for planning. This approval step becomes live after RightOnQ has sent your RBM Tester invitation and branded test message."
+      },
+      send: {
+        availableFrom: "video_ready_for_review",
+        available: "Available now",
+        waiting: "Waiting for video",
+        bannerAvailable: "Available now: the review video is ready for you to check.",
+        bannerWaiting: "Visible for planning. This review step becomes live after RightOnQ prepares and sends the application video."
+      },
+      submit: {
+        availableFrom: "registration_submitted",
+        available: "Submitted",
+        waiting: "Waiting for approval",
+        bannerAvailable: "The registration pack has been submitted for provider and carrier review.",
+        bannerWaiting: "Visible for planning. This stage updates after you approve the review video and RightOnQ submits the registration pack."
+      }
+    };
     const partBPreviewContent = {
       prepare: {
         title: "Part B storyboard",
@@ -3169,7 +3288,9 @@
       updateSelectPlaceholders();
       updateEuropeBundleState();
       updateUsRegistrationFields();
+      updatePartBStatusDisplay();
       if (!restoredProgress) showStep(0);
+      refreshApplicationStatus();
     }
 
     function showPartBWorkspace(key) {
@@ -3191,6 +3312,7 @@
             <p>${content.workspaceIntro}</p>
           </div>
         </div>
+        ${renderPartBStatusBanner(key)}
         ${mainContent}
         ${content.hideSupportCards ? "" : renderPartBSupportGrid(content, cards, checklist)}
       `;
@@ -3216,6 +3338,65 @@
       }
       if (content.submittedLayout) setupSubmittedCarousel();
       document.querySelector(".workflow").scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function statusHasReached(status, requiredStatus) {
+      const currentIndex = statusOrder.indexOf(status || "draft");
+      const requiredIndex = statusOrder.indexOf(requiredStatus || "draft");
+      if (requiredIndex === -1) return true;
+      if (currentIndex === -1) return false;
+      return currentIndex >= requiredIndex;
+    }
+
+    function getPartBStageState(key) {
+      const rule = partBStatusRules[key] || partBStatusRules.prepare;
+      const status = applicationStatus.registrationStatus || "draft";
+      const available = statusHasReached(status, rule.availableFrom);
+      return {
+        available,
+        label: available ? rule.available : rule.waiting,
+        banner: available ? rule.bannerAvailable : rule.bannerWaiting
+      };
+    }
+
+    function renderPartBStatusBanner(key) {
+      const state = getPartBStageState(key);
+      return `<div class="part-b-status-banner ${state.available ? "available" : "waiting"}">${state.banner}</div>`;
+    }
+
+    function updatePartBStatusDisplay() {
+      const status = applicationStatus.registrationStatus || "draft";
+      partBStatusText.textContent = statusLabels[status] || "Status pending";
+      document.querySelectorAll("[data-part-b-preview]").forEach(button => {
+        const state = getPartBStageState(button.dataset.partBPreview);
+        button.classList.toggle("available", state.available);
+        button.classList.toggle("waiting", !state.available);
+        const label = button.querySelector(".future-step-state");
+        if (label) label.textContent = state.label;
+      });
+    }
+
+    function setApplicationStatus(statusUpdate = {}) {
+      applicationStatus = {
+        ...applicationStatus,
+        ...statusUpdate,
+        registrationStatus: statusUpdate.registrationStatus || applicationStatus.registrationStatus || "draft",
+        partAStatus: statusUpdate.partAStatus || applicationStatus.partAStatus || "draft"
+      };
+      updatePartBStatusDisplay();
+    }
+
+    async function refreshApplicationStatus() {
+      if (!partASubmissionEndpoint || !applicationId) return;
+      try {
+        const url = `${partASubmissionEndpoint}?applicationId=${encodeURIComponent(applicationId)}`;
+        const response = await fetch(url);
+        if (!response.ok) return;
+        const result = await response.json().catch(() => ({}));
+        if (result.ok && result.found) setApplicationStatus(result);
+      } catch (error) {
+        // Status refresh is helpful, not critical. The form still works offline.
+      }
     }
 
     function setupSubmittedCarousel() {
@@ -5117,6 +5298,8 @@
         }
       }
 
+      data.applicationId = applicationId;
+      data.registrationStatus = "draft";
       data.regions = [].concat(data.regions || []);
       data.consentRoute = getSelectedConsentRoutes();
       data.iphonePreviewNumber = cleanPreviewNumber(data.iphonePreviewNumber);
@@ -5206,8 +5389,20 @@
 
     function restoreProgressData(data) {
       restoringProgress = true;
+      if (data.applicationId) {
+        applicationId = data.applicationId;
+        try {
+          localStorage.setItem(applicationIdKey, applicationId);
+        } catch (error) {
+          // Keep the restored id in memory if storage is unavailable.
+        }
+      }
+      setApplicationStatus({
+        registrationStatus: data.registrationStatus || applicationStatus.registrationStatus,
+        partAStatus: data.partAStatus || applicationStatus.partAStatus
+      });
       Object.entries(data).forEach(([key, value]) => {
-        if (["logoUpload", "bannerUpload", "regions", "consentRoute", draftStateKey, "generatedAt", "templateVersion", "registeredAddress", "currentStep", "progressStepCount", "progressSavedAt"].includes(key)) return;
+        if (["applicationId", "registrationStatus", "partAStatus", "logoUpload", "bannerUpload", "regions", "consentRoute", draftStateKey, "generatedAt", "templateVersion", "registeredAddress", "currentStep", "progressStepCount", "progressSavedAt"].includes(key)) return;
         const field = form.elements[key];
         if (!field || typeof value === "object") return;
 
@@ -5316,9 +5511,18 @@
     async function submitPartA() {
       if (!validateAllSteps()) return;
       const data = collectData();
+      data.applicationId = applicationId;
+      data.registrationStatus = "part_a_submitted";
+      data.partAStatus = "part_a_submitted";
       data.submissionId = generateSubmissionId(data);
       data.submittedAt = new Date().toISOString();
       const sent = await sendPartAToRightOnQ(data);
+      if (sent) {
+        setApplicationStatus({
+          registrationStatus: "part_a_submitted",
+          partAStatus: "part_a_submitted"
+        });
+      }
       downloadPartAFile(data);
       showCompletionMessage(sent, data.submissionId);
     }
@@ -5366,6 +5570,46 @@
       return `RCS-${stamp}-${time}-${brand || "CLIENT"}`;
     }
 
+    function loadOrCreateApplicationId() {
+      const linkedId = getLinkedApplicationId();
+      if (linkedId) {
+        try {
+          localStorage.setItem(applicationIdKey, linkedId);
+        } catch (error) {
+          // Keep the linked id in memory if this browser blocks localStorage.
+        }
+        return linkedId;
+      }
+
+      try {
+        const existing = localStorage.getItem(applicationIdKey);
+        if (existing) return existing;
+      } catch (error) {
+        // Continue with an in-memory id if this browser blocks localStorage.
+      }
+
+      const created = generateApplicationId();
+      try {
+        localStorage.setItem(applicationIdKey, created);
+      } catch (error) {
+        // Nothing to do; the id still travels in this submission payload.
+      }
+      return created;
+    }
+
+    function getLinkedApplicationId() {
+      const params = new URLSearchParams(window.location.search);
+      const value = params.get("applicationId") || params.get("application_id");
+      if (!value) return "";
+      return value.replace(/[^A-Za-z0-9_-]/g, "").slice(0, 80);
+    }
+
+    function generateApplicationId() {
+      const stamp = new Date().toISOString().replace(/[-:TZ.]/g, "").slice(0, 14);
+      const random = Math.random().toString(36).slice(2, 8).toUpperCase();
+      return `ROQ-RCS-${stamp}-${random}`;
+    }
+
     function downloadPartAFile(data = collectData()) {
       const filenameBase = slugify(data.displayName || data.legalBusinessName || "rcs-sender");
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
@@ -5401,6 +5645,18 @@
       document.getElementById("brandColourPicker").value = "#3f8cff";
       document.getElementById("primaryContactPhone").value = "+44 ";
       document.getElementById("customerPhone").value = "+44 ";
+      applicationId = generateApplicationId();
+      try {
+        localStorage.setItem(applicationIdKey, applicationId);
+      } catch (error) {
+        // Keep the reset id in memory if storage is unavailable.
+      }
+      setApplicationStatus({
+        registrationStatus: "draft",
+        partAStatus: "draft",
+        reviewStatus: "",
+        partBVideoStatus: ""
+      });
       document.getElementById("signoffDate").valueAsDate = new Date();
       document.getElementById("logoPreview").textContent = "Logo";
       document.getElementById("bannerPreview").innerHTML = "";

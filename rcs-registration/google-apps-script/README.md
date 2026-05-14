@@ -44,7 +44,9 @@ Deployment:
 
 - Execute as: `adam@rightonq.co.uk`
 - Access: `Anyone`
-- Current published version after CLI redeploy: `3`
+- Current published version after CLI redeploy: `5`
+- Version `4` added Application ID, registration status, and Part A status columns to the intake row.
+- Version `5` adds Application ID status lookup via `GET ?applicationId=...`.
 
 ## Behaviour
 
@@ -53,6 +55,8 @@ The static form posts the Part A JSON payload to the Web app URL.
 The script:
 
 - appends one new row per submission,
+- stores the application ID and initial registration/Part A statuses,
+- returns the latest status for a supplied Application ID,
 - sets review status to `New`,
 - sets US fee status to `Not yet agreed` if United States is selected,
 - stores the raw JSON payload in the `Part A JSON` column,

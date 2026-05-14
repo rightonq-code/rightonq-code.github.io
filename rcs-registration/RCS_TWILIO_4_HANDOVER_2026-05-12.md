@@ -44,6 +44,12 @@ This file continues the chain:
 
 4. `/Users/macpro/rightonq-code.github.io/rcs-registration/RCS_TWILIO_4_HANDOVER_2026-05-12.md`
 
+Also read and update the main product build plan:
+
+- `/Users/macpro/rightonq-code.github.io/rcs-registration/RCS_ONBOARDING_MAIN_BUILD_PLAN.md`
+
+The handover diary is for agent continuity and local repo state. The main build plan is the durable product/workflow source of truth across Twilio-4, Twilio-5, Twilio-6, and later agents.
+
 Twilio-2 and Twilio-3 handover copies are currently untracked in the dirty checkout, but Twilio-3 says they were safely preserved on a separate docs/handover branch and merged via PR #2. Leave them alone unless Bugs explicitly asks.
 
 ## Starting State For Twilio-4
@@ -336,6 +342,233 @@ Useful future status names:
 - `registration_submitted`
 
 For the pilot, manual status unlock by RightOnQ is preferred over trying to auto-detect whether a phone received the test message.
+
+## Wider Client Onboarding / Billing Direction
+
+After the audited Part A / static Part B checkpoint was pushed, Bugs clarified the bigger product shape: the RCS registration form is only one part of a wider RightOnQ client onboarding journey.
+
+The customer is not just "filling in an RCS form". They are becoming a RightOnQ client. Before the registration work proceeds too far, the client should understand and accept:
+
+- RightOnQ is helping them register and operate RCS.
+- Once approved/live, RightOnQ's software/service layer remains part of the process.
+- They must choose/accept the service level, initially discussed as `Local Time Only` at `£25/month`.
+- Pay-as-you-go messaging/Twilio usage fees are additional.
+- RightOnQ should not carry open-ended Twilio credit risk for client usage.
+
+### Billing / Credit-Risk Recommendation
+
+Research direction from Twilio-4 plus payment-focused and Revolut-focused sub-agents:
+
+- Bugs prefers to use `Revolut` as much as practical, even if there is a small trade-off versus Stripe, because keeping banking/payment movement under the same operational hood has advantages.
+- Revolut Merchant appears technically capable enough to support the planned first commercial flow if RightOnQ owns the service ledger and risk controls.
+- Treat `Stripe Billing` as the benchmark/fallback, not the automatic first choice.
+- Use Revolut for:
+  - initial checkout/payment;
+  - saved payment method where available;
+  - first month plus prepaid usage credit collection;
+  - possible `£25/month` subscription after sandbox testing;
+  - merchant-initiated top-up orders/charges;
+  - webhooks/reporting for reconciliation.
+- Do not rely on Revolut alone as a full SaaS billing brain.
+- RightOnQ should own:
+  - customer/application ledger;
+  - prepaid credit balance;
+  - auto top-up threshold;
+  - service pause/suspension rules;
+  - payment failure handling;
+  - customer-facing billing status inside the onboarding system.
+- Consider `GoCardless` later for larger UK B2B customers who prefer Direct Debit.
+- Twilio subaccounts are still useful, but they do not remove RightOnQ's billing exposure because Twilio bills subaccount usage to the parent account balance.
+
+Important Twilio billing point:
+
+- Use one Twilio subaccount per customer/tenant for separation, reporting, blast-radius control, and future usage reconciliation.
+- Do not rely on subaccounts to make the client financially responsible to Twilio.
+- Pull/query Twilio usage records per subaccount into RightOnQ's own ledger.
+- Bill/top up the customer through RightOnQ's billing system, with Revolut-first now preferred for the pilot if sandbox testing confirms the flow.
+
+Recommended early risk rule:
+
+- No client should get live Twilio-backed usage with unlimited postpaid exposure.
+- Require an active billing setup before serious registration/provider submission.
+- Require first month and/or minimum prepaid usage credit before live Twilio usage.
+- Example starting model:
+  - `£25/month` base subscription for Local Time Only;
+  - minimum usage credit/deposit, possibly `£50`;
+  - auto top-up before paid balance drops too low;
+  - pause/suspend if payment or top-up fails;
+  - manual RightOnQ override only.
+
+### Customer-Facing Onboarding Shape
+
+Likely customer journey:
+
+1. Lead agrees in principle to use RightOnQ RCS.
+2. Customer chooses/confirms a package, initially `Local Time Only`.
+3. Customer accepts service/payment terms.
+4. Customer sets up billing via Revolut checkout/hosted payment.
+5. Customer pays first month and/or minimum usage credit/deposit, likely `£25 + £50 = £75` at onboarding.
+6. Customer receives a private RCS application link.
+7. Customer completes Part A.
+8. RightOnQ checks and processes Part A.
+9. Part B unlocks in stages:
+   - phone preview/name-logo approval;
+   - review video approval;
+   - final submission/status.
+10. Once approved/live, RightOnQ monitors usage, billing, support, and Twilio/provider state.
+
+### RightOnQ Internal Operating Shape
+
+Likely internal journey:
+
+1. Lead qualified.
+2. Commercial offer agreed.
+3. Revolut customer/payment record created, or checkout session/order prepared.
+4. Payment method saved.
+5. Subscription/base monthly entitlement active, or monthly charge schedule recorded.
+6. Minimum credit/deposit paid.
+7. Application record created with stable `application_id`.
+8. Part A submitted.
+9. Internal review complete.
+10. Twilio subaccount created or prepared.
+11. Phone preview/test invite sent.
+12. Client approves name/logo or requests fix.
+13. Video prepared and sent for client review.
+14. Client approves video or requests fix.
+15. Registration submitted.
+16. Provider/carrier review tracked.
+17. Approved/live/paused state maintained.
+18. Usage monitored and billed/reconciled.
+
+### Source Of Truth Direction
+
+For the pilot, a structured Google Sheet is still acceptable as the source of truth if the schema is disciplined.
+
+Likely tabs:
+
+- `Applications`
+- `Billing`
+- `Part A`
+- `Part B approvals`
+- `Twilio setup`
+- `Status log`
+
+Minimum cross-system identifiers:
+
+- `application_id`
+- `client_id`
+- `revolut_customer_id`
+- `revolut_subscription_id`
+- `revolut_payment_method_id`
+- `revolut_order_id`
+- `twilio_subaccount_sid`
+- `registration_status`
+- `billing_status`
+- `usage_credit_balance`
+- `last_payment_status`
+- `provider_submission_reference`
+
+### Next Build Direction
+
+Do not treat Part B as merely more static design. The next durable build should create the thin application/status layer:
+
+1. Generate or assign a stable `application_id`.
+2. Store/update one application record rather than only appending isolated rows.
+3. Add status fields for Part A, Part B, billing, Twilio setup, and provider submission.
+4. Save Part A under that application ID.
+5. Make Part B read the application status and show locked/unlocked stages.
+6. Save B2/B3 approval/issue responses into the same source of truth.
+7. Add billing/commercial status fields before live Twilio usage is possible.
+
+This turns the current RCS form into one screen inside a controlled client onboarding system.
+
+RCS-Twilio-4 also created a separate main build document for this wider product plan:
+
+- `/Users/macpro/rightonq-code.github.io/rcs-registration/RCS_ONBOARDING_MAIN_BUILD_PLAN.md`
+
+Future agents should update that file when product decisions, schema, payment assumptions, statuses, or implementation slices change.
+
+### Main Build Plan Slice 2 Started
+
+After Bugs approved starting the new main build document, RCS-Twilio-4 began Slice 2: `Source Of Truth Schema`.
+
+Added to `RCS_ONBOARDING_MAIN_BUILD_PLAN.md`:
+
+- Draft 1 schema for `Applications`.
+- Draft 1 schema for `Billing`.
+- Draft 1 schema for `Part A`.
+- Draft 1 schema for `Part B approvals`.
+- Draft 1 schema for `Twilio setup`.
+- Draft 1 schema for `Communications`.
+- Draft 1 schema for `Status log`.
+- Recommendation for v1:
+  - keep `Part A` append-only for audit/recovery;
+  - keep `Applications` as the current control row;
+  - use `Status Log` for every important state transition.
+- Added `Slice 6A - Communications Cadence` so customer emails/notifications are treated as part of the onboarding system, not an afterthought.
+
+### Slice 3 Started - Application ID And Status In Part A
+
+Bugs approved a temporary v1 approach:
+
+- Generate `application_id` in the browser form for now.
+- Persist it in autosave/progress/download/submission payloads.
+- Include `registrationStatus` and `partAStatus` as `part_a_submitted` when Part A is submitted.
+- Update Apps Script to store/return `applicationId`, `registrationStatus`, and `partAStatus`.
+- Live sheet headers must be updated before deploying/using the changed Apps Script because these new fields are inserted near the start of the append row.
+- RCS-Twilio-4 updated the live Google Sheet header row `Part A submissions!A1:AI1` to match the new append order:
+  - `Received at`
+  - `Application ID`
+  - `Submission ID`
+  - `Registration status`
+  - `Part A status`
+  - then the existing review/client/business columns.
+- RCS-Twilio-4 reauthorised `clasp`, pushed `Code.gs`, created Apps Script version `4`, and redeployed the existing live web app URL in place:
+  - deployment ID `AKfycbyI81Ir2xvHLar0R0iFBBWyXa1Nj93T4_8Ni5_eX3XEYDA-AKQbVYbPHnTROLm8e4a6`;
+  - current version `4`;
+  - live URL unchanged.
+- Test POSTs confirmed the live Sheet receives the new fields correctly. There are two obvious test rows in the live sheet with `Application ID` = `ROQ-RCS-TEST-SLICE3-20260514`; leave them unless Bugs approves cleanup.
+
+Important launch caveat:
+
+- This browser-generated ID is a temporary implementation step only.
+- Before live launch, `application_id` should come from a RightOnQ-created private link or server-side application record.
+
+Files touched:
+
+- `rcs-registration/index.html`
+- `rcs-registration/google-apps-script/Code.gs`
+- `rcs-registration/RCS_ONBOARDING_MAIN_BUILD_PLAN.md`
+- `rcs-registration/RCS_TWILIO_4_HANDOVER_2026-05-12.md`
+
+### Slice 4 Started - Internal Status Control
+
+RCS-Twilio-4 then added the first thin status-control layer.
+
+Implemented:
+
+- Apps Script now supports `GET ?applicationId=...`.
+- It searches the live `Part A submissions` sheet by `Application ID`, using the latest matching row.
+- It returns:
+  - `registrationStatus`;
+  - `partAStatus`;
+  - `reviewStatus`;
+  - `partBVideoStatus`;
+  - `notes`;
+  - `lastUpdated`.
+- Existing live web app deployment was redeployed in place to version `5`.
+- Static app now accepts `?applicationId=...` or `?application_id=...`, stores it locally, and refreshes the status.
+- Part B progress rail now shows the current status and stage labels:
+  - B1 available now;
+  - B2 waiting until `phone_preview_sent`;
+  - B3 waiting until `video_ready_for_review`;
+  - B4 waiting until `registration_submitted`.
+- The B2/B3/B4 planning screens are still viewable, but their banners explain whether the stage is live or still waiting.
+
+Test evidence:
+
+- `GET` status lookup for `ROQ-RCS-TEST-SLICE3-20260514` returned `part_a_submitted`.
+- Browser preview at `http://localhost:8902/rcs-registration/index.html?applicationId=ROQ-RCS-TEST-SLICE3-20260514` showed `Part A received`, kept B2 as `Waiting for test message`, and had no console errors.
 
 ## B2 / Step 2 Direction
 
@@ -631,3 +864,113 @@ Only after that should the app move into deeper plumbing for:
 Be warm, but do not run ahead. Bugs is actively steering wording and product shape. He likes quick, careful passes, but wants to approve the exact direction before edits.
 
 The most important current product insight is that this is an application case flow, not a generic static form. Part B should be shown as a future staged process, but real access to B2/B3 must eventually depend on that client's application status.
+
+## Latest State - Thursday 14 May 2026
+
+This section supersedes the older "Immediate Next Build Recommendation" and "Things Not Done Yet" blocks above where they conflict.
+
+### Git / Repo State
+
+- App/layout checkpoint `72a737c` was later pushed safely via a clean temp-worktree merge.
+- Remote branch `origin/rcs-registration-part-a-b-20260507` is at merge commit `d84a3d7`.
+- Main local checkout is still based at `72a737c` and reports `[behind 5]`.
+- Do not broadly stage the worktree. There are unrelated modified root website files:
+  - `index.html`
+  - `privacy.html`
+  - `terms.html`
+- There are also unrelated untracked future-amendment notes in the repo root.
+- RCS-Twilio-4 intends the next checkpoint to include only the scoped RCS files:
+  - `rcs-registration/index.html`
+  - `rcs-registration/google-apps-script/Code.gs`
+  - `rcs-registration/google-apps-script/README.md`
+  - `rcs-registration/RCS_TWILIO_4_HANDOVER_2026-05-12.md`
+  - `rcs-registration/RCS_ONBOARDING_MAIN_BUILD_PLAN.md`
+
+### Main Build Plan Created
+
+RCS-Twilio-4 created:
+
+- `/Users/macpro/rightonq-code.github.io/rcs-registration/RCS_ONBOARDING_MAIN_BUILD_PLAN.md`
+
+This is now the durable product/workflow source of truth across RCS onboarding agents. Every successor should read and update it alongside their own handover diary.
+
+It covers:
+
+- customer-facing onboarding;
+- internal RightOnQ workflow;
+- Revolut-first billing direction;
+- source-of-truth tabs and schema;
+- communications cadence;
+- implementation slices;
+- outreach-to-onboarding CRM handoff.
+
+### Outreach / CRM Interlock
+
+Codex-Claw-2 read the main build plan and added an `Outreach To Onboarding Handoff Contract`.
+
+RCS-Twilio-4 reviewed and sharpened it:
+
+- `READY_FOR_ONBOARDING` is the formal CRM deal/status/tag trigger.
+- It means the lead is ready to enter the controlled onboarding path.
+- It does not mean commercial acceptance, billing setup, or provider approval is complete.
+- Those remain separate onboarding statuses before live Twilio-backed service or chargeable usage begins.
+- The `Applications` schema now includes CRM handoff fields:
+  - `crm_company_id`
+  - `crm_deal_id`
+  - `crm_source_record_url`
+  - `campaign_code`
+  - `message_code`
+  - `qualified_use_case`
+  - `package_interest`
+  - `handoff_date`
+  - `sales_context`
+
+### Slice 3 Completed - Application ID And Initial Status
+
+Implemented and tested:
+
+- Browser form now has an `applicationId`.
+- Autosave/progress/download/submission payloads include the ID.
+- Part A submit sends:
+  - `applicationId`
+  - `registrationStatus = part_a_submitted`
+  - `partAStatus = part_a_submitted`
+- Apps Script stores these fields in the live Sheet.
+- Live Google Sheet header row was updated to add the new leading columns.
+- Existing live Apps Script deployment was updated in place to version `4`.
+- Two obvious test rows exist in the live Sheet with `ROQ-RCS-TEST-SLICE3-20260514`; leave them unless Bugs approves cleanup.
+
+### Slice 4 Completed - Thin Internal Status Control
+
+Implemented and tested:
+
+- Apps Script now supports `GET ?applicationId=...`.
+- It returns latest status fields from the live Sheet for that application ID.
+- Existing live Apps Script deployment was updated in place to version `5`.
+- Static app accepts `?applicationId=...` or `?application_id=...`.
+- Part B progress rail now displays the current registration status and marks stages as waiting/available.
+- B1 is available now.
+- B2 becomes available from `phone_preview_sent`.
+- B3 becomes available from `video_ready_for_review`.
+- B4 becomes available from `registration_submitted`.
+- B2/B3/B4 are still viewable as planning screens, but banners explain whether the stage is live or waiting.
+
+Verification:
+
+- Inline app script syntax passed.
+- Apps Script syntax passed.
+- `git diff --check` passed for scoped RCS files.
+- Live `GET` for `ROQ-RCS-TEST-SLICE3-20260514` returned `part_a_submitted`.
+- Browser preview at `http://localhost:8902/rcs-registration/index.html?applicationId=ROQ-RCS-TEST-SLICE3-20260514` showed `Part A received`, kept B2 as `Waiting for test message`, and had no console errors.
+
+### Next Recommended Step
+
+Create a scoped local Level 2 checkpoint commit for the RCS files listed above, without touching unrelated root website files.
+
+After that, the next build slice should be one of:
+
+1. Build the real `Applications` control row and private-link/token creation path.
+2. Wire B2 name/logo approval and issue responses into storage.
+3. Build the manual internal status update process/operator sheet view.
+
+Recommended order: start with the real `Applications` control row/private-link path, because it turns the current temporary browser-generated application ID into the launch-safe version.
