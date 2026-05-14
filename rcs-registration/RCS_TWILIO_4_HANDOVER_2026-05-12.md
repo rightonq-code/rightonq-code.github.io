@@ -1345,3 +1345,70 @@ Next recommended step:
 2. Push that commit when Bugs approves.
 3. Review/polish the first customer communication templates before any real customer sending.
 4. Decide whether the next build is the internal send/review workflow or operator PIN/wrapper activation.
+
+### New Product Discovery - Twilio Trust Hub Secondary Compliance Profiles
+
+After the communications queue commit was pushed, Bugs obtained a live Twilio Console/agent walkthrough of the end-client KYC path.
+
+This changes the product map in an important way:
+
+- RCS sender registration is not the only approval track.
+- For RightOnQ-managed clients, Twilio Trust Hub Secondary Compliance Profiles / Secondary Customer Profiles are a separate KYC lane.
+- Twilio runtime subaccounts and Trust Hub compliance profiles are related but separate:
+  - subaccounts are runtime/account containers;
+  - Trust Hub holds compliance/KYC records;
+  - channel resources such as phone numbers are linked by assignment resources.
+- The onboarding model should therefore have at least three parallel lanes:
+  - commercial/payment acceptance;
+  - Twilio Trust Hub / client KYC;
+  - RCS sender registration.
+
+Current design assumption:
+
+- Build the intake model to support two authorised representatives.
+- Bugs' assisting agent reported that the Secondary Business policy requirements include `authorized_representative_1` and `authorized_representative_2`.
+- Public Twilio docs for secondary compliance profiles also say contact details for two authorised representatives are required.
+- Each representative should capture first name, last name, business/work email, phone number, business title, and job position.
+
+Important privacy/security guardrail:
+
+- Do not add date of birth, ID images, or proof-of-address uploads to the current static form / Google Sheet path unless Bugs approves a secure storage design.
+- Bugs believes his own approval did not require date of birth, so DOB is not a launch-intake field unless the live Twilio path proves otherwise.
+
+Documentation update made:
+
+- `rcs-registration/RCS_ONBOARDING_MAIN_BUILD_PLAN.md` now contains:
+  - a named Trust Hub / Secondary Compliance Profile direction section;
+  - Trust Hub status values;
+  - a `Trust Hub KYC` source-of-truth tab plan;
+  - a Slice 6C field-authority planning checkpoint;
+  - updated customer/internal journey language.
+
+Current recommended next step:
+
+1. Wait for the assisting agent's final exact Step 2/3 field capture if still pending.
+2. Decide whether rep 2 is collected in the first customer-facing intake or by RightOnQ follow-up.
+3. Build a small field-authority map before changing `rcs-registration/index.html`.
+4. Keep first Trust Hub execution manual for launch; API automation can follow after the manual path is proven.
+
+### Field Authority Map Started
+
+Bugs then received/quoted further Twilio guidance and confirmed he emailed Isa Bell at Twilio with focused KYC/build questions.
+
+RCS-Twilio-4 updated `RCS_ONBOARDING_MAIN_BUILD_PLAN.md` with:
+
+- an `Isa Bell Email - Pending Clarification` section;
+- a draft `Field Authority Map`;
+- a current audit of the existing Part A form against RCS, Trust Hub/KYC, and UK RC Bundle needs.
+
+Important conclusions from the map:
+
+- The current app remains a good RCS Part A base.
+- Trust Hub/KYC adds a compliance lane rather than invalidating the form.
+- The main later form decisions are:
+  - whether to add representative 2 to the customer-facing form or collect manually;
+  - how to align company type/industry/regions to Twilio's stricter terms;
+  - whether a physical operating address differs from the Companies House registered office address;
+  - how RightOnQ handles passport/driving-licence/proof-of-address evidence without storing it in the static app/Sheet path.
+
+Do not edit `rcs-registration/index.html` for KYC fields until Bugs has either heard back from Isa Bell or explicitly approves a working assumption.

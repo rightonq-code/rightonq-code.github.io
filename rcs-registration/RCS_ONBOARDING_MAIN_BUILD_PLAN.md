@@ -22,6 +22,8 @@ The client is becoming a RightOnQ customer. The journey needs to cover:
 
 - commercial acceptance;
 - payment setup;
+- Twilio Trust Hub / client KYC readiness;
+- Twilio subaccount/runtime setup;
 - RCS registration data capture;
 - RightOnQ internal checks;
 - phone name/logo preview;
@@ -118,6 +120,102 @@ Important caveat:
 
 RightOnQ should pull/query Twilio usage per subaccount and reconcile it against each client's prepaid balance and invoices/payments.
 
+### Trust Hub / Secondary Compliance Profile Direction
+
+Important discovery on Thursday 14 May 2026:
+
+- Twilio subaccounts and Trust Hub compliance profiles are related but separate resource graphs.
+- Subaccounts are runtime/account containers under Twilio `Accounts`.
+- Trust Hub stores KYC/compliance profiles under `trusthub.twilio.com/v1`.
+- For a RightOnQ-managed client such as `ABC Ltd`, the expected model is:
+  - RightOnQ primary compliance profile remains the approved parent profile;
+  - each end-client gets its own Secondary Compliance Profile / Secondary Customer Profile;
+  - phone numbers and other channel resources are linked to that compliance profile by assignment resources.
+- Treat this as a third onboarding track beside commercial/payment and RCS sender registration.
+
+Current design assumption, pending RightOnQ's own API/Console proof:
+
+- Build the intake data model to support two authorised representatives, not one.
+- Public Twilio docs for secondary compliance profiles say to provide contact details for two authorised representatives.
+- The engineer-to-engineer Console/API review also found `authorized_representative_1` and `authorized_representative_2` in the Secondary Business policy requirements.
+- Each representative should have:
+  - first name;
+  - last name;
+  - business/work email;
+  - phone number;
+  - business title;
+  - job position.
+
+Do not collect date of birth in the launch intake unless the live Twilio flow explicitly requires it. If Twilio later requires date of birth, ID, or proof of address for a representative, route that through a more secure manual/admin process rather than the current static form and Google Sheet path.
+
+The field-authority principle is:
+
+- when RCS and Trust Hub ask for overlapping data, RightOnQ should ask the stricter/more precise version once;
+- the canonical RightOnQ answer then feeds both the RCS sender registration and Twilio Trust Hub/KYC workflow.
+
+Useful official references checked:
+
+- Twilio Secondary Compliance Profiles: `https://www.twilio.com/docs/trust-hub/profiles/secondary-compliance-profiles`
+- Twilio Trust Hub overview: `https://www.twilio.com/docs/trust-hub`
+- Twilio API: Create a Secondary Customer Profile: `https://www.twilio.com/docs/trust-hub/trusthub-rest-api/api-create-secondary-customer-profile`
+- Twilio UK long-code KYC: `https://support.twilio.com/hc/en-us/articles/21038555454875-Know-Your-Customer-KYC-in-the-United-Kingdom`
+
+### Isa Bell Email - Pending Clarification
+
+Bugs emailed Isa Bell at Twilio on Thursday 14 May 2026 to confirm the build-critical KYC points.
+
+The email asked, in practical terms:
+
+- whether each UK limited-company client should have a Secondary Customer/Compliance Profile under RightOnQ's approved Primary Profile;
+- whether the UK long-code Regulatory Compliance Bundle is separate from, or fed by, the Secondary Customer/Compliance Profile;
+- what identity evidence is normally required for the authorised representative of a UK limited company;
+- whether RightOnQ can complete or trigger any passport/driving-licence verification through Twilio/Persona without storing copies of personal ID;
+- whether one or two authorised representatives are required;
+- whether larger/well-established UK limited companies can rely more on Companies House/company records, or whether individual identity verification is always required;
+- how UK long-code SMS fallback numbers should be assigned when the number sits inside a RightOnQ-controlled Twilio subaccount.
+
+Until Isa replies:
+
+- do not add passport/driving-licence/proof-of-address upload to the static app;
+- do not force customer-facing rep-2 capture without a design decision;
+- keep building the field-authority map and planning layer only.
+
+## Field Authority Map - Draft 1
+
+Purpose: map each customer/intake field to the strictest downstream requirement so RightOnQ asks once, asks accurately, and does not store sensitive data in the wrong place.
+
+| Field area | Current app state | RCS sender registration | Trust Hub / KYC | UK RC Bundle / long-code | Storage sensitivity | Current action |
+| --- | --- | --- | --- | --- | --- | --- |
+| Legal business name | Step 1 asks `Legal business name` | Needed | Needed | Likely needed | Normal business data | Keep; helper should say exact Companies House registered name. |
+| Trading / brand name | Step 1 asks `Trading name`; Step 2 asks sender display name | Needed for brand/sender | May help explain brand vs legal entity | Not primary | Normal business data | Keep; ensure it does not replace legal name. |
+| Companies House number | Step 1 asks `Companies House number` | Useful/needed | Needed as registration number | Likely needed | Normal business data | Keep; consider wording `Companies House company number (CRN)`. |
+| Company type | Step 1 asks `Registered company type`; sole traders excluded | Useful | Needed | May be needed | Normal business data | Align options to Twilio-compatible limited-company language where possible. |
+| Business industry | Step 1 asks `Business industry` | Needed for sender/use case | Needed | Possibly useful | Normal business data | Align options to Twilio/Twilio-RCS categories where practical. |
+| Website URL | Step 1 asks website; Step 3 asks customer-facing website | Needed | Needed and likely checked against business/brand | Likely needed | Normal business data | Strengthen review rule: live site should clearly match legal/trading brand and not be ambiguous. |
+| Registered address | Step 1 asks Companies House registered office address | Useful | Business address needed | Emergency/number compliance may need address | Normal business data unless proof files are added | Keep; add note later if Twilio needs physical operating address separate from registered office. |
+| Business regions of operation | Current Step 7 asks RCS destination countries, not company operating regions | Launch market info | Needed by Trust Hub as operations regions | Not the same as recipient countries | Normal business data | Add later or collect internally; do not confuse with RCS launch markets. |
+| Primary contact | Step 1 asks name/email/phone | Operational | Operational | Operational | Personal contact data | Keep. |
+| Authorised representative 1 | Step 1 asks name/email/job title; auto-syncs from primary contact | Needed for sign-off | Needed; phone and job position may also be needed | May be needed | Personal contact data | Expand later to first/last/email/phone/business title/job position if confirmed. |
+| Authorised representative 2 | Not currently captured | Usually not needed for RCS | Likely needed by Trust Hub policy | Unclear | Personal contact data | Pending Isa/Twilio proof; decide whether form field or manual RightOnQ follow-up. |
+| Passport / driving licence / proof of address | Not captured | Not needed for RCS form | May be required via Persona/Trust Hub | Possibly separate KYC evidence | High sensitivity | Must not use static app/Google Sheet; secure/manual route only. |
+| Sender display name | Step 2 asks it | Needed | May relate to brand context | Not primary | Normal business data | Keep. |
+| Logo, banner, brand colour | Step 2 asks uploads/colour | Needed | Not primary | Not primary | Brand assets | Keep in RCS form. |
+| Public contact and policy links | Step 3 asks email, phone, website, privacy, terms | Needed | Website may overlap | May support compliance | Normal business data | Keep; review for brand ownership and live links. |
+| Sender description and use case | Steps 4/5 ask purpose, description, examples | Needed and high review risk | Not primary | Not primary | Normal business data | Keep; RightOnQ should polish before submission. |
+| Consent/opt-in/opt-out | Step 6 asks consent route, opt-in, opt-out | Needed and high review risk | Not primary | Not primary | Normal business data | Keep; RightOnQ should polish before submission. |
+| RCS destination countries | Step 7 asks launch countries | Needed for RCS/cost planning | Different from Trust Hub operations regions | May influence number strategy | Normal business data | Keep; do not reuse as Trust Hub operations regions without review. |
+
+Immediate audit from this map:
+
+- The existing form is still a good RCS Part A base.
+- Trust Hub adds a compliance layer, not a reason to throw the app away.
+- The likely UI changes later are limited and focused:
+  - sharpen legal name/CRN/company type/industry wording;
+  - possibly add or internally collect business regions of operation;
+  - possibly expand authorised representative fields;
+  - decide how to collect representative 2;
+  - keep ID/passport evidence out of the static app.
+
 ## Customer-Facing Journey
 
 Target smooth journey:
@@ -132,21 +230,22 @@ Target smooth journey:
    - auto top-up / pause rules.
 4. Client accepts service/payment terms.
 5. Client pays via Revolut, likely first month plus starting usage credit.
-6. Client receives a private RCS application link.
-7. Client completes Part A.
-8. RightOnQ checks Part A.
-9. Client sees Part B storyboard/status.
-10. RightOnQ sends RBM Tester invitation and branded phone preview.
-11. B2 unlocks for name/logo approval.
-12. Client approves name/logo or sends issue feedback.
-13. RightOnQ fixes issues or proceeds.
-14. RightOnQ prepares review video.
-15. B3 unlocks for video review.
-16. Client approves video or requests changes.
-17. RightOnQ submits registration.
-18. B4 shows submitted/tracking state.
-19. Client is notified of provider/carrier outcome.
-20. Once approved/live, usage is monitored and charged/top-up controlled.
+6. Client receives a private onboarding/application link.
+7. Client completes the intake once, with fields accurate enough for both RCS sender registration and Twilio Trust Hub/KYC.
+8. RightOnQ checks the intake.
+9. RightOnQ starts or prepares the Twilio Trust Hub Secondary Compliance Profile track where required.
+10. Client sees Part B storyboard/status.
+11. RightOnQ sends RBM Tester invitation and branded phone preview.
+12. B2 unlocks for name/logo approval.
+13. Client approves name/logo or sends issue feedback.
+14. RightOnQ fixes issues or proceeds.
+15. RightOnQ prepares review video.
+16. B3 unlocks for video review.
+17. Client approves video or requests changes.
+18. RightOnQ submits registration.
+19. B4 shows submitted/tracking state.
+20. Client is notified of provider/carrier outcome.
+21. Once Trust Hub/KYC, RCS approval, and commercial controls are ready, usage is monitored and charged/top-up controlled.
 
 ## RightOnQ Internal Journey
 
@@ -163,20 +262,21 @@ Target internal flow:
 9. Part A submitted.
 10. Part A reviewed by RightOnQ.
 11. Registration details corrected/normalised if needed.
-12. Twilio subaccount created/prepared.
-13. Phone preview/test invitation sent.
-14. Application status updated to unlock B2.
-15. Name/logo approval received or issue raised.
-16. If issue raised, stop video work until resolved.
-17. Review video prepared.
-18. Application status updated to unlock B3.
-19. Video approval received or changes requested.
-20. If approved, registration pack submitted.
-21. Provider/carrier status tracked.
-22. Approved/live/rejected/paused state maintained.
-23. Twilio usage monitored.
-24. Revolut top-ups/payments reconciled.
-25. Service paused if billing risk rules trigger.
+12. Trust Hub/KYC readiness checked; Secondary Compliance Profile created/prepared if required.
+13. Twilio runtime subaccount created/prepared.
+14. Phone preview/test invitation sent.
+15. Application status updated to unlock B2.
+16. Name/logo approval received or issue raised.
+17. If issue raised, stop video work until resolved.
+18. Review video prepared.
+19. Application status updated to unlock B3.
+20. Video approval received or changes requested.
+21. If approved, registration pack submitted.
+22. Provider/carrier status tracked.
+23. Trust Hub/KYC, RCS approval, billing, and live-service gates maintained.
+24. Twilio usage monitored.
+25. Revolut top-ups/payments reconciled.
+26. Service paused if billing risk rules trigger.
 
 ## Outreach To Onboarding Handoff Contract
 
@@ -321,6 +421,7 @@ Likely tabs:
 - `Billing`
 - `Part A`
 - `Part B approvals`
+- `Trust Hub KYC`
 - `Twilio setup`
 - `Communications`
 - `Status log`
@@ -378,6 +479,7 @@ Suggested columns:
 - `part_a_status`
 - `part_b_status`
 - `twilio_status`
+- `trust_hub_status`
 - `provider_status`
 - `internal_owner`
 - `created_at`
@@ -393,6 +495,11 @@ Initial statuses:
 - `commercial_accepted`
 - `billing_active`
 - `application_created`
+- `trust_hub_not_started`
+- `trust_hub_draft`
+- `trust_hub_pending_review`
+- `trust_hub_approved`
+- `trust_hub_rejected`
 - `part_a_submitted`
 - `part_a_internal_review`
 - `part_a_accepted`
@@ -485,9 +592,18 @@ Suggested column groups:
   - `primary_contact_name`
   - `primary_contact_email`
   - `primary_contact_phone`
-  - `authorised_rep_name`
-  - `authorised_rep_email`
-  - `authorised_rep_title`
+  - `authorised_rep_1_first_name`
+  - `authorised_rep_1_last_name`
+  - `authorised_rep_1_email`
+  - `authorised_rep_1_phone`
+  - `authorised_rep_1_business_title`
+  - `authorised_rep_1_job_position`
+  - `authorised_rep_2_first_name`
+  - `authorised_rep_2_last_name`
+  - `authorised_rep_2_email`
+  - `authorised_rep_2_phone`
+  - `authorised_rep_2_business_title`
+  - `authorised_rep_2_job_position`
 - brand profile:
   - `sender_display_name`
   - `brand_colour`
@@ -575,9 +691,74 @@ Recommended `event_type` values:
 - `video_approval`
 - `video_change_request`
 
+### Tab: Trust Hub KYC
+
+Purpose: Twilio Trust Hub Secondary Compliance Profile / client KYC tracking.
+
+This is separate from the Twilio runtime subaccount. The subaccount is for runtime resources and billing/usage separation. Trust Hub is the compliance/KYC record and should be tracked as its own lane.
+
+Primary writer:
+
+- RightOnQ manually for pilot;
+- later automation using Twilio Trust Hub API.
+
+Suggested columns:
+
+- `application_id`
+- `client_id`
+- `primary_customer_profile_sid`
+- `secondary_customer_profile_sid`
+- `trust_hub_policy_sid`
+- `trust_hub_profile_friendly_name`
+- `trust_hub_status`
+- `trust_hub_status_updated_at`
+- `trust_hub_status_callback_configured`
+- `trust_hub_rejection_reason`
+- `business_identity`
+- `business_type`
+- `business_industry`
+- `business_registration_identifier`
+- `business_registration_number`
+- `business_regions_of_operation`
+- `business_website_match_status`
+- `address_sid`
+- `address_validation_status`
+- `supporting_document_sid`
+- `business_info_end_user_sid`
+- `authorised_rep_1_end_user_sid`
+- `authorised_rep_2_end_user_sid`
+- `primary_profile_assignment_status`
+- `business_info_assignment_status`
+- `rep_1_assignment_status`
+- `rep_2_assignment_status`
+- `address_assignment_status`
+- `evaluation_status`
+- `evaluation_last_run_at`
+- `evaluation_error_summary`
+- `channel_endpoint_assignment_status`
+- `phone_number_sid`
+- `kyc_internal_notes`
+- `updated_at`
+
+Recommended `trust_hub_status` values:
+
+- `not_started`
+- `draft`
+- `evaluation_failed`
+- `ready_to_submit`
+- `pending_review`
+- `twilio_approved`
+- `twilio_rejected`
+- `not_required_rcs_only`
+
+Launch privacy rule:
+
+- Do not store representative date of birth, ID images, or proof-of-address files in the current static form / Google Sheet workflow unless Bugs explicitly approves a secure storage design.
+- If Twilio requires sensitive representative evidence, handle it as a secure manual follow-up or later backend/admin flow.
+
 ### Tab: Twilio Setup
 
-Purpose: internal setup and provider/Twilio tracking.
+Purpose: internal runtime setup and provider/Twilio tracking.
 
 Primary writer:
 
@@ -1127,6 +1308,30 @@ Important caveat:
 - This is a queue, not an auto-send system.
 - Next step should be either template wording review/polish or an internal send/review workflow, not immediate automatic customer email sending.
 
+### Slice 6C - Trust Hub / KYC Field Authority Planning
+
+Status: planning update added by RCS-Twilio-4 on Thursday 14 May 2026 after live Twilio Console/API discovery from Bugs and the assisting agent.
+
+Purpose:
+
+- avoid building the RCS intake as if RCS sender registration is the only approval track;
+- map RightOnQ intake fields to the stricter of RCS sender registration and Twilio Trust Hub/KYC requirements;
+- keep Trust Hub compliance profile work separate from Twilio subaccount/runtime setup.
+
+Current field-authority decisions:
+
+- Legal business name should be exact Companies House / registered name.
+- Registration number should be captured as the Companies House CRN for UK Ltd clients.
+- Business type, industry, regions of operation, website, registered address, and authorised representatives should be shaped to satisfy Trust Hub first, then reused for RCS where possible.
+- Build for two authorised representatives, pending RightOnQ's own proof against the live Twilio policy/evaluation flow.
+- Do not collect date of birth in the launch intake unless Twilio's live flow explicitly requires it.
+
+Implementation stance:
+
+- First live version should stay manual: RightOnQ reviews intake, then enters/creates the Secondary Compliance Profile in Twilio Console or a guarded internal workflow.
+- API automation should come after the manual process is proven and after the required fields are verified from Twilio's live policy/evaluation resources.
+- Do not submit fake/test profiles to Twilio review. Keep test profiles clearly labelled draft-only.
+
 ### Slice 7 - Customer Commercial/Payment Entry Page
 
 Design/build the onboarding page before the RCS form.
@@ -1153,12 +1358,16 @@ Questions:
 - How are failed payments represented?
 - What IDs should be stored?
 
-### Slice 9 - Twilio Subaccount / Usage Tracking Fields
+### Slice 9 - Twilio Trust Hub / Subaccount / Usage Tracking Fields
 
-Add internal Twilio setup fields.
+Add internal Twilio compliance, runtime setup, and usage tracking fields.
 
 Output:
 
+- secondary compliance profile SID;
+- Trust Hub status;
+- Trust Hub rejection/evaluation summary;
+- two authorised representative tracking fields;
 - subaccount SID;
 - setup status;
 - registration/provider reference;
@@ -1189,6 +1398,10 @@ Output:
 - How private application links are generated and revoked.
 - Whether Google Sheets remains the source of truth beyond pilot.
 - Who inside RightOnQ manually approves each status transition.
+- Exact live Twilio Trust Hub Secondary Business policy requirements for UK clients.
+- Whether the live Twilio Console requires one or two authorised representatives for this specific account path.
+- Whether RightOnQ should ask for two reps in the first customer-facing form or collect rep 2 through a manual RightOnQ follow-up.
+- Whether any sensitive representative evidence is required by Twilio and, if so, what secure collection route replaces the current static-form/Sheet path.
 
 ## Update Rules For Future Agents
 
