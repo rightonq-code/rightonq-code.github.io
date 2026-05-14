@@ -1008,17 +1008,25 @@ Implemented:
 - Apps Script has a guarded internal `action: createApplicationDraft`.
 - `createApplicationDraft` requires script property `ONBOARDING_CREATE_PIN`.
 - If authorised, it creates/updates the `Applications` row, generates a private token, and returns a private application link.
-- Existing live Apps Script deployment was updated in place to version `7`.
+- Token-protected application status now requires the matching token. Application ID alone returns `found: false` for token-protected rows.
+- Existing live Apps Script deployment was updated in place to version `11` after proof cleanup.
 
 Test evidence:
 
 - Normal live status lookup for `ROQ-RCS-TEST-SLICE5-20260514` still returned `part_a_submitted`.
 - Same lookup with `applicationToken=WRONGTOKEN` returned `found: false`.
 - A no-PIN `createApplicationDraft` attempt did not add a row to `Applications`.
+- Temporary proof route created `ROQ-RCS-TEST-PIN-20260514173653`, created a private-link application, submitted Part A using that token, and confirmed Part A became `part_a_submitted`.
+- Temporary proof route/helper was removed before the final deployment.
+- Final checks confirmed:
+  - `ROQ-RCS-TEST-PIN-20260514173653` without a token returns `found: false`;
+  - the same ID with `applicationToken=WRONGTOKEN` returns `found: false`;
+  - non-token test app `ROQ-RCS-TEST-SLICE5-20260514` still returns status by Application ID.
 
 Important caveat:
 
-- `ONBOARDING_CREATE_PIN` has not been configured by RCS-Twilio-4.
+- The proof used a temporary PIN and removed/restored the script property afterwards.
+- A real operational `ONBOARDING_CREATE_PIN` still needs to be chosen/configured before ongoing internal draft creation.
 - Do not store the PIN in the repo or static HTML.
 - This is not yet a finished operator/admin interface; it is the guarded backend plumbing for one.
 
@@ -1028,8 +1036,8 @@ Create another scoped local Level 2 checkpoint commit for the latest Apps Script
 
 After that, the next build slice should be one of:
 
-1. Configure/test `ONBOARDING_CREATE_PIN` and prove the internal private-link creation flow end-to-end.
+1. Choose/configure the real operational `ONBOARDING_CREATE_PIN`, or build a small internal operator wrapper so agents do not handle the PIN manually.
 2. Wire B2 name/logo approval and issue responses into storage.
 3. Build the manual internal status update process/operator sheet view.
 
-Recommended order: configure/test private-link creation next, because the guarded plumbing is now present but not yet proven with a real PIN.
+Recommended order: B2 storage is now unblocked, but the operational PIN/wrapper should be settled before any real client private links are issued.

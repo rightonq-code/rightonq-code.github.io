@@ -86,6 +86,17 @@ function getApplicationStatus(applicationId) {
   const criteria = typeof applicationId === "object" ? applicationId : { applicationId: applicationId };
   const applicationRecord = findApplicationRecord(spreadsheet, criteria);
   if (applicationRecord) {
+    const recordToken = applicationRecord["Private application token"];
+    if (recordToken && String(recordToken) !== String(criteria.privateApplicationToken || "")) {
+      return {
+        ok: true,
+        found: false,
+        applicationId: criteria.applicationId || "",
+        registrationStatus: "draft",
+        partAStatus: "draft"
+      };
+    }
+
     return {
       ok: true,
       found: true,

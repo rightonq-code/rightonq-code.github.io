@@ -927,7 +927,7 @@ Important launch caveat:
 
 Prepare the launch-safe route where RightOnQ creates the application before the client starts Part A.
 
-Status: first guarded version implemented and partially tested by RCS-Twilio-4 on Thursday 14 May 2026.
+Status: guarded version implemented and proof-tested by RCS-Twilio-4 on Thursday 14 May 2026.
 
 Implemented:
 
@@ -940,17 +940,28 @@ Implemented:
 - Part A submission into a token-protected `Applications` row now requires the matching private token.
 - Apps Script has a guarded internal `action: createApplicationDraft` path.
 - That action requires the script property `ONBOARDING_CREATE_PIN`, generates a private token, creates/updates the `Applications` row, and returns a private application link.
-- Existing live Apps Script deployment `AKfycbyI81Ir2xvHLar0R0iFBBWyXa1Nj93T4_8Ni5_eX3XEYDA-AKQbVYbPHnTROLm8e4a6` redeployed in place to version `7`.
+- Token-protected application status now requires the matching token. Application ID alone returns `found: false` for token-protected rows.
+- Existing live Apps Script deployment `AKfycbyI81Ir2xvHLar0R0iFBBWyXa1Nj93T4_8Ni5_eX3XEYDA-AKQbVYbPHnTROLm8e4a6` was redeployed in place to version `11` after proof cleanup.
 
 Test evidence:
 
 - Normal status lookup for `ROQ-RCS-TEST-SLICE5-20260514` still returned the expected application status.
 - Status lookup for that Application ID with a wrong token returned `found: false`.
 - Attempted `createApplicationDraft` without a configured PIN did not create a row in `Applications`.
+- Temporary proof route created `ROQ-RCS-TEST-PIN-20260514173653`, returned a private link shape, submitted Part A against the same token-protected application, and confirmed:
+  - draft status moved from `application_created`;
+  - Part A status became `part_a_submitted`;
+  - wrong token returned `found: false`.
+- Temporary proof route/helper was removed before final deployment.
+- Final live checks confirmed:
+  - token-protected app without a token returns `found: false`;
+  - token-protected app with a wrong token returns `found: false`;
+  - older non-token test app still returns status by Application ID.
 
 Important launch caveat:
 
-- `ONBOARDING_CREATE_PIN` is not stored in the repo and must be configured in Apps Script properties before internal draft creation can be used.
+- The proof used a temporary PIN and removed/restored the script property afterwards.
+- `ONBOARDING_CREATE_PIN` is not stored in the repo and must be configured in Apps Script properties before ongoing internal draft creation can be used.
 - A proper operator/admin interface is still future work. This is the guarded plumbing layer only.
 
 ### Slice 5 - Part B Unlocks

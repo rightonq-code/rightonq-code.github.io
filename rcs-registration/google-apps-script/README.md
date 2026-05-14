@@ -44,11 +44,13 @@ Deployment:
 
 - Execute as: `adam@rightonq.co.uk`
 - Access: `Anyone`
-- Current published version after CLI redeploy: `7`
+- Current published version after CLI redeploy: `11`
 - Version `4` added Application ID, registration status, and Part A status columns to the intake row.
 - Version `5` adds Application ID status lookup via `GET ?applicationId=...`.
 - Version `6` adds the `Applications` control-row tab and writes/reads one row per Application ID.
 - Version `7` adds private application token support and a guarded internal application-draft creation action.
+- Versions `8` and `9` were temporary proof deployments.
+- Version `11` is the clean deployment after proof; token-protected application status now requires the matching token.
 
 ## Behaviour
 
