@@ -1540,6 +1540,38 @@ Important caveat:
 - Safe live proof completed against version `17`: an unauthorised `updateInternalReview` call for `ROQ-RCS-TEST-REVIEW-202605142008` returned `ONBOARDING_OPERATOR_PIN is not configured`.
 - Spreadsheet readback after that rejected call showed the `Internal reviews` row stayed `pending_review` and the `Applications` row stayed `part_a_submitted`, with `Trust Hub status = not_started`.
 
+### Slice 6F - Local Operator Review Wrapper
+
+Status: implemented by RCS-Twilio-4 on Thursday 14 May 2026.
+
+Purpose:
+
+- give RightOnQ a repeatable local command for updating `Internal reviews`;
+- avoid hand-building curl payloads for every internal review;
+- keep the operator PIN out of the public static app, repo, and Sheet audit JSON;
+- create a small contract that can later be reused by a proper internal admin UI.
+
+Implemented behaviour:
+
+- repo-owned Node wrapper at `rcs-registration/tools/operator-review.mjs`;
+- reads `RCS_ONBOARDING_OPERATOR_PIN` from the local environment;
+- sends `action = updateInternalReview` to the deployed Apps Script endpoint;
+- supports `--dry-run` so operators can inspect the payload without sending it;
+- supports checklist fields and `--part-a-accepted` to trigger the guarded Part A acceptance path.
+
+Verification:
+
+- `node --check rcs-registration/tools/operator-review.mjs` passed.
+- `--dry-run` printed the expected `updateInternalReview` payload without an operator PIN.
+- Running without `RCS_ONBOARDING_OPERATOR_PIN` failed locally before sending.
+- Running with a dummy local PIN reached Apps Script and returned `ONBOARDING_OPERATOR_PIN is not configured`.
+- Spreadsheet readback after the dummy live attempt showed no mutation: the review row stayed `pending_review`, the application stayed `part_a_submitted`, and `Trust Hub status` stayed `not_started`.
+
+Important caveat:
+
+- The wrapper does not configure the Apps Script-side `ONBOARDING_OPERATOR_PIN`.
+- Positive live proof still requires that script property to be configured.
+
 ### Slice 7 - Customer Commercial/Payment Entry Page
 
 Design/build the onboarding page before the RCS form.

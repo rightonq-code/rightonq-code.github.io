@@ -1552,3 +1552,32 @@ Important caveat:
 
 - This work is local and uncommitted at the time of this note. Next step should be a scoped commit/push if Bugs approves.
 - Positive status-changing proof still depends on configuring `ONBOARDING_OPERATOR_PIN` or building an internal wrapper.
+
+### Slice 6F Completed - Local Operator Review Wrapper
+
+Bugs approved rolling forward with the operator workflow.
+
+RCS-Twilio-4 implemented a local operator wrapper:
+
+- new repo-owned tool: `rcs-registration/tools/operator-review.mjs`;
+- purpose: update `Internal reviews` through the guarded `updateInternalReview` endpoint without hand-built curl payloads;
+- reads `RCS_ONBOARDING_OPERATOR_PIN` from the local environment;
+- never stores or prints the operator PIN;
+- supports `--dry-run` for payload inspection;
+- supports checklist fields and `--part-a-accepted` to trigger the existing Part A acceptance/status-event/communications path.
+
+Verification:
+
+- `node --check rcs-registration/tools/operator-review.mjs` passed.
+- Dry-run command printed the expected `updateInternalReview` payload without requiring a PIN.
+- Live command without `RCS_ONBOARDING_OPERATOR_PIN` failed locally before sending.
+- Live command with dummy local PIN reached Apps Script and returned `ONBOARDING_OPERATOR_PIN is not configured`.
+- Spreadsheet readback after the dummy live attempt showed no mutation:
+  - `Internal reviews` stayed `pending_review`;
+  - `Applications` stayed `part_a_submitted`;
+  - `Trust Hub status` stayed `not_started`.
+
+Important caveat:
+
+- This work is local and uncommitted at the time of this note.
+- Positive live proof still needs the Apps Script-side `ONBOARDING_OPERATOR_PIN` script property configured.
