@@ -2274,6 +2274,7 @@
             <p class="step-kicker">Step 1</p>
             <h2 class="step-title">Business details</h2>
             <p class="step-intro">These details help match the sender profile to the real registered business behind the brand.</p>
+            <div class="section-note">UK KYC note: before any UK SMS fallback number can go live, RightOnQ may need extra business or identity evidence for the authorised representative. Do not upload passport, driving licence, or proof-of-address documents here. If anything sensitive is required, RightOnQ will arrange a separate secure step.</div>
             <div class="grid">
               <div class="field">
                 <label for="legalBusinessName">Legal business name <span class="required">*</span></label>
@@ -2286,21 +2287,20 @@
                 <input id="tradingName" name="tradingName">
               </div>
               <div class="field">
-                <label for="companiesHouseNumber">Companies House number <span class="required">*</span></label>
-                <p class="helper">Only UK companies are accepted. Use the Companies House number for the business being registered.</p>
+                <label for="companiesHouseNumber">Companies House company number (CRN) <span class="required">*</span></label>
+                <p class="helper">Only UK Companies House registered businesses are accepted. Use the company registration number shown on Companies House for the business being registered.</p>
                 <input id="companiesHouseNumber" name="companiesHouseNumber" required>
               </div>
               <div class="field">
                 <label for="companyType">Registered company type <span class="required">*</span></label>
-                <p class="helper">Choose the closest registered business structure. Sole traders are not accepted for this registration flow.</p>
+                <p class="helper">Choose the Companies House registered structure. Sole traders and unregistered businesses are not accepted for this registration flow.</p>
                 <select id="companyType" name="companyType" required>
                   <option value="">Select a company type</option>
-                  <option>Private limited company</option>
-                  <option>Public limited company</option>
-                  <option>Limited liability partnership</option>
-                  <option>Limited partnership</option>
-                  <option>Community interest company</option>
-                  <option>Charity</option>
+                  <option>Private limited company (Ltd)</option>
+                  <option>Public limited company (PLC)</option>
+                  <option>Limited liability partnership (LLP)</option>
+                  <option>Community interest company (CIC)</option>
+                  <option>Company limited by guarantee</option>
                 </select>
               </div>
               <div class="field">
@@ -2310,7 +2310,7 @@
               </div>
               <div class="field">
                 <label for="businessWebsite">Website URL <span class="required">*</span></label>
-                <p class="helper">Use the public website connected to this brand or sender.</p>
+                <p class="helper">Use the live public website connected to this brand or sender. The site should clearly match the legal or trading name being registered.</p>
                 <input id="businessWebsite" name="businessWebsite" type="url" placeholder="https://example.com" required>
               </div>
               <div class="field address-field">
@@ -2360,7 +2360,7 @@
               </div>
               <div class="field">
                 <label for="authorizedRepEmail">Authorised representative email <span class="required">*</span></label>
-                <p class="helper">Defaults to the primary contact email. Use the representative’s business email if different.</p>
+                <p class="helper">Defaults to the primary contact email. Use the representative’s business email if different; avoid personal/free webmail where the business has its own domain.</p>
                 <input id="authorizedRepEmail" name="authorizedRepEmail" type="email" autocomplete="email" required>
               </div>
               <div class="field">
@@ -2448,7 +2448,7 @@
             <div class="grid">
               <div class="field">
                 <label for="customerEmail">Customer-facing email <span class="required">*</span></label>
-                <p class="helper">Use an email address customers can contact for help or questions.</p>
+                <p class="helper">Use a business email address customers can contact for help or questions. It should clearly belong to the brand where possible.</p>
                 <input id="customerEmail" name="customerEmail" type="email" required>
               </div>
               <div class="field">
@@ -2458,7 +2458,7 @@
               </div>
               <div class="field">
                 <label for="customerWebsite">Customer-facing website <span class="required">*</span></label>
-                <p class="helper">Use the main website or a page that clearly belongs to the brand.</p>
+                <p class="helper">Use the main live website or a page that clearly belongs to the brand being registered.</p>
                 <input id="customerWebsite" name="customerWebsite" type="url" placeholder="https://example.com" required>
               </div>
               <div class="field">

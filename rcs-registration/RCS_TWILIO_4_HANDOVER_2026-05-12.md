@@ -1412,3 +1412,48 @@ Important conclusions from the map:
   - how RightOnQ handles passport/driving-licence/proof-of-address evidence without storing it in the static app/Sheet path.
 
 Do not edit `rcs-registration/index.html` for KYC fields until Bugs has either heard back from Isa Bell or explicitly approves a working assumption.
+
+### Field Change Shortlist Added
+
+After Bugs said to keep rolling, RCS-Twilio-4 added a `Field Change Shortlist - Draft 1` section to the main build plan.
+
+The shortlist separates:
+
+- safe no-regrets wording changes;
+- items waiting for Isa Bell/Twilio confirmation;
+- manual/secure-only data that must not enter the static app or Google Sheet;
+- areas of the current form that should stay stable for now.
+
+Recommended next step:
+
+1. Ask Bugs whether to apply the small no-regrets form edit pass now:
+   - CRN wording;
+   - website/domain matching wording;
+   - company type option cleanup;
+   - KYC evidence notice with no upload field.
+2. If approved, edit only `rcs-registration/index.html` and related docs/schema labels as needed.
+3. Do not add rep 2 or ID upload fields until Twilio clarification returns or Bugs explicitly chooses that assumption.
+
+### Small No-Regrets Customer-Facing Wording Pass
+
+Bugs approved the small no-regrets customer-facing wording pass.
+
+RCS-Twilio-4 updated `rcs-registration/index.html` only for wording/options:
+
+- Added a Step 1 UK KYC note:
+  - RightOnQ may need extra business or identity evidence before a UK SMS fallback number can go live;
+  - the client should not upload passport, driving licence, or proof-of-address documents in this form;
+  - RightOnQ will arrange a separate secure step if sensitive evidence is required.
+- Renamed `Companies House number` to `Companies House company number (CRN)`.
+- Tightened the CRN helper to UK Companies House registered businesses.
+- Tightened company-type helper to say sole traders and unregistered businesses are not accepted.
+- Removed loose company-type options and kept:
+  - `Private limited company (Ltd)`;
+  - `Public limited company (PLC)`;
+  - `Limited liability partnership (LLP)`;
+  - `Community interest company (CIC)`;
+  - `Company limited by guarantee`.
+- Strengthened website helpers to say the live site should clearly match or belong to the legal/trading brand.
+- Strengthened authorised rep/customer email helpers to prefer business-domain email and avoid personal/free webmail where possible.
+
+No sensitive fields were added. Rep 2, DOB, ID uploads, and Trust Hub operations-region fields remain pending Isa Bell/Twilio clarification or a later explicit Bugs decision.

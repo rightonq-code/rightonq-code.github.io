@@ -216,6 +216,85 @@ Immediate audit from this map:
   - decide how to collect representative 2;
   - keep ID/passport evidence out of the static app.
 
+## Field Change Shortlist - Draft 1
+
+This shortlist translates the field authority map into practical build decisions. It should be reviewed with Bugs before editing the customer-facing form.
+
+### Safe To Change Now
+
+These changes are low-risk because they improve clarity for both RCS and KYC without adding sensitive data or changing the application structure.
+
+1. Rename/help-text `Companies House number` to make clear this is the Companies House company number / CRN.
+2. Strengthen website helper text so the client understands the site must clearly match the legal/trading brand.
+3. Tighten `Registered company type` options to reflect the UK limited-company audience and remove any option that makes RightOnQ look open to unsuitable entities.
+4. Add internal review wording that public email/domain should preferably belong to the business, not free webmail.
+5. Add a short note near Step 1 or completion that RightOnQ may need further KYC evidence before SMS fallback/UK numbers can go live, without asking for that evidence in this form.
+
+### Wait For Isa Bell / Twilio Confirmation
+
+These should not be added to the live form until Isa confirms or Bugs approves a working assumption.
+
+1. Whether the customer-facing form should require two authorised representatives.
+2. Whether representative 1 should be split into first name / last name / phone / business title / job position now, or kept simpler for v1.
+3. Whether Twilio needs physical operating address separate from Companies House registered office address.
+4. Whether Trust Hub `business_regions_of_operation` should be asked on the client form, collected internally, or inferred/reviewed by RightOnQ.
+5. Whether Secondary Compliance Profile and UK long-code RC Bundle are separate operational submissions or one feeds the other in RightOnQ's live account flow.
+
+### Manual / Secure Only
+
+These must not be added to the current static app or Google Sheet submission path.
+
+1. Passport upload.
+2. Driving licence upload.
+3. Representative proof-of-address upload.
+4. Date of birth, unless Twilio explicitly requires it and Bugs approves a secure collection/storage design.
+5. Any ID document link that could be opened by anyone with a sheet/file URL.
+
+### Do Not Change Yet
+
+These areas are already doing useful RCS work and should stay stable while the KYC answer is pending.
+
+1. Step 2 brand profile assets and image validation.
+2. Step 4/5 sender description, use case, and example message drafting.
+3. Step 6 opt-in/opt-out wording.
+4. Step 7 RCS launch markets. This is not the same thing as Trust Hub business regions of operation.
+5. Part B name/logo and video approval storage.
+
+### Likely Next Form Edit Pass
+
+If Bugs approves a small no-regrets edit pass before Isa replies, the safest scope is:
+
+1. CRN wording.
+2. Website/domain matching wording.
+3. Company type option cleanup.
+4. KYC evidence notice with no upload field.
+5. Internal docs/schema labels only, not new sensitive fields.
+
+Status: approved by Bugs and implemented by RCS-Twilio-4 on Thursday 14 May 2026.
+
+Implemented in `rcs-registration/index.html`:
+
+- Step 1 now includes a calm UK KYC note explaining that RightOnQ may need extra business/identity evidence before UK SMS fallback numbers can go live, but no passport, driving licence, or proof-of-address documents should be uploaded in this form.
+- Box 3 was renamed from `Companies House number` to `Companies House company number (CRN)`.
+- Box 3 helper now says only UK Companies House registered businesses are accepted.
+- Box 4 helper now says sole traders and unregistered businesses are not accepted.
+- Box 4 options were tightened to Companies House limited-company style options:
+  - `Private limited company (Ltd)`;
+  - `Public limited company (PLC)`;
+  - `Limited liability partnership (LLP)`;
+  - `Community interest company (CIC)`;
+  - `Company limited by guarantee`.
+- Business website and customer-facing website helpers now say the live site should clearly match/belong to the legal or trading brand.
+- Authorised representative email and customer-facing email helpers now steer away from personal/free webmail where the business has its own domain.
+
+Still not changed:
+
+- no representative 2 fields;
+- no date of birth field;
+- no passport/driving-licence/proof-of-address upload;
+- no Trust Hub operations-region field;
+- no Apps Script schema change for KYC-only data.
+
 ## Customer-Facing Journey
 
 Target smooth journey:
