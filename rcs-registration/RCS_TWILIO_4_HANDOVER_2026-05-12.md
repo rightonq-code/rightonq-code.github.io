@@ -1266,3 +1266,82 @@ Next recommended step:
 2. Push that commit when Bugs approves.
 3. Decide whether to configure the real `ONBOARDING_OPERATOR_PIN` directly or build a small internal wrapper.
 4. Then move to communications cadence.
+
+### Slice 6B Partial Completed - Communications Manual-Send Queue
+
+RCS-Twilio-4 added the first communications cadence layer.
+
+Implemented:
+
+- Apps Script now has a `Communications` manual-send queue tab.
+- Future Part A submissions queue `part_a_received`.
+- Future B2 name/logo responses queue:
+  - `name_logo_approved_received`;
+  - `name_logo_feedback_received`.
+- Future B3 video responses queue:
+  - `video_approved_received`;
+  - `video_changes_received`.
+- Future guarded internal status updates can queue:
+  - `part_a_accepted`;
+  - `phone_preview_sent`;
+  - `video_ready_for_review`;
+  - `registration_submitted`.
+- Each queued communication stores:
+  - created time;
+  - application ID;
+  - communication code;
+  - audience;
+  - recipient email/name;
+  - subject;
+  - status `queued_manual_send`;
+  - trigger status;
+  - send method `manual`;
+  - body;
+  - related event.
+- No customer email is sent automatically from the queue.
+- Apps Script deployment was pushed and redeployed in place to version `15`.
+- README and `RCS_ONBOARDING_MAIN_BUILD_PLAN.md` were updated.
+
+Test evidence:
+
+- Apps Script syntax passed via `new Function(...)`.
+- `git diff --check` passed for scoped files.
+- Live labelled Part A test submission `ROQ-RCS-TEST-COMMS-202605141832` returned:
+  - `ok: true`;
+  - `registrationStatus = part_a_submitted`.
+- Live `Applications` readback confirmed `ROQ-RCS-TEST-COMMS-202605141832` was created.
+- Live `Communications` readback confirmed a `part_a_received` draft row:
+  - recipient `test-comms@example.com`;
+  - subject `RightOnQ has received your RCS Part A details`;
+  - status `queued_manual_send`.
+
+Important caveat:
+
+- The live Part A proof also triggered the existing Adam notification email path.
+- The queue is intentionally manual-send/review for now.
+- Do not switch to automatic customer email sending without Bugs approving the final wording and send rules.
+
+Current state after communications queue work:
+
+- Branch: `rcs-registration-part-a-b-20260507`.
+- Remote branch is currently at:
+  - `d33da1c Add guarded RCS status operator path`.
+- Communications queue work is local and not yet checkpointed/pushed at the time of this entry.
+- Scoped files changed:
+  - `rcs-registration/google-apps-script/Code.gs`;
+  - `rcs-registration/google-apps-script/README.md`;
+  - `rcs-registration/RCS_ONBOARDING_MAIN_BUILD_PLAN.md`;
+  - `rcs-registration/RCS_TWILIO_4_HANDOVER_2026-05-12.md`.
+- Unrelated root website files remain dirty and should not be swept into RCS commits:
+  - `index.html`;
+  - `privacy.html`;
+  - `terms.html`;
+  - untracked `RightOnQ RCS Application Future Amendments.md`;
+  - untracked `RightOnQ Website Future Amendments.md`.
+
+Next recommended step:
+
+1. Create a scoped local checkpoint commit for the communications queue files.
+2. Push that commit when Bugs approves.
+3. Review/polish the first customer communication templates before any real customer sending.
+4. Decide whether the next build is the internal send/review workflow or operator PIN/wrapper activation.

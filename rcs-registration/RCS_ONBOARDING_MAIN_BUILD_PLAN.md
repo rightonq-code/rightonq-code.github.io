@@ -1084,13 +1084,48 @@ Important caveat:
 
 Define and implement customer communication templates and triggers.
 
+Status: first manual-send queue implemented and proof-tested by RCS-Twilio-4 on Thursday 14 May 2026.
+
 Output:
 
-- first email templates;
-- trigger statuses;
-- `Communications` tab write path;
-- manual-send fallback for v1;
+- first email templates - partially done;
+- trigger statuses - partially done;
+- `Communications` tab write path - done;
+- manual-send fallback for v1 - done;
 - later automation plan.
+
+Implemented:
+
+- Apps Script now has a `Communications` manual-send queue tab.
+- Future Part A submissions queue `part_a_received`.
+- Future B2 name/logo responses queue:
+  - `name_logo_approved_received`;
+  - `name_logo_feedback_received`.
+- Future B3 video responses queue:
+  - `video_approved_received`;
+  - `video_changes_received`.
+- Future guarded internal status updates can queue:
+  - `part_a_accepted`;
+  - `phone_preview_sent`;
+  - `video_ready_for_review`;
+  - `registration_submitted`.
+- Templates are stored as draft body text in the Sheet and marked `queued_manual_send`.
+- No customer email is sent automatically yet.
+- Existing live Apps Script deployment was redeployed in place to version `15`.
+
+Test evidence:
+
+- Apps Script syntax passed via `new Function(...)`.
+- `git diff --check` passed for scoped files.
+- Live labelled Part A test submission `ROQ-RCS-TEST-COMMS-202605141832` returned `ok: true`.
+- Live `Applications` tab now contains the labelled communications test row.
+- Live `Communications` tab contains a queued `part_a_received` draft addressed to `test-comms@example.com`.
+
+Important caveat:
+
+- The live Part A proof also ran the existing Adam notification path.
+- This is a queue, not an auto-send system.
+- Next step should be either template wording review/polish or an internal send/review workflow, not immediate automatic customer email sending.
 
 ### Slice 7 - Customer Commercial/Payment Entry Page
 

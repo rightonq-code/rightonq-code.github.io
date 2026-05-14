@@ -4,6 +4,7 @@ const APPLICATIONS_SHEET_NAME = "Applications";
 const PART_B_APPROVALS_SHEET_NAME = "Part B approvals";
 const PART_B_VIDEO_APPROVALS_SHEET_NAME = "Part B video approvals";
 const STATUS_EVENTS_SHEET_NAME = "Status events";
+const COMMUNICATIONS_SHEET_NAME = "Communications";
 const PUBLIC_FORM_URL = "https://rightonq-code.github.io/rcs-registration/index.html";
 const NOTIFY_EMAIL = "adam@rightonq.co.uk";
 const APPLICATION_HEADERS = [
@@ -88,6 +89,21 @@ const STATUS_EVENT_HEADERS = [
   "Changed by",
   "Source",
   "Submission JSON",
+  "Last updated"
+];
+const COMMUNICATION_HEADERS = [
+  "Created at",
+  "Application ID",
+  "Communication code",
+  "Audience",
+  "Recipient email",
+  "Recipient name",
+  "Subject",
+  "Status",
+  "Trigger status",
+  "Send method",
+  "Body",
+  "Related event",
   "Last updated"
 ];
 const REGISTRATION_STATUS_ORDER = [
@@ -311,6 +327,14 @@ function doPost(event) {
       now: now
     });
 
+    queueCommunication(spreadsheet, "part_a_received", {
+      applicationId: applicationId,
+      applicationRecord: payload,
+      triggerStatus: registrationStatus,
+      relatedEvent: "Part A submitted",
+      now: now
+    });
+
     notifyAdam(payload, submissionId, countries, usSelected);
 
     return jsonResponse({
@@ -422,6 +446,14 @@ function submitNameLogoApproval(spreadsheet, payload) {
     "Next action note": nextActionNote
   });
 
+  queueCommunication(spreadsheet, approved ? "name_logo_approved_received" : "name_logo_feedback_received", {
+    applicationId: applicationId,
+    applicationRecord: findApplicationRecord(spreadsheet, { applicationId: applicationId }),
+    triggerStatus: registrationStatus,
+    relatedEvent: "B2 name/logo response",
+    now: now
+  });
+
   notifyNameLogoApproval(payload, decision, issueCategories, registrationStatus);
 
   return {
@@ -483,6 +515,14 @@ function submitVideoApproval(spreadsheet, payload) {
     "Next action note": nextActionNote
   });
 
+  queueCommunication(spreadsheet, approved ? "video_approved_received" : "video_changes_received", {
+    applicationId: applicationId,
+    applicationRecord: findApplicationRecord(spreadsheet, { applicationId: applicationId }),
+    triggerStatus: registrationStatus,
+    relatedEvent: "B3 video response",
+    now: now
+  });
+
   notifyVideoApproval(payload, decision, approvalChecklist, changeCategories, registrationStatus);
 
   return {
@@ -537,6 +577,8 @@ function updateApplicationStatus(spreadsheet, payload) {
     now
   ]);
 
+  queueStatusCommunication(spreadsheet, payload, previous, updates, now);
+
   return {
     ok: true,
     applicationId: applicationId,
@@ -579,6 +621,125 @@ function buildStatusUpdates(payload, now) {
   }
 
   return updates;
+}
+
+function queueStatusCommunication(spreadsheet, payload, applicationRecord, updates, now) {
+  const status = updates["Registration status"];
+  const templatesByStatus = {
+    part_a_accepted: "part_a_accepted",
+    phone_preview_sent: "phone_preview_sent",
+    video_ready_for_review: "video_ready_for_review",
+    registration_submitted: "registration_submitted"
+  };
+  const templateCode = templatesByStatus[status];
+  if (!templateCode) return;
+
+  queueCommunication(spreadsheet, templateCode, {
+    applicationId: payload.applicationId,
+    applicationRecord: applicationRecord,
+    triggerStatus: status,
+    relatedEvent: payload.eventType || "manual_status_update",
+    now: now
+  });
+}
+
+function queueCommunication(spreadsheet, templateCode, options) {
+  const now = options.now || new Date();
+  const applicationRecord = options.applicationRecord || {};
+  const template = buildCommunicationTemplate(templateCode, applicationRecord);
+  if (!template) return;
+
+  const sheet = getOrCreateSheet(spreadsheet, COMMUNICATIONS_SHEET_NAME, COMMUNICATION_HEADERS);
+  sheet.appendRow([
+    now,
+    safeCell(options.applicationId),
+    safeCell(templateCode),
+    safeCell(template.audience),
+    safeCell(template.recipientEmail),
+    safeCell(template.recipientName),
+    safeCell(template.subject),
+    "queued_manual_send",
+    safeCell(options.triggerStatus),
+    "manual",
+    safeCell(template.body),
+    safeCell(options.relatedEvent),
+    now
+  ]);
+}
+
+function buildCommunicationTemplate(templateCode, applicationRecord) {
+  const clientName = firstValue(
+    applicationRecord["Primary contact name"],
+    applicationRecord.primaryContactName,
+    "there"
+  );
+  const clientEmail = firstValue(
+    applicationRecord["Primary contact email"],
+    applicationRecord.primaryContactEmail
+  );
+  const brandName = firstValue(
+    applicationRecord["Client name"],
+    applicationRecord.displayName,
+    applicationRecord.tradingName,
+    applicationRecord.legalBusinessName,
+    "your RCS application"
+  );
+
+  const base = {
+    audience: "client",
+    recipientEmail: clientEmail,
+    recipientName: clientName
+  };
+
+  const templates = {
+    part_a_received: {
+      ...base,
+      subject: "RightOnQ has received your RCS Part A details",
+      body: "Hi " + clientName + ",\n\nThanks, RightOnQ has received your Part A registration details for " + brandName + ". We will check and process the written details first. Once Part A is accepted, we will move into Part B, starting with the phone name and logo preview.\n\nRightOnQ"
+    },
+    part_a_accepted: {
+      ...base,
+      subject: "Your RCS Part A details are ready for the phone preview stage",
+      body: "Hi " + clientName + ",\n\nPart A has been checked and accepted for " + brandName + ". RightOnQ can now prepare the phone name and logo preview. We will let you know when the RBM Tester invitation and branded test message have been sent.\n\nRightOnQ"
+    },
+    phone_preview_sent: {
+      ...base,
+      subject: "Your RCS phone preview has been sent",
+      body: "Hi " + clientName + ",\n\nRightOnQ has sent the RBM Tester invitation and branded test message for " + brandName + ". Please accept the invitation, check how your sender name and logo appear on your phone, then return to Part B to approve it or tell us what needs changing.\n\nRightOnQ"
+    },
+    name_logo_approved_received: {
+      ...base,
+      subject: "RightOnQ has received your name and logo approval",
+      body: "Hi " + clientName + ",\n\nThanks, we have received your approval for the sender name and logo for " + brandName + ". The next stage is preparing the RCS application review video.\n\nRightOnQ"
+    },
+    name_logo_feedback_received: {
+      ...base,
+      subject: "RightOnQ has received your name and logo feedback",
+      body: "Hi " + clientName + ",\n\nThanks, we have received your feedback on the phone name/logo preview for " + brandName + ". We will review it before the video stage so any issue can be fixed as early as possible.\n\nRightOnQ"
+    },
+    video_ready_for_review: {
+      ...base,
+      subject: "Your RCS review video is ready to check",
+      body: "Hi " + clientName + ",\n\nThe RCS application review video for " + brandName + " is ready for you to check. Please review the video, confirm the sender details, message examples, opt-in and opt-out steps, then approve it in Part B or tell us what needs changing.\n\nRightOnQ"
+    },
+    video_approved_received: {
+      ...base,
+      subject: "RightOnQ has received your video approval",
+      body: "Hi " + clientName + ",\n\nThanks, we have received your approval for the RCS review video for " + brandName + ". RightOnQ can now prepare the registration pack for submission.\n\nRightOnQ"
+    },
+    video_changes_received: {
+      ...base,
+      subject: "RightOnQ has received your video change request",
+      body: "Hi " + clientName + ",\n\nThanks, we have received your requested changes for the RCS review video for " + brandName + ". We will review and amend the video before submission.\n\nRightOnQ"
+    },
+    registration_submitted: {
+      ...base,
+      subject: "Your RCS registration has been submitted",
+      body: "Hi " + clientName + ",\n\nRightOnQ has submitted the RCS registration pack for " + brandName + " to the provider and carrier review process. We will keep you updated and flag anything they come back with.\n\nRightOnQ"
+    }
+  };
+
+  return templates[templateCode] || null;
 }
 
 function validateApplicationTokenForSubmission(spreadsheet, applicationId, suppliedToken) {

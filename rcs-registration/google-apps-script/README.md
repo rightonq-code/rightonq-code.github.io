@@ -44,7 +44,7 @@ Deployment:
 
 - Execute as: `adam@rightonq.co.uk`
 - Access: `Anyone`
-- Current published version after CLI redeploy: `14`
+- Current published version after CLI redeploy: `15`
 - Version `4` added Application ID, registration status, and Part A status columns to the intake row.
 - Version `5` adds Application ID status lookup via `GET ?applicationId=...`.
 - Version `6` adds the `Applications` control-row tab and writes/reads one row per Application ID.
@@ -54,6 +54,7 @@ Deployment:
 - Version `12` adds B2 name/logo approval storage in the `Part B approvals` tab and updates the matching `Applications` control row.
 - Version `13` adds B3 video approval/change storage in the `Part B video approvals` tab and updates the matching `Applications` control row.
 - Version `14` adds a guarded internal `updateApplicationStatus` action, a `Status events` audit log, and redacts sensitive tokens/PINs from stored audit JSON.
+- Version `15` adds the `Communications` manual-send queue and first customer communication templates.
 
 ## Behaviour
 
@@ -73,6 +74,7 @@ The script:
 - supports guarded internal status updates through `action = updateApplicationStatus`,
 - appends successful internal status changes to `Status events`,
 - redacts private application tokens and operator/create PINs from stored audit JSON,
+- appends customer communication drafts to `Communications` for manual send/review,
 - sets review status to `New`,
 - sets US fee status to `Not yet agreed` if United States is selected,
 - stores the raw JSON payload in the `Part A JSON` column,
@@ -89,3 +91,5 @@ The internal `createApplicationDraft` action is guarded by the script property `
 The internal `updateApplicationStatus` action is guarded by the script property `ONBOARDING_OPERATOR_PIN`.
 
 Do not store either PIN in this repo, in static HTML, or in Sheet audit JSON. If `ONBOARDING_OPERATOR_PIN` is not configured, internal status updates correctly return `ONBOARDING_OPERATOR_PIN is not configured`.
+
+`Communications` is currently a manual-send queue. It records draft messages and trigger context, but it does not send customer emails automatically.
