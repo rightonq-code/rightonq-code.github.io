@@ -1498,6 +1498,48 @@ Important caveat:
 - It does not request, upload, store, or link sensitive ID evidence.
 - Two earlier labelled curl attempts displayed a Google Drive error page because the redirect was followed incorrectly, but they still reached the Apps Script backend and wrote test rows `ROQ-RCS-TEST-REVIEW-202605142006` and `ROQ-RCS-TEST-REVIEW-202605142007`. Leave them as obvious proof rows unless Bugs asks for cleanup.
 
+### Slice 6E - Guarded Internal Review Update Action
+
+Status: implemented and deployed by RCS-Twilio-4 on Thursday 14 May 2026.
+
+Purpose:
+
+- make the `Internal reviews` checklist actionable without manually editing every cell;
+- keep the same operator-PIN guard used by internal status changes;
+- allow RightOnQ to mark Part A accepted from the review workflow when the checklist is ready.
+
+Implemented behaviour:
+
+- Apps Script supports `action = updateInternalReview`.
+- The action requires `ONBOARDING_OPERATOR_PIN`.
+- It updates the latest `Internal reviews` row for the supplied `applicationId`, or creates one if missing.
+- Accepted/checklist fields include:
+  - `reviewStatus`;
+  - `assignedOwner`;
+  - `legalCompanyCheck`;
+  - `websiteDomainCheck`;
+  - `publicLinksCheck`;
+  - `messagePurposeExamplesCheck`;
+  - `consentOptOutCheck`;
+  - `kycTrustHubCheck`;
+  - `smsFallbackRcBundleCheck`;
+  - `phonePreviewReadiness`;
+  - `nextAction`;
+  - `notes`;
+  - `sourceStatus`.
+- If `partAAccepted = true` or `reviewStatus = accepted`, it reuses the existing internal status path to set:
+  - `registrationStatus = part_a_accepted`;
+  - `partAStatus = part_a_accepted`;
+  - `nextActionOwner = RightOnQ`;
+  - `nextActionNote = Prepare the phone name and logo preview` unless supplied.
+- Because it reuses the status path, the existing status-event and communications queue behaviour should still apply.
+
+Important caveat:
+
+- Positive live proof still depends on `ONBOARDING_OPERATOR_PIN` being configured or an internal wrapper being built.
+- Safe live proof completed against version `17`: an unauthorised `updateInternalReview` call for `ROQ-RCS-TEST-REVIEW-202605142008` returned `ONBOARDING_OPERATOR_PIN is not configured`.
+- Spreadsheet readback after that rejected call showed the `Internal reviews` row stayed `pending_review` and the `Applications` row stayed `part_a_submitted`, with `Trust Hub status = not_started`.
+
 ### Slice 7 - Customer Commercial/Payment Entry Page
 
 Design/build the onboarding page before the RCS form.

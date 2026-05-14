@@ -291,6 +291,10 @@ function doPost(event) {
       requireOperatorPin(payload);
       return jsonResponse(updateApplicationStatus(spreadsheet, payload));
     }
+    if (payload.action === "updateInternalReview") {
+      requireOperatorPin(payload);
+      return jsonResponse(updateInternalReview(spreadsheet, payload));
+    }
 
     const sheet = spreadsheet.getSheetByName(SHEET_NAME);
     if (!sheet) throw new Error("Sheet tab not found: " + SHEET_NAME);
@@ -616,6 +620,103 @@ function updateApplicationStatus(spreadsheet, payload) {
     partAStatus: partAStatus,
     partBStatus: partBStatus,
     updatedAt: now.toISOString()
+  };
+}
+
+function updateInternalReview(spreadsheet, payload) {
+  const now = new Date();
+  const applicationId = payload.applicationId;
+  if (!applicationId) throw new Error("Missing application ID");
+
+  const applicationRecord = findApplicationRecord(spreadsheet, { applicationId: applicationId });
+  if (!applicationRecord) throw new Error("Application ID not found");
+
+  const reviewResult = upsertInternalReviewRecord(spreadsheet, payload, now);
+  let statusResult = null;
+  if (payload.partAAccepted === true || payload.partAAccepted === "true" || payload.reviewStatus === "accepted") {
+    const statusPayload = {
+      applicationId: applicationId,
+      registrationStatus: "part_a_accepted",
+      partAStatus: "part_a_accepted",
+      nextActionOwner: "RightOnQ",
+      nextActionNote: firstValue(payload.nextAction, "Prepare the phone name and logo preview."),
+      eventType: "internal_review_completed",
+      changedBy: firstValue(payload.changedBy, payload.operatorName, "RightOnQ"),
+      source: "internal_review"
+    };
+    if (payload.assignedOwner) statusPayload.internalOwner = payload.assignedOwner;
+    if (payload.notes) statusPayload.internalNotes = payload.notes;
+    statusResult = updateApplicationStatus(spreadsheet, statusPayload);
+  }
+
+  return {
+    ok: true,
+    applicationId: applicationId,
+    reviewStatus: reviewResult.reviewStatus,
+    partAAccepted: Boolean(statusResult),
+    registrationStatus: statusResult ? statusResult.registrationStatus : applicationRecord["Registration status"],
+    partAStatus: statusResult ? statusResult.partAStatus : applicationRecord["Part A status"],
+    updatedAt: now.toISOString()
+  };
+}
+
+function upsertInternalReviewRecord(spreadsheet, payload, now) {
+  const sheet = getOrCreateSheet(spreadsheet, INTERNAL_REVIEWS_SHEET_NAME, INTERNAL_REVIEW_HEADERS);
+  const values = sheet.getDataRange().getValues();
+  const headers = normaliseHeaders(values[0] || INTERNAL_REVIEW_HEADERS);
+  const applicationIdColumn = headers.indexOf("Application ID");
+  if (applicationIdColumn === -1) throw new Error("Application ID column not found in Internal reviews sheet");
+
+  let rowNumber = -1;
+  let existing = {};
+  for (let index = values.length - 1; index >= 1; index -= 1) {
+    if (String(values[index][applicationIdColumn]) !== String(payload.applicationId)) continue;
+    rowNumber = index + 1;
+    existing = rowToObject(values[index], headers);
+    break;
+  }
+
+  const fieldMap = {
+    reviewStatus: "Review status",
+    assignedOwner: "Assigned owner",
+    legalCompanyCheck: "Legal/company check",
+    websiteDomainCheck: "Website/domain check",
+    publicLinksCheck: "Public links check",
+    messagePurposeExamplesCheck: "Message purpose/examples check",
+    consentOptOutCheck: "Consent/opt-out check",
+    kycTrustHubCheck: "KYC/Trust Hub check",
+    smsFallbackRcBundleCheck: "SMS fallback/RC bundle check",
+    phonePreviewReadiness: "Phone preview readiness",
+    nextAction: "Next action",
+    notes: "Notes",
+    sourceStatus: "Source status"
+  };
+
+  const record = {};
+  INTERNAL_REVIEW_HEADERS.forEach(function(header) {
+    record[header] = firstValue(existing[header], "");
+  });
+  record["Created at"] = firstValue(existing["Created at"], now);
+  record["Application ID"] = payload.applicationId;
+  record["Last updated"] = now;
+
+  Object.keys(fieldMap).forEach(function(payloadKey) {
+    if (!Object.prototype.hasOwnProperty.call(payload, payloadKey)) return;
+    record[fieldMap[payloadKey]] = payload[payloadKey];
+  });
+
+  const row = headers.map(function(header) {
+    return safeCell(record[header]);
+  });
+
+  if (rowNumber === -1) {
+    sheet.appendRow(row);
+  } else {
+    sheet.getRange(rowNumber, 1, 1, headers.length).setValues([row]);
+  }
+
+  return {
+    reviewStatus: record["Review status"]
   };
 }
 

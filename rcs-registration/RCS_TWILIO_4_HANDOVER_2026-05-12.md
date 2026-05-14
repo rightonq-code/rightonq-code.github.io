@@ -1504,3 +1504,51 @@ Important caveat:
   - `ROQ-RCS-TEST-REVIEW-202605142007`.
 - Leave those obvious test rows unless Bugs asks for cleanup.
 - This work is local and uncommitted at the time of this note. Next step should be a scoped commit/push if Bugs approves.
+
+### Slice 6E Deployed - Guarded Internal Review Update Action
+
+Bugs approved continuing with the operator workflow.
+
+RCS-Twilio-4 implemented and deployed a guarded internal review update action.
+
+Implemented:
+
+- Apps Script now recognises `action = updateInternalReview`.
+- The action requires the existing `ONBOARDING_OPERATOR_PIN` guard.
+- It updates the latest matching `Internal reviews` row for an `applicationId`, or creates one if missing.
+- It accepts checklist/status fields:
+  - `reviewStatus`;
+  - `assignedOwner`;
+  - `legalCompanyCheck`;
+  - `websiteDomainCheck`;
+  - `publicLinksCheck`;
+  - `messagePurposeExamplesCheck`;
+  - `consentOptOutCheck`;
+  - `kycTrustHubCheck`;
+  - `smsFallbackRcBundleCheck`;
+  - `phonePreviewReadiness`;
+  - `nextAction`;
+  - `notes`;
+  - `sourceStatus`.
+- If `partAAccepted = true` or `reviewStatus = accepted`, it reuses the existing `updateApplicationStatus` path to set:
+  - `registrationStatus = part_a_accepted`;
+  - `partAStatus = part_a_accepted`;
+  - `nextActionOwner = RightOnQ`;
+  - `nextActionNote = Prepare the phone name and logo preview` unless supplied.
+- `google-apps-script/README.md` now marks current version `17`.
+- `RCS_ONBOARDING_MAIN_BUILD_PLAN.md` has Slice 6E notes.
+
+Verification:
+
+- `Code.gs` syntax check passed with `new Function(...)`.
+- `git diff --check` passed for the scoped RCS files.
+- Apps Script was pushed with `clasp push`.
+- Apps Script version `17` was created with `clasp version "Add internal review update action"`.
+- Existing deployment `AKfycbyI81Ir2xvHLar0R0iFBBWyXa1Nj93T4_8Ni5_eX3XEYDA-AKQbVYbPHnTROLm8e4a6` was redeployed at version `17`.
+- Unauthorised live proof against `ROQ-RCS-TEST-REVIEW-202605142008` returned `ONBOARDING_OPERATOR_PIN is not configured`.
+- Spreadsheet readback after that rejected call showed the `Internal reviews` row stayed `pending_review` and the `Applications` row stayed `part_a_submitted`, with `Trust Hub status = not_started`.
+
+Important caveat:
+
+- This work is local and uncommitted at the time of this note. Next step should be a scoped commit/push if Bugs approves.
+- Positive status-changing proof still depends on configuring `ONBOARDING_OPERATOR_PIN` or building an internal wrapper.
