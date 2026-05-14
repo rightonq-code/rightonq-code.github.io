@@ -1886,7 +1886,60 @@ Verification:
 Important caveat:
 
 - This is documentation only.
-- It does not configure Apps Script PINs or run a positive live operator workflow.
+- It does not configure Apps Script PINs.
+
+### Slice 6L - Positive Operator PIN Proof
+
+Status: completed by Bugs and RCS-Twilio-4 on Thursday 14 May 2026 using Bugs' normal Mac Terminal.
+
+Purpose:
+
+- prove the real Apps Script-side `ONBOARDING_CREATE_PIN` and `ONBOARDING_OPERATOR_PIN` properties work;
+- prove the local operator toolchain can create, read, approve, and read back an application without exposing PINs in chat/repo files;
+- verify the status-event and communication-queue side effects of Part A acceptance.
+
+What happened:
+
+- Bugs set both Script Properties in Apps Script Project Settings:
+  - `ONBOARDING_CREATE_PIN`;
+  - `ONBOARDING_OPERATOR_PIN`.
+- An initial long pasted command was mangled by Terminal and produced `Unknown option: --`; this was a paste issue, not a PIN or backend issue.
+- A read-only terminal refresh then proved `operator-status.mjs` could use `ONBOARDING_OPERATOR_PIN` successfully.
+- Bugs then ran `operator-review.mjs` successfully against the created test application.
+
+Test application:
+
+- `ROQ-RCS-TEST-POSITIVE-20260514211204`
+
+Verified result:
+
+- `operator-create-application.mjs` created the private application record:
+  - `registrationStatus = application_created`;
+  - `partAStatus = draft`;
+  - private application link was present in the returned result but was not pasted into the docs.
+- `operator-status.mjs` read the guarded operator snapshot successfully.
+- `operator-review.mjs` accepted Part A:
+  - `reviewStatus = accepted`;
+  - `partAAccepted = true`;
+  - `registrationStatus = part_a_accepted`;
+  - `partAStatus = part_a_accepted`.
+- Final operator snapshot showed:
+  - `Applications` row moved to `part_a_accepted`;
+  - `Next action owner = RightOnQ`;
+  - `Next action note = Prepare the phone name and logo preview.`;
+  - latest `Internal reviews` row had all supplied checks and `Phone preview readiness = ready`;
+  - one `Status events` row was present for `internal_review_completed`;
+  - one `Communications` row was queued with code `part_a_accepted`;
+  - `Submission JSON` in the operator snapshot was redacted.
+
+Expected limitation:
+
+- `Trust Hub KYC` and `UK RC bundles` were empty for this test because it created a private application link but did not submit Part A through the public form. Those rows are created on Part A submission.
+
+Security note:
+
+- PINs were not committed or written to repo files.
+- The final proof used Bugs' local Terminal environment variables, then unset them.
 
 ### Slice 7 - Customer Commercial/Payment Entry Page
 

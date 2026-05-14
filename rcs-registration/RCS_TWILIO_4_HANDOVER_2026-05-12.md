@@ -1825,3 +1825,52 @@ Important caveat:
 
 - This work is local and uncommitted at the time of this note.
 - It is docs-only and does not configure Apps Script PINs.
+
+### Slice 6L Completed - Positive Operator PIN Proof
+
+Bugs configured both Apps Script Script Properties:
+
+- `ONBOARDING_CREATE_PIN`;
+- `ONBOARDING_OPERATOR_PIN`.
+
+There was a brief false alarm:
+
+- an initial long pasted Terminal command was truncated/mangled and produced `Unknown option: --`;
+- this was a paste issue, not a PIN or backend failure;
+- a later read-only terminal refresh proved the operator PIN worked correctly.
+
+Positive proof application:
+
+- `ROQ-RCS-TEST-POSITIVE-20260514211204`
+
+Proof results:
+
+- `operator-create-application.mjs` created the private application record:
+  - `registrationStatus = application_created`;
+  - `partAStatus = draft`;
+  - private application link was present in the returned result but was not pasted into docs.
+- `operator-status.mjs` read the guarded internal snapshot successfully using `ONBOARDING_OPERATOR_PIN`.
+- `operator-review.mjs` accepted Part A:
+  - `reviewStatus = accepted`;
+  - `partAAccepted = true`;
+  - `registrationStatus = part_a_accepted`;
+  - `partAStatus = part_a_accepted`.
+- Final operator snapshot confirmed:
+  - `Applications` row updated to `part_a_accepted`;
+  - `Last internal action at` populated;
+  - `Next action owner = RightOnQ`;
+  - `Next action note = Prepare the phone name and logo preview.`;
+  - latest `Internal reviews` row shows `accepted` and the supplied checklist values;
+  - one `Status events` row exists for `internal_review_completed`;
+  - one `Communications` row is queued with code `part_a_accepted`;
+  - `Submission JSON` is redacted in the operator snapshot.
+
+Expected limitation:
+
+- `Trust Hub KYC` and `UK RC bundles` were empty in this proof because the test created a private application link but did not submit Part A through the public form.
+- Those rows are created when Part A is submitted.
+
+Security note:
+
+- PINs were not stored in chat, committed files, or repo docs.
+- The final proof used Bugs' normal Mac Terminal and local environment variables.
