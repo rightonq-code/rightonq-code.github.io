@@ -853,7 +853,7 @@ function queueInternalReview(spreadsheet, options) {
     "pending",
     "pending",
     "pending",
-    "pending_isa_reply",
+    "pending_trust_hub_review",
     "pending",
     "pending",
     safeCell(nextAction),

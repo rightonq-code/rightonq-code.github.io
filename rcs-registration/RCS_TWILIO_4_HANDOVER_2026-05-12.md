@@ -1363,12 +1363,18 @@ This changes the product map in an important way:
   - Twilio Trust Hub / client KYC;
   - RCS sender registration.
 
-Current design assumption:
+Current design assumption at that point, later superseded by Isa Bell reply:
 
 - Build the intake model to support two authorised representatives.
 - Bugs' assisting agent reported that the Secondary Business policy requirements include `authorized_representative_1` and `authorized_representative_2`.
 - Public Twilio docs for secondary compliance profiles also say contact details for two authorised representatives are required.
 - Each representative should capture first name, last name, business/work email, phone number, business title, and job position.
+
+Superseding note from Isa Bell reply:
+
+- use one required primary authorised representative;
+- keep optional second rep as backup/future-proofing;
+- do not force rep 2 in the first customer-facing launch form unless Bugs approves.
 
 Important privacy/security guardrail:
 
@@ -1411,7 +1417,47 @@ Important conclusions from the map:
   - whether a physical operating address differs from the Companies House registered office address;
   - how RightOnQ handles passport/driving-licence/proof-of-address evidence without storing it in the static app/Sheet path.
 
-Do not edit `rcs-registration/index.html` for KYC fields until Bugs has either heard back from Isa Bell or explicitly approves a working assumption.
+This was the right holding position at the time. It is now superseded by the Isa Bell reply below: one required primary rep, optional second rep, ID evidence exception-only, and no ID uploads in the static form/Sheet path.
+
+### Isa Bell Reply Received - KYC Assumptions Updated
+
+Bugs received a comprehensive reply from Isa Bell at Twilio on Thursday 14 May 2026.
+
+Build-impacting points from Isa's reply:
+
+- RightOnQ's ISV model is correct:
+  - RightOnQ keeps the approved Primary Compliance Profile on the parent account;
+  - each end-client UK limited company gets its own Secondary Compliance Profile when the registered brand/entity differs from RightOnQ;
+  - Twilio docs now use `Compliance Profile` where older docs may say `Customer Profile`.
+- UK long-code RC Bundle is separate from the Secondary Compliance Profile:
+  - data overlaps;
+  - one does not replace the other;
+  - UK long-code fallback numbers should be assigned to the bundle/profile representing the end business.
+- Authorised representative evidence:
+  - baseline UK business bundle fields are business details, address, registration data, and primary authorised rep contact details;
+  - passport/government ID is exception-only if Twilio cannot digitally verify the rep or their association with the business;
+  - do not make passport/driving licence mandatory upfront.
+- Rep count:
+  - one primary authorised representative should be required;
+  - optional second rep is sensible as backup/future-proofing;
+  - do not force rep 2 on the first customer-facing launch form unless Bugs approves.
+- ID/document handling:
+  - keep the static form and Google Sheet free of ID upload fields;
+  - if identity evidence is needed, use a Twilio-managed compliance step or another secure approved process.
+
+RCS-Twilio-4 updated `RCS_ONBOARDING_MAIN_BUILD_PLAN.md` accordingly:
+
+- `Isa Bell Email - Pending Clarification` became `Isa Bell Email - Answer Received`;
+- Trust Hub design assumption changed from `two reps likely required` to `one required primary rep plus optional second`;
+- Field Authority Map now treats passport/government ID as exception-only;
+- Open questions now focus on field shape and secure exception route rather than whether two reps are mandatory.
+- Future `Internal reviews` rows now use `pending_trust_hub_review` instead of `pending_isa_reply` for the KYC check.
+
+Recommended next step:
+
+1. Do not add sensitive ID/document upload fields.
+2. Do not force a second representative in the public form yet.
+3. Later, decide whether to split the primary authorised rep into first/last/email/mobile/title/job-position in the customer form or collect the extra pieces internally for the Trust Hub lane.
 
 ### Field Change Shortlist Added
 
@@ -1432,7 +1478,7 @@ Recommended next step:
    - company type option cleanup;
    - KYC evidence notice with no upload field.
 2. If approved, edit only `rcs-registration/index.html` and related docs/schema labels as needed.
-3. Do not add rep 2 or ID upload fields until Twilio clarification returns or Bugs explicitly chooses that assumption.
+3. Do not add rep 2 or ID upload fields unless Bugs explicitly chooses them; Isa's reply now supports one required primary rep, optional second rep, and ID as exception-only.
 
 ### Small No-Regrets Customer-Facing Wording Pass
 
@@ -1646,3 +1692,31 @@ Important caveat:
 
 - This work is local and uncommitted at the time of this note.
 - Positive live proof still needs the Apps Script-side `ONBOARDING_CREATE_PIN` script property configured.
+
+### Slice 6I Deployed - Isa Bell Reply Integration
+
+Bugs pasted Isa Bell's Twilio reply, which clarified the KYC/Trust Hub assumptions.
+
+RCS-Twilio-4 integrated the reply into docs and the small Apps Script default:
+
+- `RCS_ONBOARDING_MAIN_BUILD_PLAN.md` now treats Isa's reply as received, not pending.
+- Trust Hub design assumption is now:
+  - Secondary Compliance Profile per UK limited-company end client;
+  - UK long-code RC Bundle remains a separate number-compliance lane;
+  - one required primary authorised representative;
+  - optional second authorised representative only;
+  - ID evidence is exception-only, not upfront.
+- Future `Internal reviews` rows now default `KYC/Trust Hub check` to `pending_trust_hub_review`, not `pending_isa_reply`.
+- Existing `pending_isa_reply` test rows are historical proof rows and were not mutated.
+
+Verification:
+
+- `Code.gs` syntax check passed.
+- `git diff --check` passed for the scoped files.
+- Apps Script was pushed with `clasp push`.
+- Apps Script version `19` was created with `clasp version "Update KYC checklist after Twilio reply"`.
+- Existing deployment `AKfycbyI81Ir2xvHLar0R0iFBBWyXa1Nj93T4_8Ni5_eX3XEYDA-AKQbVYbPHnTROLm8e4a6` was redeployed at version `19`.
+
+Important caveat:
+
+- No live test Part A submission was created for this default-value change, to avoid adding another Sheet/email proof row unnecessarily.

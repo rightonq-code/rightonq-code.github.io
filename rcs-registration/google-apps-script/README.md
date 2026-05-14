@@ -44,7 +44,7 @@ Deployment:
 
 - Execute as: `adam@rightonq.co.uk`
 - Access: `Anyone`
-- Current published version after CLI redeploy: `18`
+- Current published version after CLI redeploy: `19`
 - Version `4` added Application ID, registration status, and Part A status columns to the intake row.
 - Version `5` adds Application ID status lookup via `GET ?applicationId=...`.
 - Version `6` adds the `Applications` control-row tab and writes/reads one row per Application ID.
@@ -58,6 +58,7 @@ Deployment:
 - Version `16` adds the `Internal reviews` operator checklist tab and a `Trust Hub status` control field.
 - Version `17` adds a guarded `updateInternalReview` action for RightOnQ checklist updates and optional Part A acceptance.
 - Version `18` adds a guarded `getOperatorSnapshot` action for RightOnQ application readback.
+- Version `19` updates the default internal KYC checklist state from `pending_isa_reply` to `pending_trust_hub_review` after Twilio's Isa Bell reply.
 
 ## Behaviour
 
