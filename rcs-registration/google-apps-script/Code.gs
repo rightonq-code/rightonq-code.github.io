@@ -5,6 +5,7 @@ const PART_B_APPROVALS_SHEET_NAME = "Part B approvals";
 const PART_B_VIDEO_APPROVALS_SHEET_NAME = "Part B video approvals";
 const STATUS_EVENTS_SHEET_NAME = "Status events";
 const COMMUNICATIONS_SHEET_NAME = "Communications";
+const INTERNAL_REVIEWS_SHEET_NAME = "Internal reviews";
 const PUBLIC_FORM_URL = "https://rightonq-code.github.io/rcs-registration/index.html";
 const NOTIFY_EMAIL = "adam@rightonq.co.uk";
 const APPLICATION_HEADERS = [
@@ -32,6 +33,7 @@ const APPLICATION_HEADERS = [
   "Part A status",
   "Part B status",
   "Twilio status",
+  "Trust Hub status",
   "Provider status",
   "Internal owner",
   "Created at",
@@ -81,6 +83,7 @@ const STATUS_EVENT_HEADERS = [
   "New Part B status",
   "Billing status",
   "Twilio status",
+  "Trust Hub status",
   "Provider status",
   "Next action owner",
   "Next action note",
@@ -104,6 +107,24 @@ const COMMUNICATION_HEADERS = [
   "Send method",
   "Body",
   "Related event",
+  "Last updated"
+];
+const INTERNAL_REVIEW_HEADERS = [
+  "Created at",
+  "Application ID",
+  "Review status",
+  "Assigned owner",
+  "Legal/company check",
+  "Website/domain check",
+  "Public links check",
+  "Message purpose/examples check",
+  "Consent/opt-out check",
+  "KYC/Trust Hub check",
+  "SMS fallback/RC bundle check",
+  "Phone preview readiness",
+  "Next action",
+  "Notes",
+  "Source status",
   "Last updated"
 ];
 const REGISTRATION_STATUS_ORDER = [
@@ -174,6 +195,7 @@ function getApplicationStatus(applicationId) {
       partBStatus: applicationRecord["Part B status"] || "",
       billingStatus: applicationRecord["Billing status"] || "",
       twilioStatus: applicationRecord["Twilio status"] || "",
+      trustHubStatus: applicationRecord["Trust Hub status"] || "",
       providerStatus: applicationRecord["Provider status"] || "",
       reviewStatus: "",
       partBVideoStatus: "",
@@ -324,6 +346,13 @@ function doPost(event) {
       applicationId: applicationId,
       registrationStatus: registrationStatus,
       partAStatus: partAStatus,
+      now: now
+    });
+
+    queueInternalReview(spreadsheet, {
+      applicationId: applicationId,
+      applicationRecord: payload,
+      triggerStatus: registrationStatus,
       now: now
     });
 
@@ -566,6 +595,7 @@ function updateApplicationStatus(spreadsheet, payload) {
     safeCell(partBStatus),
     safeCell(finalValue(updates["Billing status"], previous["Billing status"])),
     safeCell(finalValue(updates["Twilio status"], previous["Twilio status"])),
+    safeCell(finalValue(updates["Trust Hub status"], previous["Trust Hub status"])),
     safeCell(finalValue(updates["Provider status"], previous["Provider status"])),
     safeCell(finalValue(updates["Next action owner"], previous["Next action owner"])),
     safeCell(finalValue(updates["Next action note"], previous["Next action note"])),
@@ -603,6 +633,7 @@ function buildStatusUpdates(payload, now) {
     partAStatus: "Part A status",
     partBStatus: "Part B status",
     twilioStatus: "Twilio status",
+    trustHubStatus: "Trust Hub status",
     providerStatus: "Provider status",
     internalOwner: "Internal owner",
     nextActionOwner: "Next action owner",
@@ -641,6 +672,46 @@ function queueStatusCommunication(spreadsheet, payload, applicationRecord, updat
     relatedEvent: payload.eventType || "manual_status_update",
     now: now
   });
+}
+
+function queueInternalReview(spreadsheet, options) {
+  const now = options.now || new Date();
+  const record = options.applicationRecord || {};
+  const nextAction = [
+    "Review Part A for legal/company fit, website/domain match, public links,",
+    "message wording, consent/opt-out, KYC readiness, and phone preview readiness."
+  ].join(" ");
+
+  const sheet = getOrCreateSheet(spreadsheet, INTERNAL_REVIEWS_SHEET_NAME, INTERNAL_REVIEW_HEADERS);
+  sheet.appendRow([
+    now,
+    safeCell(options.applicationId),
+    "pending_review",
+    "RightOnQ",
+    "pending",
+    "pending",
+    "pending",
+    "pending",
+    "pending",
+    "pending_isa_reply",
+    "pending",
+    "pending",
+    safeCell(nextAction),
+    safeCell(buildInternalReviewNotes(record)),
+    safeCell(options.triggerStatus),
+    now
+  ]);
+}
+
+function buildInternalReviewNotes(record) {
+  const notes = [
+    "Legal: " + firstValue(record.legalBusinessName, "not supplied"),
+    "Brand: " + firstValue(record.displayName, record.tradingName, "not supplied"),
+    "Website: " + firstValue(record.businessWebsite, record.customerWebsite, "not supplied"),
+    "Use case: " + firstValue(record.primaryUseCase, "not supplied"),
+    "KYC: do not request or store ID documents in the static form/Sheet path."
+  ];
+  return notes.join(" | ");
 }
 
 function queueCommunication(spreadsheet, templateCode, options) {
@@ -826,6 +897,7 @@ function upsertApplicationRecord(spreadsheet, payload, options) {
     "Part A status": firstValue(options.partAStatus, existing["Part A status"]),
     "Part B status": firstValue(existing["Part B status"], payload.partBStatus),
     "Twilio status": firstValue(existing["Twilio status"], payload.twilioStatus),
+    "Trust Hub status": firstValue(existing["Trust Hub status"], payload.trustHubStatus, "not_started"),
     "Provider status": firstValue(existing["Provider status"], payload.providerStatus),
     "Internal owner": firstValue(existing["Internal owner"], payload.internalOwner),
     "Created at": firstValue(existing["Created at"], now),

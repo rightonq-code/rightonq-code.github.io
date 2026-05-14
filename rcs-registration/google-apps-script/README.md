@@ -44,7 +44,7 @@ Deployment:
 
 - Execute as: `adam@rightonq.co.uk`
 - Access: `Anyone`
-- Current published version after CLI redeploy: `15`
+- Current published version after CLI redeploy: `16`
 - Version `4` added Application ID, registration status, and Part A status columns to the intake row.
 - Version `5` adds Application ID status lookup via `GET ?applicationId=...`.
 - Version `6` adds the `Applications` control-row tab and writes/reads one row per Application ID.
@@ -55,6 +55,7 @@ Deployment:
 - Version `13` adds B3 video approval/change storage in the `Part B video approvals` tab and updates the matching `Applications` control row.
 - Version `14` adds a guarded internal `updateApplicationStatus` action, a `Status events` audit log, and redacts sensitive tokens/PINs from stored audit JSON.
 - Version `15` adds the `Communications` manual-send queue and first customer communication templates.
+- Version `16` adds the `Internal reviews` operator checklist tab and a `Trust Hub status` control field.
 
 ## Behaviour
 
@@ -75,6 +76,8 @@ The script:
 - appends successful internal status changes to `Status events`,
 - redacts private application tokens and operator/create PINs from stored audit JSON,
 - appends customer communication drafts to `Communications` for manual send/review,
+- appends a RightOnQ operator checklist row to `Internal reviews` when Part A is received,
+- stores `Trust Hub status` on the `Applications` control row,
 - sets review status to `New`,
 - sets US fee status to `Not yet agreed` if United States is selected,
 - stores the raw JSON payload in the `Part A JSON` column,

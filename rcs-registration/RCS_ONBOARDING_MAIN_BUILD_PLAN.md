@@ -500,6 +500,7 @@ Likely tabs:
 - `Billing`
 - `Part A`
 - `Part B approvals`
+- `Internal reviews`
 - `Trust Hub KYC`
 - `Twilio setup`
 - `Communications`
@@ -834,6 +835,47 @@ Launch privacy rule:
 
 - Do not store representative date of birth, ID images, or proof-of-address files in the current static form / Google Sheet workflow unless Bugs explicitly approves a secure storage design.
 - If Twilio requires sensitive representative evidence, handle it as a secure manual follow-up or later backend/admin flow.
+
+### Tab: Internal Reviews
+
+Purpose: RightOnQ operator checklist for reviewing Part A before phone preview, Trust Hub/KYC work, or RCS submission moves forward.
+
+Primary writer:
+
+- system when Part A is received;
+- RightOnQ manually for checklist status and notes during pilot.
+
+Suggested columns:
+
+- `created_at`
+- `application_id`
+- `review_status`
+- `assigned_owner`
+- `legal_company_check`
+- `website_domain_check`
+- `public_links_check`
+- `message_purpose_examples_check`
+- `consent_opt_out_check`
+- `kyc_trust_hub_check`
+- `sms_fallback_rc_bundle_check`
+- `phone_preview_readiness`
+- `next_action`
+- `notes`
+- `source_status`
+- `updated_at`
+
+Initial checklist state:
+
+- `review_status`: `pending_review`
+- `assigned_owner`: `RightOnQ`
+- checklist items: `pending`
+- `kyc_trust_hub_check`: `pending_isa_reply` until Twilio clarification is received
+
+Implementation note:
+
+- This checklist is internal only.
+- It must not request or store passport, driving licence, proof-of-address files, or date of birth.
+- Its job is to make the manual RightOnQ review visible and repeatable before the application moves forward.
 
 ### Tab: Twilio Setup
 
@@ -1410,6 +1452,51 @@ Implementation stance:
 - First live version should stay manual: RightOnQ reviews intake, then enters/creates the Secondary Compliance Profile in Twilio Console or a guarded internal workflow.
 - API automation should come after the manual process is proven and after the required fields are verified from Twilio's live policy/evaluation resources.
 - Do not submit fake/test profiles to Twilio review. Keep test profiles clearly labelled draft-only.
+
+### Slice 6D - Internal Review Checklist
+
+Status: first thin implementation added by RCS-Twilio-4 on Thursday 14 May 2026.
+
+Purpose:
+
+- give RightOnQ an operator checklist when Part A lands;
+- keep the manual review visible before phone preview, Trust Hub/KYC, or RCS submission work moves forward;
+- avoid building a full admin UI before the workflow has settled.
+
+Implemented:
+
+- Apps Script now defines an `Internal reviews` tab.
+- Future Part A submissions append one checklist row to `Internal reviews`.
+- The checklist includes:
+  - legal/company check;
+  - website/domain check;
+  - public links check;
+  - message purpose/examples check;
+  - consent/opt-out check;
+  - KYC/Trust Hub check;
+  - SMS fallback/RC bundle check;
+  - phone preview readiness;
+  - next action;
+  - notes.
+- `Applications` now has a `Trust Hub status` control field.
+- Guarded internal status updates can now update `trustHubStatus`.
+- Existing live Apps Script deployment was redeployed in place to version `16`.
+
+Test evidence:
+
+- Apps Script syntax passed via `new Function(...)`.
+- `git diff --check` passed for scoped files.
+- Live labelled Part A test submission `ROQ-RCS-TEST-REVIEW-202605142008` returned `ok: true`.
+- Live `Internal reviews` tab contains a pending checklist row for `ROQ-RCS-TEST-REVIEW-202605142008`.
+- Live `Applications` tab contains `Trust Hub status = not_started` for `ROQ-RCS-TEST-REVIEW-202605142008`.
+- Live status lookup for `ROQ-RCS-TEST-REVIEW-202605142008` returns `trustHubStatus: not_started`.
+
+Important caveat:
+
+- This is not a full operator dashboard.
+- It is a sheet-backed internal checklist and status spine only.
+- It does not request, upload, store, or link sensitive ID evidence.
+- Two earlier labelled curl attempts displayed a Google Drive error page because the redirect was followed incorrectly, but they still reached the Apps Script backend and wrote test rows `ROQ-RCS-TEST-REVIEW-202605142006` and `ROQ-RCS-TEST-REVIEW-202605142007`. Leave them as obvious proof rows unless Bugs asks for cleanup.
 
 ### Slice 7 - Customer Commercial/Payment Entry Page
 

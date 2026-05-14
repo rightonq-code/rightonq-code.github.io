@@ -1457,3 +1457,50 @@ RCS-Twilio-4 updated `rcs-registration/index.html` only for wording/options:
 - Strengthened authorised rep/customer email helpers to prefer business-domain email and avoid personal/free webmail where possible.
 
 No sensitive fields were added. Rep 2, DOB, ID uploads, and Trust Hub operations-region fields remain pending Isa Bell/Twilio clarification or a later explicit Bugs decision.
+
+### Slice 6D Completed - Internal Review Checklist
+
+Bugs asked to keep rolling after the KYC-safe wording pass.
+
+RCS-Twilio-4 completed the next safe operator-readiness slice: an internal checklist for RightOnQ review after Part A lands.
+
+Implemented:
+
+- Apps Script now defines a new `Internal reviews` tab.
+- Future Part A submissions append a pending checklist row to `Internal reviews`.
+- Checklist columns cover:
+  - legal/company check;
+  - website/domain check;
+  - public links check;
+  - message purpose/examples check;
+  - consent/opt-out check;
+  - KYC/Trust Hub check;
+  - SMS fallback/RC bundle check;
+  - phone preview readiness;
+  - next action;
+  - notes.
+- `Applications` now includes a `Trust Hub status` control field.
+- `getApplicationStatus` returns `trustHubStatus`.
+- Guarded `updateApplicationStatus` can accept `trustHubStatus` and writes it to `Applications`.
+- `Status events` now includes `Trust Hub status`.
+- `RCS_ONBOARDING_MAIN_BUILD_PLAN.md` documents the `Internal reviews` tab and Slice 6D.
+- `google-apps-script/README.md` now marks Apps Script version `16` as the current deployment version.
+- Apps Script was pushed with `clasp`, versioned as `16`, and redeployed in place to the existing live web app deployment.
+
+Test evidence:
+
+- Apps Script syntax passed via `new Function(...)`.
+- `git diff --check` passed for scoped files.
+- Live labelled Part A test submission `ROQ-RCS-TEST-REVIEW-202605142008` returned `ok: true`.
+- Live `Internal reviews` tab contains a pending checklist row for `ROQ-RCS-TEST-REVIEW-202605142008`.
+- Live `Applications` tab contains `Trust Hub status = not_started` for `ROQ-RCS-TEST-REVIEW-202605142008`.
+- Live status lookup for `ROQ-RCS-TEST-REVIEW-202605142008` returns `trustHubStatus: not_started`.
+
+Important caveat:
+
+- This slice does not add a full admin UI and does not collect/store ID documents.
+- Two earlier labelled curl attempts displayed a Google Drive error page because the redirect was followed incorrectly, but they still reached the Apps Script backend and wrote test rows:
+  - `ROQ-RCS-TEST-REVIEW-202605142006`;
+  - `ROQ-RCS-TEST-REVIEW-202605142007`.
+- Leave those obvious test rows unless Bugs asks for cleanup.
+- This work is local and uncommitted at the time of this note. Next step should be a scoped commit/push if Bugs approves.
