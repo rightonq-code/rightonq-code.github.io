@@ -1605,6 +1605,39 @@ Important caveat:
 
 - Positive live proof still requires the Apps Script-side `ONBOARDING_OPERATOR_PIN` script property to be configured.
 
+### Slice 6H - Local Private Application Link Wrapper
+
+Status: implemented by RCS-Twilio-4 on Thursday 14 May 2026.
+
+Purpose:
+
+- give RightOnQ a repeatable local command for turning a qualified CRM/outreach handoff into a private application link;
+- avoid hand-building `createApplicationDraft` curl payloads;
+- keep the create PIN out of the public static app, repo, and Sheet audit JSON;
+- preserve the source-of-truth split: CRM qualifies the lead, onboarding creates the application record/link.
+
+Implemented behaviour:
+
+- repo-owned Node wrapper at `rcs-registration/tools/operator-create-application.mjs`;
+- reads `RCS_ONBOARDING_CREATE_PIN` from the local environment;
+- sends `action = createApplicationDraft` to the deployed Apps Script endpoint;
+- supports CRM, company, contact, campaign, package, and handoff context fields;
+- supports `--dry-run` so operators can inspect the payload without sending it;
+- successful live runs return the private application link for that specific client/application.
+
+Verification:
+
+- `node --check rcs-registration/tools/operator-create-application.mjs` passed.
+- `--dry-run` printed the expected `createApplicationDraft` payload without a create PIN.
+- Running without `RCS_ONBOARDING_CREATE_PIN` failed locally before sending.
+- Running with a dummy local create PIN reached Apps Script and returned `ONBOARDING_CREATE_PIN is not configured`.
+- Spreadsheet readback after the dummy live attempt showed no new `ROQ-RCS-TEST-CREATE-WRAPPER-202605142032` row in `Applications`.
+
+Important caveat:
+
+- The wrapper does not configure the Apps Script-side `ONBOARDING_CREATE_PIN`.
+- Positive live proof still requires that script property to be configured.
+
 ### Slice 7 - Customer Commercial/Payment Entry Page
 
 Design/build the onboarding page before the RCS form.

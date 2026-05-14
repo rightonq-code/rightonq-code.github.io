@@ -99,6 +99,6 @@ The internal `updateApplicationStatus` action is guarded by the script property 
 
 Do not store either PIN in this repo, in static HTML, or in Sheet audit JSON. If `ONBOARDING_OPERATOR_PIN` is not configured, internal status updates correctly return `ONBOARDING_OPERATOR_PIN is not configured`.
 
-Local operator updates can be sent with `rcs-registration/tools/operator-review.mjs`. Local operator readback can be run with `rcs-registration/tools/operator-status.mjs`. Both tools read `RCS_ONBOARDING_OPERATOR_PIN` from the local environment and never store it in the repo.
+Local application-link creation can be sent with `rcs-registration/tools/operator-create-application.mjs`, which reads `RCS_ONBOARDING_CREATE_PIN` from the local environment. Local operator updates can be sent with `rcs-registration/tools/operator-review.mjs`. Local operator readback can be run with `rcs-registration/tools/operator-status.mjs`. These tools never store PINs in the repo.
 
 `Communications` is currently a manual-send queue. It records draft messages and trigger context, but it does not send customer emails automatically.

@@ -1620,3 +1620,29 @@ Important caveat:
 - This work is local and uncommitted at the time of this note.
 - It still needs a scoped commit/push.
 - Positive live readback still needs the Apps Script-side `ONBOARDING_OPERATOR_PIN` script property configured.
+
+### Slice 6H Completed - Local Private Application Link Wrapper
+
+Bugs approved continuing forward after Slice 6G.
+
+RCS-Twilio-4 implemented a local application creation wrapper:
+
+- new repo-owned tool: `rcs-registration/tools/operator-create-application.mjs`;
+- purpose: create a private application record/link from a qualified CRM/outreach handoff through the existing guarded `createApplicationDraft` endpoint;
+- reads `RCS_ONBOARDING_CREATE_PIN` from the local environment;
+- never stores or prints the create PIN;
+- supports `--dry-run` for payload inspection;
+- supports CRM IDs, source record URL, company/contact fields, campaign/message codes, package interest, sales context, owner, and next-action notes.
+
+Verification:
+
+- `node --check rcs-registration/tools/operator-create-application.mjs` passed.
+- Dry-run printed the expected `createApplicationDraft` payload without a create PIN.
+- Live command without `RCS_ONBOARDING_CREATE_PIN` failed locally before sending.
+- Live command with a dummy local create PIN reached Apps Script and returned `ONBOARDING_CREATE_PIN is not configured`.
+- Spreadsheet readback after the dummy live attempt showed no new `ROQ-RCS-TEST-CREATE-WRAPPER-202605142032` row in `Applications`.
+
+Important caveat:
+
+- This work is local and uncommitted at the time of this note.
+- Positive live proof still needs the Apps Script-side `ONBOARDING_CREATE_PIN` script property configured.
