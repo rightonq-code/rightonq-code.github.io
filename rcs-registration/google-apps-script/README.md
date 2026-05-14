@@ -44,7 +44,7 @@ Deployment:
 
 - Execute as: `adam@rightonq.co.uk`
 - Access: `Anyone`
-- Current published version after CLI redeploy: `17`
+- Current published version after CLI redeploy: `18`
 - Version `4` added Application ID, registration status, and Part A status columns to the intake row.
 - Version `5` adds Application ID status lookup via `GET ?applicationId=...`.
 - Version `6` adds the `Applications` control-row tab and writes/reads one row per Application ID.
@@ -57,6 +57,7 @@ Deployment:
 - Version `15` adds the `Communications` manual-send queue and first customer communication templates.
 - Version `16` adds the `Internal reviews` operator checklist tab and a `Trust Hub status` control field.
 - Version `17` adds a guarded `updateInternalReview` action for RightOnQ checklist updates and optional Part A acceptance.
+- Version `18` adds a guarded `getOperatorSnapshot` action for RightOnQ application readback.
 
 ## Behaviour
 
@@ -75,6 +76,7 @@ The script:
 - updates the matching `Applications` row to `video_approved` or `video_changes_requested`,
 - supports guarded internal status updates through `action = updateApplicationStatus`,
 - supports guarded internal checklist updates through `action = updateInternalReview`,
+- supports guarded operator readback through `action = getOperatorSnapshot`,
 - appends successful internal status changes to `Status events`,
 - redacts private application tokens and operator/create PINs from stored audit JSON,
 - appends customer communication drafts to `Communications` for manual send/review,
@@ -97,6 +99,6 @@ The internal `updateApplicationStatus` action is guarded by the script property 
 
 Do not store either PIN in this repo, in static HTML, or in Sheet audit JSON. If `ONBOARDING_OPERATOR_PIN` is not configured, internal status updates correctly return `ONBOARDING_OPERATOR_PIN is not configured`.
 
-Local operator updates can be sent with `rcs-registration/tools/operator-review.mjs`. The tool reads `RCS_ONBOARDING_OPERATOR_PIN` from the local environment and never stores it in the repo.
+Local operator updates can be sent with `rcs-registration/tools/operator-review.mjs`. Local operator readback can be run with `rcs-registration/tools/operator-status.mjs`. Both tools read `RCS_ONBOARDING_OPERATOR_PIN` from the local environment and never store it in the repo.
 
 `Communications` is currently a manual-send queue. It records draft messages and trigger context, but it does not send customer emails automatically.

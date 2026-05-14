@@ -1581,3 +1581,42 @@ Important caveat:
 
 - This work is local and uncommitted at the time of this note.
 - Positive live proof still needs the Apps Script-side `ONBOARDING_OPERATOR_PIN` script property configured.
+
+### Slice 6G Deployed - Guarded Operator Snapshot Readback
+
+Bugs approved continuing forward after Slice 6F.
+
+RCS-Twilio-4 implemented and deployed guarded operator readback:
+
+- Apps Script now recognises `action = getOperatorSnapshot`;
+- the action uses the existing `ONBOARDING_OPERATOR_PIN` guard;
+- response is designed for RightOnQ operators, not customers;
+- response includes:
+  - redacted application summary;
+  - latest `Internal reviews` row;
+  - up to five recent `Status events`;
+  - up to five queued `Communications`;
+- the response excludes `Private application token`;
+- raw `Submission JSON` is redacted as `[redacted in operator snapshot]`;
+- new local wrapper: `rcs-registration/tools/operator-status.mjs`.
+
+Verification:
+
+- `Code.gs` syntax check passed.
+- `node --check rcs-registration/tools/operator-status.mjs` passed.
+- Dry-run printed the expected `getOperatorSnapshot` payload without a PIN.
+- `git diff --check` passed for the scoped files.
+- Apps Script was pushed with `clasp push`.
+- Apps Script version `18` was created with `clasp version "Add operator snapshot readback"`.
+- Existing deployment `AKfycbyI81Ir2xvHLar0R0iFBBWyXa1Nj93T4_8Ni5_eX3XEYDA-AKQbVYbPHnTROLm8e4a6` was redeployed at version `18`.
+- Dummy live operator-status request reached Apps Script and returned `ONBOARDING_OPERATOR_PIN is not configured`.
+- Spreadsheet readback after the dummy live attempt showed no mutation:
+  - `Internal reviews` stayed `pending_review`;
+  - `Applications` stayed `part_a_submitted`;
+  - `Trust Hub status` stayed `not_started`.
+
+Important caveat:
+
+- This work is local and uncommitted at the time of this note.
+- It still needs a scoped commit/push.
+- Positive live readback still needs the Apps Script-side `ONBOARDING_OPERATOR_PIN` script property configured.

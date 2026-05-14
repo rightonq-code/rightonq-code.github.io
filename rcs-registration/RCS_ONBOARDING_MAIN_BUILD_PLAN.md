@@ -1572,6 +1572,39 @@ Important caveat:
 - The wrapper does not configure the Apps Script-side `ONBOARDING_OPERATOR_PIN`.
 - Positive live proof still requires that script property to be configured.
 
+### Slice 6G - Guarded Operator Snapshot Readback
+
+Status: implemented and deployed by RCS-Twilio-4 on Thursday 14 May 2026.
+
+Purpose:
+
+- let RightOnQ inspect one application's operational state before and after an operator action;
+- avoid relying on manual Sheet scanning for every review;
+- keep the client-facing status endpoint limited and token-safe;
+- give the future internal admin UI a clean readback contract.
+
+Implemented behaviour:
+
+- Apps Script supports guarded `action = getOperatorSnapshot`;
+- the action requires `ONBOARDING_OPERATOR_PIN`;
+- response includes a redacted application summary, latest internal review, recent status events, and queued communications;
+- `Private application token` and raw `Submission JSON` are not returned in the operator snapshot;
+- local wrapper at `rcs-registration/tools/operator-status.mjs` sends the guarded readback request using `RCS_ONBOARDING_OPERATOR_PIN`.
+
+Verification:
+
+- `Code.gs` syntax check passed.
+- `node --check rcs-registration/tools/operator-status.mjs` passed.
+- `operator-status.mjs --dry-run` printed the expected `getOperatorSnapshot` payload without an operator PIN.
+- `git diff --check` passed for the scoped files.
+- Apps Script version `18` was created and deployed to the existing web app deployment.
+- A dummy live operator-status request reached Apps Script and returned `ONBOARDING_OPERATOR_PIN is not configured`.
+- Spreadsheet readback after the dummy live attempt showed no mutation.
+
+Important caveat:
+
+- Positive live proof still requires the Apps Script-side `ONBOARDING_OPERATOR_PIN` script property to be configured.
+
 ### Slice 7 - Customer Commercial/Payment Entry Page
 
 Design/build the onboarding page before the RCS form.

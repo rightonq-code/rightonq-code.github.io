@@ -287,6 +287,10 @@ function doPost(event) {
     if (payload.action === "submitVideoApproval") {
       return jsonResponse(submitVideoApproval(spreadsheet, payload));
     }
+    if (payload.action === "getOperatorSnapshot") {
+      requireOperatorPin(payload);
+      return jsonResponse(getOperatorSnapshot(spreadsheet, payload));
+    }
     if (payload.action === "updateApplicationStatus") {
       requireOperatorPin(payload);
       return jsonResponse(updateApplicationStatus(spreadsheet, payload));
@@ -620,6 +624,61 @@ function updateApplicationStatus(spreadsheet, payload) {
     partAStatus: partAStatus,
     partBStatus: partBStatus,
     updatedAt: now.toISOString()
+  };
+}
+
+function getOperatorSnapshot(spreadsheet, payload) {
+  const applicationId = payload.applicationId;
+  if (!applicationId) throw new Error("Missing application ID");
+
+  const applicationRecord = findApplicationRecord(spreadsheet, { applicationId: applicationId });
+  if (!applicationRecord) throw new Error("Application ID not found");
+
+  return {
+    ok: true,
+    applicationId: applicationId,
+    application: buildOperatorApplicationSummary(applicationRecord),
+    internalReview: findLatestRecordByApplicationId(spreadsheet, INTERNAL_REVIEWS_SHEET_NAME, applicationId),
+    recentStatusEvents: findRecentRecordsByApplicationId(spreadsheet, STATUS_EVENTS_SHEET_NAME, applicationId, 5),
+    queuedCommunications: findRecentRecordsByApplicationId(spreadsheet, COMMUNICATIONS_SHEET_NAME, applicationId, 5),
+    generatedAt: new Date().toISOString()
+  };
+}
+
+function buildOperatorApplicationSummary(record) {
+  return {
+    applicationId: record["Application ID"] || "",
+    clientId: record["Client ID"] || "",
+    crmCompanyId: record["CRM company ID"] || "",
+    crmDealId: record["CRM deal ID"] || "",
+    crmSourceRecordUrl: record["CRM source record URL"] || "",
+    clientName: record["Client name"] || "",
+    legalBusinessName: record["Legal business name"] || "",
+    tradingName: record["Trading name"] || "",
+    primaryContactName: record["Primary contact name"] || "",
+    primaryContactEmail: record["Primary contact email"] || "",
+    primaryContactPhone: record["Primary contact phone"] || "",
+    campaignCode: record["Campaign code"] || "",
+    messageCode: record["Message code"] || "",
+    qualifiedUseCase: record["Qualified use case"] || "",
+    packageInterest: record["Package interest"] || "",
+    salesContext: record["Sales context"] || "",
+    packageName: record["Package name"] || "",
+    registrationStatus: record["Registration status"] || "",
+    billingStatus: record["Billing status"] || "",
+    partAStatus: record["Part A status"] || "",
+    partBStatus: record["Part B status"] || "",
+    twilioStatus: record["Twilio status"] || "",
+    trustHubStatus: record["Trust Hub status"] || "",
+    providerStatus: record["Provider status"] || "",
+    internalOwner: record["Internal owner"] || "",
+    createdAt: serialiseDate(record["Created at"]),
+    updatedAt: serialiseDate(record["Updated at"]),
+    lastClientActionAt: serialiseDate(record["Last client action at"]),
+    lastInternalActionAt: serialiseDate(record["Last internal action at"]),
+    nextActionOwner: record["Next action owner"] || "",
+    nextActionNote: record["Next action note"] || "",
+    internalNotes: record["Internal notes"] || ""
   };
 }
 
@@ -1047,6 +1106,51 @@ function findApplicationRecord(spreadsheet, criteria) {
   }
 
   return null;
+}
+
+function findLatestRecordByApplicationId(spreadsheet, sheetName, applicationId) {
+  const records = findRecentRecordsByApplicationId(spreadsheet, sheetName, applicationId, 1);
+  return records.length ? records[0] : {};
+}
+
+function findRecentRecordsByApplicationId(spreadsheet, sheetName, applicationId, limit) {
+  const sheet = spreadsheet.getSheetByName(sheetName);
+  if (!sheet) return [];
+
+  const values = sheet.getDataRange().getValues();
+  if (values.length < 2) return [];
+
+  const headers = normaliseHeaders(values[0]);
+  const applicationIdColumn = headers.indexOf("Application ID");
+  if (applicationIdColumn === -1) return [];
+
+  const records = [];
+  for (let index = values.length - 1; index >= 1; index -= 1) {
+    if (String(values[index][applicationIdColumn]) !== String(applicationId)) continue;
+    records.push(sanitiseOperatorRecord(rowToObject(values[index], headers)));
+    if (records.length >= limit) break;
+  }
+  return records;
+}
+
+function sanitiseOperatorRecord(record) {
+  const output = {};
+  Object.keys(record).forEach(function(key) {
+    if (key === "Private application token") return;
+    if (key === "Submission JSON") {
+      output[key] = "[redacted in operator snapshot]";
+      return;
+    }
+    output[key] = serialiseOperatorValue(record[key]);
+  });
+  return output;
+}
+
+function serialiseOperatorValue(value) {
+  if (Object.prototype.toString.call(value) === "[object Date]" && !isNaN(value.getTime())) {
+    return value.toISOString();
+  }
+  return value || "";
 }
 
 function getOrCreateSheet(spreadsheet, name, headers) {
