@@ -923,6 +923,36 @@ Important launch caveat:
 - This still uses the browser/generated Application ID when the client starts from the public static page.
 - The next launch-safe move is to create the `Applications` row first, generate a private token/link, then send that private link to the client.
 
+### Slice 4B - Private Application Token Path
+
+Prepare the launch-safe route where RightOnQ creates the application before the client starts Part A.
+
+Status: first guarded version implemented and partially tested by RCS-Twilio-4 on Thursday 14 May 2026.
+
+Implemented:
+
+- Static app accepts private link parameters:
+  - `applicationId` or `application_id`;
+  - `applicationToken`, `privateApplicationToken`, `private_application_token`, or `token`.
+- Static app stores the token locally for status checks and submission, but does not include it in the downloaded client copy.
+- Status lookup can read by Application ID and token.
+- If a token is supplied and does not match the `Applications` row, status lookup returns `found: false`.
+- Part A submission into a token-protected `Applications` row now requires the matching private token.
+- Apps Script has a guarded internal `action: createApplicationDraft` path.
+- That action requires the script property `ONBOARDING_CREATE_PIN`, generates a private token, creates/updates the `Applications` row, and returns a private application link.
+- Existing live Apps Script deployment `AKfycbyI81Ir2xvHLar0R0iFBBWyXa1Nj93T4_8Ni5_eX3XEYDA-AKQbVYbPHnTROLm8e4a6` redeployed in place to version `7`.
+
+Test evidence:
+
+- Normal status lookup for `ROQ-RCS-TEST-SLICE5-20260514` still returned the expected application status.
+- Status lookup for that Application ID with a wrong token returned `found: false`.
+- Attempted `createApplicationDraft` without a configured PIN did not create a row in `Applications`.
+
+Important launch caveat:
+
+- `ONBOARDING_CREATE_PIN` is not stored in the repo and must be configured in Apps Script properties before internal draft creation can be used.
+- A proper operator/admin interface is still future work. This is the guarded plumbing layer only.
+
 ### Slice 5 - Part B Unlocks
 
 Make Part B stages reflect real application status.

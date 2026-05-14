@@ -3016,8 +3016,10 @@
     let restoringProgress = false;
     const autosaveKey = "rightonq-rcs-registration-progress-v1";
     const applicationIdKey = "rightonq-rcs-application-id-v1";
+    const applicationTokenKey = "rightonq-rcs-application-token-v1";
     const progressSaveEnabled = true;
     const partASubmissionEndpoint = "https://script.google.com/macros/s/AKfycbyI81Ir2xvHLar0R0iFBBWyXa1Nj93T4_8Ni5_eX3XEYDA-AKQbVYbPHnTROLm8e4a6/exec";
+    let applicationToken = loadLinkedApplicationToken();
     let applicationId = loadOrCreateApplicationId();
     let applicationStatus = {
       registrationStatus: "draft",
@@ -3027,6 +3029,7 @@
     };
     const statusOrder = [
       "draft",
+      "application_created",
       "part_a_submitted",
       "part_a_accepted",
       "phone_preview_sent",
@@ -3038,6 +3041,7 @@
     const statusLabels = {
       draft: "Part A not submitted",
       part_a_submitted: "Part A received",
+      application_created: "Application created",
       part_a_accepted: "Part A accepted",
       phone_preview_sent: "Phone preview sent",
       name_logo_approved: "Name and logo approved",
@@ -3387,13 +3391,26 @@
     }
 
     async function refreshApplicationStatus() {
-      if (!partASubmissionEndpoint || !applicationId) return;
+      if (!partASubmissionEndpoint || (!applicationId && !applicationToken)) return;
       try {
-        const url = `${partASubmissionEndpoint}?applicationId=${encodeURIComponent(applicationId)}`;
+        const params = new URLSearchParams();
+        if (applicationId) params.set("applicationId", applicationId);
+        if (applicationToken) params.set("applicationToken", applicationToken);
+        const url = `${partASubmissionEndpoint}?${params.toString()}`;
         const response = await fetch(url);
         if (!response.ok) return;
         const result = await response.json().catch(() => ({}));
-        if (result.ok && result.found) setApplicationStatus(result);
+        if (result.ok && result.found) {
+          if (result.applicationId && result.applicationId !== applicationId) {
+            applicationId = result.applicationId;
+            try {
+              localStorage.setItem(applicationIdKey, applicationId);
+            } catch (error) {
+              // Keep the returned id in memory if storage is unavailable.
+            }
+          }
+          setApplicationStatus(result);
+        }
       } catch (error) {
         // Status refresh is helpful, not critical. The form still works offline.
       }
@@ -5516,7 +5533,9 @@
       data.partAStatus = "part_a_submitted";
       data.submissionId = generateSubmissionId(data);
       data.submittedAt = new Date().toISOString();
-      const sent = await sendPartAToRightOnQ(data);
+      const submitPayload = { ...data };
+      if (applicationToken) submitPayload.privateApplicationToken = applicationToken;
+      const sent = await sendPartAToRightOnQ(submitPayload);
       if (sent) {
         setApplicationStatus({
           registrationStatus: "part_a_submitted",
@@ -5597,11 +5616,36 @@
       return created;
     }
 
+    function loadLinkedApplicationToken() {
+      const linkedToken = getLinkedApplicationToken();
+      if (linkedToken) {
+        try {
+          localStorage.setItem(applicationTokenKey, linkedToken);
+        } catch (error) {
+          // Keep the linked token in memory if this browser blocks localStorage.
+        }
+        return linkedToken;
+      }
+
+      try {
+        return localStorage.getItem(applicationTokenKey) || "";
+      } catch (error) {
+        return "";
+      }
+    }
+
     function getLinkedApplicationId() {
       const params = new URLSearchParams(window.location.search);
       const value = params.get("applicationId") || params.get("application_id");
       if (!value) return "";
       return value.replace(/[^A-Za-z0-9_-]/g, "").slice(0, 80);
+    }
+
+    function getLinkedApplicationToken() {
+      const params = new URLSearchParams(window.location.search);
+      const value = params.get("applicationToken") || params.get("privateApplicationToken") || params.get("private_application_token") || params.get("token");
+      if (!value) return "";
+      return value.replace(/[^A-Za-z0-9_-]/g, "").slice(0, 120);
     }
 
     function generateApplicationId() {
@@ -5648,9 +5692,11 @@
       applicationId = generateApplicationId();
       try {
         localStorage.setItem(applicationIdKey, applicationId);
+        localStorage.removeItem(applicationTokenKey);
       } catch (error) {
         // Keep the reset id in memory if storage is unavailable.
       }
+      applicationToken = "";
       setApplicationStatus({
         registrationStatus: "draft",
         partAStatus: "draft",

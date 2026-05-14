@@ -991,14 +991,45 @@ Test evidence:
 - `Applications` row included the test CRM fields and `part_a_submitted`.
 - Live `GET ?applicationId=ROQ-RCS-TEST-SLICE5-20260514` returned the `Applications` control-row shape, including billing, Part B, Twilio, provider, and next-action fields.
 
+### Slice 4B Completed - Private Application Token Path
+
+RCS-Twilio-4 added the first guarded private-link/token plumbing.
+
+Implemented:
+
+- Static app accepts private link parameters:
+  - `applicationId` / `application_id`;
+  - `applicationToken` / `privateApplicationToken` / `private_application_token` / `token`.
+- Static app stores the token locally for status lookup and submission.
+- Static app does not include the token in the downloaded client copy.
+- Apps Script status lookup can use Application ID and/or token.
+- If a token is supplied and does not match the `Applications` row, status lookup returns `found: false`.
+- Part A submission into a token-protected application now requires the matching token.
+- Apps Script has a guarded internal `action: createApplicationDraft`.
+- `createApplicationDraft` requires script property `ONBOARDING_CREATE_PIN`.
+- If authorised, it creates/updates the `Applications` row, generates a private token, and returns a private application link.
+- Existing live Apps Script deployment was updated in place to version `7`.
+
+Test evidence:
+
+- Normal live status lookup for `ROQ-RCS-TEST-SLICE5-20260514` still returned `part_a_submitted`.
+- Same lookup with `applicationToken=WRONGTOKEN` returned `found: false`.
+- A no-PIN `createApplicationDraft` attempt did not add a row to `Applications`.
+
+Important caveat:
+
+- `ONBOARDING_CREATE_PIN` has not been configured by RCS-Twilio-4.
+- Do not store the PIN in the repo or static HTML.
+- This is not yet a finished operator/admin interface; it is the guarded backend plumbing for one.
+
 ### Next Recommended Step
 
 Create another scoped local Level 2 checkpoint commit for the latest Apps Script / docs work, without touching unrelated root website files.
 
 After that, the next build slice should be one of:
 
-1. Create the private-link/token path so RightOnQ creates the `Applications` row before the client starts Part A.
+1. Configure/test `ONBOARDING_CREATE_PIN` and prove the internal private-link creation flow end-to-end.
 2. Wire B2 name/logo approval and issue responses into storage.
 3. Build the manual internal status update process/operator sheet view.
 
-Recommended order: private-link/token path next, because it turns the current temporary browser-generated application ID into the launch-safe version.
+Recommended order: configure/test private-link creation next, because the guarded plumbing is now present but not yet proven with a real PIN.

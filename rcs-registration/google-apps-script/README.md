@@ -44,10 +44,11 @@ Deployment:
 
 - Execute as: `adam@rightonq.co.uk`
 - Access: `Anyone`
-- Current published version after CLI redeploy: `6`
+- Current published version after CLI redeploy: `7`
 - Version `4` added Application ID, registration status, and Part A status columns to the intake row.
 - Version `5` adds Application ID status lookup via `GET ?applicationId=...`.
 - Version `6` adds the `Applications` control-row tab and writes/reads one row per Application ID.
+- Version `7` adds private application token support and a guarded internal application-draft creation action.
 
 ## Behaviour
 
@@ -58,7 +59,8 @@ The script:
 - appends one new row per submission,
 - stores the application ID and initial registration/Part A statuses,
 - creates or updates the matching row in the `Applications` control tab,
-- returns the latest status for a supplied Application ID,
+- returns the latest status for a supplied Application ID or private application token,
+- rejects Part A submission into a token-protected application if the supplied token does not match,
 - sets review status to `New`,
 - sets US fee status to `Not yet agreed` if United States is selected,
 - stores the raw JSON payload in the `Part A JSON` column,
@@ -69,3 +71,5 @@ If the endpoint is not configured or the POST fails, the form downloads the clie
 ## Important
 
 Do not put secrets in the static HTML page. The Apps Script URL is not a password; it is a receiver endpoint. Keep the Sheet private to RightOnQ.
+
+The internal `createApplicationDraft` action is guarded by the script property `ONBOARDING_CREATE_PIN`. Do not store that PIN in this repo or in the static HTML.

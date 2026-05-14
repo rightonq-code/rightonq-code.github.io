@@ -1,6 +1,7 @@
 const SPREADSHEET_ID = "1_C85rMaDWS0-VnXbtYQzRBS1trgN8kFf4hAnHfT3R-0";
 const SHEET_NAME = "Part A submissions";
 const APPLICATIONS_SHEET_NAME = "Applications";
+const PUBLIC_FORM_URL = "https://rightonq-code.github.io/rcs-registration/index.html";
 const NOTIFY_EMAIL = "adam@rightonq.co.uk";
 const APPLICATION_HEADERS = [
   "Application ID",
@@ -39,6 +40,7 @@ const APPLICATION_HEADERS = [
 ];
 const REGISTRATION_STATUS_ORDER = [
   "draft",
+  "application_created",
   "part_a_submitted",
   "part_a_internal_review",
   "part_a_changes_needed",
@@ -61,7 +63,16 @@ const REGISTRATION_STATUS_ORDER = [
 
 function doGet(event) {
   const applicationId = event && event.parameter && event.parameter.applicationId;
-  if (applicationId) return jsonResponse(getApplicationStatus(applicationId));
+  const applicationToken = event && event.parameter && firstValue(
+    event.parameter.applicationToken,
+    event.parameter.privateApplicationToken,
+    event.parameter.private_application_token,
+    event.parameter.token
+  );
+  if (applicationId || applicationToken) return jsonResponse(getApplicationStatus({
+    applicationId: applicationId,
+    privateApplicationToken: applicationToken
+  }));
 
   return jsonResponse({
     ok: true,
@@ -72,12 +83,13 @@ function doGet(event) {
 
 function getApplicationStatus(applicationId) {
   const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
-  const applicationRecord = findApplicationRecord(spreadsheet, applicationId);
+  const criteria = typeof applicationId === "object" ? applicationId : { applicationId: applicationId };
+  const applicationRecord = findApplicationRecord(spreadsheet, criteria);
   if (applicationRecord) {
     return {
       ok: true,
       found: true,
-      applicationId: applicationId,
+      applicationId: applicationRecord["Application ID"] || criteria.applicationId,
       registrationStatus: applicationRecord["Registration status"] || "draft",
       partAStatus: applicationRecord["Part A status"] || "draft",
       partBStatus: applicationRecord["Part B status"] || "",
@@ -93,6 +105,16 @@ function getApplicationStatus(applicationId) {
     };
   }
 
+  if (criteria.privateApplicationToken) {
+    return {
+      ok: true,
+      found: false,
+      applicationId: criteria.applicationId || "",
+      registrationStatus: "draft",
+      partAStatus: "draft"
+    };
+  }
+
   const sheet = spreadsheet.getSheetByName(SHEET_NAME);
   if (!sheet) throw new Error("Sheet tab not found: " + SHEET_NAME);
 
@@ -101,7 +123,7 @@ function getApplicationStatus(applicationId) {
     return {
       ok: true,
       found: false,
-      applicationId: applicationId,
+      applicationId: criteria.applicationId || "",
       registrationStatus: "draft",
       partAStatus: "draft"
     };
@@ -111,14 +133,24 @@ function getApplicationStatus(applicationId) {
   const applicationIdColumn = headers.indexOf("Application ID");
   if (applicationIdColumn === -1) throw new Error("Application ID column not found");
 
+  if (!criteria.applicationId) {
+    return {
+      ok: true,
+      found: false,
+      applicationId: "",
+      registrationStatus: "draft",
+      partAStatus: "draft"
+    };
+  }
+
   for (let rowIndex = values.length - 1; rowIndex >= 1; rowIndex -= 1) {
     const row = values[rowIndex];
-    if (String(row[applicationIdColumn]) !== String(applicationId)) continue;
+    if (String(row[applicationIdColumn]) !== String(criteria.applicationId)) continue;
 
     return {
       ok: true,
       found: true,
-      applicationId: applicationId,
+      applicationId: criteria.applicationId,
       registrationStatus: readColumn(row, headers, "Registration status") || "part_a_submitted",
       partAStatus: readColumn(row, headers, "Part A status") || "part_a_submitted",
       reviewStatus: readColumn(row, headers, "Review status"),
@@ -131,7 +163,7 @@ function getApplicationStatus(applicationId) {
   return {
     ok: true,
     found: false,
-    applicationId: applicationId,
+    applicationId: criteria.applicationId || "",
     registrationStatus: "draft",
     partAStatus: "draft"
   };
@@ -144,6 +176,11 @@ function doPost(event) {
   try {
     const payload = parsePayload(event);
     const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
+    if (payload.action === "createApplicationDraft") {
+      requireCreatePin(payload);
+      return jsonResponse(createApplicationDraft(spreadsheet, payload));
+    }
+
     const sheet = spreadsheet.getSheetByName(SHEET_NAME);
     if (!sheet) throw new Error("Sheet tab not found: " + SHEET_NAME);
 
@@ -154,6 +191,7 @@ function doPost(event) {
     const partAStatus = payload.partAStatus || "part_a_submitted";
     const countries = asList(payload.regions);
     const usSelected = countries.indexOf("United States") !== -1 ? "Yes" : "No";
+    validateApplicationTokenForSubmission(spreadsheet, applicationId, payload.privateApplicationToken);
 
     sheet.appendRow([
       now,
@@ -226,6 +264,52 @@ function parsePayload(event) {
   return JSON.parse(event.postData.contents);
 }
 
+function requireCreatePin(payload) {
+  const configuredPin = PropertiesService.getScriptProperties().getProperty("ONBOARDING_CREATE_PIN");
+  if (!configuredPin) throw new Error("ONBOARDING_CREATE_PIN is not configured");
+  if (!payload.createPin || String(payload.createPin) !== String(configuredPin)) {
+    throw new Error("Invalid onboarding create PIN");
+  }
+}
+
+function createApplicationDraft(spreadsheet, payload) {
+  const now = new Date();
+  const applicationId = payload.applicationId || buildApplicationId(payload, now);
+  const privateApplicationToken = payload.privateApplicationToken || buildPrivateApplicationToken();
+  const registrationStatus = payload.registrationStatus || "application_created";
+  const partAStatus = payload.partAStatus || "draft";
+
+  upsertApplicationRecord(spreadsheet, {
+    ...payload,
+    privateApplicationToken: privateApplicationToken
+  }, {
+    applicationId: applicationId,
+    registrationStatus: registrationStatus,
+    partAStatus: partAStatus,
+    now: now,
+    lastClientActionAt: ""
+  });
+
+  return {
+    ok: true,
+    applicationId: applicationId,
+    registrationStatus: registrationStatus,
+    partAStatus: partAStatus,
+    privateApplicationLink: buildPrivateApplicationLink(applicationId, privateApplicationToken),
+    createdAt: now.toISOString()
+  };
+}
+
+function validateApplicationTokenForSubmission(spreadsheet, applicationId, suppliedToken) {
+  const applicationRecord = findApplicationRecord(spreadsheet, { applicationId: applicationId });
+  if (!applicationRecord) return;
+
+  const existingToken = applicationRecord["Private application token"];
+  if (!existingToken) return;
+  if (suppliedToken && String(suppliedToken) === String(existingToken)) return;
+  throw new Error("This application link could not be verified. Please ask RightOnQ for a fresh link.");
+}
+
 function upsertApplicationRecord(spreadsheet, payload, options) {
   const sheet = getOrCreateSheet(spreadsheet, APPLICATIONS_SHEET_NAME, APPLICATION_HEADERS);
   const values = sheet.getDataRange().getValues();
@@ -243,6 +327,7 @@ function upsertApplicationRecord(spreadsheet, payload, options) {
   }
 
   const now = options.now;
+  const lastClientActionAt = Object.prototype.hasOwnProperty.call(options, "lastClientActionAt") ? options.lastClientActionAt : now;
   const record = {
     "Application ID": options.applicationId,
     "Client ID": firstValue(payload.clientId, existing["Client ID"]),
@@ -272,7 +357,7 @@ function upsertApplicationRecord(spreadsheet, payload, options) {
     "Internal owner": firstValue(existing["Internal owner"], payload.internalOwner),
     "Created at": firstValue(existing["Created at"], now),
     "Updated at": now,
-    "Last client action at": now,
+    "Last client action at": firstValue(lastClientActionAt, existing["Last client action at"]),
     "Last internal action at": firstValue(existing["Last internal action at"], ""),
     "Next action owner": firstValue(existing["Next action owner"], payload.nextActionOwner),
     "Next action note": firstValue(existing["Next action note"], payload.nextActionNote),
@@ -290,7 +375,7 @@ function upsertApplicationRecord(spreadsheet, payload, options) {
   }
 }
 
-function findApplicationRecord(spreadsheet, applicationId) {
+function findApplicationRecord(spreadsheet, criteria) {
   const sheet = spreadsheet.getSheetByName(APPLICATIONS_SHEET_NAME);
   if (!sheet) return null;
 
@@ -299,11 +384,20 @@ function findApplicationRecord(spreadsheet, applicationId) {
 
   const headers = normaliseHeaders(values[0]);
   const applicationIdColumn = headers.indexOf("Application ID");
+  const tokenColumn = headers.indexOf("Private application token");
+  const applicationId = typeof criteria === "object" ? criteria.applicationId : criteria;
+  const privateApplicationToken = typeof criteria === "object" ? criteria.privateApplicationToken : "";
   if (applicationIdColumn === -1) return null;
 
   for (let rowIndex = values.length - 1; rowIndex >= 1; rowIndex -= 1) {
-    if (String(values[rowIndex][applicationIdColumn]) !== String(applicationId)) continue;
-    return rowToObject(values[rowIndex], headers);
+    const row = values[rowIndex];
+    const idMatches = applicationId && String(row[applicationIdColumn]) === String(applicationId);
+    const tokenMatches = privateApplicationToken && tokenColumn !== -1 && String(row[tokenColumn]) === String(privateApplicationToken);
+    if (applicationId && privateApplicationToken && (!idMatches || !tokenMatches)) continue;
+    if (applicationId && !privateApplicationToken && !idMatches) continue;
+    if (!applicationId && privateApplicationToken && !tokenMatches) continue;
+    if (!applicationId && !privateApplicationToken) continue;
+    return rowToObject(row, headers);
   }
 
   return null;
@@ -397,6 +491,16 @@ function buildApplicationId(payload, date) {
     .replace(/^-|-$/g, "")
     .slice(0, 18) || "CLIENT";
   return "ROQ-RCS-" + stamp + "-" + seed;
+}
+
+function buildPrivateApplicationToken() {
+  return Utilities.getUuid().replace(/-/g, "") + Utilities.getUuid().replace(/-/g, "").slice(0, 16);
+}
+
+function buildPrivateApplicationLink(applicationId, privateApplicationToken) {
+  return PUBLIC_FORM_URL
+    + "?applicationId=" + encodeURIComponent(applicationId)
+    + "&applicationToken=" + encodeURIComponent(privateApplicationToken);
 }
 
 function asList(value) {
