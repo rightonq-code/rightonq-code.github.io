@@ -979,13 +979,38 @@ Output:
 
 Persist client approval/issue responses.
 
+Status: B2 name/logo storage implemented and proof-tested by RCS-Twilio-4 on Thursday 14 May 2026. B3 video approval storage is still pending.
+
 Output:
 
-- B2 name/logo approval record;
-- B2 issue record with categories/notes;
-- B3 video approval record;
-- B3 change request record;
-- status updates based on response.
+- B2 name/logo approval record - done via `Part B approvals`;
+- B2 issue record with categories/notes - done via `Part B approvals`;
+- B2 status updates based on response - done via `Applications`;
+- B3 video approval record - pending;
+- B3 change request record - pending;
+- B3 status updates based on response - pending.
+
+Implemented:
+
+- Static app B2 `Approve name and logo` now posts `action = submitNameLogoApproval`.
+- Payload includes Application ID, private application token when present, tester invite answer, name/logo decision, issue categories, notes, and submitted timestamp.
+- Apps Script appends each response to a new `Part B approvals` event-log tab.
+- Apps Script updates the matching `Applications` row:
+  - approval sets `registrationStatus` and `partBStatus` to `name_logo_approved`;
+  - not-arrived/help/issue/note sets both to `name_logo_changes_requested`;
+  - `Next action owner` becomes `RightOnQ`.
+- Existing live Apps Script deployment `AKfycbyI81Ir2xvHLar0R0iFBBWyXa1Nj93T4_8Ni5_eX3XEYDA-AKQbVYbPHnTROLm8e4a6` was redeployed in place to version `12`.
+
+Test evidence:
+
+- Live test POST against `ROQ-RCS-TEST-SLICE5-20260514` returned `ok: true` and `name_logo_approved`.
+- Live Sheet now has the `Part B approvals` tab with labelled B2 test approval rows.
+- `Applications` row for `ROQ-RCS-TEST-SLICE5-20260514` now shows `Registration status = name_logo_approved`, `Part B status = name_logo_approved`, `Next action owner = RightOnQ`, and `Next action note = Prepare the RCS application review video.`
+- Browser check on `http://localhost:8902/rcs-registration/index.html?applicationId=ROQ-RCS-TEST-SLICE5-20260514` showed B2 opening correctly, approval choices enabling the `Send approval to RightOnQ` button, status reading `Name and logo approved`, and no console errors.
+
+Important caveat:
+
+- Three duplicate labelled test rows exist in `Part B approvals` because Apps Script's redirect behaviour wrote during the first curl attempts. Leave them as proof rows unless Bugs approves cleanup.
 
 ### Slice 6A - Communications Cadence
 

@@ -1036,8 +1036,57 @@ Create another scoped local Level 2 checkpoint commit for the latest Apps Script
 
 After that, the next build slice should be one of:
 
-1. Choose/configure the real operational `ONBOARDING_CREATE_PIN`, or build a small internal operator wrapper so agents do not handle the PIN manually.
-2. Wire B2 name/logo approval and issue responses into storage.
+1. Wire B3 video approval/change responses into storage.
+2. Choose/configure the real operational `ONBOARDING_CREATE_PIN`, or build a small internal operator wrapper so agents do not handle the PIN manually.
 3. Build the manual internal status update process/operator sheet view.
 
-Recommended order: B2 storage is now unblocked, but the operational PIN/wrapper should be settled before any real client private links are issued.
+Recommended order: B3 storage is the cleanest continuation from the B2 work, but the operational PIN/wrapper should be settled before any real client private links are issued.
+
+### Slice 6 Partial Completed - B2 Name/Logo Approval Storage
+
+RCS-Twilio-4 wired the B2 `Approve name and logo` form to the live Apps Script receiver.
+
+Implemented:
+
+- Static B2 form now posts `action = submitNameLogoApproval`.
+- Payload includes:
+  - `applicationId`;
+  - `privateApplicationToken` when present;
+  - tester invite answer;
+  - name/logo decision;
+  - issue categories;
+  - issue notes;
+  - submitted timestamp.
+- Apps Script now has a `Part B approvals` event-log tab.
+- Each B2 response appends one audit row.
+- Apps Script updates the matching `Applications` control row:
+  - approval sets `registrationStatus = name_logo_approved`;
+  - approval sets `partBStatus = name_logo_approved`;
+  - issue/not arrived/help/note sets both to `name_logo_changes_requested`;
+  - `Next action owner = RightOnQ`;
+  - next-action note tells RightOnQ whether to prepare the video or review the issue.
+- Apps Script deployment was pushed and redeployed in place to version `12`.
+- README and `RCS_ONBOARDING_MAIN_BUILD_PLAN.md` were updated.
+
+Test evidence:
+
+- Apps Script syntax passed via `new Function(...)`.
+- Inline `index.html` script syntax passed via extracted script parse.
+- `git diff --check` passed for the scoped files.
+- Live POST against `ROQ-RCS-TEST-SLICE5-20260514` returned `ok: true`, `registrationStatus = name_logo_approved`, and `partBStatus = name_logo_approved`.
+- Live Sheet `Part B approvals` contains labelled B2 approval test rows.
+- Live Sheet `Applications` row for `ROQ-RCS-TEST-SLICE5-20260514` shows:
+  - `Registration status = name_logo_approved`;
+  - `Part B status = name_logo_approved`;
+  - `Next action owner = RightOnQ`;
+  - `Next action note = Prepare the RCS application review video.`
+- Browser check at `http://localhost:8902/rcs-registration/index.html?applicationId=ROQ-RCS-TEST-SLICE5-20260514` showed:
+  - status refreshed to `Name and logo approved`;
+  - B2 opened from the rail;
+  - selecting "Yes, I have received it" plus "Yes, approve name and logo" enabled `Send approval to RightOnQ`;
+  - browser console error log was empty.
+
+Important caveat:
+
+- Three duplicate labelled B2 test rows exist because Apps Script's redirect behaviour still wrote during early curl attempts. Leave them unless Bugs approves live Sheet cleanup.
+- B3 video approval/change storage is still pending and should be the next storage slice.

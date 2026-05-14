@@ -1,6 +1,7 @@
 const SPREADSHEET_ID = "1_C85rMaDWS0-VnXbtYQzRBS1trgN8kFf4hAnHfT3R-0";
 const SHEET_NAME = "Part A submissions";
 const APPLICATIONS_SHEET_NAME = "Applications";
+const PART_B_APPROVALS_SHEET_NAME = "Part B approvals";
 const PUBLIC_FORM_URL = "https://rightonq-code.github.io/rcs-registration/index.html";
 const NOTIFY_EMAIL = "adam@rightonq.co.uk";
 const APPLICATION_HEADERS = [
@@ -37,6 +38,20 @@ const APPLICATION_HEADERS = [
   "Next action owner",
   "Next action note",
   "Internal notes"
+];
+const PART_B_APPROVAL_HEADERS = [
+  "Received at",
+  "Application ID",
+  "Stage",
+  "Decision",
+  "Tester invite received",
+  "Name/logo decision",
+  "Issue categories",
+  "Issue notes",
+  "Registration status",
+  "Part B status",
+  "Submission JSON",
+  "Last updated"
 ];
 const REGISTRATION_STATUS_ORDER = [
   "draft",
@@ -191,6 +206,9 @@ function doPost(event) {
       requireCreatePin(payload);
       return jsonResponse(createApplicationDraft(spreadsheet, payload));
     }
+    if (payload.action === "submitNameLogoApproval") {
+      return jsonResponse(submitNameLogoApproval(spreadsheet, payload));
+    }
 
     const sheet = spreadsheet.getSheetByName(SHEET_NAME);
     if (!sheet) throw new Error("Sheet tab not found: " + SHEET_NAME);
@@ -311,6 +329,67 @@ function createApplicationDraft(spreadsheet, payload) {
   };
 }
 
+function submitNameLogoApproval(spreadsheet, payload) {
+  const now = new Date();
+  const applicationId = payload.applicationId;
+  if (!applicationId) throw new Error("Missing application ID");
+
+  validateApplicationTokenForSubmission(spreadsheet, applicationId, payload.privateApplicationToken);
+
+  const decision = payload.decision || deriveNameLogoDecision(payload);
+  const issueCategories = asList(payload.issueCategories);
+  const approved = decision === "approve";
+  const registrationStatus = approved ? "name_logo_approved" : "name_logo_changes_requested";
+  const partBStatus = registrationStatus;
+  const nextActionNote = approved
+    ? "Prepare the RCS application review video."
+    : "Review name/logo feedback before video work starts.";
+
+  const sheet = getOrCreateSheet(spreadsheet, PART_B_APPROVALS_SHEET_NAME, PART_B_APPROVAL_HEADERS);
+  sheet.appendRow([
+    now,
+    safeCell(applicationId),
+    "B2 name/logo approval",
+    safeCell(decision),
+    safeCell(payload.testerReceived),
+    safeCell(payload.nameLogoDecision),
+    safeCell(issueCategories.join(", ")),
+    safeCell(payload.issueNotes),
+    safeCell(registrationStatus),
+    safeCell(partBStatus),
+    JSON.stringify(payload),
+    now
+  ]);
+
+  updateApplicationControlFields(spreadsheet, applicationId, {
+    "Registration status": registrationStatus,
+    "Part B status": partBStatus,
+    "Updated at": now,
+    "Last client action at": now,
+    "Next action owner": "RightOnQ",
+    "Next action note": nextActionNote
+  });
+
+  notifyNameLogoApproval(payload, decision, issueCategories, registrationStatus);
+
+  return {
+    ok: true,
+    applicationId: applicationId,
+    decision: decision,
+    registrationStatus: registrationStatus,
+    partBStatus: partBStatus,
+    receivedAt: now.toISOString()
+  };
+}
+
+function deriveNameLogoDecision(payload) {
+  if (payload.testerReceived === "not-yet") return "not_yet";
+  if (payload.testerReceived === "help") return "help";
+  if (payload.nameLogoDecision === "approve") return "approve";
+  if (payload.nameLogoDecision === "note") return "note";
+  return "issue";
+}
+
 function validateApplicationTokenForSubmission(spreadsheet, applicationId, suppliedToken) {
   const applicationRecord = findApplicationRecord(spreadsheet, { applicationId: applicationId });
   if (!applicationRecord) return;
@@ -319,6 +398,37 @@ function validateApplicationTokenForSubmission(spreadsheet, applicationId, suppl
   if (!existingToken) return;
   if (suppliedToken && String(suppliedToken) === String(existingToken)) return;
   throw new Error("This application link could not be verified. Please ask RightOnQ for a fresh link.");
+}
+
+function updateApplicationControlFields(spreadsheet, applicationId, updates) {
+  const sheet = getOrCreateSheet(spreadsheet, APPLICATIONS_SHEET_NAME, APPLICATION_HEADERS);
+  const values = sheet.getDataRange().getValues();
+  const headers = normaliseHeaders(values[0] || APPLICATION_HEADERS);
+  const applicationIdColumn = headers.indexOf("Application ID");
+  if (applicationIdColumn === -1) throw new Error("Application ID column not found in Applications sheet");
+
+  let rowNumber = -1;
+  for (let index = values.length - 1; index >= 1; index -= 1) {
+    if (String(values[index][applicationIdColumn]) !== String(applicationId)) continue;
+    rowNumber = index + 1;
+    break;
+  }
+
+  if (rowNumber === -1) {
+    upsertApplicationRecord(spreadsheet, {}, {
+      applicationId: applicationId,
+      registrationStatus: updates["Registration status"],
+      partAStatus: "",
+      now: updates["Updated at"] || new Date(),
+      lastClientActionAt: updates["Last client action at"] || ""
+    });
+    rowNumber = sheet.getLastRow();
+  }
+
+  headers.forEach(function(header, index) {
+    if (!Object.prototype.hasOwnProperty.call(updates, header)) return;
+    sheet.getRange(rowNumber, index + 1).setValue(safeCell(updates[header]));
+  });
 }
 
 function upsertApplicationRecord(spreadsheet, payload, options) {
@@ -480,6 +590,28 @@ function notifyAdam(payload, submissionId, countries, usSelected) {
   ].join("\n");
 
   MailApp.sendEmail(NOTIFY_EMAIL, subject, body);
+}
+
+function notifyNameLogoApproval(payload, decision, issueCategories, registrationStatus) {
+  if (!NOTIFY_EMAIL) return;
+
+  const subjectPrefix = decision === "approve" ? "RCS name/logo approved" : "RCS name/logo needs attention";
+  const body = [
+    "A Part B name/logo response has been received.",
+    "",
+    "Application ID: " + (payload.applicationId || ""),
+    "Decision: " + decision,
+    "Tester invite received: " + (payload.testerReceived || ""),
+    "Name/logo decision: " + (payload.nameLogoDecision || ""),
+    "Issue categories: " + issueCategories.join(", "),
+    "Issue notes: " + (payload.issueNotes || ""),
+    "Registration status: " + registrationStatus,
+    "",
+    "Open the intake sheet:",
+    "https://docs.google.com/spreadsheets/d/" + SPREADSHEET_ID + "/edit"
+  ].join("\n");
+
+  MailApp.sendEmail(NOTIFY_EMAIL, subjectPrefix + ": " + (payload.applicationId || "unknown application"), body);
 }
 
 function buildSubmissionId(payload, date) {

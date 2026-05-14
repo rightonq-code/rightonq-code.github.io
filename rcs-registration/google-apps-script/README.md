@@ -44,13 +44,14 @@ Deployment:
 
 - Execute as: `adam@rightonq.co.uk`
 - Access: `Anyone`
-- Current published version after CLI redeploy: `11`
+- Current published version after CLI redeploy: `12`
 - Version `4` added Application ID, registration status, and Part A status columns to the intake row.
 - Version `5` adds Application ID status lookup via `GET ?applicationId=...`.
 - Version `6` adds the `Applications` control-row tab and writes/reads one row per Application ID.
 - Version `7` adds private application token support and a guarded internal application-draft creation action.
 - Versions `8` and `9` were temporary proof deployments.
 - Version `11` is the clean deployment after proof; token-protected application status now requires the matching token.
+- Version `12` adds B2 name/logo approval storage in the `Part B approvals` tab and updates the matching `Applications` control row.
 
 ## Behaviour
 
@@ -63,6 +64,8 @@ The script:
 - creates or updates the matching row in the `Applications` control tab,
 - returns the latest status for a supplied Application ID or private application token,
 - rejects Part A submission into a token-protected application if the supplied token does not match,
+- appends B2 name/logo approval or issue responses to `Part B approvals`,
+- updates the matching `Applications` row to `name_logo_approved` or `name_logo_changes_requested`,
 - sets review status to `New`,
 - sets US fee status to `Not yet agreed` if United States is selected,
 - stores the raw JSON payload in the `Part A JSON` column,
