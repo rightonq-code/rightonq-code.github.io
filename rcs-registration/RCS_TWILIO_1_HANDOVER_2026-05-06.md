@@ -26,6 +26,64 @@ Files refreshed in this morning sync:
 - `/Users/macpro/rightonq-code.github.io/rcs-registration/index.html`
 - `/Users/macpro/rightonq-code.github.io/rcs-registration/google-apps-script/Code.gs`
 
+### File And Preview Protocol - Do Not Skip
+
+This project contains more than one `index.html`. Always verify the file path before editing.
+
+### Golden Rule For Working With Adam
+
+Do not rush ahead from half-formed ideas into edits.
+
+Adam wants a collaborative working relationship, not a cold or passive agent. It is fine to inspect, think, suggest, and bring good ideas. But before changing product flow, wording, layout, files, commits, pushes, or anything that could affect the project state:
+
+1. stop;
+2. explain the exact proposed change;
+3. discuss the reasoning in plain language;
+4. wait for Adam's approval;
+5. then edit only the approved scope.
+
+This is especially important because the RCS work is commercially important and multiple agents may be active in nearby files. Unapproved changes, wrong preview URLs, wrong files, or accidental overwrites create anxiety and can cost hours or days of recovery work. The safest rhythm is: inspect first, propose clearly, wait for confirmation, then make the agreed change and verify it on the correct preview URL.
+
+Correct RCS application file:
+
+- `/Users/macpro/rightonq-code.github.io/rcs-registration/index.html`
+
+Main website file, not the RCS app:
+
+- `/Users/macpro/rightonq-code.github.io/index.html`
+
+Correct repo root for preview server:
+
+- `/Users/macpro/rightonq-code.github.io`
+
+Correct local preview command:
+
+```bash
+cd /Users/macpro/rightonq-code.github.io
+python3 -m http.server 8902
+```
+
+Correct local preview URL:
+
+- `http://localhost:8902/rcs-registration/index.html`
+
+Avoid using a server started from inside `/Users/macpro/rightonq-code.github.io/rcs-registration` for visual review. It can make root-relative assets such as `/images/...` resolve incorrectly and can make the page look subtly wrong. If the browser shows a `file://` URL or a localhost URL that does not include `/rcs-registration/index.html`, stop and correct the preview before judging the design.
+
+Before editing:
+
+- confirm branch with `git branch --show-current`;
+- confirm the target file path is `rcs-registration/index.html`;
+- check `git status --short` and note unrelated dirty files;
+- do not stage root `index.html`, legal pages, or future-amendment notes unless the user explicitly asks.
+
+Before saving work as a commit:
+
+- run the inline script syntax check for `rcs-registration/index.html`;
+- run `git diff --check` on the exact files being committed;
+- check `git diff --cached --name-only` before committing;
+- commit only the files in the approved scope;
+- do not push experimental layout work until the user has seen the correct `http://localhost:8902/rcs-registration/index.html` preview and approved it.
+
 Known unrelated local work at the time of this sync:
 
 - root `/Users/macpro/rightonq-code.github.io/index.html` is modified and should still be treated as unrelated to the RCS registration app unless the user explicitly asks to work on the main website.
