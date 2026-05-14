@@ -888,6 +888,41 @@ Important launch caveat:
 - This is still not the final private-link architecture.
 - Before launch, RightOnQ should create the application row/link before the client starts Part A, then send a private link containing a non-guessable token or equivalent.
 
+### Slice 4A - Applications Control Row
+
+Give each application a one-row internal control record, separate from the append-only Part A submission log.
+
+Status: first thin version implemented and tested by RCS-Twilio-4 on Thursday 14 May 2026.
+
+Implemented:
+
+- Apps Script now creates the `Applications` tab if needed.
+- Apps Script writes one row per `Application ID`.
+- Part A submissions still append to `Part A submissions` for audit/recovery.
+- The `Applications` row stores CRM handoff fields when supplied:
+  - `CRM company ID`;
+  - `CRM deal ID`;
+  - `CRM source record URL`;
+  - `Campaign code`;
+  - `Message code`;
+  - `Qualified use case`;
+  - `Package interest`;
+  - `Handoff date`;
+  - `Sales context`.
+- Status lookup now checks `Applications` first and falls back to `Part A submissions`.
+- Existing live Apps Script deployment `AKfycbyI81Ir2xvHLar0R0iFBBWyXa1Nj93T4_8Ni5_eX3XEYDA-AKQbVYbPHnTROLm8e4a6` redeployed in place to version `6`.
+
+Test evidence:
+
+- Test submission `ROQ-RCS-TEST-SLICE5-20260514` wrote to both `Part A submissions` and `Applications`.
+- `Applications` row included test CRM fields, package interest, handoff date, and sales context.
+- Live status lookup for `ROQ-RCS-TEST-SLICE5-20260514` returned status data from the `Applications` shape, including billing/Part B/Twilio/provider status fields.
+
+Important launch caveat:
+
+- This still uses the browser/generated Application ID when the client starts from the public static page.
+- The next launch-safe move is to create the `Applications` row first, generate a private token/link, then send that private link to the client.
+
 ### Slice 5 - Part B Unlocks
 
 Make Part B stages reflect real application status.

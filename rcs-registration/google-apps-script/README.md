@@ -44,9 +44,10 @@ Deployment:
 
 - Execute as: `adam@rightonq.co.uk`
 - Access: `Anyone`
-- Current published version after CLI redeploy: `5`
+- Current published version after CLI redeploy: `6`
 - Version `4` added Application ID, registration status, and Part A status columns to the intake row.
 - Version `5` adds Application ID status lookup via `GET ?applicationId=...`.
+- Version `6` adds the `Applications` control-row tab and writes/reads one row per Application ID.
 
 ## Behaviour
 
@@ -56,6 +57,7 @@ The script:
 
 - appends one new row per submission,
 - stores the application ID and initial registration/Part A statuses,
+- creates or updates the matching row in the `Applications` control tab,
 - returns the latest status for a supplied Application ID,
 - sets review status to `New`,
 - sets US fee status to `Not yet agreed` if United States is selected,

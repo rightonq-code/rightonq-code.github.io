@@ -1,6 +1,63 @@
 const SPREADSHEET_ID = "1_C85rMaDWS0-VnXbtYQzRBS1trgN8kFf4hAnHfT3R-0";
 const SHEET_NAME = "Part A submissions";
+const APPLICATIONS_SHEET_NAME = "Applications";
 const NOTIFY_EMAIL = "adam@rightonq.co.uk";
+const APPLICATION_HEADERS = [
+  "Application ID",
+  "Client ID",
+  "CRM company ID",
+  "CRM deal ID",
+  "CRM source record URL",
+  "Private application token",
+  "Client name",
+  "Legal business name",
+  "Trading name",
+  "Primary contact name",
+  "Primary contact email",
+  "Primary contact phone",
+  "Campaign code",
+  "Message code",
+  "Qualified use case",
+  "Package interest",
+  "Handoff date",
+  "Sales context",
+  "Package name",
+  "Registration status",
+  "Billing status",
+  "Part A status",
+  "Part B status",
+  "Twilio status",
+  "Provider status",
+  "Internal owner",
+  "Created at",
+  "Updated at",
+  "Last client action at",
+  "Last internal action at",
+  "Next action owner",
+  "Next action note",
+  "Internal notes"
+];
+const REGISTRATION_STATUS_ORDER = [
+  "draft",
+  "part_a_submitted",
+  "part_a_internal_review",
+  "part_a_changes_needed",
+  "part_a_accepted",
+  "phone_preview_sent",
+  "name_logo_approved",
+  "name_logo_changes_requested",
+  "video_preparing",
+  "video_ready_for_review",
+  "video_approved",
+  "video_changes_requested",
+  "registration_submitted",
+  "provider_review",
+  "provider_changes_requested",
+  "approved",
+  "live",
+  "paused_billing",
+  "paused_operational"
+];
 
 function doGet(event) {
   const applicationId = event && event.parameter && event.parameter.applicationId;
@@ -14,7 +71,29 @@ function doGet(event) {
 }
 
 function getApplicationStatus(applicationId) {
-  const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAME);
+  const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const applicationRecord = findApplicationRecord(spreadsheet, applicationId);
+  if (applicationRecord) {
+    return {
+      ok: true,
+      found: true,
+      applicationId: applicationId,
+      registrationStatus: applicationRecord["Registration status"] || "draft",
+      partAStatus: applicationRecord["Part A status"] || "draft",
+      partBStatus: applicationRecord["Part B status"] || "",
+      billingStatus: applicationRecord["Billing status"] || "",
+      twilioStatus: applicationRecord["Twilio status"] || "",
+      providerStatus: applicationRecord["Provider status"] || "",
+      reviewStatus: "",
+      partBVideoStatus: "",
+      nextActionOwner: applicationRecord["Next action owner"] || "",
+      nextActionNote: applicationRecord["Next action note"] || "",
+      notes: applicationRecord["Internal notes"] || "",
+      lastUpdated: serialiseDate(applicationRecord["Updated at"])
+    };
+  }
+
+  const sheet = spreadsheet.getSheetByName(SHEET_NAME);
   if (!sheet) throw new Error("Sheet tab not found: " + SHEET_NAME);
 
   const values = sheet.getDataRange().getValues();
@@ -64,7 +143,8 @@ function doPost(event) {
 
   try {
     const payload = parsePayload(event);
-    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAME);
+    const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
+    const sheet = spreadsheet.getSheetByName(SHEET_NAME);
     if (!sheet) throw new Error("Sheet tab not found: " + SHEET_NAME);
 
     const now = new Date();
@@ -113,6 +193,13 @@ function doPost(event) {
       now
     ]);
 
+    upsertApplicationRecord(spreadsheet, payload, {
+      applicationId: applicationId,
+      registrationStatus: registrationStatus,
+      partAStatus: partAStatus,
+      now: now
+    });
+
     notifyAdam(payload, submissionId, countries, usSelected);
 
     return jsonResponse({
@@ -137,6 +224,132 @@ function parsePayload(event) {
     throw new Error("Missing POST body");
   }
   return JSON.parse(event.postData.contents);
+}
+
+function upsertApplicationRecord(spreadsheet, payload, options) {
+  const sheet = getOrCreateSheet(spreadsheet, APPLICATIONS_SHEET_NAME, APPLICATION_HEADERS);
+  const values = sheet.getDataRange().getValues();
+  const headers = normaliseHeaders(values[0] || APPLICATION_HEADERS);
+  const applicationIdColumn = headers.indexOf("Application ID");
+  if (applicationIdColumn === -1) throw new Error("Application ID column not found in Applications sheet");
+
+  let rowNumber = -1;
+  let existing = {};
+  for (let index = values.length - 1; index >= 1; index -= 1) {
+    if (String(values[index][applicationIdColumn]) !== String(options.applicationId)) continue;
+    rowNumber = index + 1;
+    existing = rowToObject(values[index], headers);
+    break;
+  }
+
+  const now = options.now;
+  const record = {
+    "Application ID": options.applicationId,
+    "Client ID": firstValue(payload.clientId, existing["Client ID"]),
+    "CRM company ID": firstValue(payload.crmCompanyId, existing["CRM company ID"]),
+    "CRM deal ID": firstValue(payload.crmDealId, existing["CRM deal ID"]),
+    "CRM source record URL": firstValue(payload.crmSourceRecordUrl, existing["CRM source record URL"]),
+    "Private application token": firstValue(payload.privateApplicationToken, existing["Private application token"]),
+    "Client name": firstValue(payload.displayName, payload.tradingName, payload.legalBusinessName, existing["Client name"]),
+    "Legal business name": firstValue(payload.legalBusinessName, existing["Legal business name"]),
+    "Trading name": firstValue(payload.tradingName, existing["Trading name"]),
+    "Primary contact name": firstValue(payload.primaryContactName, existing["Primary contact name"]),
+    "Primary contact email": firstValue(payload.primaryContactEmail, existing["Primary contact email"]),
+    "Primary contact phone": firstValue(payload.primaryContactPhone, existing["Primary contact phone"]),
+    "Campaign code": firstValue(payload.campaignCode, existing["Campaign code"]),
+    "Message code": firstValue(payload.messageCode, existing["Message code"]),
+    "Qualified use case": firstValue(payload.qualifiedUseCase, payload.primaryUseCase, existing["Qualified use case"]),
+    "Package interest": firstValue(payload.packageInterest, existing["Package interest"]),
+    "Handoff date": firstValue(payload.handoffDate, existing["Handoff date"]),
+    "Sales context": firstValue(payload.salesContext, existing["Sales context"]),
+    "Package name": firstValue(payload.packageName, existing["Package name"]),
+    "Registration status": mostAdvancedStatus(existing["Registration status"], options.registrationStatus),
+    "Billing status": firstValue(existing["Billing status"], payload.billingStatus),
+    "Part A status": firstValue(options.partAStatus, existing["Part A status"]),
+    "Part B status": firstValue(existing["Part B status"], payload.partBStatus),
+    "Twilio status": firstValue(existing["Twilio status"], payload.twilioStatus),
+    "Provider status": firstValue(existing["Provider status"], payload.providerStatus),
+    "Internal owner": firstValue(existing["Internal owner"], payload.internalOwner),
+    "Created at": firstValue(existing["Created at"], now),
+    "Updated at": now,
+    "Last client action at": now,
+    "Last internal action at": firstValue(existing["Last internal action at"], ""),
+    "Next action owner": firstValue(existing["Next action owner"], payload.nextActionOwner),
+    "Next action note": firstValue(existing["Next action note"], payload.nextActionNote),
+    "Internal notes": firstValue(existing["Internal notes"], payload.internalNotes)
+  };
+
+  const row = headers.map(function(header) {
+    return safeCell(record[header]);
+  });
+
+  if (rowNumber === -1) {
+    sheet.appendRow(row);
+  } else {
+    sheet.getRange(rowNumber, 1, 1, headers.length).setValues([row]);
+  }
+}
+
+function findApplicationRecord(spreadsheet, applicationId) {
+  const sheet = spreadsheet.getSheetByName(APPLICATIONS_SHEET_NAME);
+  if (!sheet) return null;
+
+  const values = sheet.getDataRange().getValues();
+  if (values.length < 2) return null;
+
+  const headers = normaliseHeaders(values[0]);
+  const applicationIdColumn = headers.indexOf("Application ID");
+  if (applicationIdColumn === -1) return null;
+
+  for (let rowIndex = values.length - 1; rowIndex >= 1; rowIndex -= 1) {
+    if (String(values[rowIndex][applicationIdColumn]) !== String(applicationId)) continue;
+    return rowToObject(values[rowIndex], headers);
+  }
+
+  return null;
+}
+
+function getOrCreateSheet(spreadsheet, name, headers) {
+  let sheet = spreadsheet.getSheetByName(name);
+  if (!sheet) sheet = spreadsheet.insertSheet(name);
+
+  if (sheet.getLastRow() === 0) {
+    sheet.appendRow(headers);
+  } else {
+    const currentHeaders = normaliseHeaders(sheet.getRange(1, 1, 1, Math.max(sheet.getLastColumn(), headers.length)).getValues()[0]);
+    const missingHeaders = headers.filter(function(header) {
+      return currentHeaders.indexOf(header) === -1;
+    });
+    if (missingHeaders.length) {
+      sheet.getRange(1, currentHeaders.length + 1, 1, missingHeaders.length).setValues([missingHeaders]);
+    }
+  }
+
+  return sheet;
+}
+
+function rowToObject(row, headers) {
+  const output = {};
+  headers.forEach(function(header, index) {
+    output[header] = row[index] || "";
+  });
+  return output;
+}
+
+function normaliseHeaders(headers) {
+  return headers.map(function(header) {
+    return String(header || "").trim();
+  }).filter(Boolean);
+}
+
+function mostAdvancedStatus(existingStatus, incomingStatus) {
+  if (!existingStatus) return incomingStatus || "draft";
+  if (!incomingStatus) return existingStatus;
+
+  const existingIndex = REGISTRATION_STATUS_ORDER.indexOf(existingStatus);
+  const incomingIndex = REGISTRATION_STATUS_ORDER.indexOf(incomingStatus);
+  if (existingIndex === -1 || incomingIndex === -1) return incomingStatus;
+  return incomingIndex > existingIndex ? incomingStatus : existingStatus;
 }
 
 function notifyAdam(payload, submissionId, countries, usSelected) {
@@ -213,6 +426,7 @@ function serialiseDate(value) {
 
 function safeCell(value) {
   if (value === null || value === undefined) return "";
+  if (Object.prototype.toString.call(value) === "[object Date]") return value;
   const text = String(value);
   return /^[=+\-@]/.test(text) ? "'" + text : text;
 }

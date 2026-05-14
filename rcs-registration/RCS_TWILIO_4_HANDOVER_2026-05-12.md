@@ -963,14 +963,42 @@ Verification:
 - Live `GET` for `ROQ-RCS-TEST-SLICE3-20260514` returned `part_a_submitted`.
 - Browser preview at `http://localhost:8902/rcs-registration/index.html?applicationId=ROQ-RCS-TEST-SLICE3-20260514` showed `Part A received`, kept B2 as `Waiting for test message`, and had no console errors.
 
+### Slice 4A Completed - Applications Control Row
+
+RCS-Twilio-4 added the first real one-row-per-application control path.
+
+Implemented:
+
+- Apps Script now creates an `Applications` tab if needed.
+- Part A submissions still append to `Part A submissions`.
+- The same POST also creates or updates one `Applications` control row keyed by `Application ID`.
+- `Applications` stores supplied CRM/outreach handoff fields:
+  - `CRM company ID`
+  - `CRM deal ID`
+  - `CRM source record URL`
+  - `Campaign code`
+  - `Message code`
+  - `Qualified use case`
+  - `Package interest`
+  - `Handoff date`
+  - `Sales context`
+- Status lookup now checks `Applications` first and falls back to `Part A submissions`.
+- Existing live Apps Script deployment was updated in place to version `6`.
+
+Test evidence:
+
+- Test submission `ROQ-RCS-TEST-SLICE5-20260514` wrote to both `Part A submissions` and `Applications`.
+- `Applications` row included the test CRM fields and `part_a_submitted`.
+- Live `GET ?applicationId=ROQ-RCS-TEST-SLICE5-20260514` returned the `Applications` control-row shape, including billing, Part B, Twilio, provider, and next-action fields.
+
 ### Next Recommended Step
 
-Create a scoped local Level 2 checkpoint commit for the RCS files listed above, without touching unrelated root website files.
+Create another scoped local Level 2 checkpoint commit for the latest Apps Script / docs work, without touching unrelated root website files.
 
 After that, the next build slice should be one of:
 
-1. Build the real `Applications` control row and private-link/token creation path.
+1. Create the private-link/token path so RightOnQ creates the `Applications` row before the client starts Part A.
 2. Wire B2 name/logo approval and issue responses into storage.
 3. Build the manual internal status update process/operator sheet view.
 
-Recommended order: start with the real `Applications` control row/private-link path, because it turns the current temporary browser-generated application ID into the launch-safe version.
+Recommended order: private-link/token path next, because it turns the current temporary browser-generated application ID into the launch-safe version.
