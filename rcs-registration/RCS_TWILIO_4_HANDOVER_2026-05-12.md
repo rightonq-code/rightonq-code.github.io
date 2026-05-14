@@ -1459,6 +1459,48 @@ Recommended next step:
 2. Do not force a second representative in the public form yet.
 3. Later, decide whether to split the primary authorised rep into first/last/email/mobile/title/job-position in the customer form or collect the extra pieces internally for the Trust Hub lane.
 
+### Spawned Agent Research Added - Twilio KYC Docs
+
+Bugs then spawned agents to review the Twilio pages referenced by Isa's reply and pasted the consolidated build impact.
+
+RCS-Twilio-4 added that consolidation to `RCS_ONBOARDING_MAIN_BUILD_PLAN.md`.
+
+Key build additions:
+
+- confirmed the architecture remains:
+  - RightOnQ parent Primary Compliance Profile;
+  - one Secondary Compliance Profile per end-client company;
+  - separate UK RC Bundle for UK long-code SMS fallback;
+  - assign UK numbers to the approved end-business bundle/profile.
+- intake should plan for:
+  - one required primary authorised representative;
+  - optional second representative;
+  - legal company name, company registration number, website, address, business classification, subassignment flag, and optional comments.
+- status tracking should include:
+  - `draft`;
+  - `pending_review`;
+  - `in_review`;
+  - `twilio_approved`;
+  - `twilio_rejected`;
+  - rejection/error reasons.
+- exception codes to track:
+  - `18019` - proof of identity required for authorised representative;
+  - `18020` - proof of authorised representative's association with business required;
+  - `18057` - authorised representative validation failed.
+
+Important storage stance:
+
+- passport/driving licence/government ID must not become normal upfront intake fields;
+- use Twilio-managed compliance collection wherever available;
+- store Twilio IDs, statuses, and rejection reasons rather than raw ID documents;
+- do not promise universally that RightOnQ never touches evidence until Twilio confirms the UK-specific embeddable/compliance path.
+
+Remaining uncertainties:
+
+- whether UK RCS production onboarding consumes the same Trust Hub Secondary Compliance Profile cleanly, or adds separate RCS/carrier checks;
+- whether RightOnQ's Twilio account has the required ISV/subaccount/embeddable capabilities enabled;
+- exact UK long-code purchase enforcement should be tested in the live account before final UX copy.
+
 ### Field Change Shortlist Added
 
 After Bugs said to keep rolling, RCS-Twilio-4 added a `Field Change Shortlist - Draft 1` section to the main build plan.

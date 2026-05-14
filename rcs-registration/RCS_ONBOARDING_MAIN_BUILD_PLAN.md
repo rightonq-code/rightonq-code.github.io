@@ -198,6 +198,71 @@ Immediate build impact:
 - keep KYC evidence as exception-only;
 - treat Secondary Compliance Profile and UK RC Bundle as two separate operational checklist/status lanes, even though they share data.
 
+### Spawned Agent Research - Twilio KYC Docs
+
+Bugs spawned research agents after Isa's reply and pasted the consolidated build impact on Thursday 14 May 2026.
+
+The research supports the current architecture:
+
+- RightOnQ keeps the approved parent Primary Compliance Profile.
+- Each end-client company gets its own Secondary Compliance Profile when the brand/entity differs from RightOnQ.
+- If UK long-code SMS fallback is used, RightOnQ should build a separate UK Regulatory Compliance Bundle for the end business, then assign the UK number to that approved bundle.
+
+Intake fields to plan around:
+
+- one required primary authorised representative:
+  - first name;
+  - last name;
+  - work email;
+  - mobile number;
+- optional second authorised representative, because Twilio's Console/API guidance is mixed;
+- UK business fields:
+  - legal company name;
+  - company registration number;
+  - website;
+  - address;
+  - business classification;
+  - subassignment flag;
+  - optional comments;
+- Twilio status tracking:
+  - `draft`;
+  - `pending_review`;
+  - `in_review`;
+  - `twilio_approved`;
+  - `twilio_rejected`;
+  - rejection/error reasons.
+
+Identity evidence remains exception-only:
+
+- `18019`: Twilio could not verify the authorised representative's identity; government ID or passport may be requested.
+- `18020`: Twilio needs proof the representative is associated with the business.
+- `18057`: digital validation of the authorised representative failed; may need a different representative or an explanation of the company/website connection.
+
+Do not make passport or driving licence a normal upfront field.
+
+RightOnQ document-storage stance:
+
+- Use Twilio-managed compliance collection wherever available.
+- Store Twilio IDs, statuses, and rejection reasons rather than raw ID documents.
+- Do not promise universally that RightOnQ never touches evidence until Twilio confirms UK RC Bundle / Secondary Profile coverage for the relevant embeddable path.
+
+Remaining uncertainties from the research:
+
+- Whether UK RCS production onboarding consumes the same Trust Hub Secondary Compliance Profile cleanly, or adds separate carrier/RCS-specific checks.
+- Whether RightOnQ's Twilio account has the required ISV/subaccount/embeddable capabilities enabled.
+- Exact UK long-code purchase enforcement should be tested in the live account before final UX copy.
+
+Research references supplied by the agents:
+
+- Twilio Secondary Compliance Profiles: `https://www.twilio.com/docs/trust-hub/profiles/secondary-compliance-profiles`
+- Twilio API: Create a Secondary Customer Profile: `https://www.twilio.com/docs/trust-hub/trusthub-rest-api/api-create-secondary-customer-profile`
+- Twilio Reading Regulations for the UK Bundle: `https://www.twilio.com/docs/phone-numbers/regulatory/reading-regulations-for-the-uk-bundle`
+- Twilio KYC in the United Kingdom: `https://help.twilio.com/articles/21038555454875-Know-Your-Customer-KYC-in-the-United-Kingdom`
+- Twilio Regulatory Compliance REST APIs: `https://www.twilio.com/docs/phone-numbers/regulatory/api`
+- Twilio Compliance Embeddable onboarding: `https://www.twilio.com/docs/messaging/compliance/toll-free/compliance-embeddable-onboarding`
+- Twilio Voice Integrity ISV/subaccount flow: `https://www.twilio.com/docs/voice/spam-monitoring-with-voiceintegrity/voice-integrity-onboarding/voiceintegrity-onboarding-in-the-twilio-console`
+- Twilio errors `18019`, `18020`, and `18057`.
+
 ## Field Authority Map - Draft 1
 
 Purpose: map each customer/intake field to the strictest downstream requirement so RightOnQ asks once, asks accurately, and does not store sensitive data in the wrong place.
@@ -818,6 +883,8 @@ Suggested columns:
 - `trust_hub_status_updated_at`
 - `trust_hub_status_callback_configured`
 - `trust_hub_rejection_reason`
+- `trust_hub_error_code`
+- `trust_hub_error_detail`
 - `business_identity`
 - `business_type`
 - `business_industry`
@@ -831,6 +898,10 @@ Suggested columns:
 - `business_info_end_user_sid`
 - `authorised_rep_1_end_user_sid`
 - `authorised_rep_2_end_user_sid`
+- `authorised_rep_1_validation_status`
+- `authorised_rep_2_validation_status`
+- `authorised_rep_exception_code`
+- `authorised_rep_exception_action`
 - `primary_profile_assignment_status`
 - `business_info_assignment_status`
 - `rep_1_assignment_status`
@@ -851,14 +922,21 @@ Recommended `trust_hub_status` values:
 - `evaluation_failed`
 - `ready_to_submit`
 - `pending_review`
+- `in_review`
 - `twilio_approved`
 - `twilio_rejected`
 - `not_required_rcs_only`
 
+Recommended exception codes to track:
+
+- `18019`: proof of identity required for authorised representative.
+- `18020`: proof of authorised representative's association with business required.
+- `18057`: authorised representative validation failed.
+
 Launch privacy rule:
 
 - Do not store representative date of birth, ID images, or proof-of-address files in the current static form / Google Sheet workflow unless Bugs explicitly approves a secure storage design.
-- If Twilio requires sensitive representative evidence, handle it as a secure manual follow-up or later backend/admin flow.
+- If Twilio requires sensitive representative evidence, prefer Twilio-managed compliance collection where available, or handle it as a secure manual follow-up/later backend-admin flow.
 
 ### Tab: Internal Reviews
 
@@ -1729,8 +1807,11 @@ Output:
 - secondary compliance profile SID;
 - Trust Hub status;
 - Trust Hub rejection/evaluation summary;
+- Trust Hub error code/detail;
+- authorised representative exception code/action;
 - primary authorised representative tracking fields;
 - optional second authorised representative tracking fields;
+- UK RC Bundle SID/status/rejection fields;
 - subaccount SID;
 - setup status;
 - registration/provider reference;
