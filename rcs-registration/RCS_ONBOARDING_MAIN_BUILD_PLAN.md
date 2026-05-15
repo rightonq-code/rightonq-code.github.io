@@ -57,8 +57,9 @@ Revolut should ideally handle:
 
 - initial onboarding checkout/payment;
 - payment method saving where supported;
-- first month subscription/payment;
-- prepaid usage credit/deposit payment;
+- `£100 + VAT` registration fee payment;
+- later post-approval monthly subscription payment;
+- later prepaid usage credit/top-up payment;
 - merchant-initiated top-up orders/charges where supported;
 - reporting and reconciliation exports;
 - webhook events back into RightOnQ's source of truth.
@@ -80,20 +81,27 @@ RightOnQ should maintain:
 
 Do not rely on Revolut alone as the full SaaS billing brain until its sandbox and operational fit are proven.
 
-### Initial Commercial Model Under Discussion
+### Current Commercial Model Decision
 
-Starting package:
+Bugs decided the customer journey should be simple and platform-led:
 
-- `Local Time Only`
-- `£25/month`
-- PAYG usage fees on top
-- minimum starting usage credit/deposit, likely `£50`
+- no standalone "application only" product for now;
+- every client pays a `£100 + VAT` RCS registration fee before RightOnQ starts the registration work;
+- the fee confirms the business is serious and covers application preparation, checking, submission support, phone preview work, and registration follow-up;
+- monthly platform fees start only once the RCS sender is approved and ready to use;
+- if the RCS sender application is not approved for reasons outside the client's control, the `£100 + VAT` registration fee is refunded in full;
+- the registration fee is not refundable if the application cannot proceed or is rejected because the business provided inaccurate information, failed required checks, did not complete requested actions, withdrew, or has business/compliance history that prevents approval.
 
-Likely first payment:
+Platform packages:
 
-- `£25` first month
-- `£50` starting usage credit
-- total `£75`
+- `RightOnQ UK Basic`: `£25/month + VAT`, plus messaging costs;
+- `RightOnQ Multi-Zone`: `£49/month + VAT`, plus messaging costs.
+
+Customer-facing pricing principle:
+
+- keep this simple;
+- do not charge monthly subscription fees during the 4-6 week registration wait;
+- do not offer a low-commitment registration-only path that attracts unsuitable clients.
 
 Important risk rule:
 
@@ -389,16 +397,17 @@ Still not changed:
 Target smooth journey:
 
 1. Client expresses interest and is qualified by RightOnQ/outreach.
-2. Client opens a RightOnQ onboarding page or receives a guided link.
-3. Client sees the package and commercial terms:
-   - service level;
-   - monthly base fee;
-   - PAYG usage;
-   - starting usage credit/deposit;
-   - auto top-up / pause rules.
+2. Client opens a RightOnQ registration gateway page or receives a guided link.
+3. Client sees the commercial terms:
+   - `£100 + VAT` RCS registration fee;
+   - refund guarantee if the application is not approved for reasons outside the client's control;
+   - no monthly platform fee until approved and ready to use;
+   - UK Basic at `£25/month + VAT` after approval;
+   - Multi-Zone at `£49/month + VAT` after approval;
+   - messaging costs charged separately.
 4. Client accepts service/payment terms.
-5. Client pays via Revolut, likely first month plus starting usage credit.
-6. Client receives a private onboarding/application link.
+5. Client pays the `£100 + VAT` registration fee, likely via Revolut.
+6. RightOnQ creates/sends a private onboarding/application link.
 7. Client completes the intake once, with fields accurate enough for both RCS sender registration and Twilio Trust Hub/KYC.
 8. RightOnQ checks the intake.
 9. RightOnQ starts or prepares the Twilio Trust Hub Secondary Compliance Profile track where required.
@@ -422,9 +431,9 @@ Target internal flow:
 1. Lead qualified.
 2. Commercial offer agreed.
 3. Revolut checkout/order/payment setup created.
-4. Payment received and/or payment method saved.
-5. Subscription/base monthly entitlement active or recorded.
-6. Minimum usage credit/deposit received.
+4. `£100 + VAT` registration fee received.
+5. Payment method saved where supported.
+6. Post-approval subscription/base monthly entitlement recorded but not charged until approved and ready to use.
 7. Application record created with stable `application_id`.
 8. Private application link issued.
 9. Part A submitted.
@@ -2131,7 +2140,9 @@ Design/build the onboarding page before the RCS form.
 Output:
 
 - package explanation;
-- price/usage/deposit/top-up wording;
+- `£100 + VAT` RCS registration fee wording;
+- refund guarantee wording;
+- post-approval plan wording for UK Basic and Multi-Zone;
 - terms acceptance;
 - Revolut checkout handoff;
 - success route to private application link.
@@ -2144,7 +2155,7 @@ Questions:
 
 - Can RightOnQ create a customer/order/payment in sandbox?
 - Can the payment method be saved for future merchant-initiated charge?
-- Can the first payment be `£75`?
+- Can the first payment be `£100 + VAT`?
 - Can later top-up charge be initiated?
 - What webhook events arrive?
 - How are failed payments represented?
