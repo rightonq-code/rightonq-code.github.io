@@ -401,8 +401,8 @@ Commercial decision from Bugs on 2026-05-15:
 - every client pays a `£100 + VAT` RCS registration fee to start;
 - if the RCS sender application is not approved for reasons outside the client's control, refund the registration fee in full;
 - do not refund where the application cannot proceed or is rejected because the business provided inaccurate information, failed required checks, did not complete requested actions, withdrew, or has business/compliance history that prevents approval;
-- UK Basic after approval: `£25/month + VAT`, plus messaging costs;
-- Multi-Zone after approval: `£49/month + VAT`, plus messaging costs.
+- RightOnQ UK after approval: `£25/month + VAT`, plus messaging costs;
+- RightOnQ Global after approval: `£49/month + VAT`, plus messaging costs.
 
 ### Customer-Facing Onboarding Shape
 

@@ -94,8 +94,8 @@ Bugs decided the customer journey should be simple and platform-led:
 
 Platform packages:
 
-- `RightOnQ UK Basic`: `£25/month + VAT`, plus messaging costs;
-- `RightOnQ Multi-Zone`: `£49/month + VAT`, plus messaging costs.
+- `RightOnQ UK`: `£25/month + VAT`, plus messaging costs;
+- `RightOnQ Global`: `£49/month + VAT`, plus messaging costs.
 
 Customer-facing pricing principle:
 
@@ -402,8 +402,8 @@ Target smooth journey:
    - `£100 + VAT` RCS registration fee;
    - refund guarantee if the application is not approved for reasons outside the client's control;
    - no monthly platform fee until approved and ready to use;
-   - UK Basic at `£25/month + VAT` after approval;
-   - Multi-Zone at `£49/month + VAT` after approval;
+   - RightOnQ UK at `£25/month + VAT` after approval;
+   - RightOnQ Global at `£49/month + VAT` after approval;
    - messaging costs charged separately.
 4. Client accepts service/payment terms.
 5. Client pays the `£100 + VAT` registration fee, likely via Revolut.
@@ -2142,7 +2142,7 @@ Output:
 - package explanation;
 - `£100 + VAT` RCS registration fee wording;
 - refund guarantee wording;
-- post-approval plan wording for UK Basic and Multi-Zone;
+- post-approval plan wording for RightOnQ UK and RightOnQ Global;
 - terms acceptance;
 - Revolut checkout handoff;
 - success route to private application link.
