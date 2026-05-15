@@ -44,7 +44,7 @@ Deployment:
 
 - Execute as: `adam@rightonq.co.uk`
 - Access: `Anyone`
-- Current published version after CLI redeploy: `20`
+- Current published version after CLI redeploy: `21`
 - Version `4` added Application ID, registration status, and Part A status columns to the intake row.
 - Version `5` adds Application ID status lookup via `GET ?applicationId=...`.
 - Version `6` adds the `Applications` control-row tab and writes/reads one row per Application ID.
@@ -60,6 +60,7 @@ Deployment:
 - Version `18` adds a guarded `getOperatorSnapshot` action for RightOnQ application readback.
 - Version `19` updates the default internal KYC checklist state from `pending_isa_reply` to `pending_trust_hub_review` after Twilio's Isa Bell reply.
 - Version `20` adds internal `Trust Hub KYC` and `UK RC bundles` tracking rows for future Part A submissions and includes them in guarded operator snapshots.
+- Version `21` adds guarded operator update actions for `Trust Hub KYC` and `UK RC bundles`.
 
 ## Behaviour
 
@@ -79,6 +80,8 @@ The script:
 - supports guarded internal status updates through `action = updateApplicationStatus`,
 - supports guarded internal checklist updates through `action = updateInternalReview`,
 - supports guarded operator readback through `action = getOperatorSnapshot`,
+- supports guarded Trust Hub KYC updates through `action = updateTrustHubKyc`,
+- supports guarded UK RC Bundle updates through `action = updateUkRcBundle`,
 - appends successful internal status changes to `Status events`,
 - redacts private application tokens and operator/create PINs from stored audit JSON,
 - appends customer communication drafts to `Communications` for manual send/review,
@@ -102,6 +105,6 @@ The internal `updateApplicationStatus` action is guarded by the script property 
 
 Do not store either PIN in this repo, in static HTML, or in Sheet audit JSON. If `ONBOARDING_OPERATOR_PIN` is not configured, internal status updates correctly return `ONBOARDING_OPERATOR_PIN is not configured`.
 
-Local application-link creation can be sent with `rcs-registration/tools/operator-create-application.mjs`, which reads `RCS_ONBOARDING_CREATE_PIN` from the local environment. Local operator updates can be sent with `rcs-registration/tools/operator-review.mjs`. Local operator readback can be run with `rcs-registration/tools/operator-status.mjs`. These tools never store PINs in the repo. See `rcs-registration/tools/README.md` for dry-run and live examples.
+Local application-link creation can be sent with `rcs-registration/tools/operator-create-application.mjs`, which reads `RCS_ONBOARDING_CREATE_PIN` from the local environment. Local operator updates can be sent with `rcs-registration/tools/operator-review.mjs`, `rcs-registration/tools/operator-trusthub-kyc.mjs`, and `rcs-registration/tools/operator-rc-bundle.mjs`. Local operator readback can be run with `rcs-registration/tools/operator-status.mjs`. These tools never store PINs in the repo. See `rcs-registration/tools/README.md` for dry-run and live examples.
 
 `Communications` is currently a manual-send queue. It records draft messages and trigger context, but it does not send customer emails automatically.

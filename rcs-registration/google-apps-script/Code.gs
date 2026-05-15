@@ -368,6 +368,14 @@ function doPost(event) {
       requireOperatorPin(payload);
       return jsonResponse(updateInternalReview(spreadsheet, payload));
     }
+    if (payload.action === "updateTrustHubKyc") {
+      requireOperatorPin(payload);
+      return jsonResponse(updateTrustHubKyc(spreadsheet, payload));
+    }
+    if (payload.action === "updateUkRcBundle") {
+      requireOperatorPin(payload);
+      return jsonResponse(updateUkRcBundle(spreadsheet, payload));
+    }
 
     const sheet = spreadsheet.getSheetByName(SHEET_NAME);
     if (!sheet) throw new Error("Sheet tab not found: " + SHEET_NAME);
@@ -859,6 +867,197 @@ function upsertInternalReviewRecord(spreadsheet, payload, now) {
 
   return {
     reviewStatus: record["Review status"]
+  };
+}
+
+function updateTrustHubKyc(spreadsheet, payload) {
+  const now = new Date();
+  const applicationId = payload.applicationId;
+  if (!applicationId) throw new Error("Missing application ID");
+
+  const applicationRecord = findApplicationRecord(spreadsheet, { applicationId: applicationId });
+  if (!applicationRecord) throw new Error("Application ID not found");
+
+  const result = upsertTrackingRecord(
+    spreadsheet,
+    TRUST_HUB_KYC_SHEET_NAME,
+    TRUST_HUB_KYC_HEADERS,
+    buildTrustHubKycFieldMap(),
+    payload,
+    now
+  );
+
+  if (Object.prototype.hasOwnProperty.call(payload, "trustHubStatus")) {
+    updateApplicationStatus(spreadsheet, {
+      applicationId: applicationId,
+      trustHubStatus: payload.trustHubStatus,
+      eventType: "trust_hub_kyc_updated",
+      changedBy: firstValue(payload.changedBy, payload.operatorName, "RightOnQ"),
+      source: "trust_hub_kyc",
+      internalNotes: firstValue(payload.kycInternalNotes, applicationRecord["Internal notes"])
+    });
+  }
+
+  return {
+    ok: true,
+    applicationId: applicationId,
+    trustHubStatus: result.record["Trust Hub status"] || "",
+    secondaryComplianceProfileSid: result.record["Secondary compliance profile SID"] || "",
+    evaluationStatus: result.record["Evaluation status"] || "",
+    updatedAt: now.toISOString()
+  };
+}
+
+function updateUkRcBundle(spreadsheet, payload) {
+  const now = new Date();
+  const applicationId = payload.applicationId;
+  if (!applicationId) throw new Error("Missing application ID");
+
+  const applicationRecord = findApplicationRecord(spreadsheet, { applicationId: applicationId });
+  if (!applicationRecord) throw new Error("Application ID not found");
+
+  const result = upsertTrackingRecord(
+    spreadsheet,
+    UK_RC_BUNDLES_SHEET_NAME,
+    UK_RC_BUNDLE_HEADERS,
+    buildUkRcBundleFieldMap(),
+    payload,
+    now
+  );
+
+  if (Object.prototype.hasOwnProperty.call(payload, "rcBundleStatus")) {
+    updateApplicationStatus(spreadsheet, {
+      applicationId: applicationId,
+      eventType: "uk_rc_bundle_updated",
+      changedBy: firstValue(payload.changedBy, payload.operatorName, "RightOnQ"),
+      source: "uk_rc_bundle",
+      internalNotes: firstValue(payload.internalNotes, applicationRecord["Internal notes"])
+    });
+  }
+
+  return {
+    ok: true,
+    applicationId: applicationId,
+    rcBundleStatus: result.record["RC bundle status"] || "",
+    rcBundleSid: result.record["RC bundle SID"] || "",
+    fallbackRequired: result.record["Fallback required"] || "",
+    updatedAt: now.toISOString()
+  };
+}
+
+function upsertTrackingRecord(spreadsheet, sheetName, headersList, fieldMap, payload, now) {
+  const sheet = getOrCreateSheet(spreadsheet, sheetName, headersList);
+  const values = sheet.getDataRange().getValues();
+  const headers = normaliseHeaders(values[0] || headersList);
+  const applicationIdColumn = headers.indexOf("Application ID");
+  if (applicationIdColumn === -1) throw new Error("Application ID column not found in " + sheetName + " sheet");
+
+  let rowNumber = -1;
+  let existing = {};
+  for (let index = values.length - 1; index >= 1; index -= 1) {
+    if (String(values[index][applicationIdColumn]) !== String(payload.applicationId)) continue;
+    rowNumber = index + 1;
+    existing = rowToObject(values[index], headers);
+    break;
+  }
+
+  const record = {};
+  headersList.forEach(function(header) {
+    record[header] = firstValue(existing[header], "");
+  });
+  record["Created at"] = firstValue(existing["Created at"], now);
+  record["Application ID"] = payload.applicationId;
+  record["Last updated"] = now;
+
+  Object.keys(fieldMap).forEach(function(payloadKey) {
+    if (!Object.prototype.hasOwnProperty.call(payload, payloadKey)) return;
+    record[fieldMap[payloadKey]] = payload[payloadKey];
+  });
+
+  if (Object.prototype.hasOwnProperty.call(record, "Trust Hub status updated at") && Object.prototype.hasOwnProperty.call(payload, "trustHubStatus")) {
+    record["Trust Hub status updated at"] = now;
+  }
+  if (Object.prototype.hasOwnProperty.call(record, "RC bundle status updated at") && Object.prototype.hasOwnProperty.call(payload, "rcBundleStatus")) {
+    record["RC bundle status updated at"] = now;
+  }
+
+  const row = headers.map(function(header) {
+    return safeCell(record[header]);
+  });
+
+  if (rowNumber === -1) {
+    sheet.appendRow(row);
+  } else {
+    sheet.getRange(rowNumber, 1, 1, headers.length).setValues([row]);
+  }
+
+  return {
+    record: record
+  };
+}
+
+function buildTrustHubKycFieldMap() {
+  return {
+    clientId: "Client ID",
+    primaryCustomerProfileSid: "Primary customer profile SID",
+    secondaryComplianceProfileSid: "Secondary compliance profile SID",
+    trustHubPolicySid: "Trust Hub policy SID",
+    trustHubProfileFriendlyName: "Trust Hub profile friendly name",
+    trustHubStatus: "Trust Hub status",
+    trustHubStatusCallbackConfigured: "Trust Hub status callback configured",
+    trustHubRejectionReason: "Trust Hub rejection reason",
+    trustHubErrorCode: "Trust Hub error code",
+    trustHubErrorDetail: "Trust Hub error detail",
+    businessIdentity: "Business identity",
+    businessType: "Business type",
+    businessIndustry: "Business industry",
+    businessRegistrationIdentifier: "Business registration identifier",
+    businessRegistrationNumber: "Business registration number",
+    businessRegionsOfOperation: "Business regions of operation",
+    businessWebsiteMatchStatus: "Business website match status",
+    addressSid: "Address SID",
+    addressValidationStatus: "Address validation status",
+    supportingDocumentSid: "Supporting document SID",
+    businessInfoEndUserSid: "Business info end user SID",
+    authorisedRep1EndUserSid: "Authorised rep 1 end user SID",
+    authorisedRep2EndUserSid: "Authorised rep 2 end user SID",
+    authorisedRep1ValidationStatus: "Authorised rep 1 validation status",
+    authorisedRep2ValidationStatus: "Authorised rep 2 validation status",
+    authorisedRepExceptionCode: "Authorised rep exception code",
+    authorisedRepExceptionAction: "Authorised rep exception action",
+    primaryProfileAssignmentStatus: "Primary profile assignment status",
+    businessInfoAssignmentStatus: "Business info assignment status",
+    rep1AssignmentStatus: "Rep 1 assignment status",
+    rep2AssignmentStatus: "Rep 2 assignment status",
+    addressAssignmentStatus: "Address assignment status",
+    evaluationStatus: "Evaluation status",
+    evaluationLastRunAt: "Evaluation last run at",
+    evaluationErrorSummary: "Evaluation error summary",
+    channelEndpointAssignmentStatus: "Channel endpoint assignment status",
+    phoneNumberSid: "Phone number SID",
+    kycInternalNotes: "KYC internal notes"
+  };
+}
+
+function buildUkRcBundleFieldMap() {
+  return {
+    clientId: "Client ID",
+    rcBundleSid: "RC bundle SID",
+    rcBundleStatus: "RC bundle status",
+    rcBundleRejectionReason: "RC bundle rejection reason",
+    rcBundleErrorCode: "RC bundle error code",
+    rcBundleErrorDetail: "RC bundle error detail",
+    endBusinessLegalName: "End business legal name",
+    businessRegistrationNumber: "Business registration number",
+    numberType: "Number type",
+    phoneNumberSid: "Phone number SID",
+    phoneNumber: "Phone number",
+    phoneNumberAssignmentStatus: "Phone number assignment status",
+    addressSid: "Address SID",
+    supportingDocumentSid: "Supporting document SID",
+    complianceOwner: "Compliance owner",
+    fallbackRequired: "Fallback required",
+    internalNotes: "Internal notes"
   };
 }
 

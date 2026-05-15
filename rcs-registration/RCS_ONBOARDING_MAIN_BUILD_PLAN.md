@@ -1996,6 +1996,76 @@ Outcome:
 - The previous evidence gap is closed.
 - The next build slice can safely focus on guarded operator update actions for Trust Hub KYC and UK RC Bundle statuses.
 
+### Slice 6N - Guarded Trust Hub / RC Bundle Operator Updates
+
+Goal:
+
+- let RightOnQ update internal Trust Hub KYC and UK RC Bundle tracking without direct Sheet edits;
+- keep the public form free of identity-document collection;
+- preserve audit/status-event evidence for manual operator changes.
+
+Apps Script version:
+
+- version `21`;
+- deployed to existing web app deployment `AKfycbyI81Ir2xvHLar0R0iFBBWyXa1Nj93T4_8Ni5_eX3XEYDA-AKQbVYbPHnTROLm8e4a6`.
+
+Added guarded actions:
+
+- `updateTrustHubKyc`;
+- `updateUkRcBundle`.
+
+Both actions:
+
+- require `ONBOARDING_OPERATOR_PIN`;
+- reject incorrect PINs;
+- update the matching internal tracking row by `Application ID`;
+- append/update status evidence without storing raw identity evidence.
+
+Added local tools:
+
+- `rcs-registration/tools/operator-trusthub-kyc.mjs`;
+- `rcs-registration/tools/operator-rc-bundle.mjs`.
+
+Live proof application:
+
+- `ROQ-RCS-TEST-PUBLIC-PARTA-20260514211901`
+
+Security proof:
+
+- an incorrect operator PIN was entered first;
+- Trust Hub update, RC Bundle update, and status snapshot all returned `Invalid onboarding operator PIN`;
+- the correct PIN was then entered and the proof succeeded.
+
+Correct-PIN proof result:
+
+- Trust Hub KYC update returned:
+  - `trustHubStatus = pending_review`;
+  - `secondaryComplianceProfileSid = BU_TEST_SECONDARY_PROFILE`;
+  - `evaluationStatus = not_run`;
+  - `updatedAt = 2026-05-15T07:24:16.476Z`.
+- UK RC Bundle update returned:
+  - `rcBundleStatus = pending_review`;
+  - `fallbackRequired = yes`;
+  - `updatedAt = 2026-05-15T07:24:23.739Z`.
+- operator snapshot confirmed:
+  - `Applications.Trust Hub status = pending_review`;
+  - latest `Trust Hub KYC` row has `Trust Hub status = pending_review`;
+  - latest `Trust Hub KYC` row has `Secondary compliance profile SID = BU_TEST_SECONDARY_PROFILE`;
+  - latest `Trust Hub KYC` row has `Business website match status = pending_review`;
+  - latest `Trust Hub KYC` row has `Evaluation status = not_run`;
+  - latest `UK RC bundles` row has `RC bundle status = pending_review`;
+  - latest `UK RC bundles` row has `Fallback required = yes`;
+  - latest `UK RC bundles` row has `Compliance owner = end_business`;
+  - `Status events` includes `trust_hub_kyc_updated`;
+  - `Status events` includes `uk_rc_bundle_updated`;
+  - `Submission JSON` remains redacted in operator snapshots.
+
+Outcome:
+
+- manual Trust Hub and RC Bundle status tracking is now available through guarded local tools;
+- no client-facing ID collection was added;
+- no raw identity documents, DOB, passport, driving licence, or proof-of-address fields were added to the public form or Sheet workflow.
+
 ### Slice 7 - Customer Commercial/Payment Entry Page
 
 Design/build the onboarding page before the RCS form.

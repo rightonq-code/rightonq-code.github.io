@@ -1927,3 +1927,76 @@ Outcome:
 
 - The v20 public Part A path is now proven to create the new internal Trust Hub KYC and UK RC Bundle tracking rows.
 - Next sensible build slice is guarded operator update actions for `Trust Hub KYC` and `UK RC bundles`.
+
+### Slice 6N Completed - Guarded Trust Hub / RC Bundle Operator Updates
+
+RCS-Twilio-4 added the next internal operator slice after the public Part A proof.
+
+Apps Script changes:
+
+- new guarded `action = updateTrustHubKyc`;
+- new guarded `action = updateUkRcBundle`;
+- both require `ONBOARDING_OPERATOR_PIN`;
+- `updateTrustHubKyc` updates the latest `Trust Hub KYC` row and syncs `Applications.Trust Hub status`;
+- `updateUkRcBundle` updates the latest `UK RC bundles` row;
+- both append `Status events` rows via the existing internal status path;
+- Apps Script was pushed with `clasp`;
+- Apps Script version `21` was created;
+- the existing deployment `AKfycbyI81Ir2xvHLar0R0iFBBWyXa1Nj93T4_8Ni5_eX3XEYDA-AKQbVYbPHnTROLm8e4a6` was redeployed to version `21`.
+
+New local tools:
+
+- `rcs-registration/tools/operator-trusthub-kyc.mjs`;
+- `rcs-registration/tools/operator-rc-bundle.mjs`.
+
+Tool behaviour:
+
+- both read `RCS_ONBOARDING_OPERATOR_PIN` from the local environment;
+- both support `--dry-run`;
+- neither stores or prints the PIN;
+- neither supports raw identity-document storage.
+
+Live proof application:
+
+- `ROQ-RCS-TEST-PUBLIC-PARTA-20260514211901`
+
+Security proof:
+
+- Bugs first entered an incorrect operator PIN;
+- all three attempted calls returned `Invalid onboarding operator PIN`;
+- no update was accepted until the correct PIN was entered.
+
+Correct-PIN proof results:
+
+- `operator-trusthub-kyc.mjs` returned:
+  - `ok = true`;
+  - `trustHubStatus = pending_review`;
+  - `secondaryComplianceProfileSid = BU_TEST_SECONDARY_PROFILE`;
+  - `evaluationStatus = not_run`;
+  - `updatedAt = 2026-05-15T07:24:16.476Z`.
+- `operator-rc-bundle.mjs` returned:
+  - `ok = true`;
+  - `rcBundleStatus = pending_review`;
+  - `fallbackRequired = yes`;
+  - `updatedAt = 2026-05-15T07:24:23.739Z`.
+- final guarded snapshot confirmed:
+  - `Applications.Trust Hub status = pending_review`;
+  - `Applications.lastInternalActionAt = 2026-05-15T07:24:24.573Z`;
+  - latest `Trust Hub KYC` row has `Trust Hub status = pending_review`;
+  - latest `Trust Hub KYC` row has `Secondary compliance profile SID = BU_TEST_SECONDARY_PROFILE`;
+  - latest `Trust Hub KYC` row has `Business website match status = pending_review`;
+  - latest `Trust Hub KYC` row has `Evaluation status = not_run`;
+  - latest `Trust Hub KYC` row note says no identity evidence was stored;
+  - latest `UK RC bundles` row has `RC bundle status = pending_review`;
+  - latest `UK RC bundles` row has `Fallback required = yes`;
+  - latest `UK RC bundles` row has `Compliance owner = end_business`;
+  - `Status events` includes `trust_hub_kyc_updated`;
+  - `Status events` includes `uk_rc_bundle_updated`;
+  - `Submission JSON` remains redacted in operator snapshots.
+
+Outcome:
+
+- RightOnQ can now manually track Twilio Trust Hub KYC and UK RC Bundle progress from local operator tools without editing the Sheet directly.
+- Next sensible build slice is either:
+  - build a small operator/status runbook for real client use; or
+  - move to the commercial/payment onboarding slice.

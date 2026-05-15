@@ -11,6 +11,8 @@ They call the deployed Apps Script web app, but they do not store PINs in this r
 | `operator-create-application.mjs` | Create a private application record/link from a qualified CRM or outreach handoff. | `RCS_ONBOARDING_CREATE_PIN` |
 | `operator-status.mjs` | Read the guarded operator snapshot for one application. | `RCS_ONBOARDING_OPERATOR_PIN` |
 | `operator-review.mjs` | Update the internal review checklist and optionally mark Part A accepted. | `RCS_ONBOARDING_OPERATOR_PIN` |
+| `operator-trusthub-kyc.mjs` | Update the internal Trust Hub KYC tracking row and sync the application Trust Hub status. | `RCS_ONBOARDING_OPERATOR_PIN` |
+| `operator-rc-bundle.mjs` | Update the internal UK RC Bundle tracking row. | `RCS_ONBOARDING_OPERATOR_PIN` |
 | `proof-public-part-a-submit.mjs` | Create a private test link, submit Part A through the public path, then prove Trust Hub KYC and UK RC Bundle tracking rows were created. | `RCS_ONBOARDING_CREATE_PIN` and `RCS_ONBOARDING_OPERATOR_PIN` |
 
 ## Safety Rules
@@ -123,6 +125,60 @@ RCS_ONBOARDING_OPERATOR_PIN="..." node rcs-registration/tools/operator-review.mj
 ```
 
 Expected live result: JSON showing `partAAccepted: true`, with `registrationStatus` and `partAStatus` set to `part_a_accepted`.
+
+## Update Trust Hub KYC Tracking
+
+Dry run:
+
+```bash
+node rcs-registration/tools/operator-trusthub-kyc.mjs \
+  --application-id ROQ-RCS-... \
+  --trust-hub-status pending_review \
+  --secondary-compliance-profile-sid BUxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx \
+  --evaluation-status not_run \
+  --kyc-internal-notes "Secondary profile prepared for manual Twilio review." \
+  --dry-run
+```
+
+Live run:
+
+```bash
+RCS_ONBOARDING_OPERATOR_PIN="..." node rcs-registration/tools/operator-trusthub-kyc.mjs \
+  --application-id ROQ-RCS-... \
+  --trust-hub-status pending_review \
+  --secondary-compliance-profile-sid BUxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx \
+  --evaluation-status not_run \
+  --kyc-internal-notes "Secondary profile prepared for manual Twilio review."
+```
+
+Expected live result: JSON showing the latest `trustHubStatus`, any stored secondary profile SID, and evaluation status. This action also syncs `Applications.Trust Hub status`.
+
+## Update UK RC Bundle Tracking
+
+Dry run:
+
+```bash
+node rcs-registration/tools/operator-rc-bundle.mjs \
+  --application-id ROQ-RCS-... \
+  --rc-bundle-status pending_review \
+  --fallback-required yes \
+  --compliance-owner end_business \
+  --internal-notes "UK long-code fallback bundle prepared." \
+  --dry-run
+```
+
+Live run:
+
+```bash
+RCS_ONBOARDING_OPERATOR_PIN="..." node rcs-registration/tools/operator-rc-bundle.mjs \
+  --application-id ROQ-RCS-... \
+  --rc-bundle-status pending_review \
+  --fallback-required yes \
+  --compliance-owner end_business \
+  --internal-notes "UK long-code fallback bundle prepared."
+```
+
+Expected live result: JSON showing the latest `rcBundleStatus`, any stored RC Bundle SID, and fallback status.
 
 ## Recommended Operator Order
 
