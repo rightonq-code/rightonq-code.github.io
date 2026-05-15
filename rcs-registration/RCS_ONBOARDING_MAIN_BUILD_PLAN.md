@@ -141,11 +141,12 @@ Important discovery on Thursday 14 May 2026:
   - phone numbers and other channel resources are linked to that compliance profile by assignment resources.
 - Treat this as a third onboarding track beside commercial/payment and RCS sender registration.
 
-Updated design assumption after Isa Bell/Twilio reply on Thursday 14 May 2026:
+Updated design assumption after Isa Bell/Twilio follow-up:
 
-- Build the intake data model around one required primary authorised representative.
-- Support an optional second authorised representative as backup/future-proofing, because Twilio guidance is mixed across Console/API/ISV docs.
-- Do not force customer-facing rep-2 capture in the first launch form unless Bugs explicitly chooses to.
+- Because Secondary Compliance Profile creation is part of the default RightOnQ onboarding lane, design the canonical intake model for two authorised representatives from the start.
+- The first representative remains the primary operational contact/sign-off person.
+- The second representative is required for the Secondary Compliance Profile lane, even if the UK RC Bundle lane alone may not independently require two reps.
+- If Bugs chooses a lighter first public form, rep 2 can be collected as a follow-up/manual step, but the state model should not treat rep 2 as optional once Secondary Compliance Profile submission is in scope.
 - Each representative record, where collected, should support:
   - first name;
   - last name;
@@ -154,7 +155,16 @@ Updated design assumption after Isa Bell/Twilio reply on Thursday 14 May 2026:
   - business title;
   - job position.
 
-Do not collect date of birth, passport, driving licence, government ID, or proof-of-address documents in the launch intake unless Twilio's live flow explicitly requires it. Isa's reply says passport/government ID is not an always-required upfront UK business-bundle field; Twilio asks for extra identity evidence if it cannot digitally verify the representative or their association with the business. If that happens, route evidence through a Twilio-managed compliance step or a secure manual/admin process, not the current static form and Google Sheet path.
+Do not collect date of birth, passport, driving licence, government ID, or proof-of-address documents in the launch intake unless Twilio's live flow explicitly requires it. Twilio asks for extra identity evidence if it cannot digitally verify the representative or their association with the business. If that happens, route evidence through a Twilio-managed compliance step where that lane is embeddable-supported, or through a secure manual/admin process, not the current static form and Google Sheet path.
+
+Compliance Embeddable design boundary from Isa/Twilio follow-up:
+
+- UK long-code Regulatory Compliance Bundles are explicitly within Compliance Embeddable scope.
+- Generic Trust Hub Secondary Compliance Profile support through Compliance Embeddable is not clearly confirmed by public docs; public docs explicitly list Secondary Customer Profiles for Voice Trust, which is narrower.
+- Therefore, treat UK RC Bundle evidence/resubmission as the likely embeddable/self-service lane, but keep Secondary Compliance Profile creation/resubmission RightOnQ/API/Console-managed unless Twilio confirms account/use-case enablement.
+- Compliance Embeddable is white-label and does not require the end client to have a Twilio login.
+- Compliance Embeddable session tokens are ephemeral; persist `inquiry_id` and `registration_id`, not the session token.
+- Twilio's Compliance Embeddable FAQ says data for this product is stored in the US; keep that visible for privacy review.
 
 The field-authority principle is:
 
@@ -167,6 +177,8 @@ Useful official references checked:
 - Twilio Trust Hub overview: `https://www.twilio.com/docs/trust-hub`
 - Twilio API: Create a Secondary Customer Profile: `https://www.twilio.com/docs/trust-hub/trusthub-rest-api/api-create-secondary-customer-profile`
 - Twilio UK long-code KYC: `https://support.twilio.com/hc/en-us/articles/21038555454875-Know-Your-Customer-KYC-in-the-United-Kingdom`
+- Twilio Compliance Embeddable FAQ: `https://help.twilio.com/articles/31769870199707-What-is-the-Compliance-Embeddable`
+- Twilio Compliance Embeddable onboarding guide: `https://www.twilio.com/docs/messaging/compliance/toll-free/compliance-embeddable-onboarding`
 
 ### Isa Bell Email - Answer Received
 
@@ -196,15 +208,54 @@ Isa replied on Thursday 14 May 2026 with these build-impacting answers:
   - baseline UK business-bundle fields are business details, address, registration data, and authorised rep contact details;
   - government ID/passport is an exception path if Twilio cannot digitally verify the representative;
   - do not make passport or driving licence a mandatory upfront intake field.
-- For reps, use one required primary authorised representative plus an optional second backup rep.
+- First-reply rep guidance was one required primary authorised representative plus optional second backup rep. This is now superseded for the default Secondary Profile lane by the later follow-up: collect/model two reps when Secondary Compliance Profile creation is in scope.
 - If avoiding ID storage is important, design exception handling so the end customer enters/uploads evidence directly into a Twilio-managed compliance step or another secure approved route, not by emailing/uploading documents into the static app or Sheet.
 
 Immediate build impact:
 
-- update docs and field map from `two reps likely required` to `one required, optional second`;
+- this first reply moved the working assumption from `two reps likely required` to `one required, optional second`;
+- Isa's later Compliance Embeddable / Secondary Profile follow-up supersedes that rep-count assumption for the default RightOnQ flow: collect/model two reps when Secondary Compliance Profile creation is part of onboarding;
 - keep the current customer-facing form free of ID upload fields;
 - keep KYC evidence as exception-only;
 - treat Secondary Compliance Profile and UK RC Bundle as two separate operational checklist/status lanes, even though they share data.
+
+### Isa Bell Follow-Up - Embeddable Scope and Rep Count Correction
+
+Bugs later received a more specific Twilio/Isa follow-up about Compliance Embeddable scope, UK RC Bundles, Secondary Compliance Profiles, and representative count.
+
+Build-impacting corrections:
+
+- Compliance Embeddable can be used for Regulatory Compliance Bundles for Long Codes, so the UK long-code RC Bundle lane should be designed as the client self-service / Twilio-managed evidence path where account enablement is available.
+- Public docs do not clearly confirm generic Secondary Compliance Profile support in Compliance Embeddable. They explicitly mention Secondary Customer Profiles for Voice Trust, which is not the same as saying all Trust Hub secondary profile flows are embeddable-supported.
+- Do not assume Secondary Compliance Profile evidence/resubmission uses the same embedded UX unless Twilio confirms it for RightOnQ's account/use case.
+- Compliance Embeddable can appear inside RightOnQ without visible Twilio branding, but:
+  - form content/copy/order is not customizable;
+  - it renders in English only;
+  - UI styling uses `ThemeSetId`;
+  - access requires prior registration/enablement.
+- The end client does not need Twilio Console access for an embeddable-supported flow; RightOnQ initializes server-side and embeds the returned inquiry/session flow.
+- The session token expires after 24 hours. Persist `inquiry_id` and `registration_id`; regenerate session tokens as needed.
+- Compliance Embeddable supports prefilling data from RightOnQ's canonical onboarding record.
+- Compliance Embeddable FAQ says data for this product is stored in the US, so privacy wording/review should account for that.
+
+Rep-count correction:
+
+- Secondary Compliance Profile public guidance says to provide contact details for two authorised representatives.
+- Because RightOnQ expects a Secondary Compliance Profile per end-client as the default compliance lane, the canonical state model should collect/support two representatives from the start.
+- For a lighter first customer form, rep 2 may be collected as a follow-up/manual field before Secondary Profile submission, but the workflow should not treat it as optional once Secondary Profile submission is required.
+
+State-machine / storage impact:
+
+- Keep separate lanes:
+  - `Secondary Compliance Profile`;
+  - `UK RC Bundle`;
+  - `RCS Sender approval`.
+- Persist by lane:
+  - Compliance Embeddable inquiry: `inquiry_id`, `registration_id`, latest status, rejection code/reason, callback/event history;
+  - Secondary profile: `CustomerProfileSid` / secondary profile SID, profile status, rejection reasons, callback/webhook history;
+  - UK RC Bundle: Bundle SID, bundle status, evaluation results where used, rejection reasons, callback history.
+- Do not persist `inquiry_session_token` as a durable identifier.
+- Store IDs/status/rejection reasons/callback history, not raw identity documents.
 
 ### Spawned Agent Research - Twilio KYC Docs
 
@@ -216,14 +267,15 @@ The research supports the current architecture:
 - Each end-client company gets its own Secondary Compliance Profile when the brand/entity differs from RightOnQ.
 - If UK long-code SMS fallback is used, RightOnQ should build a separate UK Regulatory Compliance Bundle for the end business, then assign the UK number to that approved bundle.
 
-Intake fields to plan around:
+Earlier intake fields from this research should now be read with the follow-up correction above:
 
-- one required primary authorised representative:
+- two authorised representatives where Secondary Compliance Profile submission is in scope, each with:
   - first name;
   - last name;
   - work email;
   - mobile number;
-- optional second authorised representative, because Twilio's Console/API guidance is mixed;
+  - business title;
+  - job position;
 - UK business fields:
   - legal company name;
   - company registration number;
@@ -286,8 +338,8 @@ Purpose: map each customer/intake field to the strictest downstream requirement 
 | Registered address | Step 1 asks Companies House registered office address | Useful | Business address needed | Emergency/number compliance may need address | Normal business data unless proof files are added | Keep; add note later if Twilio needs physical operating address separate from registered office. |
 | Business regions of operation | Current Step 7 asks RCS destination countries, not company operating regions | Launch market info | Needed by Trust Hub as operations regions | Not the same as recipient countries | Normal business data | Add later or collect internally; do not confuse with RCS launch markets. |
 | Primary contact | Step 1 asks name/email/phone | Operational | Operational | Operational | Personal contact data | Keep. |
-| Authorised representative 1 | Step 1 asks name/email/job title; auto-syncs from primary contact | Needed for sign-off | Required primary rep per Isa/Twilio reply; phone and job position may also be needed | May be needed | Personal contact data | Expand later to first/last/email/phone/business title/job position if/when the Trust Hub lane is implemented. |
-| Authorised representative 2 | Not currently captured | Usually not needed for RCS | Optional backup/future-proofing per Isa/Twilio reply | Unclear | Personal contact data | Do not force in first customer-facing launch form unless Bugs approves; collect manually or add optional later. |
+| Authorised representative 1 | Step 1 asks name/email/job title; auto-syncs from primary contact | Needed for sign-off | Required primary rep; phone and job position may also be needed | May be needed | Personal contact data | Expand to first/last/email/phone/business title/job position before Secondary Profile submission. |
+| Authorised representative 2 | Not currently captured | Usually not needed for RCS | Required for Secondary Compliance Profile per latest Twilio/Isa follow-up | May not be independently required for UK RC Bundle alone | Personal contact data | Add to canonical intake/state model. If not in first public form, collect as follow-up/manual before Secondary Profile submission. |
 | Passport / driving licence / proof of address | Not captured | Not needed for RCS form | Exception-only if Twilio cannot digitally verify rep/business association | Possibly separate KYC evidence | High sensitivity | Must not use static app/Google Sheet; use Twilio-managed compliance step or secure/manual route only. |
 | Sender display name | Step 2 asks it | Needed | May relate to brand context | Not primary | Normal business data | Keep. |
 | Logo, banner, brand colour | Step 2 asks uploads/colour | Needed | Not primary | Not primary | Brand assets | Keep in RCS form. |
@@ -303,8 +355,8 @@ Immediate audit from this map:
 - The likely UI changes later are limited and focused:
   - sharpen legal name/CRN/company type/industry wording;
   - possibly add or internally collect business regions of operation;
-  - possibly expand primary authorised representative fields;
-  - optionally add or manually collect representative 2 later;
+  - expand authorised representative fields for both representatives;
+  - add or manually collect representative 2 before Secondary Profile submission;
   - keep ID/passport evidence out of the static app.
 
 ## Field Change Shortlist - Draft 1
@@ -325,14 +377,14 @@ These changes are low-risk because they improve clarity for both RCS and KYC wit
 
 These points now have a clearer working answer.
 
-1. Customer-facing form should not require two authorised representatives for v1; use one required primary rep and optional second later/manual.
+1. Secondary Profile submission should plan for two authorised representatives; if the first public form remains lighter, collect rep 2 later/manual before submission.
 2. Passport/government ID should be exception-only, not mandatory upfront.
 3. Secondary Compliance Profile and UK long-code RC Bundle should be treated as separate operational submissions/status lanes.
 4. UK long-code numbers controlled by RightOnQ should still be assigned to the client/end-business compliance bundle/profile.
 
 ### Still Needs Later Design
 
-1. Whether representative 1 should be split into first name / last name / phone / business title / job position now, or kept simpler for v1.
+1. Whether both representatives should be collected directly in the public form now, or whether rep 2 is a RightOnQ follow-up/manual field before Secondary Profile submission.
 2. Whether Twilio needs physical operating address separate from Companies House registered office address.
 3. Whether Trust Hub `business_regions_of_operation` should be asked on the client form, collected internally, or inferred/reviewed by RightOnQ.
 4. Whether Twilio Compliance Embeddable becomes the preferred exception path for any ID/document collection.
@@ -966,6 +1018,14 @@ Suggested columns:
 
 - `application_id`
 - `client_id`
+- `compliance_embeddable_supported`
+- `compliance_embeddable_inquiry_id`
+- `compliance_embeddable_registration_id`
+- `compliance_embeddable_status`
+- `compliance_embeddable_rejection_code`
+- `compliance_embeddable_rejection_reason`
+- `compliance_embeddable_last_event`
+- `compliance_embeddable_last_event_at`
 - `rc_bundle_sid`
 - `rc_bundle_status`
 - `rc_bundle_status_updated_at`
@@ -999,6 +1059,7 @@ Launch note:
 
 - UK long-code fallback numbers must be assigned to the end-business bundle before use.
 - This tab stores Twilio IDs, statuses, and rejection reasons; it must not store raw ID documents.
+- Compliance Embeddable session tokens expire and must not be stored as durable identifiers. Store `inquiry_id` and `registration_id`; regenerate a fresh session token when resuming an inquiry.
 
 ### Tab: Internal Reviews
 
@@ -1607,8 +1668,8 @@ Current field-authority decisions:
 
 - Legal business name should be exact Companies House / registered name.
 - Registration number should be captured as the Companies House CRN for UK Ltd clients.
-- Business type, industry, regions of operation, website, registered address, and the primary authorised representative should be shaped to satisfy Trust Hub first, then reused for RCS where possible.
-- Build for one required primary authorised representative and optional/manual second representative, following Isa Bell's Twilio reply on Thursday 14 May 2026.
+- Business type, industry, regions of operation, website, registered address, and both authorised representatives should be shaped to satisfy Trust Hub first, then reused for RCS where possible.
+- Build for two authorised representatives when Secondary Compliance Profile submission is in scope, following the later Isa/Twilio follow-up and current public Secondary Compliance Profile guidance.
 - Do not collect date of birth in the launch intake unless Twilio's live flow explicitly requires it.
 
 Implementation stance:
@@ -1817,8 +1878,7 @@ Implemented behaviour:
 - update Trust Hub/RC Bundle assumptions:
   - Secondary Compliance Profile per UK limited-company end client;
   - UK long-code RC Bundle remains a separate number-compliance lane;
-  - one required primary authorised representative;
-  - optional second representative only;
+  - later follow-up now means two authorised representatives for Secondary Profile readiness;
   - ID evidence is exception-only, not upfront;
   - ID/document evidence must not enter the static app or Sheet path;
 - change future `Internal reviews` KYC default from `pending_isa_reply` to `pending_trust_hub_review`.
@@ -2517,8 +2577,8 @@ Output:
 - Trust Hub rejection/evaluation summary;
 - Trust Hub error code/detail;
 - authorised representative exception code/action;
-- primary authorised representative tracking fields;
-- optional second authorised representative tracking fields;
+- authorised representative 1 tracking fields;
+- authorised representative 2 tracking fields;
 - UK RC Bundle SID/status/rejection fields;
 - subaccount SID;
 - setup status;
@@ -2550,8 +2610,8 @@ Output:
 - Whether Google Sheets remains the source of truth beyond pilot.
 - Who inside RightOnQ manually approves each status transition.
 - Exact live Twilio Trust Hub Secondary Business policy requirements for UK clients.
-- Whether representative 1 should be split into first/last/email/mobile/title/job-position in the customer form or captured internally later.
-- Whether optional rep 2 should be added later or kept as manual follow-up.
+- Whether both representatives should be collected in the customer form or rep 2 should be kept as a RightOnQ manual follow-up before Secondary Profile submission.
+- Exact first/last/email/mobile/title/job-position field shape for both authorised representatives.
 - Which secure/Twilio-managed route will handle exception-only identity evidence if Twilio cannot digitally verify a representative.
 
 ## Update Rules For Future Agents
