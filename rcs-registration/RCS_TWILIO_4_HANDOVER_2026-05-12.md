@@ -2776,3 +2776,34 @@ Verification:
 - `node rcs-registration/tools/revolut-webhook-map.mjs --self-test` passed for:
   - `ORDER_COMPLETED` -> paid mapping;
   - `ORDER_PAYMENT_DECLINED` -> failed/declined mapping.
+
+### End-of-Day Checkpoint - 2026-05-15
+
+Pushed state:
+
+- latest pushed commit on `rcs-registration-part-a-b-20260507`: `5abec7e Map Revolut webhooks to billing dry runs`;
+- branch is in sync with origin for all RCS work;
+- unrelated website/legal working-tree files remain dirty and intentionally untouched:
+  - `index.html`;
+  - `privacy.html`;
+  - `terms.html`;
+  - `RightOnQ Website Future Amendments.md`.
+
+Next job:
+
+- get the Revolut Business Sandbox Merchant API Secret from Revolut Business Sandbox;
+- do not paste the secret into chat, docs, commits, screenshots, or command examples;
+- use a local terminal prompt/environment flow only;
+- run the first live sandbox registration-fee order proof with:
+  - `amount = 12000` minor units (`GBP 120.00`, representing `GBP 100 + VAT`);
+  - a fixed `Idempotency-Key`;
+  - the RightOnQ `applicationId` as the Revolut reference;
+- repeat the same idempotency-key call to prove duplicate protection;
+- then retrieve/list the order, complete sandbox checkout, capture webhook headers/payload, verify signature, map to Billing, and only then consider a live operator Billing update.
+
+Current boundary:
+
+- no live Revolut API call has been made;
+- no Revolut secret has been used;
+- no sandbox webhook has been registered;
+- all current Revolut work is local/offline tooling and documentation.
