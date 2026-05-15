@@ -2310,6 +2310,7 @@ Slice 8 continuation after public/operator hardening:
 - Confirmed refunds are full/partial, require completed orders, and should use `Idempotency-Key`.
 - Confirmed saved-method MIT charging needs a payment method saved for merchant use.
 - Confirmed webhook callbacks include `Revolut-Request-Timestamp` and `Revolut-Signature`; the webhook signing secret must not be stored in the repo.
+- Confirmed webhook signature verification uses `v1.{timestamp}.{raw payload}` with HMAC SHA-256 and a 5-minute timestamp tolerance.
 - `revolut-sandbox-proof.mjs` now supports dry/live scaffolding for:
   - registration order creation;
   - order retrieval;
@@ -2317,7 +2318,13 @@ Slice 8 continuation after public/operator hardening:
   - payment-list retrieval;
   - refund proof;
   - saved-method payment proof.
+- `revolut-webhook-verify.mjs` now supports:
+  - local fake-data self-test;
+  - real captured sandbox payload verification via `REVOLUT_WEBHOOK_SIGNING_SECRET`;
+  - multiple comma-separated `v1=` signatures during signing-secret rotation;
+  - replay-window checks using the Revolut timestamp header.
 - Dry-run checks passed for create-order, refund, and saved-method payment payloads.
+- Webhook verifier self-test passed for valid, tampered-payload, and stale-timestamp cases.
 - No live Revolut API call has been made yet.
 
 ### Slice 8B - Public Endpoint Hardening Started

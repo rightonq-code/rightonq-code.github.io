@@ -2692,3 +2692,46 @@ Verification:
 - Dry-run merchant-initiated saved-method payment payload passed with `mit-ROQ-RCS-TEST-REVOLUT-20260515`.
 
 No live Revolut call has been made yet. Next action is to get/use a sandbox Merchant API secret locally through an environment variable, then run one create-order sandbox proof with a fixed idempotency key.
+
+### Slice 8G Continued - Revolut Webhook Signature Proof
+
+RCS-Twilio-4 added the local webhook verification part of the Revolut sandbox proof before any real Revolut secret was available.
+
+Official Revolut doc points confirmed on 2026-05-15:
+
+- webhook callbacks include `Revolut-Request-Timestamp` and `Revolut-Signature`;
+- the payload to sign is `v1.{timestamp}.{raw payload}`;
+- HMAC SHA-256 is computed with the webhook signing secret;
+- the expected signature header value is `v1=<hex digest>`;
+- multiple comma-separated signatures can appear while webhook signing secrets rotate;
+- Revolut recommends a 5-minute timestamp tolerance.
+
+Updated:
+
+- added `rcs-registration/tools/revolut-webhook-verify.mjs`;
+- updated `rcs-registration/REVOLUT_SANDBOX_PROOF.md`;
+- updated `rcs-registration/tools/README.md`;
+- updated `rcs-registration/RCS_ONBOARDING_MAIN_BUILD_PLAN.md`.
+
+Tool behaviour:
+
+- `--self-test` uses fake sample data only and needs no secret;
+- real captured sandbox samples use `REVOLUT_WEBHOOK_SIGNING_SECRET` from the local environment;
+- the tool does not print webhook signing secrets or computed HMACs;
+- verification extracts `event`, `order_id`, and `merchant_order_ext_ref` for operator routing checks;
+- raw payload bytes/string must be preserved exactly because JSON reformatting changes the signature.
+
+Verification:
+
+- `node --check rcs-registration/tools/revolut-webhook-verify.mjs` passed;
+- `node rcs-registration/tools/revolut-webhook-verify.mjs --self-test` passed:
+  - valid fake callback verified;
+  - tampered payload failed signature matching;
+  - stale timestamp failed the 5-minute replay window while still proving HMAC matching.
+
+Still not done:
+
+- no live Revolut API call has been made;
+- no sandbox webhook has been registered;
+- no real `REVOLUT_WEBHOOK_SIGNING_SECRET` has been used;
+- next secret-dependent step is still one sandbox registration-fee order with a fixed `Idempotency-Key`, followed by capturing one webhook payload/headers and verifying it locally.

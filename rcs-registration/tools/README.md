@@ -44,6 +44,7 @@ The proof helper uses the authenticated operator API for creating the private te
 | `operator-billing.mjs` | Update the internal billing/payment tracking row. | `RCS_ONBOARDING_OPERATOR_PIN` |
 | `proof-public-part-a-submit.mjs` | Create a private test link, submit Part A through the public path, then prove Trust Hub KYC and UK RC Bundle tracking rows were created. | `RCS_ONBOARDING_CREATE_PIN` and `RCS_ONBOARDING_OPERATOR_PIN` |
 | `revolut-sandbox-proof.mjs` | Prepare and test Revolut sandbox Hosted Checkout requests. | No RCS PIN; uses `REVOLUT_MERCHANT_API_SECRET` for live sandbox calls |
+| `revolut-webhook-verify.mjs` | Verify Revolut webhook signatures/timestamp tolerance against captured sandbox payloads. | No RCS PIN; uses `REVOLUT_WEBHOOK_SIGNING_SECRET` for real samples |
 
 ## Safety Rules
 
@@ -51,6 +52,7 @@ The proof helper uses the authenticated operator API for creating the private te
 - Do not pass PINs as command arguments.
 - Use environment variables only.
 - Keep `~/.clasprc.json` and downloaded Google OAuth client JSON files out of the repo. The root `.gitignore` blocks common clasp/client-secret filename patterns, but still treat those files as live credentials.
+- Keep Revolut Merchant API secrets and webhook signing secrets out of the repo, chat, screenshots, and command examples.
 - Do not store passport, driving licence, government ID, proof-of-address, or DOB data in these tools, the static app, or the Google Sheet.
 - Treat private application links as client-specific.
 
@@ -313,6 +315,23 @@ REVOLUT_MERCHANT_API_SECRET="..." node rcs-registration/tools/revolut-sandbox-pr
   --payment-initiator merchant \
   --idempotency-key mit-ROQ-RCS-...
 ```
+
+Webhook signature proof, using fake data only:
+
+```bash
+node rcs-registration/tools/revolut-webhook-verify.mjs --self-test
+```
+
+Webhook signature proof for a captured sandbox callback:
+
+```bash
+REVOLUT_WEBHOOK_SIGNING_SECRET="..." node rcs-registration/tools/revolut-webhook-verify.mjs \
+  --payload-file /path/to/revolut-webhook-payload.json \
+  --timestamp "1683650202360" \
+  --signature "v1=..."
+```
+
+Expected result: `ok: true`, `signatureMatched: true`, and `timestampAccepted: true`. Keep the payload raw; changing whitespace or re-serialising JSON changes the signature.
 
 ## Recommended Operator Order
 
