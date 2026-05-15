@@ -2720,6 +2720,11 @@ Tool behaviour:
 - the tool does not print webhook signing secrets or computed HMACs;
 - verification extracts `event`, `order_id`, and `merchant_order_ext_ref` for operator routing checks;
 - raw payload bytes/string must be preserved exactly because JSON reformatting changes the signature.
+- follow-up polish after read-only review:
+  - `--payload` is now labelled debug-only;
+  - docs steer real samples to `--payload-file`;
+  - mismatch output hints at trailing newline / formatting / JSON re-serialisation problems;
+  - docs state that `--skip-timestamp-tolerance` is CLI-only and must not be copied into the future live webhook endpoint.
 
 Verification:
 

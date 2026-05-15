@@ -2323,6 +2323,7 @@ Slice 8 continuation after public/operator hardening:
   - real captured sandbox payload verification via `REVOLUT_WEBHOOK_SIGNING_SECRET`;
   - multiple comma-separated `v1=` signatures during signing-secret rotation;
   - replay-window checks using the Revolut timestamp header.
+- Post-review polish steers real webhook checks to `--payload-file`, adds a raw-payload mismatch hint, and records that any live webhook endpoint must enforce timestamp tolerance with no skip flag.
 - Dry-run checks passed for create-order, refund, and saved-method payment payloads.
 - Webhook verifier self-test passed for valid, tampered-payload, and stale-timestamp cases.
 - No live Revolut API call has been made yet.

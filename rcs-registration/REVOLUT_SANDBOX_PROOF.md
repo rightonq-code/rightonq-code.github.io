@@ -231,8 +231,16 @@ node rcs-registration/tools/revolut-webhook-verify.mjs \
 unset REVOLUT_WEBHOOK_SIGNING_SECRET
 ```
 
+When using a real `wsk_...` value, prefer a local secret loader or a shell setup that avoids saving the secret in history. The command above is a shape example, not a request to paste secrets into chat or docs.
+
 Important: use the raw webhook body exactly as Revolut delivered it. Do not pretty-print,
 trim, reorder, or re-serialise the JSON before verification.
+Use `--payload-file` for real captures; `--payload` is only for tiny debug examples
+because shell quoting can alter the body and command history can retain it.
+If verification fails with `signatureMatched: false`, first check for an added trailing
+newline, formatter changes, or a payload copied after JSON re-serialisation.
+The verifier's `--skip-timestamp-tolerance` flag is only for old archived samples. The
+future live webhook endpoint must enforce the Revolut timestamp window.
 
 For live sandbox use, set the secret in the terminal environment, not in the repo:
 

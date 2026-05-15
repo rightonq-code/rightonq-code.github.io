@@ -325,13 +325,15 @@ node rcs-registration/tools/revolut-webhook-verify.mjs --self-test
 Webhook signature proof for a captured sandbox callback:
 
 ```bash
-REVOLUT_WEBHOOK_SIGNING_SECRET="..." node rcs-registration/tools/revolut-webhook-verify.mjs \
+export REVOLUT_WEBHOOK_SIGNING_SECRET="..."
+node rcs-registration/tools/revolut-webhook-verify.mjs \
   --payload-file /path/to/revolut-webhook-payload.json \
   --timestamp "1683650202360" \
   --signature "v1=..."
+unset REVOLUT_WEBHOOK_SIGNING_SECRET
 ```
 
-Expected result: `ok: true`, `signatureMatched: true`, and `timestampAccepted: true`. Keep the payload raw; changing whitespace or re-serialising JSON changes the signature.
+Expected result: `ok: true`, `signatureMatched: true`, and `timestampAccepted: true`. Use `--payload-file` for real captures and keep the payload raw; changing whitespace, adding a trailing newline, or re-serialising JSON changes the signature. When using a real `wsk_...` value, prefer a local secret loader or shell setup that avoids saving the secret in history. The verifier's `--skip-timestamp-tolerance` flag is for archived local samples only; the future live webhook endpoint must enforce the timestamp window.
 
 ## Recommended Operator Order
 

@@ -29,12 +29,12 @@ function usage() {
     "",
     "Options:",
     "  --self-test                    Run a local fake-signature positive/negative proof",
-    "  --payload '{...}'              Raw webhook payload string, exactly as received",
-    "  --payload-file webhook.json    File containing raw webhook payload",
+    "  --payload '{...}'              Debug only; raw payload string, exactly as received",
+    "  --payload-file webhook.json    Preferred for real captures; file containing raw webhook payload",
     "  --timestamp 1683650202360      Revolut-Request-Timestamp header value",
     "  --signature 'v1=...'           Revolut-Signature header value; comma-separated signatures are supported",
     "  --tolerance-seconds 300        Timestamp replay tolerance; defaults to 300 seconds",
-    "  --skip-timestamp-tolerance     Verify HMAC only; useful for archived samples",
+    "  --skip-timestamp-tolerance     CLI-only archived-sample check; do not copy into live endpoints",
     "",
     "Environment:",
     "  REVOLUT_WEBHOOK_SIGNING_SECRET Required unless --self-test is used",
@@ -182,6 +182,9 @@ function verifyWebhook({ secret, timestamp, payload, signatureHeader, toleranceS
   return {
     ok: signatureMatched && timestampCheck.ok,
     signatureMatched,
+    signatureMismatchHint: signatureMatched
+      ? ""
+      : "Confirm the payload is the exact raw body Revolut sent. Added trailing newlines, pretty-printing, trimming, or JSON re-serialising will change the signature.",
     timestampAccepted: timestampCheck.ok,
     timestampReason: timestampCheck.reason,
     timestampAgeSeconds: timestampCheck.ageSeconds,
