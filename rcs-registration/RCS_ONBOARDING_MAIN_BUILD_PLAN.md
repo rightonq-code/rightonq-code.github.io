@@ -2430,6 +2430,26 @@ Remaining proof gap:
 - `--nondev` currently reports the function is not found as an API executable;
 - next work should verify OAuth / caller authorisation and confirm in the Apps Script UI that the version 29 deployment remains API executable only.
 
+Step 2C update:
+
+- a clean API-only deployment now exists:
+  - deployment ID `AKfycbyG5yW-r0sfaKt1bwUUGFAHHdQoKK8wBCfR1riVxvYamu9YhfOBpRJhnRL_5iBP0VSC`;
+  - version `30`;
+  - description `Operator API executable (Step 2C clean API-only)`;
+- local `.clasp.json` points at this clean v30 deployment;
+- the contaminated v29 deployment `AKfycbzogKHOijtu6kjp2MVrL9WcVuF6mWrgQyKUzQGRvpTfozdUSA9y_B6X_eWpQeQ-mWtS` has been archived after approval;
+- do not run `clasp deploy -i` against the clean v30 deployment while the manifest still has web app deployment settings;
+- `clasp run` still fails before executing `rcsOperatorAction`, so the OAuth / execution-permission proof remains open.
+
+Step 2E update:
+
+- existing Desktop OAuth client `RightOnQ-GOG-Client` is now used by named clasp login `rightonq-gog`;
+- login was refreshed with the Sheets scope required by `SpreadsheetApp.openById`;
+- no-PIN API execution reaches Apps Script and correctly fails on `Invalid onboarding operator PIN`;
+- valid-PIN read-only `rcsOperatorAction` snapshot returned `ok: true` for `ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747`;
+- Trust Hub KYC header drift was fixed by reconciling tracking sheets to canonical header order before operator readback;
+- normal `clasp run` is proven; `clasp run --nondev` still cannot find the function as an API executable, so keep that caveat in the runbook.
+
 ### Slice 9 - Twilio Trust Hub / Subaccount / Usage Tracking Fields
 
 Add internal Twilio compliance, runtime setup, and usage tracking fields.

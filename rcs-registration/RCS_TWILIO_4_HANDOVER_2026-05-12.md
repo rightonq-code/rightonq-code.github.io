@@ -2497,3 +2497,76 @@ Remaining Step 2B blocker:
 - likely next check is OAuth / execution-authorisation against the linked standard GCP project, plus UI verification that the API executable remained API-only after the CLI redeploy to version 29.
 
 Do not proceed to website integration until this operator API execution proof is either fixed or deliberately deferred with a documented fallback.
+
+### Slice 8D Continued - Clean API-Only Deployment Created
+
+The browser-side helper agent created a fresh API-only deployment after the v29 deployment was accidentally contaminated by `clasp deploy -i`.
+
+Clean deployment:
+
+- deployment ID `AKfycbyG5yW-r0sfaKt1bwUUGFAHHdQoKK8wBCfR1riVxvYamu9YhfOBpRJhnRL_5iBP0VSC`;
+- version `30`;
+- description `Operator API executable (Step 2C clean API-only)`;
+- type `API executable only`;
+- access `Anyone within rightonq.co.uk`;
+- success/configuration screen showed no Web app section.
+
+Local follow-up:
+
+- `.clasp.json` now points at the clean v30 deployment ID;
+- `clasp deployments` shows five deployments:
+  - HEAD;
+  - clean API-only v30;
+  - public v25 `Harden public Part A submission`;
+  - original v1 intake receiver;
+  - contaminated v29 `Operator API executable (Step 2B pin guard)`;
+- `clasp run rcsOperatorAction --nondev ...` still reports `Script function not found. Please make sure script is deployed as API executable.`;
+- `clasp run rcsOperatorAction ...` still reports `Unable to run script function. Please make sure you have permission to run the script function.`
+
+Critical warning:
+
+- do not run `clasp deploy -i` against the clean v30 deployment while `appsscript.json` still contains the `webapp` block;
+- if a future code update needs an API-only deployment, create/update it carefully through the Apps Script UI with only API executable selected, or first remove public web app deployment settings from the manifest and confirm the public v25 path is not affected.
+
+Recommended next step:
+
+- contaminated deployment `AKfycbzogKHOijtu6kjp2MVrL9WcVuF6mWrgQyKUzQGRvpTfozdUSA9y_B6X_eWpQeQ-mWtS` was archived by the browser-side helper after Bugs approval;
+- `clasp deployments` now shows only:
+  - HEAD;
+  - clean API-only v30;
+  - public v25 `Harden public Part A submission`;
+  - original v1 intake receiver;
+- continue original Step 2B items 2-4: inspect/create Desktop OAuth client for `rightonq-gog`, download JSON locally without pasting contents, and retry the read-only `rcsOperatorAction` proof.
+
+### Slice 8D Completed - Clean Operator API Proof
+
+OAuth / credentials:
+
+- existing Desktop OAuth client `RightOnQ-GOG-Client` was found in `rightonq-gog`;
+- original local JSON was found at `/Users/macpro/Downloads/rightonq-gog-client.json`;
+- only metadata was inspected; client secret contents were not printed;
+- clasp required a `localhost` redirect URI, while the existing JSON used `127.0.0.1`;
+- created local-only derived file `/Users/macpro/Downloads/rightonq-gog-client-clasp-localhost.json` with `http://localhost` added to `redirect_uris`;
+- logged in with named clasp user `rightonq-gog` using the existing Desktop OAuth client;
+- refreshed login with the extra `https://www.googleapis.com/auth/spreadsheets` scope after the first API execution reached Apps Script but lacked Spreadsheet access.
+
+Proof:
+
+- `clasp -u rightonq-gog show-authorized-user` reports `adam@rightonq.co.uk` with the user-provided OAuth client;
+- no-PIN `clasp -u rightonq-gog run rcsOperatorAction ...` reaches Apps Script and correctly fails with `Invalid onboarding operator PIN`;
+- valid-PIN `rcsOperatorAction` read-only snapshot for `ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747` returned `ok: true`;
+- snapshot included application, billing, internal review, Trust Hub KYC, UK RC Bundle, and queued communications blocks.
+
+Header drift fix:
+
+- the first valid snapshot showed Trust Hub KYC fields shifted under wrong headings;
+- cause was existing Sheet headers created before the newer evidence columns existed;
+- patched `getOrCreateSheet` / operator snapshot readback so tracked sheets are reconciled to canonical header order instead of only appending missing headers;
+- pushed the patch to Apps Script HEAD;
+- second valid snapshot confirmed Trust Hub KYC values now sit under the right headings.
+
+Remaining caveat:
+
+- normal `clasp run` works and proves the operator API route against Apps Script HEAD;
+- `clasp run --nondev` still reports `Script function not found. Please make sure script is deployed as API executable.`;
+- do not use `clasp deploy -i` against the clean v30 deployment while the manifest still contains public web app deployment settings.

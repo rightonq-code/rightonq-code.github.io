@@ -831,10 +831,10 @@ function getOperatorSnapshot(spreadsheet, payload) {
     ok: true,
     applicationId: applicationId,
     application: buildOperatorApplicationSummary(applicationRecord),
-    billing: findLatestRecordByApplicationId(spreadsheet, BILLING_SHEET_NAME, applicationId),
-    internalReview: findLatestRecordByApplicationId(spreadsheet, INTERNAL_REVIEWS_SHEET_NAME, applicationId),
-    trustHubKyc: findLatestRecordByApplicationId(spreadsheet, TRUST_HUB_KYC_SHEET_NAME, applicationId),
-    ukRcBundle: findLatestRecordByApplicationId(spreadsheet, UK_RC_BUNDLES_SHEET_NAME, applicationId),
+    billing: findLatestRecordByApplicationId(spreadsheet, BILLING_SHEET_NAME, applicationId, BILLING_HEADERS),
+    internalReview: findLatestRecordByApplicationId(spreadsheet, INTERNAL_REVIEWS_SHEET_NAME, applicationId, INTERNAL_REVIEW_HEADERS),
+    trustHubKyc: findLatestRecordByApplicationId(spreadsheet, TRUST_HUB_KYC_SHEET_NAME, applicationId, TRUST_HUB_KYC_HEADERS),
+    ukRcBundle: findLatestRecordByApplicationId(spreadsheet, UK_RC_BUNDLES_SHEET_NAME, applicationId, UK_RC_BUNDLE_HEADERS),
     recentStatusEvents: findRecentRecordsByApplicationId(spreadsheet, STATUS_EVENTS_SHEET_NAME, applicationId, 5),
     queuedCommunications: findRecentRecordsByApplicationId(spreadsheet, COMMUNICATIONS_SHEET_NAME, applicationId, 5),
     generatedAt: new Date().toISOString()
@@ -1764,13 +1764,13 @@ function findApplicationRecord(spreadsheet, criteria) {
   return null;
 }
 
-function findLatestRecordByApplicationId(spreadsheet, sheetName, applicationId) {
-  const records = findRecentRecordsByApplicationId(spreadsheet, sheetName, applicationId, 1);
+function findLatestRecordByApplicationId(spreadsheet, sheetName, applicationId, headersList) {
+  const records = findRecentRecordsByApplicationId(spreadsheet, sheetName, applicationId, 1, headersList);
   return records.length ? records[0] : {};
 }
 
-function findRecentRecordsByApplicationId(spreadsheet, sheetName, applicationId, limit) {
-  const sheet = spreadsheet.getSheetByName(sheetName);
+function findRecentRecordsByApplicationId(spreadsheet, sheetName, applicationId, limit, headersList) {
+  const sheet = headersList ? getOrCreateSheet(spreadsheet, sheetName, headersList) : spreadsheet.getSheetByName(sheetName);
   if (!sheet) return [];
 
   const values = sheet.getDataRange().getValues();
@@ -1817,11 +1817,21 @@ function getOrCreateSheet(spreadsheet, name, headers) {
     sheet.appendRow(headers);
   } else {
     const currentHeaders = normaliseHeaders(sheet.getRange(1, 1, 1, Math.max(sheet.getLastColumn(), headers.length)).getValues()[0]);
-    const missingHeaders = headers.filter(function(header) {
-      return currentHeaders.indexOf(header) === -1;
+    const extraHeaders = currentHeaders.filter(function(header) {
+      return headers.indexOf(header) === -1;
     });
-    if (missingHeaders.length) {
-      sheet.getRange(1, currentHeaders.length + 1, 1, missingHeaders.length).setValues([missingHeaders]);
+    const desiredHeaders = headers.concat(extraHeaders);
+    const headerMismatch = desiredHeaders.length !== currentHeaders.length || desiredHeaders.some(function(header, index) {
+      return header !== currentHeaders[index];
+    });
+    if (headerMismatch) {
+      if (sheet.getMaxColumns() < desiredHeaders.length) {
+        sheet.insertColumnsAfter(sheet.getMaxColumns(), desiredHeaders.length - sheet.getMaxColumns());
+      }
+      sheet.getRange(1, 1, 1, desiredHeaders.length).setValues([desiredHeaders]);
+      if (sheet.getLastColumn() > desiredHeaders.length) {
+        sheet.getRange(1, desiredHeaders.length + 1, 1, sheet.getLastColumn() - desiredHeaders.length).clearContent();
+      }
     }
   }
 

@@ -145,23 +145,29 @@ Authenticated operator API scaffold:
 - `rcsOperatorAction(payload)` is available in `Code.gs` as the intended Apps Script API entry point for operator-only actions.
 - The manifest includes `executionApi.access = DOMAIN`.
 - The Apps Script project is now linked to standard Google Cloud project `rightonq-gog`.
-- The operator API executable deployment is `AKfycbzogKHOijtu6kjp2MVrL9WcVuF6mWrgQyKUzQGRvpTfozdUSA9y_B6X_eWpQeQ-mWtS`.
-- Version `29` is deployed with description `Operator API executable (Step 2B pin guard)`.
+- The clean operator API executable deployment is `AKfycbyG5yW-r0sfaKt1bwUUGFAHHdQoKK8wBCfR1riVxvYamu9YhfOBpRJhnRL_5iBP0VSC`.
+- Version `30` is deployed with description `Operator API executable (Step 2C clean API-only)`.
+- The earlier v29 deployment `AKfycbzogKHOijtu6kjp2MVrL9WcVuF6mWrgQyKUzQGRvpTfozdUSA9y_B6X_eWpQeQ-mWtS` was contaminated with Web app + API executable + Library types and has been archived.
 - `rcsOperatorAction(payload)` now enforces the same PIN guard as the web app operator path:
   - `createApplicationDraft` requires the create PIN;
   - the other operator actions require the operator PIN.
 - Public web app version `25` remains the live public customer endpoint.
+- Do not run `clasp deploy -i` against the clean API executable while `appsscript.json` still contains public web app deployment settings.
 
-Remaining proof gap before replacing PIN/web-app operator calls:
+Operator API proof:
 
-1. Re-check in the Apps Script UI that the version `29` deployment is still API executable only.
-2. Resolve the terminal execution permission / OAuth issue.
-3. Re-run a read-only `rcsOperatorAction` snapshot proof.
+- Named clasp login `rightonq-gog` uses the existing Desktop OAuth client `RightOnQ-GOG-Client`.
+- Local credential JSON was found at `/Users/macpro/Downloads/rightonq-gog-client.json`.
+- A local-only derived copy, `/Users/macpro/Downloads/rightonq-gog-client-clasp-localhost.json`, adds `http://localhost` because this clasp version requires a literal localhost redirect URI.
+- The named login includes the Sheets scope needed by `SpreadsheetApp.openById`.
+- No-PIN `clasp -u rightonq-gog run rcsOperatorAction ...` reaches Apps Script and correctly returns `Invalid onboarding operator PIN`.
+- Valid-PIN read-only snapshot for `ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747` returned `ok: true`.
+- Operator snapshot readback now reconciles tracked Sheet headers to canonical order before reading Billing, Internal reviews, Trust Hub KYC, and UK RC Bundle rows.
 
-Current terminal symptoms:
+Current caveat:
 
-- `clasp run rcsOperatorAction ...` returns `Unable to run script function. Please make sure you have permission to run the script function.`
 - `clasp run rcsOperatorAction --nondev ...` returns `Script function not found. Please make sure script is deployed as API executable.`
+- Use normal `clasp -u rightonq-gog run ...` for the pilot operator API proof path unless this is resolved later.
 
 Do not store either PIN in this repo, in static HTML, or in Sheet audit JSON. If `ONBOARDING_OPERATOR_PIN` is not configured, internal status updates correctly return `ONBOARDING_OPERATOR_PIN is not configured`.
 
