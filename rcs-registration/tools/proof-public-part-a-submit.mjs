@@ -184,6 +184,25 @@ function buildPartAPayload(createPayload, applicationId, privateApplicationToken
   };
 }
 
+function buildBlockedPartAPayload() {
+  return {
+    applicationId: `ROQ-RCS-TEST-BLOCKED-${timestamp()}`,
+    privateApplicationToken: "not-a-real-token",
+    registrationStatus: "part_a_submitted",
+    partAStatus: "part_a_submitted",
+    submissionId: `RCS-${timestamp().slice(0, 8)}-BLOCKED-PUBLIC-PROOF`,
+    legalBusinessName: "TEST Blocked Public Submit Ltd",
+    tradingName: "TEST Blocked Public Submit",
+    primaryContactName: "Blocked Submitter",
+    primaryContactEmail: "blocked-public-submit@example.com",
+    primaryContactPhone: "+44 7000 000099",
+    primaryUseCase: "Transactional",
+    regions: ["United Kingdom"],
+    consentRoute: ["website_form"],
+    templateVersion: "2026-05-06"
+  };
+}
+
 function buildSnapshotPayload(applicationId) {
   const operatorPin = process.env.RCS_ONBOARDING_OPERATOR_PIN;
   if (!operatorPin) throw new Error("Set RCS_ONBOARDING_OPERATOR_PIN before reading the live snapshot");
@@ -229,6 +248,21 @@ async function postJson(url, payload) {
     throw new Error(data.error || "Apps Script request failed with HTTP " + response.status);
   }
   return data;
+}
+
+async function postJsonAllowFailure(url, payload) {
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify(payload),
+    redirect: "follow"
+  });
+  const text = await response.text();
+  try {
+    return JSON.parse(text);
+  } catch (error) {
+    throw new Error("Non-JSON response from Apps Script: " + text.slice(0, 500));
+  }
 }
 
 function summariseSnapshot(snapshot) {
@@ -282,9 +316,11 @@ async function main() {
   const applicationId = buildApplicationId(options);
   const createPayload = buildCreatePayload(options, applicationId);
   const dryRunPartAPayload = buildPartAPayload(createPayload, applicationId, "[private token from created link]");
+  const blockedPartAPayload = buildBlockedPartAPayload();
 
   if (options.dryRun) {
     console.log(JSON.stringify({
+      expectedBlockedPartAPayload: sanitisePayload(blockedPartAPayload),
       createPayload: sanitisePayload(createPayload),
       partAPayload: sanitisePayload(dryRunPartAPayload),
       snapshotPayload: {
@@ -297,6 +333,11 @@ async function main() {
   }
 
   const webAppUrl = process.env.RCS_ONBOARDING_WEB_APP_URL || DEFAULT_WEB_APP_URL;
+  const blocked = await postJsonAllowFailure(webAppUrl, blockedPartAPayload);
+  if (blocked.ok !== false) {
+    throw new Error("Expected blocked public Part A submission to fail, but it succeeded");
+  }
+
   const created = await postJson(webAppUrl, createPayload);
   const privateApplicationToken = extractToken(created.privateApplicationLink);
   const partAPayload = buildPartAPayload(createPayload, applicationId, privateApplicationToken);
@@ -304,6 +345,11 @@ async function main() {
   const snapshot = await postJson(webAppUrl, buildSnapshotPayload(applicationId));
 
   console.log(JSON.stringify({
+    blockedPublicSubmit: {
+      ok: blocked.ok,
+      rejected: blocked.ok === false,
+      error: blocked.error
+    },
     created: {
       ok: created.ok,
       applicationId: created.applicationId,

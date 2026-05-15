@@ -2302,6 +2302,40 @@ node rcs-registration/tools/revolut-sandbox-proof.mjs \
   --idempotency-key proof-ROQ-RCS-TEST-PUBLIC-PARTA-20260514211901
 ```
 
+### Slice 8B - Public Endpoint Hardening Started
+
+Purpose:
+
+- close the obvious public submission spam path before any website integration;
+- reduce Adam MailApp notification abuse risk while keeping pilot notifications useful.
+
+Implemented:
+
+- public Part A submissions now require:
+  - an existing `Applications` record;
+  - a matching private application token;
+  - `Part A status` of `draft` or `part_a_changes_needed`;
+- unknown application IDs can no longer create fresh application/submission rows through the anonymous public submit branch;
+- `PART_A_PAYMENT_GATE_MODE` script property can switch payment gating from advisory to strict;
+- strict payment gate allows Part A only when `Applications.Billing status` is one of:
+  - `registration_fee_paid`;
+  - `registration_fee_manually_confirmed`;
+  - `registration_fee_waived`;
+- default mode remains advisory until Revolut/payment confirmation is wired end-to-end;
+- Adam MailApp notifications are rate-limited per notification type to reduce inbox/quota abuse;
+- `proof-public-part-a-submit.mjs` now starts by proving a fake public Part A submission is rejected before creating a valid private-link proof.
+
+Deployment/proof:
+
+- Apps Script version `25` deployed to the existing web app deployment;
+- a live no-PIN fake public Part A submission was rejected with the private-link verification error, confirming unknown application IDs do not create rows.
+
+Still required before public website integration:
+
+- split anonymous customer actions from operator actions, or move operator actions to a Google-authenticated/private deployment;
+- wire real Revolut payment confirmation before setting `PART_A_PAYMENT_GATE_MODE = strict`;
+- decide whether Adam notifications should become Communications-queue-only.
+
 ### Slice 9 - Twilio Trust Hub / Subaccount / Usage Tracking Fields
 
 Add internal Twilio compliance, runtime setup, and usage tracking fields.

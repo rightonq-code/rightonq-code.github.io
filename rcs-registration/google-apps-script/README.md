@@ -44,7 +44,7 @@ Deployment:
 
 - Execute as: `adam@rightonq.co.uk`
 - Access: `Anyone`
-- Current published version after CLI redeploy: `22`
+- Current published version after CLI redeploy: `25`
 - Version `4` added Application ID, registration status, and Part A status columns to the intake row.
 - Version `5` adds Application ID status lookup via `GET ?applicationId=...`.
 - Version `6` adds the `Applications` control-row tab and writes/reads one row per Application ID.
@@ -62,6 +62,9 @@ Deployment:
 - Version `20` adds internal `Trust Hub KYC` and `UK RC bundles` tracking rows for future Part A submissions and includes them in guarded operator snapshots.
 - Version `21` adds guarded operator update actions for `Trust Hub KYC` and `UK RC bundles`.
 - Version `22` adds status/ID tracking fields for exception-only authorised-representative evidence collection, without adding raw identity-document storage.
+- Version `23` adds billing/commercial tracking scaffolding.
+- Version `24` fixes default billing fee fields for future billing updates.
+- Version `25` hardens public Part A submission by requiring an existing private application link/token, adds advisory/strict payment gate support, and rate-limits Adam MailApp notifications.
 
 ## Behaviour
 
@@ -73,7 +76,9 @@ The script:
 - stores the application ID and initial registration/Part A statuses,
 - creates or updates the matching row in the `Applications` control tab,
 - returns the latest status for a supplied Application ID or private application token,
-- rejects Part A submission into a token-protected application if the supplied token does not match,
+- rejects public Part A submission unless the application exists and the supplied private token matches,
+- blocks repeat public Part A submissions unless the application is back in `part_a_changes_needed`,
+- can enforce payment-confirmed Part A access when `PART_A_PAYMENT_GATE_MODE` is set to `strict`,
 - appends B2 name/logo approval or issue responses to `Part B approvals`,
 - updates the matching `Applications` row to `name_logo_approved` or `name_logo_changes_requested`,
 - appends B3 video approval or change responses to `Part B video approvals`,
@@ -92,7 +97,7 @@ The script:
 - sets review status to `New`,
 - sets US fee status to `Not yet agreed` if United States is selected,
 - stores the raw JSON payload in the `Part A JSON` column,
-- sends an email notification to `adam@rightonq.co.uk`.
+- sends a rate-limited email notification to `adam@rightonq.co.uk`.
 
 If the endpoint is not configured or the POST fails, the form downloads the client copy and asks the user to email it to Adam.
 
@@ -103,6 +108,8 @@ Do not put secrets in the static HTML page. The Apps Script URL is not a passwor
 The internal `createApplicationDraft` action is guarded by the script property `ONBOARDING_CREATE_PIN`.
 
 The internal `updateApplicationStatus` action is guarded by the script property `ONBOARDING_OPERATOR_PIN`.
+
+`PART_A_PAYMENT_GATE_MODE` defaults to advisory/missing. Set it to `strict` only after Revolut/manual payment confirmation is wired into `Applications.Billing status`; strict mode accepts `registration_fee_paid`, `registration_fee_manually_confirmed`, or `registration_fee_waived`.
 
 Do not store either PIN in this repo, in static HTML, or in Sheet audit JSON. If `ONBOARDING_OPERATOR_PIN` is not configured, internal status updates correctly return `ONBOARDING_OPERATOR_PIN is not configured`.
 

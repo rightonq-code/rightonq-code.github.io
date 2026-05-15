@@ -11,6 +11,13 @@ const UK_RC_BUNDLES_SHEET_NAME = "UK RC bundles";
 const BILLING_SHEET_NAME = "Billing";
 const PUBLIC_FORM_URL = "https://rightonq-code.github.io/rcs-registration/index.html";
 const NOTIFY_EMAIL = "adam@rightonq.co.uk";
+const NOTIFY_RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
+const NOTIFY_RATE_LIMIT_MAX = 5;
+const PART_A_PAYMENT_READY_STATUSES = [
+  "registration_fee_paid",
+  "registration_fee_manually_confirmed",
+  "registration_fee_waived"
+];
 const APPLICATION_HEADERS = [
   "Application ID",
   "Client ID",
@@ -429,7 +436,7 @@ function doPost(event) {
     const partAStatus = payload.partAStatus || "part_a_submitted";
     const countries = asList(payload.regions);
     const usSelected = countries.indexOf("United States") !== -1 ? "Yes" : "No";
-    validateApplicationTokenForSubmission(spreadsheet, applicationId, payload.privateApplicationToken);
+    validatePartAPublicSubmissionAccess(spreadsheet, applicationId, payload.privateApplicationToken);
 
     sheet.appendRow([
       now,
@@ -1558,12 +1565,35 @@ function buildCommunicationTemplate(templateCode, applicationRecord) {
 
 function validateApplicationTokenForSubmission(spreadsheet, applicationId, suppliedToken) {
   const applicationRecord = findApplicationRecord(spreadsheet, { applicationId: applicationId });
-  if (!applicationRecord) return;
+  if (!applicationRecord) throw new Error("This application link could not be verified. Please ask RightOnQ for a fresh link.");
 
   const existingToken = applicationRecord["Private application token"];
-  if (!existingToken) return;
+  if (!existingToken) throw new Error("This application link could not be verified. Please ask RightOnQ for a fresh link.");
   if (suppliedToken && String(suppliedToken) === String(existingToken)) return;
   throw new Error("This application link could not be verified. Please ask RightOnQ for a fresh link.");
+}
+
+function validatePartAPublicSubmissionAccess(spreadsheet, applicationId, suppliedToken) {
+  if (!applicationId) throw new Error("Missing application ID");
+  if (!suppliedToken) throw new Error("This application link could not be verified. Please ask RightOnQ for a fresh link.");
+
+  const applicationRecord = findApplicationRecord(spreadsheet, { applicationId: applicationId });
+  if (!applicationRecord) throw new Error("This application link could not be verified. Please ask RightOnQ for a fresh link.");
+
+  validateApplicationTokenForSubmission(spreadsheet, applicationId, suppliedToken);
+
+  const currentPartAStatus = applicationRecord["Part A status"] || "draft";
+  const allowedPartAStatuses = ["draft", "part_a_changes_needed"];
+  if (allowedPartAStatuses.indexOf(currentPartAStatus) === -1) {
+    throw new Error("Part A has already been submitted for this application. Please ask RightOnQ if you need to make a change.");
+  }
+
+  const paymentGateMode = String(PropertiesService.getScriptProperties().getProperty("PART_A_PAYMENT_GATE_MODE") || "advisory").toLowerCase();
+  if (paymentGateMode !== "strict") return;
+
+  const billingStatus = applicationRecord["Billing status"] || "";
+  if (PART_A_PAYMENT_READY_STATUSES.indexOf(billingStatus) !== -1) return;
+  throw new Error("Part A is not open yet. RightOnQ will release this form once the registration fee is confirmed.");
 }
 
 function updateApplicationControlFields(spreadsheet, applicationId, updates) {
@@ -1781,6 +1811,7 @@ function mostAdvancedStatus(existingStatus, incomingStatus) {
 
 function notifyAdam(payload, submissionId, countries, usSelected) {
   if (!NOTIFY_EMAIL) return;
+  if (!canSendNotifyEmail("part_a")) return;
 
   const subject = "New RCS Part A received: " + firstValue(payload.displayName, payload.tradingName, payload.legalBusinessName, submissionId);
   const body = [
@@ -1806,6 +1837,7 @@ function notifyAdam(payload, submissionId, countries, usSelected) {
 
 function notifyNameLogoApproval(payload, decision, issueCategories, registrationStatus) {
   if (!NOTIFY_EMAIL) return;
+  if (!canSendNotifyEmail("name_logo")) return;
 
   const subjectPrefix = decision === "approve" ? "RCS name/logo approved" : "RCS name/logo needs attention";
   const body = [
@@ -1828,6 +1860,7 @@ function notifyNameLogoApproval(payload, decision, issueCategories, registration
 
 function notifyVideoApproval(payload, decision, approvalChecklist, changeCategories, registrationStatus) {
   if (!NOTIFY_EMAIL) return;
+  if (!canSendNotifyEmail("video")) return;
 
   const subjectPrefix = decision === "approve" ? "RCS video approved" : "RCS video changes requested";
   const body = [
@@ -1845,6 +1878,35 @@ function notifyVideoApproval(payload, decision, approvalChecklist, changeCategor
   ].join("\n");
 
   MailApp.sendEmail(NOTIFY_EMAIL, subjectPrefix + ": " + (payload.applicationId || "unknown application"), body);
+}
+
+function canSendNotifyEmail(notificationType) {
+  const properties = PropertiesService.getScriptProperties();
+  const key = "NOTIFY_RATE_" + String(notificationType || "general").toUpperCase();
+  const now = Date.now();
+  let state = {};
+  try {
+    state = JSON.parse(properties.getProperty(key) || "{}");
+  } catch (error) {
+    state = {};
+  }
+
+  if (!state.windowStart || now - Number(state.windowStart) > NOTIFY_RATE_LIMIT_WINDOW_MS) {
+    properties.setProperty(key, JSON.stringify({
+      windowStart: now,
+      count: 1
+    }));
+    return true;
+  }
+
+  const count = Number(state.count || 0);
+  if (count >= NOTIFY_RATE_LIMIT_MAX) return false;
+
+  properties.setProperty(key, JSON.stringify({
+    windowStart: Number(state.windowStart),
+    count: count + 1
+  }));
+  return true;
 }
 
 function buildSubmissionId(payload, date) {

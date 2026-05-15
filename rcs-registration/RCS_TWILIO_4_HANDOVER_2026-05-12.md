@@ -2276,3 +2276,47 @@ Helper update:
 
 - `revolut-sandbox-proof.mjs` now supports `--application-id` and `--idempotency-key`;
 - dry-run output prints the intended `merchant_order_data.reference` and idempotency header shape without printing secrets.
+
+### Slice 8B Started - Public Endpoint Hardening
+
+RCS-Twilio-4 started the first no-regrets endpoint hardening slice after the external sanity check.
+
+Code changes:
+
+- `Code.gs` now routes public Part A submissions through `validatePartAPublicSubmissionAccess`;
+- public Part A submission requires an existing application record and a matching private application token;
+- unknown application IDs no longer fall through into row creation;
+- public Part A submission is allowed only while `Part A status` is `draft` or `part_a_changes_needed`;
+- `PART_A_PAYMENT_GATE_MODE` script property controls payment enforcement:
+  - default/missing value = `advisory`;
+  - `strict` requires `Applications.Billing status` to be `registration_fee_paid`, `registration_fee_manually_confirmed`, or `registration_fee_waived`;
+- default is intentionally advisory until Revolut payment confirmation is wired end-to-end;
+- Adam `MailApp.sendEmail` notifications are now rate-limited per notification type:
+  - 5 emails per 10-minute window per type;
+  - affected notification types: Part A, name/logo, video;
+  - client Communications queue rows are still written independently.
+
+Proof helper update:
+
+- `proof-public-part-a-submit.mjs` now first sends a fake public Part A submission with a fake application/token and expects rejection;
+- only after that blocked-public proof does it create a legitimate private application, submit Part A, and read the operator snapshot.
+
+Deployment:
+
+- Apps Script pushed with `clasp push`;
+- version `25` created with description `Harden public Part A submission`;
+- existing deployment `AKfycbyI81Ir2xvHLar0R0iFBBWyXa1Nj93T4_8Ni5_eX3XEYDA-AKQbVYbPHnTROLm8e4a6` updated to version `25`.
+
+Live no-PIN proof:
+
+- sent a fake public Part A submission directly to the deployed web app;
+- response was:
+  - `ok = false`;
+  - `error = This application link could not be verified. Please ask RightOnQ for a fresh link.`;
+- this confirms unknown application IDs can no longer create rows through the public branch.
+
+Still not solved in this slice:
+
+- operator actions still share the anonymous Apps Script deployment and are PIN guarded;
+- `changedBy` is still operator-supplied/spoofable until per-operator auth exists;
+- public website must not link to the gateway until token/payment gating and operator split are launch-ready.

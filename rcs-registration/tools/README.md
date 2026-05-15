@@ -272,6 +272,7 @@ RCS_ONBOARDING_CREATE_PIN="..." RCS_ONBOARDING_OPERATOR_PIN="..." node rcs-regis
 
 Expected live result:
 
+- an attempted fake public Part A submission without a real private application link is rejected;
 - a private test application is created;
 - a Part A test payload is submitted through the normal public Apps Script path using the private application token;
 - the redacted operator snapshot shows:
