@@ -92,7 +92,9 @@ function buildCreatePayload(options, applicationId) {
     campaignCode: "RCS1",
     messageCode: "PUBLIC-PARTA-PROOF",
     qualifiedUseCase: "Transactional customer updates",
-    packageInterest: "Local Time Only",
+    packageInterest: "RightOnQ UK",
+    packageName: "RightOnQ UK",
+    billingStatus: "registration_fee_pending",
     salesContext: "Public Part A submission proof"
   };
 
@@ -108,6 +110,13 @@ function buildPartAPayload(createPayload, applicationId, privateApplicationToken
     partAStatus: "part_a_submitted",
     submissionId: `RCS-${timestamp().slice(0, 8)}-PUBLIC-PARTA-PROOF`,
     submittedAt: new Date().toISOString(),
+    packageInterest: createPayload.packageInterest,
+    packageName: createPayload.packageName,
+    monthlyBaseFeeGbp: "25",
+    registrationFeeGbp: "100",
+    registrationFeeVatTreatment: "+ VAT",
+    registrationFeeAcknowledgement: "Confirmed",
+    billingStatus: "registration_fee_pending",
     legalBusinessName: createPayload.legalBusinessName,
     tradingName: createPayload.tradingName,
     companiesHouseNumber: "12345678",

@@ -2064,3 +2064,52 @@ Proof result:
 Outcome:
 
 - RightOnQ can now track the lifecycle of a Twilio-managed evidence exception while keeping the current static app / Sheet path free of sensitive identity documents.
+
+### Slice 7A Completed - Commercial Gateway Mechanics Draft
+
+Bugs approved moving into the commercial/payment entry direction after the `RightOnQ UK` / `RightOnQ Global` pricing model was settled.
+
+RCS-Twilio-4 added the first customer-facing commercial gateway mechanics to `rcs-registration/index.html`.
+
+Current gateway behaviour:
+
+- page now introduces the RCS sender registration as a managed RightOnQ journey;
+- customer must choose either:
+  - `RightOnQ UK` at `£25/month + VAT after approval`; or
+  - `RightOnQ Global` at `£49/month + VAT after approval`;
+- customer must acknowledge the `£100 + VAT` registration fee and refund terms before continuing into Part A;
+- `Complete Part A` now validates the plan choice and acknowledgement before scrolling into the form;
+- the selected plan, monthly base fee, registration fee, VAT treatment, acknowledgement, and billing status are included in the Part A payload;
+- review/export data now includes:
+  - selected RightOnQ plan;
+  - monthly base fee;
+  - registration fee acknowledgement.
+
+Proof/tooling adjustment:
+
+- `rcs-registration/tools/proof-public-part-a-submit.mjs` now uses `RightOnQ UK` instead of stale `Local Time Only`;
+- proof payload now includes:
+  - `packageName = RightOnQ UK`;
+  - `packageInterest = RightOnQ UK`;
+  - `monthlyBaseFeeGbp = 25`;
+  - `registrationFeeGbp = 100`;
+  - `registrationFeeVatTreatment = + VAT`;
+  - `registrationFeeAcknowledgement = Confirmed`;
+  - `billingStatus = registration_fee_pending`.
+
+Parked future polish:
+
+- `RightOnQ RCS Application Future Amendments.md` now records the opening storyboard idea, 4-6 week calm-process wording, month-end plan-change wording, no pro-rata-credit boundary, and desktop/laptop/tablet-first completion priority.
+
+Important limitation:
+
+- this is not live Revolut checkout yet;
+- it is the pre-payment/customer gateway mechanics and data capture layer only;
+- the final intended flow remains payment first, then private application link, then Part A.
+
+Verification run:
+
+- `git diff --check -- rcs-registration/index.html rcs-registration/tools/proof-public-part-a-submit.mjs`;
+- `node --check rcs-registration/tools/proof-public-part-a-submit.mjs`;
+- inline script syntax check against `rcs-registration/index.html`;
+- local preview server reachable at `http://localhost:8902/rcs-registration/index.html`.

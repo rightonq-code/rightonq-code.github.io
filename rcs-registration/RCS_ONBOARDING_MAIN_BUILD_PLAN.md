@@ -2141,6 +2141,12 @@ Boundary:
 
 Design/build the onboarding page before the RCS form.
 
+Status:
+
+- started as `Slice 7A - Commercial gateway mechanics draft`;
+- customer-facing plan/fee acknowledgement mechanics now exist in `rcs-registration/index.html`;
+- live payment/checkout is still not implemented.
+
 Output:
 
 - package explanation;
@@ -2150,6 +2156,38 @@ Output:
 - terms acceptance;
 - Revolut checkout handoff;
 - success route to private application link.
+
+Current implemented gateway mechanics:
+
+- customer chooses `RightOnQ UK` or `RightOnQ Global`;
+- customer acknowledges the `£100 + VAT` registration fee and refund terms;
+- `Complete Part A` is gated until plan choice and acknowledgement are complete;
+- Part A payload carries:
+  - `packageName`;
+  - `packageInterest`;
+  - `monthlyBaseFeeGbp`;
+  - `registrationFeeGbp`;
+  - `registrationFeeVatTreatment`;
+  - `registrationFeeAcknowledgement`;
+  - `billingStatus = registration_fee_pending`.
+
+Remaining Slice 7 work:
+
+- decide the final public wording and layout after mechanics are settled;
+- create the real payment/checkout start point;
+- mark payment as received before private Part A access;
+- generate or reveal the private application link only after payment/manual payment confirmation;
+- connect payment IDs/statuses into the application record;
+- decide whether the static page remains the gateway or whether a separate checkout/start page should precede it.
+
+Parked page polish:
+
+- top-of-page journey storyboard;
+- 4-6 week process reassurance;
+- no monthly platform fee until approval and ready-to-use;
+- month-end plan changes only;
+- no pro-rata credits currently;
+- desktop/laptop/tablet-first completion experience.
 
 ### Slice 8 - Revolut Sandbox Proof
 
