@@ -27,6 +27,15 @@ Customer flow should become:
 5. RightOnQ creates/reveals the private Part A link;
 6. monthly platform billing starts only after RCS approval and ready-to-use setup.
 
+Important billing posture:
+
+- RightOnQ owns the billing brain unless sandbox proof shows Revolut subscriptions can safely own the exact required behaviour.
+- Do not assume Stripe-style subscriptions.
+- Prove both paths:
+  - Revolut Subscriptions API for the monthly plan, if it supports the delayed/approval-gated start we need;
+  - RightOnQ-owned monthly scheduler using merchant-initiated transactions against a saved payment method.
+- If both are technically possible, prefer the simpler operational route that keeps customer experience clear and credit risk controlled.
+
 ## Revolut Docs Checked
 
 Official Revolut Merchant docs reviewed on 2026-05-15:
@@ -38,13 +47,22 @@ Official Revolut Merchant docs reviewed on 2026-05-15:
 - Subscriptions: Revolut has a Subscriptions API with plans, variations, hosted onboarding/setup orders, saved payment method capture, lifecycle tracking, and billing-cycle history.
 - Webhooks: Revolut supports order lifecycle events such as `ORDER_AUTHORISED` and `ORDER_COMPLETED`; delivery order is not guaranteed, so RightOnQ must treat webhook handling as idempotent.
 
+Potential doc/API naming caution:
+
+- Current Revolut order docs show `merchant_order_data.reference` as the internal order reference field.
+- External feedback mentioned `merchant_order_ext_ref`; verify the exact field name in the selected API version during sandbox proof.
+- For RightOnQ, the external reference should be the `applicationId` wherever Revolut supports it, so webhooks can route directly back to the application.
+
 ## Proof Questions
 
 ### A. One-off registration fee
 
 - Can a sandbox Merchant order be created for `12000` minor units (`£120.00`, representing `£100 + VAT`)?
+- Does the API treat `12000` as `£120.00` in GBP minor units?
 - Does the response include a stable order `id` and customer-facing `checkout_url`?
-- Can RightOnQ set an internal reference such as `ROQ-RCS-TEST-...`?
+- Can RightOnQ set the `applicationId` as the Revolut external/reference field?
+- Does the reference come back in order retrieval and webhook payloads?
+- Does an `Idempotency-Key` header prevent duplicate order creation on retry?
 - Can the order include customer email/name safely?
 - What exact order states are returned before and after test payment?
 
@@ -53,12 +71,18 @@ Official Revolut Merchant docs reviewed on 2026-05-15:
 - Does the hosted page look acceptable with Revolut branding/customisation?
 - Can a customer complete payment with Revolut sandbox test cards?
 - What happens on failure/decline test cards?
+- What happens on 3DS challenge failure or abandoned checkout?
 - Can a success redirect return to a RightOnQ URL with enough context to continue?
 
 ### C. Saved payment method / merchant-initiated billing
 
 - Can the initial registration-fee payment save a payment method for merchant-initiated use?
+- What exact parameter or hosted checkout/subscription setting records explicit consent to future merchant-initiated charges?
+- How should that consent be worded/stored on the RightOnQ side?
 - If not through Hosted Checkout alone, does Revolut require the widget/subscription setup flow instead?
+- Can sandbox create a customer, attach a saved payment method, and reuse it across a fresh checkout/payment?
+- Can RightOnQ retrieve saved methods filtered for merchant-initiated use?
+- Can a follow-up order be charged without the customer present?
 - Which IDs must be stored:
   - customer ID;
   - payment method ID;
@@ -76,6 +100,7 @@ Official Revolut Merchant docs reviewed on 2026-05-15:
 - Can renewal date be updated to start after the 4-6 week registration period?
 - Can upgrades/downgrades happen at the end of a billing cycle without pro-rata credits?
 - What webhook events are emitted for subscription creation, setup payment, renewal, failure, cancellation, and plan changes?
+- If subscriptions do not match the operating model, can RightOnQ instead use saved-method MIT charges from its own monthly scheduler?
 
 ### E. PAYG / top-up control
 
@@ -84,14 +109,33 @@ Official Revolut Merchant docs reviewed on 2026-05-15:
 - Can later top-ups use a saved merchant-initiated payment method?
 - What is the cleanest way to pause sending if top-up fails?
 
-### F. Webhooks and reconciliation
+### F. Refunds
+
+- Can a full sandbox refund be created for the registration fee?
+- Can a partial refund be created if needed?
+- Which refund IDs/statuses are returned?
+- What webhook events are emitted for refund created, refund completed, refund failed, or equivalent states?
+- How should `Billing.Refund status`, `Refund reason`, `Refund amount GBP`, and `Refund processed at` be mapped?
+
+### G. Webhooks and reconciliation
 
 - Can webhook URLs be created in sandbox?
 - Which event types are available for orders/subscriptions?
 - Does Revolut sign webhook payloads and expose a signing secret?
+- What are the exact signature/timestamp headers in sandbox?
+- What HMAC/signature algorithm is used?
 - Can RightOnQ verify signatures locally?
+- What should RightOnQ return for verified events, duplicate events, and failed signature verification?
 - Are retries delivered if the endpoint fails?
 - Does webhook order differ from payment lifecycle order?
+
+### H. Endpoint hardening before launch
+
+- Do not link the public website to the gateway until public/operator endpoint hardening lands.
+- Public submissions should be payment/token gated before external traffic is invited.
+- Operator actions should move to a separate Google-authenticated deployment or equivalent private path.
+- MailApp notifications to Adam need throttling or should move fully into the `Communications` queue before external traffic.
+- `changedBy` is currently operator-supplied and therefore spoofable; per-operator attribution should be added when operator auth is hardened.
 
 ## Data Safety Boundary
 
@@ -125,13 +169,29 @@ Initial helper:
 node rcs-registration/tools/revolut-sandbox-proof.mjs --dry-run
 ```
 
+Dry run with an application reference and repeatable idempotency key:
+
+```bash
+node rcs-registration/tools/revolut-sandbox-proof.mjs \
+  --dry-run \
+  --application-id ROQ-RCS-TEST-PUBLIC-PARTA-20260514211901 \
+  --idempotency-key proof-ROQ-RCS-TEST-PUBLIC-PARTA-20260514211901
+```
+
 For live sandbox use, set the secret in the terminal environment, not in the repo:
 
 ```bash
 export REVOLUT_MERCHANT_API_SECRET="sk_sandbox_..."
-node rcs-registration/tools/revolut-sandbox-proof.mjs --create-registration-order
+node rcs-registration/tools/revolut-sandbox-proof.mjs \
+  --create-registration-order \
+  --application-id ROQ-RCS-TEST-PUBLIC-PARTA-20260514211901 \
+  --idempotency-key proof-ROQ-RCS-TEST-PUBLIC-PARTA-20260514211901
 unset REVOLUT_MERCHANT_API_SECRET
 ```
+
+To prove idempotency, run the same live sandbox command twice with the same
+`--idempotency-key` and confirm Revolut does not create two separate customer
+orders for the same application/payment attempt.
 
 Optional environment:
 
@@ -147,14 +207,18 @@ Minimum useful proof:
 - sandbox order created for `£120.00`;
 - response includes `id` and `checkout_url`;
 - order can be retrieved by ID;
+- `applicationId` appears in Revolut reference/metadata fields and can route the order back to the application;
+- idempotency behaviour is observed with a repeated request;
 - hosted checkout page opens;
 - successful sandbox payment changes order/payment state as expected;
 - failed sandbox payment can be observed and mapped;
+- full refund path is observed and mapped;
 - IDs/statuses can be copied into the existing `Billing` sheet through `operator-billing.mjs`.
 
 Stronger proof:
 
 - saved payment method can be retrieved for merchant-initiated use;
+- follow-up merchant-initiated charge can be created against the saved method;
 - subscription plan/variation created in sandbox;
 - subscription setup order created and checkout URL retrieved;
 - first renewal date can be delayed/updated;

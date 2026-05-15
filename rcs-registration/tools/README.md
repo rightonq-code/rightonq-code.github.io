@@ -13,7 +13,9 @@ They call the deployed Apps Script web app, but they do not store PINs in this r
 | `operator-review.mjs` | Update the internal review checklist and optionally mark Part A accepted. | `RCS_ONBOARDING_OPERATOR_PIN` |
 | `operator-trusthub-kyc.mjs` | Update the internal Trust Hub KYC tracking row and sync the application Trust Hub status. | `RCS_ONBOARDING_OPERATOR_PIN` |
 | `operator-rc-bundle.mjs` | Update the internal UK RC Bundle tracking row. | `RCS_ONBOARDING_OPERATOR_PIN` |
+| `operator-billing.mjs` | Update the internal billing/payment tracking row. | `RCS_ONBOARDING_OPERATOR_PIN` |
 | `proof-public-part-a-submit.mjs` | Create a private test link, submit Part A through the public path, then prove Trust Hub KYC and UK RC Bundle tracking rows were created. | `RCS_ONBOARDING_CREATE_PIN` and `RCS_ONBOARDING_OPERATOR_PIN` |
+| `revolut-sandbox-proof.mjs` | Prepare and test Revolut sandbox Hosted Checkout requests. | No RCS PIN; uses `REVOLUT_MERCHANT_API_SECRET` for live sandbox calls |
 
 ## Safety Rules
 
@@ -186,13 +188,73 @@ RCS_ONBOARDING_OPERATOR_PIN="..." node rcs-registration/tools/operator-rc-bundle
 
 Expected live result: JSON showing the latest `rcBundleStatus`, any stored RC Bundle SID, and fallback status.
 
+## Update Billing Tracking
+
+Dry run:
+
+```bash
+node rcs-registration/tools/operator-billing.mjs \
+  --application-id ROQ-RCS-... \
+  --billing-status registration_fee_paid \
+  --payment-provider revolut \
+  --checkout-order-id order_... \
+  --payment-id pay_... \
+  --payment-status paid \
+  --monthly-plan "RightOnQ UK" \
+  --monthly-base-fee-gbp 25 \
+  --refund-status not_required \
+  --internal-notes "Registration fee confirmed. No card data stored." \
+  --dry-run
+```
+
+Live run:
+
+```bash
+RCS_ONBOARDING_OPERATOR_PIN="..." node rcs-registration/tools/operator-billing.mjs \
+  --application-id ROQ-RCS-... \
+  --billing-status registration_fee_paid \
+  --payment-provider revolut \
+  --checkout-order-id order_... \
+  --payment-id pay_... \
+  --payment-status paid \
+  --monthly-plan "RightOnQ UK" \
+  --monthly-base-fee-gbp 25 \
+  --refund-status not_required \
+  --internal-notes "Registration fee confirmed. No card data stored."
+```
+
+Expected live result: JSON showing `billingStatus`, provider/order/payment references, payment status, and update timestamp. Store provider IDs/statuses only; do not store card details.
+
+## Revolut Sandbox Proof
+
+Dry run:
+
+```bash
+node rcs-registration/tools/revolut-sandbox-proof.mjs \
+  --dry-run \
+  --application-id ROQ-RCS-... \
+  --idempotency-key proof-ROQ-RCS-...
+```
+
+Live sandbox order creation:
+
+```bash
+REVOLUT_MERCHANT_API_SECRET="..." node rcs-registration/tools/revolut-sandbox-proof.mjs \
+  --create-registration-order \
+  --application-id ROQ-RCS-... \
+  --idempotency-key proof-ROQ-RCS-...
+```
+
+Expected live result: JSON showing the Revolut order ID, checkout URL presence, order state, and reference fields. Run the same sandbox create command twice with the same idempotency key to prove retry behaviour before relying on it.
+
 ## Recommended Operator Order
 
 1. Create the private application link with `operator-create-application.mjs`.
 2. Check the application with `operator-status.mjs`.
-3. After the customer submits Part A, check status again.
-4. Complete RightOnQ review using `operator-review.mjs`.
-5. Check status again with `operator-status.mjs`.
+3. Confirm registration-fee billing state with `operator-billing.mjs`.
+4. After the customer submits Part A, check status again.
+5. Complete RightOnQ review using `operator-review.mjs`.
+6. Check status again with `operator-status.mjs`.
 
 ## Public Part A Submission Proof
 

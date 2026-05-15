@@ -2280,6 +2280,28 @@ External sanity check note:
 - It recommended `Slice 8 - Revolut Sandbox Proof` before further wording or Trust Hub field expansion.
 - It recommended pausing more Trust Hub/RC field expansion until one real Twilio submission teaches the actual requirements.
 
+Revolut proof refinement:
+
+- prove both possible monthly billing paths:
+  - Revolut Subscriptions API;
+  - RightOnQ-owned monthly scheduler using merchant-initiated charges against a saved payment method;
+- do not assume a Stripe-style subscription model until sandbox proves the fit;
+- use `applicationId` as the Revolut reference where supported, so webhooks can route back to the application;
+- prove `Idempotency-Key` behaviour before running repeated checkout/order tests;
+- add full/partial refund proof before relying on the registration-fee refund promise;
+- capture at least one failed/abandoned payment path;
+- capture webhook signature verification details;
+- keep public endpoint hardening ahead of website integration.
+
+Updated local helper:
+
+```bash
+node rcs-registration/tools/revolut-sandbox-proof.mjs \
+  --dry-run \
+  --application-id ROQ-RCS-TEST-PUBLIC-PARTA-20260514211901 \
+  --idempotency-key proof-ROQ-RCS-TEST-PUBLIC-PARTA-20260514211901
+```
+
 ### Slice 9 - Twilio Trust Hub / Subaccount / Usage Tracking Fields
 
 Add internal Twilio compliance, runtime setup, and usage tracking fields.

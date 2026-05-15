@@ -2256,3 +2256,23 @@ Current blocker for actual Revolut API proof:
 
 - Bugs/RightOnQ needs a Revolut Business Sandbox Merchant account and sandbox Merchant API Secret key.
 - Keep it local only, preferably via environment variable or future secret-loader helper.
+
+Follow-up refinement from external read-only sanity check:
+
+- do not assume "subscription" means Stripe-style managed billing;
+- prove both Revolut Subscriptions API and RightOnQ-owned monthly MIT charges against a saved payment method;
+- use the onboarding `applicationId` as the Revolut order reference where supported;
+- prove `Idempotency-Key` handling so retries do not create duplicate orders;
+- prove refund behaviour for full and partial refunds before relying on the `£100 + VAT` refund policy;
+- capture at least one negative path such as declined card, 3DS failure, or abandoned checkout;
+- capture webhook signature/timestamp header shape and verification behaviour;
+- keep endpoint hardening as a pre-public-launch blocker:
+  - no public website link before payment/token gating;
+  - operator actions should move away from the anonymous deployment;
+  - Adam MailApp notifications need throttling or Communications-queue-only handling;
+  - `changedBy` remains spoofable until operator auth is hardened.
+
+Helper update:
+
+- `revolut-sandbox-proof.mjs` now supports `--application-id` and `--idempotency-key`;
+- dry-run output prints the intended `merchant_order_data.reference` and idempotency header shape without printing secrets.
