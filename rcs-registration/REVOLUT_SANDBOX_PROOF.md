@@ -218,6 +218,7 @@ Webhook signature self-test, using fake data only:
 
 ```bash
 node rcs-registration/tools/revolut-webhook-verify.mjs --self-test
+node rcs-registration/tools/revolut-webhook-map.mjs --self-test
 ```
 
 Verify a captured sandbox webhook sample locally:
@@ -241,6 +242,19 @@ If verification fails with `signatureMatched: false`, first check for an added t
 newline, formatter changes, or a payload copied after JSON re-serialisation.
 The verifier's `--skip-timestamp-tolerance` flag is only for old archived samples. The
 future live webhook endpoint must enforce the Revolut timestamp window.
+
+After signature verification passes, map the webhook to a proposed Billing update:
+
+```bash
+node rcs-registration/tools/revolut-webhook-map.mjs \
+  --payload-file /path/to/revolut-webhook-payload.json \
+  --request-timestamp "1683650202360"
+```
+
+The mapper is deliberately dry-run only. It prints proposed `operatorBillingArgs`, a
+`dedupeKey`, and an `operator-billing.mjs --dry-run` command. Review the output before
+running any live operator billing update. It warns if `merchant_order_ext_ref` does not
+look like a `ROQ-RCS-...` application ID.
 
 For live sandbox use, set the secret in the terminal environment, not in the repo:
 
@@ -274,10 +288,11 @@ First live sandbox sequence, once Bugs has the sandbox Merchant API secret:
 6. Retrieve the order and payment list after payment.
 7. Capture one sandbox webhook payload plus headers and verify it with
    `revolut-webhook-verify.mjs`.
-8. Update the existing Billing row with `operator-billing.mjs` using provider/order/payment IDs only.
-9. Run one failed/declined sandbox payment if Revolut sandbox provides a suitable test card.
-10. Run a full refund only after the order reaches `completed`.
-11. Record webhook requirements, but do not expose a public webhook endpoint until signature verification is wired into that endpoint.
+8. Map the verified webhook with `revolut-webhook-map.mjs` and review the proposed Billing update.
+9. Update the existing Billing row with `operator-billing.mjs` using provider/order/payment IDs only.
+10. Run one failed/declined sandbox payment if Revolut sandbox provides a suitable test card.
+11. Run a full refund only after the order reaches `completed`.
+12. Record webhook requirements, but do not expose a public webhook endpoint until signature verification is wired into that endpoint.
 
 ## Proof Success Criteria
 
@@ -293,6 +308,7 @@ Minimum useful proof:
 - failed sandbox payment can be observed and mapped;
 - full refund path is observed and mapped;
 - captured webhook signature verifies locally using the raw payload and Revolut headers;
+- verified webhook payload maps to the expected Billing status without writing to the Sheet;
 - IDs/statuses can be copied into the existing `Billing` sheet through `operator-billing.mjs`.
 
 Stronger proof:
@@ -308,4 +324,4 @@ Stronger proof:
 
 Get or create a Revolut Business Sandbox Merchant account and sandbox Merchant API Secret key. Do not paste the key into chat. Use it locally through an environment variable or a future secret-loader helper.
 
-No live Revolut call has been made yet. The local helpers have passed dry-run checks for create order, refund, saved-method payment payloads, and fake-data webhook signature verification.
+No live Revolut call has been made yet. The local helpers have passed dry-run checks for create order, refund, saved-method payment payloads, fake-data webhook signature verification, and fake-data webhook-to-billing mapping.

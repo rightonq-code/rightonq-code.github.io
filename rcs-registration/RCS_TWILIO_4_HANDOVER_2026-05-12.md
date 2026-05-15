@@ -2740,3 +2740,39 @@ Still not done:
 - no sandbox webhook has been registered;
 - no real `REVOLUT_WEBHOOK_SIGNING_SECRET` has been used;
 - next secret-dependent step is still one sandbox registration-fee order with a fixed `Idempotency-Key`, followed by capturing one webhook payload/headers and verifying it locally.
+
+### Slice 8G Continued - Revolut Webhook Billing Mapper
+
+RCS-Twilio-4 added a second offline helper so a verified Revolut webhook can be mapped into the Billing lane without writing to the Sheet.
+
+Added:
+
+- `rcs-registration/tools/revolut-webhook-map.mjs`.
+
+Purpose:
+
+- read a verified Revolut webhook payload from `--payload-file`;
+- use `merchant_order_ext_ref` as the RightOnQ `applicationId`;
+- use `order_id` as the Revolut checkout/order ID;
+- map core events into proposed Billing values:
+  - `ORDER_COMPLETED` -> `billingStatus = registration_fee_paid`, `paymentStatus = paid`;
+  - `ORDER_AUTHORISED` -> keep `registration_fee_pending`, `paymentStatus = authorised`;
+  - `ORDER_CANCELLED` -> `registration_fee_cancelled`;
+  - `ORDER_FAILED` / `ORDER_PAYMENT_FAILED` -> `registration_fee_failed`;
+  - `ORDER_PAYMENT_DECLINED` -> `registration_fee_failed`, `paymentStatus = declined`;
+  - challenge/authenticated payment events stay pending;
+- print a `dedupeKey`, `operatorBillingArgs`, and an `operator-billing.mjs --dry-run` command.
+
+Safety boundary:
+
+- the mapper performs no network calls;
+- it does not call Apps Script;
+- it does not need or read RCS PINs;
+- it should be run only after `revolut-webhook-verify.mjs` has accepted the signature/timestamp.
+
+Verification:
+
+- `node --check rcs-registration/tools/revolut-webhook-map.mjs` passed;
+- `node rcs-registration/tools/revolut-webhook-map.mjs --self-test` passed for:
+  - `ORDER_COMPLETED` -> paid mapping;
+  - `ORDER_PAYMENT_DECLINED` -> failed/declined mapping.

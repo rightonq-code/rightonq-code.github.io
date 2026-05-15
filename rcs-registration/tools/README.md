@@ -45,6 +45,7 @@ The proof helper uses the authenticated operator API for creating the private te
 | `proof-public-part-a-submit.mjs` | Create a private test link, submit Part A through the public path, then prove Trust Hub KYC and UK RC Bundle tracking rows were created. | `RCS_ONBOARDING_CREATE_PIN` and `RCS_ONBOARDING_OPERATOR_PIN` |
 | `revolut-sandbox-proof.mjs` | Prepare and test Revolut sandbox Hosted Checkout requests. | No RCS PIN; uses `REVOLUT_MERCHANT_API_SECRET` for live sandbox calls |
 | `revolut-webhook-verify.mjs` | Verify Revolut webhook signatures/timestamp tolerance against captured sandbox payloads. | No RCS PIN; uses `REVOLUT_WEBHOOK_SIGNING_SECRET` for real samples |
+| `revolut-webhook-map.mjs` | Map a verified Revolut webhook payload into a proposed `operator-billing.mjs --dry-run` update. | No RCS PIN; performs no writes |
 
 ## Safety Rules
 
@@ -334,6 +335,18 @@ unset REVOLUT_WEBHOOK_SIGNING_SECRET
 ```
 
 Expected result: `ok: true`, `signatureMatched: true`, and `timestampAccepted: true`. Use `--payload-file` for real captures and keep the payload raw; changing whitespace, adding a trailing newline, or re-serialising JSON changes the signature. When using a real `wsk_...` value, prefer a local secret loader or shell setup that avoids saving the secret in history. The verifier's `--skip-timestamp-tolerance` flag is for archived local samples only; the future live webhook endpoint must enforce the timestamp window.
+
+Webhook-to-billing mapping proof, after signature verification passes:
+
+```bash
+node rcs-registration/tools/revolut-webhook-map.mjs --self-test
+
+node rcs-registration/tools/revolut-webhook-map.mjs \
+  --payload-file /path/to/revolut-webhook-payload.json \
+  --request-timestamp "1683650202360"
+```
+
+Expected result: JSON containing `mapped: true`, a `dedupeKey`, proposed `operatorBillingArgs`, and an `operatorBillingDryRunCommand`. The mapper warns if `merchant_order_ext_ref` does not look like a `ROQ-RCS-...` application ID. It does not call Apps Script or update the Sheet.
 
 ## Recommended Operator Order
 

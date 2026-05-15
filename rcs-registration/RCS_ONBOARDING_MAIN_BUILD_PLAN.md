@@ -2324,8 +2324,10 @@ Slice 8 continuation after public/operator hardening:
   - multiple comma-separated `v1=` signatures during signing-secret rotation;
   - replay-window checks using the Revolut timestamp header.
 - Post-review polish steers real webhook checks to `--payload-file`, adds a raw-payload mismatch hint, and records that any live webhook endpoint must enforce timestamp tolerance with no skip flag.
+- `revolut-webhook-map.mjs` now maps verified Revolut order/payment webhook payloads into proposed `operator-billing.mjs --dry-run` updates without calling Apps Script or writing to the Sheet.
 - Dry-run checks passed for create-order, refund, and saved-method payment payloads.
 - Webhook verifier self-test passed for valid, tampered-payload, and stale-timestamp cases.
+- Webhook mapper self-test passed for completed-payment and declined-payment cases.
 - No live Revolut API call has been made yet.
 
 ### Slice 8B - Public Endpoint Hardening Started
