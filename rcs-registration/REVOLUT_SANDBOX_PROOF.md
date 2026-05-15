@@ -46,6 +46,11 @@ Official Revolut Merchant docs reviewed on 2026-05-15:
 - Merchant-initiated charges: to charge later, create an order for a customer with a saved payment method, then pay for that order using the saved payment method ID/type.
 - Subscriptions: Revolut has a Subscriptions API with plans, variations, hosted onboarding/setup orders, saved payment method capture, lifecycle tracking, and billing-cycle history.
 - Webhooks: Revolut supports order lifecycle events such as `ORDER_AUTHORISED` and `ORDER_COMPLETED`; delivery order is not guaranteed, so RightOnQ must treat webhook handling as idempotent.
+- Current Hosted Checkout API guidance says order creation must be done server-side because the Merchant API secret must not be exposed to frontend code.
+- `merchant_order_data.reference` is the internal reference field at order creation; webhook payloads expose this back as `merchant_order_ext_ref`, so RightOnQ should treat both names as the same business reference crossing different API surfaces.
+- Refunds can be full or partial, but only for completed orders, and should use `Idempotency-Key` to avoid duplicate refund processing.
+- Merchant-initiated saved-method payments require a payment method saved for the merchant; customer-only saved methods are not enough for unattended monthly charges.
+- Webhook callback headers include `Revolut-Request-Timestamp` and `Revolut-Signature`; the webhook creation response includes a `signing_secret`.
 
 Potential doc/API naming caution:
 
@@ -178,6 +183,31 @@ node rcs-registration/tools/revolut-sandbox-proof.mjs \
   --idempotency-key proof-ROQ-RCS-TEST-PUBLIC-PARTA-20260514211901
 ```
 
+Dry run the refund shape:
+
+```bash
+node rcs-registration/tools/revolut-sandbox-proof.mjs \
+  --dry-run \
+  --refund-order \
+  --order-id order_TEST \
+  --refund-amount 12000 \
+  --refund-reference ROQ-RCS-TEST-PUBLIC-PARTA-20260514211901 \
+  --idempotency-key refund-ROQ-RCS-TEST-PUBLIC-PARTA-20260514211901
+```
+
+Dry run a later merchant-initiated saved-method payment shape:
+
+```bash
+node rcs-registration/tools/revolut-sandbox-proof.mjs \
+  --dry-run \
+  --pay-order \
+  --order-id order_TEST \
+  --payment-method-id pm_TEST \
+  --payment-method-type card \
+  --payment-initiator merchant \
+  --idempotency-key mit-ROQ-RCS-TEST-PUBLIC-PARTA-20260514211901
+```
+
 For live sandbox use, set the secret in the terminal environment, not in the repo:
 
 ```bash
@@ -199,6 +229,19 @@ Optional environment:
 export REVOLUT_MERCHANT_API_BASE_URL="https://sandbox-merchant.revolut.com/api"
 export REVOLUT_API_VERSION="2026-04-20"
 ```
+
+First live sandbox sequence, once Bugs has the sandbox Merchant API secret:
+
+1. Create one registration-fee order with a fixed idempotency key.
+2. Run the exact same create command again with the same idempotency key and confirm the returned order identity/status does not duplicate the payment attempt.
+3. Retrieve the order by ID.
+4. List orders by `merchant_order_data_reference` using the same application ID.
+5. Open the checkout URL in a browser and complete one sandbox card payment.
+6. Retrieve the order and payment list after payment.
+7. Update the existing Billing row with `operator-billing.mjs` using provider/order/payment IDs only.
+8. Run one failed/declined sandbox payment if Revolut sandbox provides a suitable test card.
+9. Run a full refund only after the order reaches `completed`.
+10. Record webhook requirements, but do not expose a public webhook endpoint until signature verification is implemented.
 
 ## Proof Success Criteria
 
@@ -227,3 +270,5 @@ Stronger proof:
 ## Current Next Action
 
 Get or create a Revolut Business Sandbox Merchant account and sandbox Merchant API Secret key. Do not paste the key into chat. Use it locally through an environment variable or a future secret-loader helper.
+
+No live Revolut call has been made yet. The local helper has passed dry-run checks for create order, refund, and saved-method payment payloads.

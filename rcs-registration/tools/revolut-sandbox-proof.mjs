@@ -31,6 +31,10 @@ const DEFAULT_ORDER = {
 
 const BOOLEAN_FLAGS = {
   "create-registration-order": "createRegistrationOrder",
+  "list-orders": "listOrders",
+  "retrieve-payments": "retrievePayments",
+  "refund-order": "refundOrder",
+  "pay-order": "payOrder",
   "dry-run": "dryRun"
 };
 
@@ -42,9 +46,19 @@ const VALUE_FLAGS = {
   "description": "description",
   "customer-email": "customerEmail",
   "customer-name": "customerName",
+  "customer-id": "customerId",
   "reference": "reference",
   "idempotency-key": "idempotencyKey",
-  "redirect-url": "redirectUrl"
+  "redirect-url": "redirectUrl",
+  "limit": "limit",
+  "state": "state",
+  "refund-amount": "refundAmount",
+  "refund-currency": "refundCurrency",
+  "refund-description": "refundDescription",
+  "refund-reference": "refundReference",
+  "payment-method-id": "paymentMethodId",
+  "payment-method-type": "paymentMethodType",
+  "payment-initiator": "paymentInitiator"
 };
 
 function usage() {
@@ -54,6 +68,10 @@ function usage() {
     "  REVOLUT_MERCHANT_API_SECRET=... node rcs-registration/tools/revolut-sandbox-proof.mjs --create-registration-order",
     "  REVOLUT_MERCHANT_API_SECRET=... node rcs-registration/tools/revolut-sandbox-proof.mjs --create-registration-order --application-id ROQ-RCS-...",
     "  REVOLUT_MERCHANT_API_SECRET=... node rcs-registration/tools/revolut-sandbox-proof.mjs --order-id <order_id>",
+    "  REVOLUT_MERCHANT_API_SECRET=... node rcs-registration/tools/revolut-sandbox-proof.mjs --list-orders --reference ROQ-RCS-...",
+    "  REVOLUT_MERCHANT_API_SECRET=... node rcs-registration/tools/revolut-sandbox-proof.mjs --retrieve-payments --order-id <order_id>",
+    "  REVOLUT_MERCHANT_API_SECRET=... node rcs-registration/tools/revolut-sandbox-proof.mjs --refund-order --order-id <order_id> --refund-amount 12000",
+    "  REVOLUT_MERCHANT_API_SECRET=... node rcs-registration/tools/revolut-sandbox-proof.mjs --pay-order --order-id <order_id> --payment-method-id <id> --payment-method-type card",
     "",
     "Options:",
     "  --create-registration-order    Create a GBP 120.00 sandbox Hosted Checkout order",
@@ -63,9 +81,22 @@ function usage() {
     "  --currency GBP",
     "  --customer-email test@example.com",
     "  --customer-name \"Test User\"",
+    "  --customer-id <id>              Use an existing Revolut customer ID on order creation",
     "  --reference ROQ-RCS-...         Override the Revolut merchant_order_data.reference",
     "  --idempotency-key key           Use a repeatable key to prove duplicate protection",
     "  --redirect-url https://...",
+    "  --list-orders                  Retrieve orders, optionally filtered by --reference and --state",
+    "  --limit 100",
+    "  --state completed",
+    "  --retrieve-payments            Retrieve payments for --order-id",
+    "  --refund-order                 Refund --order-id; use --refund-amount in minor units",
+    "  --refund-amount 12000",
+    "  --refund-reference ROQ-RCS-...",
+    "  --refund-description \"Registration fee refund\"",
+    "  --pay-order                    Pay --order-id using a saved payment method",
+    "  --payment-method-id <id>",
+    "  --payment-method-type card|revolut_pay",
+    "  --payment-initiator merchant|customer",
     "  --dry-run                      Print request details without sending",
     "",
     "Environment:",
@@ -123,10 +154,38 @@ function buildOrderPayload(options) {
   }
   if (options.customerEmail) payload.customer.email = options.customerEmail;
   if (options.customerName) payload.customer.full_name = options.customerName;
+  if (options.customerId) payload.customer = { id: options.customerId };
   if (options.applicationId) payload.merchant_order_data.reference = options.applicationId;
   if (options.reference) payload.merchant_order_data.reference = options.reference;
   if (options.redirectUrl) payload.redirect_url = options.redirectUrl;
   return payload;
+}
+
+function buildRefundPayload(options) {
+  if (!options.refundAmount) throw new Error("--refund-amount is required for --refund-order");
+  const amount = Number(options.refundAmount);
+  if (!Number.isInteger(amount) || amount <= 0) {
+    throw new Error("--refund-amount must be a positive integer in minor units");
+  }
+  const payload = {
+    amount,
+    currency: options.refundCurrency || options.currency || DEFAULT_ORDER.currency,
+    description: options.refundDescription || "RightOnQ RCS registration fee refund"
+  };
+  const reference = options.refundReference || options.reference || options.applicationId;
+  if (reference) payload.merchant_order_ext_ref = reference;
+  return payload;
+}
+
+function buildPayOrderPayload(options) {
+  if (!options.paymentMethodId) throw new Error("--payment-method-id is required for --pay-order");
+  return {
+    saved_payment_method: {
+      type: options.paymentMethodType || "card",
+      id: options.paymentMethodId,
+      initiator: options.paymentInitiator || "merchant"
+    }
+  };
 }
 
 function buildHeaders(secret, options = {}) {
@@ -187,13 +246,22 @@ function summariseOrder(order) {
     checkoutUrl: order.checkout_url || "",
     customerId: order.customer && order.customer.id || "",
     payments: Array.isArray(order.payments)
-      ? order.payments.map(payment => ({
-          id: payment.id || "",
-          state: payment.state || "",
-          paymentMethodType: payment.payment_method && payment.payment_method.type || "",
-          paymentMethodIdPresent: Boolean(payment.payment_method && payment.payment_method.id)
-        }))
+      ? order.payments.map(summarisePayment)
       : []
+  };
+}
+
+function summarisePayment(payment) {
+  return {
+    id: payment.id || "",
+    orderId: payment.order_id || "",
+    state: payment.state || "",
+    amount: payment.amount || "",
+    currency: payment.currency || "",
+    declineReason: payment.decline_reason || "",
+    paymentMethodType: payment.payment_method && payment.payment_method.type || "",
+    paymentMethodIdPresent: Boolean(payment.payment_method && payment.payment_method.id),
+    authenticationChallengePresent: Boolean(payment.authentication_challenge)
   };
 }
 
@@ -214,9 +282,11 @@ async function main() {
   }
 
   const orderPayload = buildOrderPayload(options);
+  const refundPayload = options.refundOrder ? buildRefundPayload(options) : null;
+  const payOrderPayload = options.payOrder ? buildPayOrderPayload(options) : null;
   const idempotencyKey = options.idempotencyKey || generateIdempotencyKey(orderPayload.merchant_order_data.reference);
 
-  if (options.dryRun || (!options.createRegistrationOrder && !options.orderId)) {
+  if (options.dryRun || (!options.createRegistrationOrder && !options.orderId && !options.listOrders)) {
     console.log(JSON.stringify({
       mode: "dry_run",
       apiBaseUrl: getBaseUrl(),
@@ -242,6 +312,38 @@ async function main() {
         method: "GET",
         path: "/orders/<order_id>"
       },
+      listOrdersExample: {
+        method: "GET",
+        path: "/orders?merchant_order_data_reference=<application_id>&limit=100"
+      },
+      retrievePaymentsExample: {
+        method: "GET",
+        path: "/orders/<order_id>/payments"
+      },
+      refundOrder: refundPayload ? {
+        method: "POST",
+        path: "/1.0/orders/<order_id>/refund",
+        headers: {
+          Authorization: process.env.REVOLUT_MERCHANT_API_SECRET ? "Bearer [present]" : "Bearer [missing]",
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          "Revolut-Api-Version": process.env.REVOLUT_API_VERSION || DEFAULT_API_VERSION,
+          "Idempotency-Key": idempotencyKey
+        },
+        payload: refundPayload
+      } : null,
+      payOrder: payOrderPayload ? {
+        method: "POST",
+        path: "/orders/<order_id>/payments",
+        headers: {
+          Authorization: process.env.REVOLUT_MERCHANT_API_SECRET ? "Bearer [present]" : "Bearer [missing]",
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          "Revolut-Api-Version": process.env.REVOLUT_API_VERSION || DEFAULT_API_VERSION,
+          "Idempotency-Key": idempotencyKey
+        },
+        payload: payOrderPayload
+      } : null,
       secretPresent: Boolean(process.env.REVOLUT_MERCHANT_API_SECRET)
     }, null, 2));
     return;
@@ -260,6 +362,73 @@ async function main() {
       requestReference: orderPayload.merchant_order_data.reference,
       idempotencyKey,
       order: summariseOrder(order)
+    }, null, 2));
+    return;
+  }
+
+  if (options.listOrders) {
+    const params = new URLSearchParams();
+    if (options.limit) params.set("limit", options.limit);
+    if (options.state) params.append("state", options.state);
+    const reference = options.reference || options.applicationId;
+    if (reference) params.set("merchant_order_data_reference", reference);
+    const suffix = params.toString() ? `?${params.toString()}` : "";
+    const result = await requestJson(`/orders${suffix}`, { method: "GET" });
+    const orders = Array.isArray(result.orders) ? result.orders : [];
+    console.log(JSON.stringify({
+      ok: true,
+      action: "list_orders",
+      count: orders.length,
+      orders: orders.map(summariseOrder)
+    }, null, 2));
+    return;
+  }
+
+  if (options.refundOrder) {
+    if (!options.orderId) throw new Error("--order-id is required for --refund-order");
+    const refund = await requestJson(`/1.0/orders/${encodeURIComponent(options.orderId)}/refund`, {
+      method: "POST",
+      body: JSON.stringify(refundPayload),
+      idempotencyKey,
+      reference: refundPayload.merchant_order_ext_ref || orderPayload.merchant_order_data.reference
+    });
+    console.log(JSON.stringify({
+      ok: true,
+      action: "refund_order",
+      idempotencyKey,
+      refund: summariseOrder(refund)
+    }, null, 2));
+    return;
+  }
+
+  if (options.payOrder) {
+    if (!options.orderId) throw new Error("--order-id is required for --pay-order");
+    const payment = await requestJson(`/orders/${encodeURIComponent(options.orderId)}/payments`, {
+      method: "POST",
+      body: JSON.stringify(payOrderPayload),
+      idempotencyKey,
+      reference: orderPayload.merchant_order_data.reference
+    });
+    console.log(JSON.stringify({
+      ok: true,
+      action: "pay_order",
+      idempotencyKey,
+      payment: summarisePayment(payment)
+    }, null, 2));
+    return;
+  }
+
+  if (options.retrievePayments) {
+    if (!options.orderId) throw new Error("--order-id is required for --retrieve-payments");
+    const result = await requestJson(`/orders/${encodeURIComponent(options.orderId)}/payments`, {
+      method: "GET"
+    });
+    const payments = Array.isArray(result.payments) ? result.payments : [];
+    console.log(JSON.stringify({
+      ok: true,
+      action: "retrieve_payments",
+      count: payments.length,
+      payments: payments.map(summarisePayment)
     }, null, 2));
     return;
   }

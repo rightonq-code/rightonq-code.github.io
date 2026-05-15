@@ -2302,6 +2302,24 @@ node rcs-registration/tools/revolut-sandbox-proof.mjs \
   --idempotency-key proof-ROQ-RCS-TEST-PUBLIC-PARTA-20260514211901
 ```
 
+Slice 8 continuation after public/operator hardening:
+
+- Revolut official docs were refreshed on 2026-05-15 before coding the next proof step.
+- Confirmed Hosted Checkout API is server-side only because the Merchant API secret must not be exposed to frontend code.
+- Confirmed `merchant_order_data.reference` is the create-order reference, while webhook callbacks expose the same business reference as `merchant_order_ext_ref`.
+- Confirmed refunds are full/partial, require completed orders, and should use `Idempotency-Key`.
+- Confirmed saved-method MIT charging needs a payment method saved for merchant use.
+- Confirmed webhook callbacks include `Revolut-Request-Timestamp` and `Revolut-Signature`; the webhook signing secret must not be stored in the repo.
+- `revolut-sandbox-proof.mjs` now supports dry/live scaffolding for:
+  - registration order creation;
+  - order retrieval;
+  - order listing by reference;
+  - payment-list retrieval;
+  - refund proof;
+  - saved-method payment proof.
+- Dry-run checks passed for create-order, refund, and saved-method payment payloads.
+- No live Revolut API call has been made yet.
+
 ### Slice 8B - Public Endpoint Hardening Started
 
 Purpose:

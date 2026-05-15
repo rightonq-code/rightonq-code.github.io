@@ -2659,3 +2659,36 @@ Current caveat:
 - the clean operator API deployment still points at version `30`, while public web app is version `31`;
 - version `31` mainly adds the public `doPost` block plus small helper/docs hardening, so operator status reads still work through the pinned clean API deployment;
 - if future operator-side Apps Script changes matter, update the clean operator API deployment through the Apps Script UI to the new version, preserving no-Web-app exposure.
+
+### Slice 8G Started - Revolut Sandbox Proof Harness
+
+RCS-Twilio-4 moved back into the Revolut sandbox slice after public/operator endpoint hardening was completed and pushed.
+
+Official Revolut docs refreshed on 2026-05-15 before changing the local helper:
+
+- Hosted Checkout API creates orders server-side and returns `id` plus `checkout_url`; the Merchant API secret must not be exposed to frontend code.
+- `merchant_order_data.reference` is used on order creation; webhook callbacks expose that same business reference as `merchant_order_ext_ref`.
+- Refunds can be full or partial, but only on completed orders; use `Idempotency-Key` for refund requests.
+- Merchant-initiated saved-method charges require payment methods saved for merchant use, not customer-only saved methods.
+- Webhook callbacks use `Revolut-Request-Timestamp` and `Revolut-Signature`; webhook signing secrets must stay out of repo/chat.
+
+Updated:
+
+- `rcs-registration/tools/revolut-sandbox-proof.mjs` now supports:
+  - registration order creation;
+  - order retrieval;
+  - order listing by reference;
+  - payment-list retrieval;
+  - refund proof payloads;
+  - saved-method / merchant-initiated payment proof payloads.
+- `rcs-registration/REVOLUT_SANDBOX_PROOF.md` now has the first live sandbox sequence and dry-run commands.
+- `rcs-registration/tools/README.md` now documents the new Revolut helper commands.
+
+Verification:
+
+- `node --check rcs-registration/tools/revolut-sandbox-proof.mjs` passed.
+- Dry-run create-order payload passed for application reference `ROQ-RCS-TEST-REVOLUT-20260515`.
+- Dry-run refund payload passed with `refund-ROQ-RCS-TEST-REVOLUT-20260515`.
+- Dry-run merchant-initiated saved-method payment payload passed with `mit-ROQ-RCS-TEST-REVOLUT-20260515`.
+
+No live Revolut call has been made yet. Next action is to get/use a sandbox Merchant API secret locally through an environment variable, then run one create-order sandbox proof with a fixed idempotency key.

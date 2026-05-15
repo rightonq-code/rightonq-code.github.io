@@ -276,6 +276,44 @@ REVOLUT_MERCHANT_API_SECRET="..." node rcs-registration/tools/revolut-sandbox-pr
 
 Expected live result: JSON showing the Revolut order ID, checkout URL presence, order state, and reference fields. Run the same sandbox create command twice with the same idempotency key to prove retry behaviour before relying on it.
 
+Useful sandbox follow-up reads:
+
+```bash
+REVOLUT_MERCHANT_API_SECRET="..." node rcs-registration/tools/revolut-sandbox-proof.mjs \
+  --order-id order_...
+
+REVOLUT_MERCHANT_API_SECRET="..." node rcs-registration/tools/revolut-sandbox-proof.mjs \
+  --list-orders \
+  --reference ROQ-RCS-...
+
+REVOLUT_MERCHANT_API_SECRET="..." node rcs-registration/tools/revolut-sandbox-proof.mjs \
+  --retrieve-payments \
+  --order-id order_...
+```
+
+Refund proof, after a sandbox order is completed:
+
+```bash
+REVOLUT_MERCHANT_API_SECRET="..." node rcs-registration/tools/revolut-sandbox-proof.mjs \
+  --refund-order \
+  --order-id order_... \
+  --refund-amount 12000 \
+  --refund-reference ROQ-RCS-... \
+  --idempotency-key refund-ROQ-RCS-...
+```
+
+Saved-method / merchant-initiated payment proof, after sandbox provides a saved method ID:
+
+```bash
+REVOLUT_MERCHANT_API_SECRET="..." node rcs-registration/tools/revolut-sandbox-proof.mjs \
+  --pay-order \
+  --order-id order_... \
+  --payment-method-id pm_... \
+  --payment-method-type card \
+  --payment-initiator merchant \
+  --idempotency-key mit-ROQ-RCS-...
+```
+
 ## Recommended Operator Order
 
 1. Create the private application link with `operator-create-application.mjs`.
