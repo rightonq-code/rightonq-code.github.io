@@ -140,6 +140,21 @@ Local tooling is ready for the split:
 - use `RCS_ONBOARDING_OPERATOR_WEB_APP_URL` for the operator deployment;
 - `RCS_ONBOARDING_WEB_APP_URL` remains the combined deployment fallback during the pilot.
 
+Authenticated operator API scaffold:
+
+- `rcsOperatorAction(payload)` is available in `Code.gs` as the intended Apps Script API entry point for operator-only actions.
+- The manifest includes `executionApi.access = DOMAIN`.
+- `clasp run rcsOperatorAction ...` currently cannot run because the Apps Script project has no standard GCP project ID set.
+- `clasp apis` returns: `GCP project ID is not set, unable to continue.`
+- Failed proof deployments `Authenticated operator API` and `Operator API domain access` were removed; the live public web app remains version `25`.
+
+Next step before replacing PIN/web-app operator calls:
+
+1. Associate this Apps Script project with a standard Google Cloud project.
+2. Enable Apps Script API / Execution API requirements there.
+3. Redeploy the API executable.
+4. Re-run a read-only `rcsOperatorAction` snapshot proof.
+
 Do not store either PIN in this repo, in static HTML, or in Sheet audit JSON. If `ONBOARDING_OPERATOR_PIN` is not configured, internal status updates correctly return `ONBOARDING_OPERATOR_PIN is not configured`.
 
 Local application-link creation can be sent with `rcs-registration/tools/operator-create-application.mjs`, which reads `RCS_ONBOARDING_CREATE_PIN` from the local environment. Local operator updates can be sent with `rcs-registration/tools/operator-review.mjs`, `rcs-registration/tools/operator-trusthub-kyc.mjs`, and `rcs-registration/tools/operator-rc-bundle.mjs`. Local operator readback can be run with `rcs-registration/tools/operator-status.mjs`. These tools never store PINs in the repo. See `rcs-registration/tools/README.md` for dry-run and live examples.

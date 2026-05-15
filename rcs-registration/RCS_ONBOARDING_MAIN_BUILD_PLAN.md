@@ -2375,6 +2375,41 @@ Next implementation decision:
   - a second Apps Script deployment with Google Workspace access restrictions if Apps Script deployment settings support the needed split cleanly; or
   - a separate Apps Script project for operator actions only, sharing the same Sheet but deployed as RightOnQ-only.
 
+### Slice 8D - Authenticated Operator API Spike
+
+Decision:
+
+- a private/domain-only web app is not ideal for the terminal operator tools because Node fetch does not carry a browser Google login session;
+- the better operator path is Apps Script API execution via authenticated `clasp run` / scripts.run, while the public web app remains anonymous for customer actions.
+
+Implemented scaffold:
+
+- added server-side `rcsOperatorAction(payload)`;
+- it allows only operator/internal actions:
+  - `createApplicationDraft`;
+  - `getOperatorSnapshot`;
+  - `updateApplicationStatus`;
+  - `updateBilling`;
+  - `updateInternalReview`;
+  - `updateTrustHubKyc`;
+  - `updateUkRcBundle`;
+- it does not route public customer actions;
+- added `executionApi.access = DOMAIN` to the manifest.
+
+Proof result:
+
+- `clasp run rcsOperatorAction ...` does not yet run;
+- `MYSELF` and `DOMAIN` execution API attempts both failed from the CLI with permission/API executable errors;
+- temporary failed API deployments were deleted;
+- current public web app deployment remains version `25`;
+- `clasp apis` reports `GCP project ID is not set, unable to continue.`
+
+Conclusion:
+
+- this is blocked on associating the Apps Script project with a standard Google Cloud project and enabling the Apps Script API / Execution API requirements;
+- do not weaken the operator API to `ANYONE`;
+- keep the v25 public web app as-is until the authenticated operator API proof passes.
+
 ### Slice 9 - Twilio Trust Hub / Subaccount / Usage Tracking Fields
 
 Add internal Twilio compliance, runtime setup, and usage tracking fields.

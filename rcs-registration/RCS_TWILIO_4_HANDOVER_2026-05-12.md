@@ -2398,3 +2398,56 @@ Why this matters:
 Open implementation choice:
 
 - verify whether Apps Script can support one project with two web app deployments using different access settings cleanly from the UI/manifest; if not, create a separate operator Apps Script project sharing the same Sheet and deploy it as RightOnQ-only.
+
+### Slice 8D Attempted - Authenticated Operator API
+
+RCS-Twilio-4 investigated the next operator/public split step.
+
+Finding:
+
+- a domain/private web app is not a clean fit for the terminal tools because Node `fetch` does not carry a browser Google login session;
+- better candidate is Apps Script API execution (`clasp run` / scripts.run) for operator actions.
+
+Implemented scaffold in `Code.gs`:
+
+- new top-level function `rcsOperatorAction(payload)`;
+- allowed actions only:
+  - `createApplicationDraft`;
+  - `getOperatorSnapshot`;
+  - `updateApplicationStatus`;
+  - `updateBilling`;
+  - `updateInternalReview`;
+  - `updateTrustHubKyc`;
+  - `updateUkRcBundle`;
+- public customer actions are not routed through this function.
+
+Manifest:
+
+- added `executionApi.access = DOMAIN`.
+
+Proof attempts:
+
+- pushed Apps Script head with the scaffold;
+- first tried `executionApi.access = MYSELF`;
+- created version `26` / deployment `Authenticated operator API`;
+- `clasp run rcsOperatorAction --params '[{"action":"getOperatorSnapshot","applicationId":"ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747"}]'` failed with a permission error;
+- changed to `executionApi.access = DOMAIN`;
+- created version `27` / deployment `Operator API domain access`;
+- the same read-only proof still failed with permission/API executable errors;
+- `clasp run --nondev ...` also failed;
+- `clasp apis` returned `GCP project ID is not set, unable to continue.`
+
+Cleanup:
+
+- deleted failed deployment `AKfycbxYROXkOQmoT4eP0Z9CrWdvfuLtotZrh9OMCVjl31xC5TbvIsgOtP2p-rDwbz6TpYQh`;
+- deleted failed deployment `AKfycbyiJftrD96DGcOKHoPxk1Yh-UtsI-eoFhYX1_chm2HTSz9NJGBHccQw36N54ob_gYnr`;
+- confirmed deployments list is back to:
+  - HEAD;
+  - public v25 `Harden public Part A submission`;
+  - original v1 intake receiver.
+
+Current conclusion:
+
+- public v25 deployment is still the safe live endpoint;
+- authenticated operator API is the preferred design, but blocked until the Apps Script project is associated with a standard Google Cloud project and the required Apps Script API / Execution API setup is complete;
+- do not loosen `executionApi.access` to `ANYONE`.

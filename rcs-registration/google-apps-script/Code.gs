@@ -535,6 +535,42 @@ function doPost(event) {
   }
 }
 
+function rcsOperatorAction(payload) {
+  const lock = LockService.getScriptLock();
+  lock.waitLock(10000);
+
+  try {
+    if (!payload || !payload.action) throw new Error("Missing operator action");
+    const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
+
+    if (payload.action === "createApplicationDraft") {
+      return createApplicationDraft(spreadsheet, payload);
+    }
+    if (payload.action === "getOperatorSnapshot") {
+      return getOperatorSnapshot(spreadsheet, payload);
+    }
+    if (payload.action === "updateApplicationStatus") {
+      return updateApplicationStatus(spreadsheet, payload);
+    }
+    if (payload.action === "updateBilling") {
+      return updateBilling(spreadsheet, payload);
+    }
+    if (payload.action === "updateInternalReview") {
+      return updateInternalReview(spreadsheet, payload);
+    }
+    if (payload.action === "updateTrustHubKyc") {
+      return updateTrustHubKyc(spreadsheet, payload);
+    }
+    if (payload.action === "updateUkRcBundle") {
+      return updateUkRcBundle(spreadsheet, payload);
+    }
+
+    throw new Error("Unsupported operator action: " + payload.action);
+  } finally {
+    lock.releaseLock();
+  }
+}
+
 function parsePayload(event) {
   if (!event || !event.postData || !event.postData.contents) {
     throw new Error("Missing POST body");
