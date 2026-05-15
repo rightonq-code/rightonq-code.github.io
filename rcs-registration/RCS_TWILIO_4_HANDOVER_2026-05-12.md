@@ -2113,3 +2113,70 @@ Verification run:
 - `node --check rcs-registration/tools/proof-public-part-a-submit.mjs`;
 - inline script syntax check against `rcs-registration/index.html`;
 - local preview server reachable at `http://localhost:8902/rcs-registration/index.html`.
+
+### Slice 7B Completed - Billing Tracking Sheet And Operator Tool
+
+RCS-Twilio-4 added the internal billing/payment tracking lane needed before live Revolut integration.
+
+Apps Script changes:
+
+- new `Billing` sheet;
+- new guarded `action = updateBilling`;
+- `getOperatorSnapshot` now returns the latest `Billing` row;
+- `createApplicationDraft` queues a default Billing row;
+- Part A submission also queues/updates a Billing row;
+- billing updates write a `billing_updated` status event and update `Applications.Billing status`;
+- Apps Script version `23` deployed the first billing action;
+- Apps Script version `24` added safe defaults so billing updates carry `Registration fee GBP = 100`, `Registration fee VAT treatment = + VAT`, `Refund status = not_required`, and `Usage/top-up status = not_started` unless specifically overridden.
+
+New tool:
+
+- `rcs-registration/tools/operator-billing.mjs`
+
+The tool is PIN-gated through `RCS_ONBOARDING_OPERATOR_PIN` and is designed to store only:
+
+- payment provider IDs;
+- checkout/order IDs;
+- payment IDs;
+- payment method IDs;
+- payment statuses;
+- timestamps;
+- refund statuses/reasons;
+- monthly plan/billing-start metadata;
+- operator notes.
+
+Safety boundary:
+
+- do not store card numbers, CVV, raw card data, bank credentials, or sensitive payment data in the app, Sheet, docs, commands, or chat.
+
+Live proof application:
+
+- `ROQ-RCS-TEST-PUBLIC-PARTA-20260514211901`
+
+Proof command:
+
+- ran `operator-billing.mjs` with fake Revolut-style IDs:
+  - `billingStatus = registration_fee_paid`;
+  - `paymentProvider = revolut`;
+  - `checkoutOrderId = order_TEST_REG_FEE`;
+  - `paymentId = pay_TEST_REG_FEE`;
+  - `paymentStatus = paid`;
+  - `paymentReceivedAt = 2026-05-15T13:45:00Z`;
+  - `monthlyPlan = RightOnQ UK`;
+  - `monthlyBaseFeeGbp = 25`;
+  - `refundStatus = not_required`;
+  - `internalNotes = Live billing proof only. No card data stored.`
+
+Proof result:
+
+- operator response returned `ok = true`;
+- `Applications.Billing status = registration_fee_paid`;
+- snapshot included a populated `billing` object;
+- `Status events` included `billing_updated`;
+- no card data was stored.
+
+Known context:
+
+- the proof application was created before the new commercial gateway fields existed, so its `Applications.Package interest` still shows stale `Local Time Only`;
+- new proof payloads now use `RightOnQ UK`;
+- version `24` fixes default billing fee fields for future billing updates.

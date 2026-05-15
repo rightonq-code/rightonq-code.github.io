@@ -8,6 +8,7 @@ const COMMUNICATIONS_SHEET_NAME = "Communications";
 const INTERNAL_REVIEWS_SHEET_NAME = "Internal reviews";
 const TRUST_HUB_KYC_SHEET_NAME = "Trust Hub KYC";
 const UK_RC_BUNDLES_SHEET_NAME = "UK RC bundles";
+const BILLING_SHEET_NAME = "Billing";
 const PUBLIC_FORM_URL = "https://rightonq-code.github.io/rcs-registration/index.html";
 const NOTIFY_EMAIL = "adam@rightonq.co.uk";
 const APPLICATION_HEADERS = [
@@ -109,6 +110,33 @@ const COMMUNICATION_HEADERS = [
   "Send method",
   "Body",
   "Related event",
+  "Last updated"
+];
+const BILLING_HEADERS = [
+  "Created at",
+  "Application ID",
+  "Client ID",
+  "Billing status",
+  "Registration fee GBP",
+  "Registration fee VAT treatment",
+  "Registration fee acknowledgement",
+  "Payment provider",
+  "Provider customer ID",
+  "Checkout/order ID",
+  "Payment ID",
+  "Payment method ID",
+  "Payment status",
+  "Payment received at",
+  "Refund status",
+  "Refund reason",
+  "Refund amount GBP",
+  "Refund processed at",
+  "Monthly plan",
+  "Monthly base fee GBP",
+  "Monthly billing starts at",
+  "Next billing cycle date",
+  "Usage/top-up status",
+  "Internal notes",
   "Last updated"
 ];
 const INTERNAL_REVIEW_HEADERS = [
@@ -374,6 +402,10 @@ function doPost(event) {
       requireOperatorPin(payload);
       return jsonResponse(updateApplicationStatus(spreadsheet, payload));
     }
+    if (payload.action === "updateBilling") {
+      requireOperatorPin(payload);
+      return jsonResponse(updateBilling(spreadsheet, payload));
+    }
     if (payload.action === "updateInternalReview") {
       requireOperatorPin(payload);
       return jsonResponse(updateInternalReview(spreadsheet, payload));
@@ -463,6 +495,12 @@ function doPost(event) {
       now: now
     });
 
+    queueBilling(spreadsheet, {
+      applicationId: applicationId,
+      applicationRecord: payload,
+      now: now
+    });
+
     queueCommunication(spreadsheet, "part_a_received", {
       applicationId: applicationId,
       applicationRecord: payload,
@@ -529,6 +567,12 @@ function createApplicationDraft(spreadsheet, payload) {
     partAStatus: partAStatus,
     now: now,
     lastClientActionAt: ""
+  });
+
+  queueBilling(spreadsheet, {
+    applicationId: applicationId,
+    applicationRecord: payload,
+    now: now
   });
 
   return {
@@ -737,6 +781,7 @@ function getOperatorSnapshot(spreadsheet, payload) {
     ok: true,
     applicationId: applicationId,
     application: buildOperatorApplicationSummary(applicationRecord),
+    billing: findLatestRecordByApplicationId(spreadsheet, BILLING_SHEET_NAME, applicationId),
     internalReview: findLatestRecordByApplicationId(spreadsheet, INTERNAL_REVIEWS_SHEET_NAME, applicationId),
     trustHubKyc: findLatestRecordByApplicationId(spreadsheet, TRUST_HUB_KYC_SHEET_NAME, applicationId),
     ukRcBundle: findLatestRecordByApplicationId(spreadsheet, UK_RC_BUNDLES_SHEET_NAME, applicationId),
@@ -955,6 +1000,54 @@ function updateUkRcBundle(spreadsheet, payload) {
   };
 }
 
+function updateBilling(spreadsheet, payload) {
+  const now = new Date();
+  const applicationId = payload.applicationId;
+  if (!applicationId) throw new Error("Missing application ID");
+
+  const applicationRecord = findApplicationRecord(spreadsheet, { applicationId: applicationId });
+  if (!applicationRecord) throw new Error("Application ID not found");
+
+  const billingPayload = {
+    registrationFeeGbp: "100",
+    registrationFeeVatTreatment: "+ VAT",
+    refundStatus: "not_required",
+    usageTopUpStatus: "not_started",
+    monthlyPlan: firstValue(applicationRecord["Package name"], applicationRecord["Package interest"]),
+    ...payload
+  };
+
+  const result = upsertTrackingRecord(
+    spreadsheet,
+    BILLING_SHEET_NAME,
+    BILLING_HEADERS,
+    buildBillingFieldMap(),
+    billingPayload,
+    now
+  );
+
+  if (Object.prototype.hasOwnProperty.call(payload, "billingStatus")) {
+    updateApplicationStatus(spreadsheet, {
+      applicationId: applicationId,
+      billingStatus: payload.billingStatus,
+      eventType: "billing_updated",
+      changedBy: firstValue(payload.changedBy, payload.operatorName, "RightOnQ"),
+      source: "billing",
+      internalNotes: firstValue(payload.internalNotes, applicationRecord["Internal notes"])
+    });
+  }
+
+  return {
+    ok: true,
+    applicationId: applicationId,
+    billingStatus: result.record["Billing status"] || "",
+    paymentProvider: result.record["Payment provider"] || "",
+    checkoutOrderId: result.record["Checkout/order ID"] || "",
+    paymentStatus: result.record["Payment status"] || "",
+    updatedAt: now.toISOString()
+  };
+}
+
 function upsertTrackingRecord(spreadsheet, sheetName, headersList, fieldMap, payload, now) {
   const sheet = getOrCreateSheet(spreadsheet, sheetName, headersList);
   const values = sheet.getDataRange().getValues();
@@ -1077,6 +1170,33 @@ function buildUkRcBundleFieldMap() {
     supportingDocumentSid: "Supporting document SID",
     complianceOwner: "Compliance owner",
     fallbackRequired: "Fallback required",
+    internalNotes: "Internal notes"
+  };
+}
+
+function buildBillingFieldMap() {
+  return {
+    clientId: "Client ID",
+    billingStatus: "Billing status",
+    registrationFeeGbp: "Registration fee GBP",
+    registrationFeeVatTreatment: "Registration fee VAT treatment",
+    registrationFeeAcknowledgement: "Registration fee acknowledgement",
+    paymentProvider: "Payment provider",
+    providerCustomerId: "Provider customer ID",
+    checkoutOrderId: "Checkout/order ID",
+    paymentId: "Payment ID",
+    paymentMethodId: "Payment method ID",
+    paymentStatus: "Payment status",
+    paymentReceivedAt: "Payment received at",
+    refundStatus: "Refund status",
+    refundReason: "Refund reason",
+    refundAmountGbp: "Refund amount GBP",
+    refundProcessedAt: "Refund processed at",
+    monthlyPlan: "Monthly plan",
+    monthlyBaseFeeGbp: "Monthly base fee GBP",
+    monthlyBillingStartsAt: "Monthly billing starts at",
+    nextBillingCycleDate: "Next billing cycle date",
+    usageTopUpStatus: "Usage/top-up status",
     internalNotes: "Internal notes"
   };
 }
@@ -1274,6 +1394,55 @@ function buildUkRcBundleNotes(record, hasUk) {
     "Assign UK long-code fallback numbers to the end-business bundle before use."
   ];
   if (record.usFeeStatus) notes.push("US fee status: " + record.usFeeStatus);
+  return notes.join(" | ");
+}
+
+function queueBilling(spreadsheet, options) {
+  const now = options.now || new Date();
+  const record = options.applicationRecord || {};
+  const payload = {
+    applicationId: options.applicationId,
+    clientId: record.clientId,
+    billingStatus: firstValue(record.billingStatus, "registration_fee_pending"),
+    registrationFeeGbp: firstValue(record.registrationFeeGbp, "100"),
+    registrationFeeVatTreatment: firstValue(record.registrationFeeVatTreatment, "+ VAT"),
+    registrationFeeAcknowledgement: firstValue(record.registrationFeeAcknowledgement, ""),
+    paymentProvider: firstValue(record.paymentProvider, "not_selected"),
+    providerCustomerId: record.providerCustomerId,
+    checkoutOrderId: record.checkoutOrderId,
+    paymentId: record.paymentId,
+    paymentMethodId: record.paymentMethodId,
+    paymentStatus: firstValue(record.paymentStatus, "not_started"),
+    paymentReceivedAt: record.paymentReceivedAt,
+    refundStatus: firstValue(record.refundStatus, "not_required"),
+    refundReason: record.refundReason,
+    refundAmountGbp: record.refundAmountGbp,
+    refundProcessedAt: record.refundProcessedAt,
+    monthlyPlan: firstValue(record.packageName, record.packageInterest),
+    monthlyBaseFeeGbp: record.monthlyBaseFeeGbp,
+    monthlyBillingStartsAt: record.monthlyBillingStartsAt,
+    nextBillingCycleDate: record.nextBillingCycleDate,
+    usageTopUpStatus: firstValue(record.usageTopUpStatus, "not_started"),
+    internalNotes: buildBillingNotes(record)
+  };
+
+  return upsertTrackingRecord(
+    spreadsheet,
+    BILLING_SHEET_NAME,
+    BILLING_HEADERS,
+    buildBillingFieldMap(),
+    payload,
+    now
+  );
+}
+
+function buildBillingNotes(record) {
+  const notes = [
+    "Registration fee starts the RCS application work.",
+    "Monthly plan starts only after approval and ready-to-use setup.",
+    "Live Revolut checkout is not wired yet; use operator updates as payment evidence during pilot."
+  ];
+  if (record.salesContext) notes.push("Sales context: " + record.salesContext);
   return notes.join(" | ");
 }
 

@@ -2145,6 +2145,7 @@ Status:
 
 - started as `Slice 7A - Commercial gateway mechanics draft`;
 - customer-facing plan/fee acknowledgement mechanics now exist in `rcs-registration/index.html`;
+- `Slice 7B - Billing tracking sheet and operator tool` is complete;
 - live payment/checkout is still not implemented.
 
 Output:
@@ -2179,6 +2180,40 @@ Remaining Slice 7 work:
 - generate or reveal the private application link only after payment/manual payment confirmation;
 - connect payment IDs/statuses into the application record;
 - decide whether the static page remains the gateway or whether a separate checkout/start page should precede it.
+
+Implemented billing tracking:
+
+- new `Billing` sheet;
+- new guarded Apps Script `action = updateBilling`;
+- new local tool `rcs-registration/tools/operator-billing.mjs`;
+- `getOperatorSnapshot` returns latest Billing row;
+- `createApplicationDraft` queues default billing state;
+- Part A submission queues/updates billing state;
+- billing updates write `billing_updated` events and update `Applications.Billing status`;
+- Apps Script version `24` is deployed to the existing web app deployment.
+
+Billing fields currently track:
+
+- registration fee amount/VAT treatment/acknowledgement;
+- payment provider;
+- provider customer ID;
+- checkout/order ID;
+- payment ID;
+- payment method ID;
+- payment status;
+- payment received timestamp;
+- refund status/reason/amount/timestamp;
+- monthly plan;
+- monthly base fee;
+- monthly billing start date;
+- next billing cycle date;
+- usage/top-up status;
+- internal notes.
+
+Billing safety boundary:
+
+- store provider references, statuses, timestamps, and notes only;
+- never store card numbers, CVV, raw card data, bank credentials, or sensitive payment evidence.
 
 Parked page polish:
 

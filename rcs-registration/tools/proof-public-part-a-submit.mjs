@@ -247,6 +247,14 @@ function summariseSnapshot(snapshot) {
       kycTrustHubCheck: snapshot.internalReview && snapshot.internalReview["KYC/Trust Hub check"],
       smsFallbackRcBundleCheck: snapshot.internalReview && snapshot.internalReview["SMS fallback/RC bundle check"]
     },
+    billing: {
+      present: Boolean(snapshot.billing && snapshot.billing["Application ID"]),
+      billingStatus: snapshot.billing && snapshot.billing["Billing status"],
+      paymentProvider: snapshot.billing && snapshot.billing["Payment provider"],
+      paymentStatus: snapshot.billing && snapshot.billing["Payment status"],
+      monthlyPlan: snapshot.billing && snapshot.billing["Monthly plan"],
+      monthlyBaseFeeGbp: snapshot.billing && snapshot.billing["Monthly base fee GBP"]
+    },
     trustHubKyc: {
       present: Boolean(snapshot.trustHubKyc && snapshot.trustHubKyc["Application ID"]),
       status: snapshot.trustHubKyc && snapshot.trustHubKyc["Trust Hub status"],
