@@ -2000,3 +2000,62 @@ Outcome:
 - Next sensible build slice is either:
   - build a small operator/status runbook for real client use; or
   - move to the commercial/payment onboarding slice.
+
+### Slice 6O Completed - Evidence Exception Tracking Fields
+
+Bugs sent Isa Bell the question set about a RightOnQ-branded / Twilio-managed evidence path.
+
+RCS-Twilio-4 added internal status/ID fields so the system can track an evidence exception without collecting raw ID data.
+
+Apps Script changes:
+
+- `Trust Hub KYC` headers now include:
+  - `Evidence collection mode`;
+  - `Evidence status`;
+  - `Evidence provider`;
+  - `Evidence inquiry ID`;
+  - `Evidence registration ID`;
+  - `Evidence requested at`;
+  - `Evidence submitted at`;
+  - `Evidence approved at`;
+  - `Evidence rejected at`;
+  - `Evidence rejection reason`.
+- default queued `Trust Hub KYC` rows now set:
+  - `Evidence collection mode = not_required`;
+  - `Evidence status = not_required`.
+- `operator-trusthub-kyc.mjs` can update those evidence fields.
+- Apps Script version `22` was created and deployed to the existing web app deployment.
+
+Important design boundary:
+
+- these are status/reference fields only;
+- no passport, driving licence, DOB, proof-of-address, proof-of-identity file, or raw evidence document field was added;
+- no customer-facing ID upload was added.
+
+Live proof application:
+
+- `ROQ-RCS-TEST-PUBLIC-PARTA-20260514211901`
+
+Proof command updated the Trust Hub KYC row with:
+
+- `Authorised rep exception code = 18019`;
+- `Authorised rep exception action = twilio_managed_evidence_required`;
+- `Evidence collection mode = twilio_managed`;
+- `Evidence status = requested`;
+- `Evidence provider = twilio_compliance_embeddable`;
+- `Evidence inquiry ID = inq_TEST_EVIDENCE`;
+- `Evidence registration ID = tri_TEST_EVIDENCE`;
+- `Evidence requested at = 2026-05-15T08:00:00Z`;
+- `KYC internal notes = Evidence exception proof only. No identity evidence stored.`
+
+Proof result:
+
+- `operator-trusthub-kyc.mjs` returned `ok = true`;
+- guarded snapshot showed all evidence fields above on the `Trust Hub KYC` row;
+- `Trust Hub status` remained `pending_review`;
+- `Secondary compliance profile SID` remained `BU_TEST_SECONDARY_PROFILE`;
+- no raw identity evidence was stored.
+
+Outcome:
+
+- RightOnQ can now track the lifecycle of a Twilio-managed evidence exception while keeping the current static app / Sheet path free of sensitive identity documents.

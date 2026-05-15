@@ -136,6 +136,8 @@ node rcs-registration/tools/operator-trusthub-kyc.mjs \
   --trust-hub-status pending_review \
   --secondary-compliance-profile-sid BUxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx \
   --evaluation-status not_run \
+  --evidence-collection-mode twilio_managed \
+  --evidence-status requested \
   --kyc-internal-notes "Secondary profile prepared for manual Twilio review." \
   --dry-run
 ```
@@ -148,10 +150,14 @@ RCS_ONBOARDING_OPERATOR_PIN="..." node rcs-registration/tools/operator-trusthub-
   --trust-hub-status pending_review \
   --secondary-compliance-profile-sid BUxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx \
   --evaluation-status not_run \
+  --evidence-collection-mode twilio_managed \
+  --evidence-status requested \
   --kyc-internal-notes "Secondary profile prepared for manual Twilio review."
 ```
 
 Expected live result: JSON showing the latest `trustHubStatus`, any stored secondary profile SID, and evaluation status. This action also syncs `Applications.Trust Hub status`.
+
+Evidence fields are status/ID fields only. Do not store session tokens, passport numbers, driving licence numbers, DOB, proof-of-address files, or identity document files in this workflow.
 
 ## Update UK RC Bundle Tracking
 

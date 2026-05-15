@@ -2066,6 +2066,64 @@ Outcome:
 - no client-facing ID collection was added;
 - no raw identity documents, DOB, passport, driving licence, or proof-of-address fields were added to the public form or Sheet workflow.
 
+### Slice 6O - Evidence Exception Tracking Fields
+
+Goal:
+
+- prepare for Twilio-managed evidence exceptions without adding ID uploads to the public form;
+- keep RightOnQ's internal record aware of the evidence status;
+- store only status/reference data.
+
+Added to `Trust Hub KYC`:
+
+- `Evidence collection mode`;
+- `Evidence status`;
+- `Evidence provider`;
+- `Evidence inquiry ID`;
+- `Evidence registration ID`;
+- `Evidence requested at`;
+- `Evidence submitted at`;
+- `Evidence approved at`;
+- `Evidence rejected at`;
+- `Evidence rejection reason`.
+
+Default for new Part A submissions:
+
+- `Evidence collection mode = not_required`;
+- `Evidence status = not_required`.
+
+Supported update path:
+
+- `operator-trusthub-kyc.mjs` can update the evidence fields through guarded `updateTrustHubKyc`.
+
+Apps Script version:
+
+- version `22`;
+- deployed to existing web app deployment `AKfycbyI81Ir2xvHLar0R0iFBBWyXa1Nj93T4_8Ni5_eX3XEYDA-AKQbVYbPHnTROLm8e4a6`.
+
+Live proof application:
+
+- `ROQ-RCS-TEST-PUBLIC-PARTA-20260514211901`
+
+Proof result:
+
+- `operator-trusthub-kyc.mjs` returned `ok = true`;
+- snapshot confirmed:
+  - `Authorised rep exception code = 18019`;
+  - `Authorised rep exception action = twilio_managed_evidence_required`;
+  - `Evidence collection mode = twilio_managed`;
+  - `Evidence status = requested`;
+  - `Evidence provider = twilio_compliance_embeddable`;
+  - `Evidence inquiry ID = inq_TEST_EVIDENCE`;
+  - `Evidence registration ID = tri_TEST_EVIDENCE`;
+  - `Evidence requested at = 2026-05-15T08:00:00Z`;
+  - `KYC internal notes = Evidence exception proof only. No identity evidence stored.`
+
+Boundary:
+
+- no passport, driving licence, DOB, proof-of-address, government ID, or raw identity document field was added;
+- the current design stores only Twilio/compliance IDs, status values, timestamps, rejection reasons, and operator notes.
+
 ### Slice 7 - Customer Commercial/Payment Entry Page
 
 Design/build the onboarding page before the RCS form.
