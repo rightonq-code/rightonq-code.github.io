@@ -4,6 +4,25 @@ These tools are local RightOnQ operator helpers for the RCS onboarding pilot.
 
 They call the deployed Apps Script web app, but they do not store PINs in this repo. Always use `--dry-run` first, then run the live command only when the Apps Script-side PIN has been configured.
 
+## Endpoint Environment
+
+Current pilot default:
+
+- `RCS_ONBOARDING_WEB_APP_URL` points all tools at the current combined Apps Script deployment.
+
+Future split default:
+
+- `RCS_ONBOARDING_PUBLIC_WEB_APP_URL` should point public customer submissions at the anonymous customer deployment.
+- `RCS_ONBOARDING_OPERATOR_WEB_APP_URL` should point operator tools at the private/operator deployment.
+
+Operator tools resolve endpoints in this order:
+
+1. `RCS_ONBOARDING_OPERATOR_WEB_APP_URL`;
+2. `RCS_ONBOARDING_WEB_APP_URL`;
+3. built-in current deployment URL.
+
+The public Part A proof helper uses the public URL for fake/valid customer submissions and the operator URL for creating the private test application and reading the snapshot.
+
 ## Tools
 
 | Tool | Purpose | Local PIN |
@@ -268,6 +287,16 @@ Live proof:
 
 ```bash
 RCS_ONBOARDING_CREATE_PIN="..." RCS_ONBOARDING_OPERATOR_PIN="..." node rcs-registration/tools/proof-public-part-a-submit.mjs
+```
+
+When the deployment split exists:
+
+```bash
+RCS_ONBOARDING_PUBLIC_WEB_APP_URL="https://script.google.com/macros/s/PUBLIC_DEPLOYMENT/exec" \
+RCS_ONBOARDING_OPERATOR_WEB_APP_URL="https://script.google.com/macros/s/OPERATOR_DEPLOYMENT/exec" \
+RCS_ONBOARDING_CREATE_PIN="..." \
+RCS_ONBOARDING_OPERATOR_PIN="..." \
+node rcs-registration/tools/proof-public-part-a-submit.mjs
 ```
 
 Expected live result:

@@ -2341,6 +2341,40 @@ Still required before public website integration:
 - wire real Revolut payment confirmation before setting `PART_A_PAYMENT_GATE_MODE = strict`;
 - decide whether Adam notifications should become Communications-queue-only.
 
+### Slice 8C - Operator/Public Split Foundation Started
+
+Purpose:
+
+- prepare the local tooling for separate public/customer and private/operator Apps Script deployments without breaking the current combined pilot deployment.
+
+Action classification:
+
+- public/customer actions:
+  - anonymous Part A submission branch;
+  - `submitNameLogoApproval`;
+  - `submitVideoApproval`;
+- operator/internal actions:
+  - `createApplicationDraft`;
+  - `getOperatorSnapshot`;
+  - `updateApplicationStatus`;
+  - `updateBilling`;
+  - `updateInternalReview`;
+  - `updateTrustHubKyc`;
+  - `updateUkRcBundle`.
+
+Implemented locally:
+
+- operator tools now prefer `RCS_ONBOARDING_OPERATOR_WEB_APP_URL`;
+- public/customer proof uses `RCS_ONBOARDING_PUBLIC_WEB_APP_URL` for public submissions;
+- `RCS_ONBOARDING_WEB_APP_URL` remains a compatibility fallback for the current combined deployment;
+- no live deployment behaviour changed by this tooling-only slice.
+
+Next implementation decision:
+
+- choose whether the private operator path is:
+  - a second Apps Script deployment with Google Workspace access restrictions if Apps Script deployment settings support the needed split cleanly; or
+  - a separate Apps Script project for operator actions only, sharing the same Sheet but deployed as RightOnQ-only.
+
 ### Slice 9 - Twilio Trust Hub / Subaccount / Usage Tracking Fields
 
 Add internal Twilio compliance, runtime setup, and usage tracking fields.

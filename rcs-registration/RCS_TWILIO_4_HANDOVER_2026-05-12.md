@@ -2358,3 +2358,43 @@ Still not solved in this slice:
 - operator actions still share the anonymous Apps Script deployment and are PIN guarded;
 - `changedBy` is still operator-supplied/spoofable until per-operator auth exists;
 - public website must not link to the gateway until token/payment gating and operator split are launch-ready.
+
+### Slice 8C Started - Operator/Public Split Foundation
+
+RCS-Twilio-4 started the split carefully as a tooling/docs foundation, without changing live deployment behaviour.
+
+Current action classification:
+
+- public/customer:
+  - default anonymous Part A submit branch;
+  - `submitNameLogoApproval`;
+  - `submitVideoApproval`;
+- operator/internal:
+  - `createApplicationDraft`;
+  - `getOperatorSnapshot`;
+  - `updateApplicationStatus`;
+  - `updateBilling`;
+  - `updateInternalReview`;
+  - `updateTrustHubKyc`;
+  - `updateUkRcBundle`.
+
+Tooling change:
+
+- all `operator-*.mjs` tools now resolve the endpoint in this order:
+  - `RCS_ONBOARDING_OPERATOR_WEB_APP_URL`;
+  - `RCS_ONBOARDING_WEB_APP_URL`;
+  - built-in current deployment URL;
+- `proof-public-part-a-submit.mjs` now resolves:
+  - public submits through `RCS_ONBOARDING_PUBLIC_WEB_APP_URL` first;
+  - operator create/snapshot calls through `RCS_ONBOARDING_OPERATOR_WEB_APP_URL` first;
+  - `RCS_ONBOARDING_WEB_APP_URL` remains the combined-deployment fallback.
+
+Why this matters:
+
+- once a private operator deployment exists, local tools can point operator traffic at it without code changes;
+- current pilot commands continue to work against the existing combined deployment;
+- no new secrets or endpoints were committed.
+
+Open implementation choice:
+
+- verify whether Apps Script can support one project with two web app deployments using different access settings cleanly from the UI/manifest; if not, create a separate operator Apps Script project sharing the same Sheet and deploy it as RightOnQ-only.

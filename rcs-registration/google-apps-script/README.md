@@ -111,6 +111,35 @@ The internal `updateApplicationStatus` action is guarded by the script property 
 
 `PART_A_PAYMENT_GATE_MODE` defaults to advisory/missing. Set it to `strict` only after Revolut/manual payment confirmation is wired into `Applications.Billing status`; strict mode accepts `registration_fee_paid`, `registration_fee_manually_confirmed`, or `registration_fee_waived`.
 
+## Public / Operator Split
+
+Current pilot state:
+
+- one combined Apps Script deployment handles both public customer actions and PIN-guarded operator actions;
+- version `25` blocks fake public Part A submissions, but operator actions still live on the same anonymous deployment.
+
+Target state before public website integration:
+
+- public deployment:
+  - anonymous customer Part A submit;
+  - `submitNameLogoApproval`;
+  - `submitVideoApproval`;
+- operator deployment:
+  - `createApplicationDraft`;
+  - `getOperatorSnapshot`;
+  - `updateApplicationStatus`;
+  - `updateBilling`;
+  - `updateInternalReview`;
+  - `updateTrustHubKyc`;
+  - `updateUkRcBundle`;
+  - Google-authenticated / RightOnQ-only access where practical.
+
+Local tooling is ready for the split:
+
+- use `RCS_ONBOARDING_PUBLIC_WEB_APP_URL` for the public deployment;
+- use `RCS_ONBOARDING_OPERATOR_WEB_APP_URL` for the operator deployment;
+- `RCS_ONBOARDING_WEB_APP_URL` remains the combined deployment fallback during the pilot.
+
 Do not store either PIN in this repo, in static HTML, or in Sheet audit JSON. If `ONBOARDING_OPERATOR_PIN` is not configured, internal status updates correctly return `ONBOARDING_OPERATOR_PIN is not configured`.
 
 Local application-link creation can be sent with `rcs-registration/tools/operator-create-application.mjs`, which reads `RCS_ONBOARDING_CREATE_PIN` from the local environment. Local operator updates can be sent with `rcs-registration/tools/operator-review.mjs`, `rcs-registration/tools/operator-trusthub-kyc.mjs`, and `rcs-registration/tools/operator-rc-bundle.mjs`. Local operator readback can be run with `rcs-registration/tools/operator-status.mjs`. These tools never store PINs in the repo. See `rcs-registration/tools/README.md` for dry-run and live examples.

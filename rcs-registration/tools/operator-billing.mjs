@@ -3,6 +3,12 @@
 const DEFAULT_WEB_APP_URL =
   "https://script.google.com/macros/s/AKfycbyI81Ir2xvHLar0R0iFBBWyXa1Nj93T4_8Ni5_eX3XEYDA-AKQbVYbPHnTROLm8e4a6/exec";
 
+function resolveOperatorWebAppUrl() {
+  return process.env.RCS_ONBOARDING_OPERATOR_WEB_APP_URL ||
+    process.env.RCS_ONBOARDING_WEB_APP_URL ||
+    DEFAULT_WEB_APP_URL;
+}
+
 const FIELD_ALIASES = {
   "application-id": "applicationId",
   "client-id": "clientId",
@@ -149,7 +155,7 @@ async function main() {
     return;
   }
 
-  const webAppUrl = process.env.RCS_ONBOARDING_WEB_APP_URL || DEFAULT_WEB_APP_URL;
+  const webAppUrl = resolveOperatorWebAppUrl();
   const result = await postJson(webAppUrl, payload);
   console.log(JSON.stringify(result, null, 2));
 }

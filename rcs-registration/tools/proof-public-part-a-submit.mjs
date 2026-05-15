@@ -3,6 +3,18 @@
 const DEFAULT_WEB_APP_URL =
   "https://script.google.com/macros/s/AKfycbyI81Ir2xvHLar0R0iFBBWyXa1Nj93T4_8Ni5_eX3XEYDA-AKQbVYbPHnTROLm8e4a6/exec";
 
+function resolvePublicWebAppUrl() {
+  return process.env.RCS_ONBOARDING_PUBLIC_WEB_APP_URL ||
+    process.env.RCS_ONBOARDING_WEB_APP_URL ||
+    DEFAULT_WEB_APP_URL;
+}
+
+function resolveOperatorWebAppUrl() {
+  return process.env.RCS_ONBOARDING_OPERATOR_WEB_APP_URL ||
+    process.env.RCS_ONBOARDING_WEB_APP_URL ||
+    DEFAULT_WEB_APP_URL;
+}
+
 const BOOLEAN_FLAGS = {
   "dry-run": "dryRun"
 };
@@ -332,17 +344,19 @@ async function main() {
     return;
   }
 
-  const webAppUrl = process.env.RCS_ONBOARDING_WEB_APP_URL || DEFAULT_WEB_APP_URL;
-  const blocked = await postJsonAllowFailure(webAppUrl, blockedPartAPayload);
+  const publicWebAppUrl = resolvePublicWebAppUrl();
+  const operatorWebAppUrl = resolveOperatorWebAppUrl();
+
+  const blocked = await postJsonAllowFailure(publicWebAppUrl, blockedPartAPayload);
   if (blocked.ok !== false) {
     throw new Error("Expected blocked public Part A submission to fail, but it succeeded");
   }
 
-  const created = await postJson(webAppUrl, createPayload);
+  const created = await postJson(operatorWebAppUrl, createPayload);
   const privateApplicationToken = extractToken(created.privateApplicationLink);
   const partAPayload = buildPartAPayload(createPayload, applicationId, privateApplicationToken);
-  const submitted = await postJson(webAppUrl, partAPayload);
-  const snapshot = await postJson(webAppUrl, buildSnapshotPayload(applicationId));
+  const submitted = await postJson(publicWebAppUrl, partAPayload);
+  const snapshot = await postJson(operatorWebAppUrl, buildSnapshotPayload(applicationId));
 
   console.log(JSON.stringify({
     blockedPublicSubmit: {
