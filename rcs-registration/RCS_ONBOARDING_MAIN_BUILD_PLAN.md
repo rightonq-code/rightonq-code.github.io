@@ -707,7 +707,10 @@ Suggested columns:
 - `client_id`
 - `package_name`
 - `monthly_base_fee_gbp`
-- `starting_usage_credit_gbp`
+- `registration_fee_gbp`
+- `registration_fee_vat_gbp`
+- `registration_fee_refund_status`
+- `registration_fee_refund_reason`
 - `initial_payment_due_gbp`
 - `initial_payment_status`
 - `initial_payment_revolut_order_id`
@@ -729,10 +732,11 @@ Suggested columns:
 
 Starting assumptions to test:
 
-- `package_name`: `Local Time Only`
-- `monthly_base_fee_gbp`: `25`
-- `starting_usage_credit_gbp`: `50`
-- `initial_payment_due_gbp`: `75`
+- `package_name`: `RightOnQ UK` or `RightOnQ Global`
+- `monthly_base_fee_gbp`: `25` for RightOnQ UK, `49` for RightOnQ Global
+- `registration_fee_gbp`: `100`
+- `registration_fee_vat_gbp`: calculate at current VAT rate
+- `initial_payment_due_gbp`: `100 + VAT`
 - `top_up_threshold_gbp`: to be agreed
 - `top_up_amount_gbp`: to be agreed
 
@@ -2195,9 +2199,8 @@ Output:
 
 ## Open Questions
 
-- Exact wording of the `Local Time Only` package.
-- Whether registration assistance has a separate setup fee or is bundled.
-- Exact first payment amount.
+- Exact sales-page wording for `RightOnQ UK` and `RightOnQ Global`.
+- Exact VAT-inclusive checkout amount for the `£100 + VAT` registration fee.
 - Exact prepaid credit/top-up threshold.
 - Whether auto top-up is mandatory or optional.
 - Whether clients can use Direct Debit later.

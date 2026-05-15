@@ -351,7 +351,7 @@ The customer is not just "filling in an RCS form". They are becoming a RightOnQ 
 
 - RightOnQ is helping them register and operate RCS.
 - Once approved/live, RightOnQ's software/service layer remains part of the process.
-- They must choose/accept the service level, initially discussed as `Local Time Only` at `£25/month`.
+- They must choose/accept the service level, currently `RightOnQ UK` at `£25/month + VAT` or `RightOnQ Global` at `£49/month + VAT`.
 - Pay-as-you-go messaging/Twilio usage fees are additional.
 - RightOnQ should not carry open-ended Twilio credit risk for client usage.
 
