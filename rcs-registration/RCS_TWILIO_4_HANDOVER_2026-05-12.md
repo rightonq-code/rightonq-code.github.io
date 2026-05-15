@@ -2180,3 +2180,79 @@ Known context:
 - the proof application was created before the new commercial gateway fields existed, so its `Applications.Package interest` still shows stale `Local Time Only`;
 - new proof payloads now use `RightOnQ UK`;
 - version `24` fixes default billing fee fields for future billing updates.
+
+### External Read-Only Sanity Check - Claude Code
+
+Bugs asked Claude Code to read, in read-only mode:
+
+- `rcs-registration/RCS_ONBOARDING_MAIN_BUILD_PLAN.md`;
+- `rcs-registration/RCS_TWILIO_4_HANDOVER_2026-05-12.md`.
+
+Claude made no edits.
+
+Useful positive findings:
+
+- three-lane split is correct:
+  - commercial/payment;
+  - Trust Hub KYC + UK RC Bundle;
+  - RCS sender registration;
+- CRM-to-onboarding handoff contract is clean;
+- no raw ID storage is enforced in code/field shape, not just policy;
+- PIN-gated operator actions, CLI wrappers, `safeCell`, and `mostAdvancedStatus` are good pilot-stage safeguards;
+- manual communications queue is the correct risk posture during pilot;
+- later correction from "two reps required" to "one required, second optional" has been handled correctly.
+
+Concerns to keep visible:
+
+- current Apps Script web app mixes anonymous public submissions and PIN-gated operator actions in one deployment;
+- before public launch, operator actions should move to a private deployment or equivalent hardened path;
+- anonymous Part A submission should be token/payment gated before public website traffic is sent to it;
+- current status model may need simplification later, because lifecycle/billing/compliance are separate axes;
+- Sheets are acceptable for pilot but should have a migration tripwire before concurrency/operator volume grows;
+- no real customer or real Twilio submission has gone through end-to-end yet.
+
+Priority recommendation accepted by RCS-Twilio-4:
+
+1. run `Slice 8 - Revolut Sandbox Proof`;
+2. harden anonymous/public versus operator endpoint exposure before public launch;
+3. verify RightOnQ's Twilio ISV/subaccount/embeddable capabilities;
+4. run one real RightOnQ/client application end-to-end;
+5. only then expand more Trust Hub/RC fields.
+
+### Slice 8A Started - Revolut Sandbox Proof Prep
+
+RCS-Twilio-4 checked current Revolut Merchant documentation and created the first local proof assets.
+
+Files added locally:
+
+- `rcs-registration/REVOLUT_SANDBOX_PROOF.md`;
+- `rcs-registration/tools/revolut-sandbox-proof.mjs`.
+
+Official Revolut doc points captured in the proof plan:
+
+- sandbox API calls use `https://sandbox-merchant.revolut.com/` instead of production;
+- Hosted Checkout Page via API creates a backend order and returns an order `id` plus `checkout_url`;
+- order/payment status should be verified server-side through webhooks or polling;
+- Subscriptions API supports plans, variations, hosted onboarding/setup orders, automatic charging of saved payment methods, lifecycle tracking, and billing-cycle history;
+- hosted subscription setup can save the customer payment method for future billing cycles;
+- saved payment methods are generated as part of payment/setup, not manually created by RightOnQ;
+- merchant-initiated later charges require a saved payment method ID/type;
+- webhooks support order events including `ORDER_AUTHORISED` and `ORDER_COMPLETED`, but event delivery order is not guaranteed.
+
+Proof helper behaviour:
+
+- `node rcs-registration/tools/revolut-sandbox-proof.mjs --dry-run` prints the intended sandbox order request without needing a secret;
+- intended first live sandbox call is a `GBP 120.00` order for the `GBP 100 + VAT` registration fee;
+- live sandbox calls require `REVOLUT_MERCHANT_API_SECRET` in the local environment;
+- no Revolut API secret should be pasted into chat or committed to the repo.
+
+Verification run:
+
+- `node --check rcs-registration/tools/revolut-sandbox-proof.mjs`;
+- `node rcs-registration/tools/revolut-sandbox-proof.mjs --dry-run`;
+- `git diff --check -- rcs-registration/REVOLUT_SANDBOX_PROOF.md rcs-registration/tools/revolut-sandbox-proof.mjs`.
+
+Current blocker for actual Revolut API proof:
+
+- Bugs/RightOnQ needs a Revolut Business Sandbox Merchant account and sandbox Merchant API Secret key.
+- Keep it local only, preferably via environment variable or future secret-loader helper.

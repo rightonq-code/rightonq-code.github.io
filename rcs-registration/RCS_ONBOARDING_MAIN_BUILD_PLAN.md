@@ -2228,6 +2228,14 @@ Parked page polish:
 
 Test Revolut flow before committing to implementation.
 
+Status:
+
+- started on 2026-05-15 after external read-only sanity check confirmed this is the highest-value next slice;
+- `rcs-registration/REVOLUT_SANDBOX_PROOF.md` created as the proof runbook;
+- `rcs-registration/tools/revolut-sandbox-proof.mjs` created as the local sandbox helper;
+- no live Revolut secret has been stored in the repo;
+- no live Revolut API call has been made yet.
+
 Questions:
 
 - Can RightOnQ create a customer/order/payment in sandbox?
@@ -2237,6 +2245,40 @@ Questions:
 - What webhook events arrive?
 - How are failed payments represented?
 - What IDs should be stored?
+
+Initial doc-backed findings:
+
+- Hosted Checkout Page via API can create a backend order and return an `id` plus `checkout_url`.
+- Sandbox API calls should use `https://sandbox-merchant.revolut.com/` instead of production endpoints.
+- Subscriptions API supports plans/variations, hosted onboarding/setup orders, automatic charging of saved payment methods, lifecycle tracking, and billing-cycle history.
+- Creating a subscription can produce a `setup_order_id`; retrieving that order gives the `checkout_url` for the hosted setup payment page.
+- Saved payment methods are created as part of payment/setup flows, not manually by RightOnQ.
+- Merchant-initiated later charges require a saved payment method ID/type and a new order/payment call.
+- Webhooks support order lifecycle events such as `ORDER_AUTHORISED` and `ORDER_COMPLETED`, but event delivery order is not guaranteed; RightOnQ webhook handling must be idempotent.
+
+Current proof helper:
+
+```bash
+node rcs-registration/tools/revolut-sandbox-proof.mjs --dry-run
+```
+
+When Bugs has a sandbox Merchant API secret, run it locally only through an environment variable:
+
+```bash
+export REVOLUT_MERCHANT_API_SECRET="sk_sandbox_..."
+node rcs-registration/tools/revolut-sandbox-proof.mjs --create-registration-order
+unset REVOLUT_MERCHANT_API_SECRET
+```
+
+Do not paste Revolut secrets into chat or commit them.
+
+External sanity check note:
+
+- Claude Code read the build plan and Twilio-4 handover in read-only mode.
+- It agreed the three-lane split is right: commercial/payment, Trust Hub + UK RC Bundle, RCS sender registration.
+- It warned that endpoint exposure and anonymous submission hardening must happen before public launch.
+- It recommended `Slice 8 - Revolut Sandbox Proof` before further wording or Trust Hub field expansion.
+- It recommended pausing more Trust Hub/RC field expansion until one real Twilio submission teaches the actual requirements.
 
 ### Slice 9 - Twilio Trust Hub / Subaccount / Usage Tracking Fields
 
