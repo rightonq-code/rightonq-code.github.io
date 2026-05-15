@@ -230,6 +230,9 @@ function sanitisePayload(payload) {
 }
 
 function extractToken(privateApplicationLink) {
+  if (!privateApplicationLink) {
+    throw new Error("Operator API did not return privateApplicationLink");
+  }
   const url = new URL(privateApplicationLink);
   const token = url.searchParams.get("applicationToken") ||
     url.searchParams.get("privateApplicationToken") ||

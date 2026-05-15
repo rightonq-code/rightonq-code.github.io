@@ -2580,8 +2580,8 @@ Implemented:
 - added `rcs-registration/tools/operator-api-client.mjs`;
 - it reads the named local clasp credential `rightonq-gog` from `~/.clasprc.json`;
 - it refreshes a Google access token locally;
-- it reads the script ID from `rcs-registration/google-apps-script/.clasp.json`;
-- it calls `https://script.googleapis.com/v1/scripts/{scriptId}:run` with function `rcsOperatorAction`;
+- it reads the clean API executable deployment ID from `rcs-registration/google-apps-script/.clasp.json`;
+- it calls `https://script.googleapis.com/v1/scripts/{deploymentId}:run` with function `rcsOperatorAction` and `devMode: false`;
 - the operator PIN/create PIN now travels in the HTTPS request body, not in a `clasp run --params` command-line argument.
 
 Updated wrappers:
@@ -2605,3 +2605,56 @@ Proof:
 - dry-run outputs still redact PINs/tokens;
 - `operator-status.mjs` live proof returned strict JSON with `ok: true` for `ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747`;
 - Trust Hub KYC, UK RC Bundle, Billing, Internal Review, Application, and queued communication blocks were present.
+
+### Slice 8F Completed - Public Operator Action Block
+
+RCS-Twilio-4 acted on the Ford Co / Claude read-only review that found operator actions were still reachable through the anonymous public `doPost` web app.
+
+Implemented:
+
+- `doPost` now rejects these operator-only actions before opening the Sheet:
+  - `createApplicationDraft`;
+  - `getOperatorSnapshot`;
+  - `updateApplicationStatus`;
+  - `updateBilling`;
+  - `updateInternalReview`;
+  - `updateTrustHubKyc`;
+  - `updateUkRcBundle`;
+- public customer actions remain on the web app:
+  - default Part A submission;
+  - `submitNameLogoApproval`;
+  - `submitVideoApproval`;
+- `operator-api-client.mjs` now throws if the Apps Script Execution API response lacks `response.result`;
+- `operator-api-client.mjs` now uses `.clasp.json.deploymentId` with `devMode: false`, so wrapper calls are pinned to the clean API executable deployment instead of Apps Script HEAD;
+- `proof-public-part-a-submit.mjs` now gives a clear error if the operator API does not return `privateApplicationLink`;
+- `.gitignore` now blocks common local clasp / Google OAuth client secret filename patterns;
+- local credential file permissions were tightened to owner-only `600` for:
+  - `/Users/macpro/.clasprc.json`;
+  - `/Users/macpro/Downloads/rightonq-gog-client.json`;
+  - `/Users/macpro/Downloads/rightonq-gog-client-clasp-localhost.json`.
+
+Deployment:
+
+- Apps Script HEAD was pushed with `clasp push --force`;
+- Apps Script version `31` was created with description `Disable public operator actions`;
+- the existing public web app deployment `AKfycbyI81Ir2xvHLar0R0iFBBWyXa1Nj93T4_8Ni5_eX3XEYDA-AKQbVYbPHnTROLm8e4a6` was updated through the Apps Script UI to version `31`;
+- public deployment description is now `Harden public Part A submission + block public operator actions`;
+- public web app URL is unchanged;
+- public deployment has no API executable section;
+- clean operator API deployment `AKfycbyG5yW-r0sfaKt1bwUUGFAHHdQoKK8wBCfR1riVxvYamu9YhfOBpRJhnRL_5iBP0VSC` remains without a Web app section.
+
+Verification:
+
+- all `rcs-registration/tools/*.mjs` files passed `node --check`;
+- `Code.gs` passed a local syntax parse;
+- live public web app POST proof for an operator action returned:
+  - `ok: false`;
+  - `rejected: true`;
+  - `Operator action is not supported on the public endpoint...`;
+- dummy-PIN proof against the clean API executable deployment reached `rcsOperatorAction` and returned `Invalid onboarding operator PIN`.
+
+Current caveat:
+
+- the clean operator API deployment still points at version `30`, while public web app is version `31`;
+- version `31` mainly adds the public `doPost` block plus small helper/docs hardening, so operator status reads still work through the pinned clean API deployment;
+- if future operator-side Apps Script changes matter, update the clean operator API deployment through the Apps Script UI to the new version, preserving no-Web-app exposure.

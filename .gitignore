@@ -5,3 +5,9 @@
 vendor/
 .DS_Store
 RightOnQ_Web_Handover_2026-05-01.txt
+
+# Local OAuth / clasp credential files. Never commit Google refresh tokens or client secrets.
+**/.clasprc.json
+*.clasprc*.json
+*clasp*client*.json
+rightonq-gog-client*.json

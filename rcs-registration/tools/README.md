@@ -14,10 +14,12 @@ Operator tools use the named clasp/OAuth login:
 - clean API executable deployment: `AKfycbyG5yW-r0sfaKt1bwUUGFAHHdQoKK8wBCfR1riVxvYamu9YhfOBpRJhnRL_5iBP0VSC`;
 - public customer web app deployment: `AKfycbyI81Ir2xvHLar0R0iFBBWyXa1Nj93T4_8Ni5_eX3XEYDA-AKQbVYbPHnTROLm8e4a6`.
 
+Operator wrappers call `scripts.run` against the clean API executable deployment ID in `.clasp.json` with `devMode: false`. They are pinned to the deployed operator API version rather than Apps Script HEAD.
+
 Override knobs, only if needed:
 
 - `RCS_ONBOARDING_CLASP_USER` changes the named clasp credential used by operator tools.
-- `RCS_ONBOARDING_CLASP_PROJECT` changes the `.clasp.json` path used to find the script ID.
+- `RCS_ONBOARDING_CLASP_PROJECT` changes the `.clasp.json` path used to find the operator API deployment ID.
 - `CLASPRC_JSON` changes the clasp credential store path.
 
 ## Public Endpoint Environment
@@ -48,6 +50,7 @@ The proof helper uses the authenticated operator API for creating the private te
 - Do not paste real PINs into chat, docs, commits, or command examples.
 - Do not pass PINs as command arguments.
 - Use environment variables only.
+- Keep `~/.clasprc.json` and downloaded Google OAuth client JSON files out of the repo. The root `.gitignore` blocks common clasp/client-secret filename patterns, but still treat those files as live credentials.
 - Do not store passport, driving licence, government ID, proof-of-address, or DOB data in these tools, the static app, or the Google Sheet.
 - Treat private application links as client-specific.
 

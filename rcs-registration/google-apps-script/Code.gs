@@ -390,40 +390,20 @@ function doPost(event) {
 
   try {
     const payload = parsePayload(event);
-    const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
-    if (payload.action === "createApplicationDraft") {
-      requireCreatePin(payload);
-      return jsonResponse(createApplicationDraft(spreadsheet, payload));
+    if (isOperatorOnlyAction(payload.action)) {
+      return jsonResponse({
+        ok: false,
+        rejected: true,
+        error: "Operator action is not supported on the public endpoint. Use the authenticated operator API."
+      });
     }
+
+    const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
     if (payload.action === "submitNameLogoApproval") {
       return jsonResponse(submitNameLogoApproval(spreadsheet, payload));
     }
     if (payload.action === "submitVideoApproval") {
       return jsonResponse(submitVideoApproval(spreadsheet, payload));
-    }
-    if (payload.action === "getOperatorSnapshot") {
-      requireOperatorPin(payload);
-      return jsonResponse(getOperatorSnapshot(spreadsheet, payload));
-    }
-    if (payload.action === "updateApplicationStatus") {
-      requireOperatorPin(payload);
-      return jsonResponse(updateApplicationStatus(spreadsheet, payload));
-    }
-    if (payload.action === "updateBilling") {
-      requireOperatorPin(payload);
-      return jsonResponse(updateBilling(spreadsheet, payload));
-    }
-    if (payload.action === "updateInternalReview") {
-      requireOperatorPin(payload);
-      return jsonResponse(updateInternalReview(spreadsheet, payload));
-    }
-    if (payload.action === "updateTrustHubKyc") {
-      requireOperatorPin(payload);
-      return jsonResponse(updateTrustHubKyc(spreadsheet, payload));
-    }
-    if (payload.action === "updateUkRcBundle") {
-      requireOperatorPin(payload);
-      return jsonResponse(updateUkRcBundle(spreadsheet, payload));
     }
 
     const sheet = spreadsheet.getSheetByName(SHEET_NAME);
@@ -533,6 +513,19 @@ function doPost(event) {
   } finally {
     lock.releaseLock();
   }
+}
+
+function isOperatorOnlyAction(action) {
+  const operatorActions = {
+    createApplicationDraft: true,
+    getOperatorSnapshot: true,
+    updateApplicationStatus: true,
+    updateBilling: true,
+    updateInternalReview: true,
+    updateTrustHubKyc: true,
+    updateUkRcBundle: true
+  };
+  return Boolean(action && operatorActions[action]);
 }
 
 function rcsOperatorAction(payload) {
@@ -1031,13 +1024,15 @@ function updateUkRcBundle(spreadsheet, payload) {
   );
 
   if (Object.prototype.hasOwnProperty.call(payload, "rcBundleStatus")) {
-    updateApplicationStatus(spreadsheet, {
+    const statusPayload = {
       applicationId: applicationId,
       eventType: "uk_rc_bundle_updated",
       changedBy: firstValue(payload.changedBy, payload.operatorName, "RightOnQ"),
-      source: "uk_rc_bundle",
-      internalNotes: firstValue(payload.internalNotes, applicationRecord["Internal notes"])
-    });
+      source: "uk_rc_bundle"
+    };
+    const internalNotes = firstValue(payload.internalNotes, applicationRecord["Internal notes"]);
+    if (internalNotes) statusPayload.internalNotes = internalNotes;
+    updateApplicationStatus(spreadsheet, statusPayload);
   }
 
   return {

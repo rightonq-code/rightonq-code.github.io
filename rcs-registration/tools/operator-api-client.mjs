@@ -61,10 +61,10 @@ async function getAccessToken() {
   return data.access_token;
 }
 
-async function getScriptId() {
+async function getExecutionDeploymentId() {
   const project = await readJson(getClaspProjectPath());
-  if (!project.scriptId) throw new Error("scriptId missing from .clasp.json");
-  return project.scriptId;
+  if (!project.deploymentId) throw new Error("deploymentId missing from .clasp.json");
+  return project.deploymentId;
 }
 
 function formatExecutionError(error) {
@@ -79,8 +79,8 @@ function formatExecutionError(error) {
 }
 
 export async function runOperatorAction(payload) {
-  const [accessToken, scriptId] = await Promise.all([getAccessToken(), getScriptId()]);
-  const response = await fetch("https://script.googleapis.com/v1/scripts/" + scriptId + ":run", {
+  const [accessToken, deploymentId] = await Promise.all([getAccessToken(), getExecutionDeploymentId()]);
+  const response = await fetch("https://script.googleapis.com/v1/scripts/" + deploymentId + ":run", {
     method: "POST",
     headers: {
       "Authorization": "Bearer " + accessToken,
@@ -89,14 +89,15 @@ export async function runOperatorAction(payload) {
     body: JSON.stringify({
       function: "rcsOperatorAction",
       parameters: [payload],
-      devMode: true
+      devMode: false
     })
   });
   const data = await response.json().catch(() => ({}));
   if (!response.ok || data.error) {
     throw new Error(formatExecutionError(data.error));
   }
-  return data.response && Object.prototype.hasOwnProperty.call(data.response, "result")
-    ? data.response.result
-    : data.response;
+  if (!data.response || !Object.prototype.hasOwnProperty.call(data.response, "result")) {
+    throw new Error("Apps Script execution response did not include a result");
+  }
+  return data.response.result;
 }

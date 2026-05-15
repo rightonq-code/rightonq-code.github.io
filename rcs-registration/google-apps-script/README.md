@@ -44,7 +44,7 @@ Deployment:
 
 - Execute as: `adam@rightonq.co.uk`
 - Access: `Anyone`
-- Current published version after CLI redeploy: `25`
+- Current public web app version: `31`
 - Version `4` added Application ID, registration status, and Part A status columns to the intake row.
 - Version `5` adds Application ID status lookup via `GET ?applicationId=...`.
 - Version `6` adds the `Applications` control-row tab and writes/reads one row per Application ID.
@@ -115,8 +115,9 @@ The internal `updateApplicationStatus` action is guarded by the script property 
 
 Current pilot state:
 
-- one combined Apps Script deployment handles both public customer actions and PIN-guarded operator actions;
-- version `25` blocks fake public Part A submissions, but operator actions still live on the same anonymous deployment.
+- public customer actions run through the anonymous public web app;
+- operator actions run through `rcsOperatorAction` using authenticated Apps Script API execution;
+- HEAD code now rejects operator-only actions if they arrive through the anonymous `doPost` web app path.
 
 Target state before public website integration:
 
@@ -151,7 +152,8 @@ Authenticated operator API scaffold:
 - `rcsOperatorAction(payload)` now enforces the same PIN guard as the web app operator path:
   - `createApplicationDraft` requires the create PIN;
   - the other operator actions require the operator PIN.
-- Public web app version `25` remains the live public customer endpoint.
+- Public web app version `31` is the live public customer endpoint.
+- Version `31` blocks operator-only actions on the public `doPost` path before opening the Sheet.
 - Do not run `clasp deploy -i` against the clean API executable while `appsscript.json` still contains public web app deployment settings.
 
 Operator API proof:
@@ -160,17 +162,18 @@ Operator API proof:
 - Local credential JSON was found at `/Users/macpro/Downloads/rightonq-gog-client.json`.
 - A local-only derived copy, `/Users/macpro/Downloads/rightonq-gog-client-clasp-localhost.json`, adds `http://localhost` because this clasp version requires a literal localhost redirect URI.
 - The named login includes the Sheets scope needed by `SpreadsheetApp.openById`.
-- No-PIN `clasp -u rightonq-gog run rcsOperatorAction ...` reaches Apps Script and correctly returns `Invalid onboarding operator PIN`.
+- Direct `scripts.run` execution against the clean API deployment with a dummy PIN reaches Apps Script and correctly returns `Invalid onboarding operator PIN`.
 - Valid-PIN read-only snapshot for `ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747` returned `ok: true`.
 - Operator snapshot readback now reconciles tracked Sheet headers to canonical order before reading Billing, Internal reviews, Trust Hub KYC, and UK RC Bundle rows.
-- Local operator wrappers now call `https://script.googleapis.com/v1/scripts/{scriptId}:run` directly with the PIN in the HTTPS request body, not in a command-line `clasp run --params` argument.
+- Local operator wrappers now call `https://script.googleapis.com/v1/scripts/{deploymentId}:run` directly with the PIN in the HTTPS request body, not in a command-line `clasp run --params` argument.
+- The direct `scripts.run` helper uses `devMode: false` and the clean API executable deployment ID from `.clasp.json`, so wrappers are pinned to the deployed operator API version rather than Apps Script HEAD.
 - `operator-status.mjs` proved the wrapper path by returning strict JSON with `ok: true` for `ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747`.
-- Public customer submissions remain on the public v25 web app.
+- Public customer submissions remain on the public v31 web app.
 
 Current caveat:
 
-- `clasp run rcsOperatorAction --nondev ...` returns `Script function not found. Please make sure script is deployed as API executable.`
-- Use normal `clasp -u rightonq-gog run ...` for the pilot operator API proof path unless this is resolved later.
+- `clasp run rcsOperatorAction --nondev ...` may still return `Script function not found. Please make sure script is deployed as API executable.`
+- Use the repo-owned operator wrappers, which call the Apps Script API endpoint directly with the clean deployment ID.
 
 Do not store either PIN in this repo, in static HTML, or in Sheet audit JSON. If `ONBOARDING_OPERATOR_PIN` is not configured, internal status updates correctly return `ONBOARDING_OPERATOR_PIN is not configured`.
 

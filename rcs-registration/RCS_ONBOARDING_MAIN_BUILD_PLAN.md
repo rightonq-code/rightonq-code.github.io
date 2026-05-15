@@ -2458,6 +2458,26 @@ Step 2F update:
 - `operator-status.mjs` live proof returned strict JSON with `ok: true`;
 - this completes the practical public/operator transport split for the pilot.
 
+Step 2G update:
+
+- a read-only external review found that the anonymous public `doPost` endpoint still accepted operator-only actions if called directly with a PIN;
+- `doPost` now blocks operator-only actions before opening the Sheet:
+  - `createApplicationDraft`;
+  - `getOperatorSnapshot`;
+  - `updateApplicationStatus`;
+  - `updateBilling`;
+  - `updateInternalReview`;
+  - `updateTrustHubKyc`;
+  - `updateUkRcBundle`;
+- public Part A, B2 name/logo approval, and B3 video approval remain on the public web app;
+- Apps Script HEAD was pushed and version `31` was created with description `Disable public operator actions`;
+- the existing public web app deployment was updated through the Apps Script UI to version `31` with description `Harden public Part A submission + block public operator actions`;
+- live public proof confirmed a public `getOperatorSnapshot` POST now returns `ok: false`, `rejected: true`, and `Operator action is not supported on the public endpoint...`;
+- do not use `clasp deploy -i` for that public deployment update unless the manifest/deployment-type risk has been deliberately revisited;
+- operator wrappers now call `scripts.run` with the clean API executable deployment ID and `devMode: false`, so they are pinned to the deployed operator API rather than Apps Script HEAD;
+- dummy-PIN proof against the clean API deployment reached `rcsOperatorAction` and returned `Invalid onboarding operator PIN`;
+- local clasp/OAuth credential files were tightened to file mode `600`, and `.gitignore` now blocks common clasp/client-secret filename patterns.
+
 ### Slice 9 - Twilio Trust Hub / Subaccount / Usage Tracking Fields
 
 Add internal Twilio compliance, runtime setup, and usage tracking fields.
