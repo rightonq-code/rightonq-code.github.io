@@ -544,24 +544,31 @@ function rcsOperatorAction(payload) {
     const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
 
     if (payload.action === "createApplicationDraft") {
+      requireCreatePin(payload);
       return createApplicationDraft(spreadsheet, payload);
     }
     if (payload.action === "getOperatorSnapshot") {
+      requireOperatorPin(payload);
       return getOperatorSnapshot(spreadsheet, payload);
     }
     if (payload.action === "updateApplicationStatus") {
+      requireOperatorPin(payload);
       return updateApplicationStatus(spreadsheet, payload);
     }
     if (payload.action === "updateBilling") {
+      requireOperatorPin(payload);
       return updateBilling(spreadsheet, payload);
     }
     if (payload.action === "updateInternalReview") {
+      requireOperatorPin(payload);
       return updateInternalReview(spreadsheet, payload);
     }
     if (payload.action === "updateTrustHubKyc") {
+      requireOperatorPin(payload);
       return updateTrustHubKyc(spreadsheet, payload);
     }
     if (payload.action === "updateUkRcBundle") {
+      requireOperatorPin(payload);
       return updateUkRcBundle(spreadsheet, payload);
     }
 

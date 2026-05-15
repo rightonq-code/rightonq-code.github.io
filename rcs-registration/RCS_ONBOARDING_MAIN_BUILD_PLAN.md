@@ -2410,6 +2410,26 @@ Conclusion:
 - do not weaken the operator API to `ANYONE`;
 - keep the v25 public web app as-is until the authenticated operator API proof passes.
 
+Update on 2026-05-15:
+
+- standard Google Cloud project `rightonq-gog` / `RightOnQ-GOG` is now linked to the Apps Script project;
+- Apps Script API is enabled on that project;
+- API executable deployment was created as API-only:
+  - deployment ID `AKfycbzogKHOijtu6kjp2MVrL9WcVuF6mWrgQyKUzQGRvpTfozdUSA9y_B6X_eWpQeQ-mWtS`;
+  - original version `28`;
+  - access `Anyone within rightonq.co.uk`;
+- RCS-Twilio-4 found and fixed a missing server-side PIN check inside `rcsOperatorAction(payload)`;
+- the same API executable deployment was redeployed as version `29` with description `Operator API executable (Step 2B pin guard)`;
+- public web app v25 remains the public customer endpoint and was re-verified after the API update;
+- `clasp apis` now runs successfully.
+
+Remaining proof gap:
+
+- `clasp run rcsOperatorAction ...` still cannot execute from the terminal;
+- dev-mode currently fails with a permission error before function execution;
+- `--nondev` currently reports the function is not found as an API executable;
+- next work should verify OAuth / caller authorisation and confirm in the Apps Script UI that the version 29 deployment remains API executable only.
+
 ### Slice 9 - Twilio Trust Hub / Subaccount / Usage Tracking Fields
 
 Add internal Twilio compliance, runtime setup, and usage tracking fields.

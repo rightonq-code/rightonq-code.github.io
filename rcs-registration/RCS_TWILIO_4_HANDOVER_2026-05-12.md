@@ -2451,3 +2451,49 @@ Current conclusion:
 - public v25 deployment is still the safe live endpoint;
 - authenticated operator API is the preferred design, but blocked until the Apps Script project is associated with a standard Google Cloud project and the required Apps Script API / Execution API setup is complete;
 - do not loosen `executionApi.access` to `ANYONE`.
+
+### Slice 8D Continued - Operator API Executable Created
+
+Step 2A was completed in the Apps Script UI by the browser-side helper agent:
+
+- standard Google Cloud project linked:
+  - project name: `RightOnQ-GOG`;
+  - project ID: `rightonq-gog`;
+  - project number: `872475523113`;
+- Apps Script API was enabled on that standard project;
+- API executable deployment was created without selecting Web app:
+  - deployment ID `AKfycbzogKHOijtu6kjp2MVrL9WcVuF6mWrgQyKUzQGRvpTfozdUSA9y_B6X_eWpQeQ-mWtS`;
+  - version `28`;
+  - description `Operator API executable (Step 2A)`;
+  - access `Anyone within rightonq.co.uk`.
+
+RCS-Twilio-4 then verified locally:
+
+- `clasp deployments` showed the same API executable alongside the existing public v25 deployment;
+- `.clasp.json` was updated with `projectId: rightonq-gog` and the API executable deployment ID;
+- `clasp apis` now runs successfully instead of returning `GCP project ID is not set`;
+- public web app v25 still responds to GET with the service JSON;
+- fake anonymous public Part A POST is still rejected with `This application link could not be verified. Please ask RightOnQ for a fresh link.`
+
+Important local fix:
+
+- while checking Step 2B, RCS-Twilio-4 found that `rcsOperatorAction(payload)` routed operator actions without re-checking the PIN guard;
+- patched `rcsOperatorAction` so:
+  - `createApplicationDraft` requires the create PIN;
+  - every other operator action requires the operator PIN;
+- pushed the patch to Apps Script HEAD with `clasp push --force`;
+- redeployed the same API executable deployment ID as version `29` with description `Operator API executable (Step 2B pin guard)`;
+- confirmed deployments remain:
+  - HEAD;
+  - public v25 `Harden public Part A submission`;
+  - original v1 intake receiver;
+  - API executable v29 `Operator API executable (Step 2B pin guard)`.
+
+Remaining Step 2B blocker:
+
+- `clasp run rcsOperatorAction --params '[{"action":"getOperatorSnapshot","applicationId":"ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747"}]'` currently stops before function execution with `Unable to run script function. Please make sure you have permission to run the script function.`;
+- `clasp run rcsOperatorAction --nondev ...` currently returns `Script function not found. Please make sure script is deployed as API executable.`;
+- therefore the live API execution proof is still not complete;
+- likely next check is OAuth / execution-authorisation against the linked standard GCP project, plus UI verification that the API executable remained API-only after the CLI redeploy to version 29.
+
+Do not proceed to website integration until this operator API execution proof is either fixed or deliberately deferred with a documented fallback.

@@ -144,16 +144,24 @@ Authenticated operator API scaffold:
 
 - `rcsOperatorAction(payload)` is available in `Code.gs` as the intended Apps Script API entry point for operator-only actions.
 - The manifest includes `executionApi.access = DOMAIN`.
-- `clasp run rcsOperatorAction ...` currently cannot run because the Apps Script project has no standard GCP project ID set.
-- `clasp apis` returns: `GCP project ID is not set, unable to continue.`
-- Failed proof deployments `Authenticated operator API` and `Operator API domain access` were removed; the live public web app remains version `25`.
+- The Apps Script project is now linked to standard Google Cloud project `rightonq-gog`.
+- The operator API executable deployment is `AKfycbzogKHOijtu6kjp2MVrL9WcVuF6mWrgQyKUzQGRvpTfozdUSA9y_B6X_eWpQeQ-mWtS`.
+- Version `29` is deployed with description `Operator API executable (Step 2B pin guard)`.
+- `rcsOperatorAction(payload)` now enforces the same PIN guard as the web app operator path:
+  - `createApplicationDraft` requires the create PIN;
+  - the other operator actions require the operator PIN.
+- Public web app version `25` remains the live public customer endpoint.
 
-Next step before replacing PIN/web-app operator calls:
+Remaining proof gap before replacing PIN/web-app operator calls:
 
-1. Associate this Apps Script project with a standard Google Cloud project.
-2. Enable Apps Script API / Execution API requirements there.
-3. Redeploy the API executable.
-4. Re-run a read-only `rcsOperatorAction` snapshot proof.
+1. Re-check in the Apps Script UI that the version `29` deployment is still API executable only.
+2. Resolve the terminal execution permission / OAuth issue.
+3. Re-run a read-only `rcsOperatorAction` snapshot proof.
+
+Current terminal symptoms:
+
+- `clasp run rcsOperatorAction ...` returns `Unable to run script function. Please make sure you have permission to run the script function.`
+- `clasp run rcsOperatorAction --nondev ...` returns `Script function not found. Please make sure script is deployed as API executable.`
 
 Do not store either PIN in this repo, in static HTML, or in Sheet audit JSON. If `ONBOARDING_OPERATOR_PIN` is not configured, internal status updates correctly return `ONBOARDING_OPERATOR_PIN is not configured`.
 
