@@ -143,6 +143,125 @@
       font-size: clamp(1rem, 1.25vw, 1.15rem);
     }
 
+    .registration-gateway {
+      display: grid;
+      grid-template-columns: minmax(0, 0.95fr) minmax(320px, 1.05fr);
+      gap: 22px;
+      align-items: stretch;
+      margin: 0 auto 20px;
+      padding: 22px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(17, 31, 49, 0.82);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+    }
+
+    .gateway-copy {
+      display: grid;
+      gap: 14px;
+      align-content: start;
+    }
+
+    .gateway-copy h2 {
+      max-width: 620px;
+      color: var(--ink);
+      font-size: clamp(1.7rem, 3vw, 2.65rem);
+    }
+
+    .gateway-copy p {
+      max-width: 660px;
+      margin: 0;
+      color: var(--muted);
+      font-size: 1rem;
+    }
+
+    .gateway-fee {
+      width: fit-content;
+      border: 1px solid rgba(142, 197, 255, 0.28);
+      border-radius: 8px;
+      background: rgba(63, 140, 255, 0.12);
+      padding: 14px 16px;
+    }
+
+    .gateway-fee strong {
+      display: block;
+      color: #fff;
+      font-size: clamp(1.7rem, 3vw, 2.35rem);
+      line-height: 1;
+    }
+
+    .gateway-fee span {
+      display: block;
+      margin-top: 6px;
+      color: var(--blue-2);
+      font-weight: 800;
+    }
+
+    .gateway-guarantee {
+      border-left: 4px solid var(--green);
+      border-radius: 8px;
+      background: rgba(55, 191, 126, 0.12);
+      padding: 12px 14px;
+      color: #c8f5dd;
+      font-weight: 800;
+    }
+
+    .gateway-plans {
+      display: grid;
+      gap: 12px;
+    }
+
+    .gateway-plan {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 14px;
+      align-items: center;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      background: rgba(246, 249, 252, 0.96);
+      color: var(--field-text);
+      padding: 16px;
+    }
+
+    .gateway-plan h3 {
+      margin-bottom: 5px;
+      color: var(--field-text);
+      font-size: 1.16rem;
+    }
+
+    .gateway-plan p {
+      margin: 0;
+      color: #52667e;
+      font-size: 0.92rem;
+      line-height: 1.42;
+    }
+
+    .gateway-price {
+      min-width: 116px;
+      text-align: right;
+      color: #10223a;
+      font-size: 1.34rem;
+      font-weight: 900;
+      line-height: 1.05;
+    }
+
+    .gateway-price small {
+      display: block;
+      margin-top: 4px;
+      color: #647790;
+      font-size: 0.74rem;
+      font-weight: 800;
+    }
+
+    .gateway-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      margin-top: 4px;
+    }
+
     .workflow {
       display: grid;
       grid-template-columns: 280px minmax(0, 1fr);
@@ -2025,6 +2144,10 @@
         grid-template-columns: 1fr;
       }
 
+      .registration-gateway {
+        grid-template-columns: 1fr;
+      }
+
       .part-b-board {
         grid-template-columns: 1fr;
       }
@@ -2107,6 +2230,14 @@
       .action-bar {
         align-items: stretch;
         flex-direction: column;
+      }
+
+      .gateway-plan {
+        grid-template-columns: 1fr;
+      }
+
+      .gateway-price {
+        text-align: left;
       }
 
       .button-row,
@@ -2196,6 +2327,46 @@
         <p class="eyebrow">RCS client application</p>
         <h1 id="page-title">RCS sender registration</h1>
         <p class="hero-copy">Complete Part A so RightOnQ can check your RCS registration details before Part B, the review video stage.</p>
+      </div>
+    </section>
+
+    <section class="registration-gateway" aria-labelledby="gateway-title">
+      <div class="gateway-copy">
+        <p class="eyebrow">Start your RCS registration</p>
+        <h2 id="gateway-title">A managed route into branded RCS messaging.</h2>
+        <p>RightOnQ prepares and manages the registration journey, then switches on the monthly platform plan only once your sender is approved and ready to use.</p>
+        <div class="gateway-fee">
+          <strong>£100 + VAT</strong>
+          <span>RCS registration fee before work starts</span>
+        </div>
+        <div class="gateway-guarantee">If your sender application is not approved for reasons outside your control, the registration fee is refunded in full.</div>
+        <p>The fee is not refundable if the application cannot proceed because information is inaccurate, required checks or actions are not completed, the business withdraws, or business/compliance history prevents approval.</p>
+        <div class="gateway-actions">
+          <a class="btn secondary" href="#registrationForm">Continue to Part A</a>
+        </div>
+      </div>
+      <div class="gateway-plans" aria-label="RightOnQ platform plans">
+        <article class="gateway-plan">
+          <div>
+            <h3>RightOnQ UK</h3>
+            <p>For UK-focused RCS sending, local operating hours and a straightforward managed sender setup.</p>
+          </div>
+          <div class="gateway-price">£25<small>per month + VAT after approval</small></div>
+        </article>
+        <article class="gateway-plan">
+          <div>
+            <h3>RightOnQ Global</h3>
+            <p>For businesses planning wider launch markets, international timing controls and a broader managed sending setup.</p>
+          </div>
+          <div class="gateway-price">£49<small>per month + VAT after approval</small></div>
+        </article>
+        <article class="gateway-plan">
+          <div>
+            <h3>Messaging costs</h3>
+            <p>Message usage is charged separately. RightOnQ will keep usage controlled before live sending begins.</p>
+          </div>
+          <div class="gateway-price">PAYG<small>usage-based</small></div>
+        </article>
       </div>
     </section>
 
