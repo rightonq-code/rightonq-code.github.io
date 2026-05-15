@@ -2329,6 +2329,11 @@ Deployment/proof:
 
 - Apps Script version `25` deployed to the existing web app deployment;
 - a live no-PIN fake public Part A submission was rejected with the private-link verification error, confirming unknown application IDs do not create rows.
+- full valid private-link proof passed on 2026-05-15:
+  - fake public submit rejected first;
+  - private application created as `ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747`;
+  - valid Part A submitted as `RCS-20260515-PUBLIC-PARTA-PROOF`;
+  - snapshot confirmed `Billing`, `Internal reviews`, `Trust Hub KYC`, `UK RC bundles`, and queued `part_a_received` communication rows.
 
 Still required before public website integration:
 

@@ -2315,6 +2315,44 @@ Live no-PIN proof:
   - `error = This application link could not be verified. Please ask RightOnQ for a fresh link.`;
 - this confirms unknown application IDs can no longer create rows through the public branch.
 
+Full v25 private-link proof:
+
+- Bugs ran `node rcs-registration/tools/proof-public-part-a-submit.mjs` with local create/operator PINs;
+- test application:
+  - `ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747`;
+- blocked-public step:
+  - `ok = false`;
+  - `rejected = true`;
+  - error matched the private-link verification message;
+- private application creation:
+  - `ok = true`;
+  - `registrationStatus = application_created`;
+  - `partAStatus = draft`;
+  - private application link present;
+- valid Part A submission:
+  - `ok = true`;
+  - `submissionId = RCS-20260515-PUBLIC-PARTA-PROOF`;
+  - `registrationStatus = part_a_submitted`;
+  - `receivedAt = 2026-05-15T15:17:55.506Z`;
+- snapshot confirmed:
+  - `application.registrationStatus = part_a_submitted`;
+  - `application.partAStatus = part_a_submitted`;
+  - `billing.present = true`;
+  - `billing.billingStatus = registration_fee_pending`;
+  - `billing.paymentProvider = not_selected`;
+  - `billing.paymentStatus = not_started`;
+  - `billing.monthlyPlan = RightOnQ UK`;
+  - `billing.monthlyBaseFeeGbp = 25`;
+  - `internalReview.reviewStatus = pending_review`;
+  - `internalReview.kycTrustHubCheck = pending_trust_hub_review`;
+  - `internalReview.smsFallbackRcBundleCheck = pending`;
+  - `trustHubKyc.present = true`;
+  - `trustHubKyc.status = not_started`;
+  - `ukRcBundle.present = true`;
+  - `ukRcBundle.status = not_started`;
+  - `ukRcBundle.fallbackRequired = to_be_confirmed`;
+  - queued communication includes `part_a_received`.
+
 Still not solved in this slice:
 
 - operator actions still share the anonymous Apps Script deployment and are PIN guarded;
