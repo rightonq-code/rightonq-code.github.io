@@ -2450,6 +2450,14 @@ Step 2E update:
 - Trust Hub KYC header drift was fixed by reconciling tracking sheets to canonical header order before operator readback;
 - normal `clasp run` is proven; `clasp run --nondev` still cannot find the function as an API executable, so keep that caveat in the runbook.
 
+Step 2F update:
+
+- local operator wrappers now use an authenticated Apps Script Execution API client instead of posting to the web app;
+- the shared helper is `rcs-registration/tools/operator-api-client.mjs`;
+- public customer submissions still use public v25;
+- `operator-status.mjs` live proof returned strict JSON with `ok: true`;
+- this completes the practical public/operator transport split for the pilot.
+
 ### Slice 9 - Twilio Trust Hub / Subaccount / Usage Tracking Fields
 
 Add internal Twilio compliance, runtime setup, and usage tracking fields.

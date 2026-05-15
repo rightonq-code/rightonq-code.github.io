@@ -163,6 +163,9 @@ Operator API proof:
 - No-PIN `clasp -u rightonq-gog run rcsOperatorAction ...` reaches Apps Script and correctly returns `Invalid onboarding operator PIN`.
 - Valid-PIN read-only snapshot for `ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747` returned `ok: true`.
 - Operator snapshot readback now reconciles tracked Sheet headers to canonical order before reading Billing, Internal reviews, Trust Hub KYC, and UK RC Bundle rows.
+- Local operator wrappers now call `https://script.googleapis.com/v1/scripts/{scriptId}:run` directly with the PIN in the HTTPS request body, not in a command-line `clasp run --params` argument.
+- `operator-status.mjs` proved the wrapper path by returning strict JSON with `ok: true` for `ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747`.
+- Public customer submissions remain on the public v25 web app.
 
 Current caveat:
 

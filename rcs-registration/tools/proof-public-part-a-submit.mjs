@@ -1,16 +1,12 @@
 #!/usr/bin/env node
 
+import { runOperatorAction } from "./operator-api-client.mjs";
+
 const DEFAULT_WEB_APP_URL =
   "https://script.google.com/macros/s/AKfycbyI81Ir2xvHLar0R0iFBBWyXa1Nj93T4_8Ni5_eX3XEYDA-AKQbVYbPHnTROLm8e4a6/exec";
 
 function resolvePublicWebAppUrl() {
   return process.env.RCS_ONBOARDING_PUBLIC_WEB_APP_URL ||
-    process.env.RCS_ONBOARDING_WEB_APP_URL ||
-    DEFAULT_WEB_APP_URL;
-}
-
-function resolveOperatorWebAppUrl() {
-  return process.env.RCS_ONBOARDING_OPERATOR_WEB_APP_URL ||
     process.env.RCS_ONBOARDING_WEB_APP_URL ||
     DEFAULT_WEB_APP_URL;
 }
@@ -345,18 +341,16 @@ async function main() {
   }
 
   const publicWebAppUrl = resolvePublicWebAppUrl();
-  const operatorWebAppUrl = resolveOperatorWebAppUrl();
-
   const blocked = await postJsonAllowFailure(publicWebAppUrl, blockedPartAPayload);
   if (blocked.ok !== false) {
     throw new Error("Expected blocked public Part A submission to fail, but it succeeded");
   }
 
-  const created = await postJson(operatorWebAppUrl, createPayload);
+  const created = await runOperatorAction(createPayload);
   const privateApplicationToken = extractToken(created.privateApplicationLink);
   const partAPayload = buildPartAPayload(createPayload, applicationId, privateApplicationToken);
   const submitted = await postJson(publicWebAppUrl, partAPayload);
-  const snapshot = await postJson(operatorWebAppUrl, buildSnapshotPayload(applicationId));
+  const snapshot = await runOperatorAction(buildSnapshotPayload(applicationId));
 
   console.log(JSON.stringify({
     blockedPublicSubmit: {

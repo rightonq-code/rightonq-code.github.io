@@ -2570,3 +2570,38 @@ Remaining caveat:
 - normal `clasp run` works and proves the operator API route against Apps Script HEAD;
 - `clasp run --nondev` still reports `Script function not found. Please make sure script is deployed as API executable.`;
 - do not use `clasp deploy -i` against the clean v30 deployment while the manifest still contains public web app deployment settings.
+
+### Slice 8E Completed - Operator Wrappers Use Authenticated API
+
+RCS-Twilio-4 moved the local operator wrappers away from the public/combined web-app POST path.
+
+Implemented:
+
+- added `rcs-registration/tools/operator-api-client.mjs`;
+- it reads the named local clasp credential `rightonq-gog` from `~/.clasprc.json`;
+- it refreshes a Google access token locally;
+- it reads the script ID from `rcs-registration/google-apps-script/.clasp.json`;
+- it calls `https://script.googleapis.com/v1/scripts/{scriptId}:run` with function `rcsOperatorAction`;
+- the operator PIN/create PIN now travels in the HTTPS request body, not in a `clasp run --params` command-line argument.
+
+Updated wrappers:
+
+- `operator-create-application.mjs`;
+- `operator-status.mjs`;
+- `operator-review.mjs`;
+- `operator-trusthub-kyc.mjs`;
+- `operator-rc-bundle.mjs`;
+- `operator-billing.mjs`;
+- `proof-public-part-a-submit.mjs` for its operator create/snapshot legs only.
+
+Public path preserved:
+
+- `proof-public-part-a-submit.mjs` still uses the public v25 web app for blocked/valid customer Part A submissions;
+- public customer B2/B3 paths are unchanged.
+
+Proof:
+
+- all tool files passed `node --check`;
+- dry-run outputs still redact PINs/tokens;
+- `operator-status.mjs` live proof returned strict JSON with `ok: true` for `ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747`;
+- Trust Hub KYC, UK RC Bundle, Billing, Internal Review, Application, and queued communication blocks were present.

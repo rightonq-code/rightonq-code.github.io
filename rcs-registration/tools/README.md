@@ -2,26 +2,33 @@
 
 These tools are local RightOnQ operator helpers for the RCS onboarding pilot.
 
-They call the deployed Apps Script web app, but they do not store PINs in this repo. Always use `--dry-run` first, then run the live command only when the Apps Script-side PIN has been configured.
+Operator tools call the authenticated Apps Script Execution API through the clean `rcsOperatorAction` route. Public customer submissions still use the public v25 web app. The tools do not store PINs in this repo. Always use `--dry-run` first, then run the live command only when the Apps Script-side PIN has been configured.
 
-## Endpoint Environment
+## Apps Script Auth
 
-Current pilot default:
+Operator tools use the named clasp/OAuth login:
 
-- `RCS_ONBOARDING_WEB_APP_URL` points all tools at the current combined Apps Script deployment.
+- clasp user: `rightonq-gog`;
+- local OAuth credential source: `~/.clasprc.json`;
+- Apps Script project config: `rcs-registration/google-apps-script/.clasp.json`;
+- clean API executable deployment: `AKfycbyG5yW-r0sfaKt1bwUUGFAHHdQoKK8wBCfR1riVxvYamu9YhfOBpRJhnRL_5iBP0VSC`;
+- public customer web app deployment: `AKfycbyI81Ir2xvHLar0R0iFBBWyXa1Nj93T4_8Ni5_eX3XEYDA-AKQbVYbPHnTROLm8e4a6`.
 
-Future split default:
+Override knobs, only if needed:
 
-- `RCS_ONBOARDING_PUBLIC_WEB_APP_URL` should point public customer submissions at the anonymous customer deployment.
-- `RCS_ONBOARDING_OPERATOR_WEB_APP_URL` should point operator tools at the private/operator deployment.
+- `RCS_ONBOARDING_CLASP_USER` changes the named clasp credential used by operator tools.
+- `RCS_ONBOARDING_CLASP_PROJECT` changes the `.clasp.json` path used to find the script ID.
+- `CLASPRC_JSON` changes the clasp credential store path.
 
-Operator tools resolve endpoints in this order:
+## Public Endpoint Environment
 
-1. `RCS_ONBOARDING_OPERATOR_WEB_APP_URL`;
+The public Part A proof helper still uses a web app URL for fake/valid customer submissions. It resolves the public endpoint in this order:
+
+1. `RCS_ONBOARDING_PUBLIC_WEB_APP_URL`;
 2. `RCS_ONBOARDING_WEB_APP_URL`;
-3. built-in current deployment URL.
+3. built-in public v25 deployment URL.
 
-The public Part A proof helper uses the public URL for fake/valid customer submissions and the operator URL for creating the private test application and reading the snapshot.
+The proof helper uses the authenticated operator API for creating the private test application and reading the snapshot.
 
 ## Tools
 
@@ -319,4 +326,6 @@ The helper does not print the private application token, private link, create PI
 - `ONBOARDING_OPERATOR_PIN is not configured`: the Apps Script-side operator PIN is missing.
 - `Invalid onboarding create PIN`: the local create PIN does not match the Apps Script property.
 - `Invalid onboarding operator PIN`: the local operator PIN does not match the Apps Script property.
-- `Non-JSON response from Apps Script`: the web app URL may be wrong, redeployed incorrectly, or blocked by an auth/config issue.
+- `Named clasp credential 'rightonq-gog' was not found`: rerun the local OAuth login for the `rightonq-gog` clasp user.
+- `Unable to refresh Google access token`: the local OAuth credential needs refreshing.
+- `Non-JSON response from Apps Script`: public web app proof only; the public URL may be wrong, redeployed incorrectly, or blocked by an auth/config issue.

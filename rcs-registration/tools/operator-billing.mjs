@@ -1,13 +1,6 @@
 #!/usr/bin/env node
 
-const DEFAULT_WEB_APP_URL =
-  "https://script.google.com/macros/s/AKfycbyI81Ir2xvHLar0R0iFBBWyXa1Nj93T4_8Ni5_eX3XEYDA-AKQbVYbPHnTROLm8e4a6/exec";
-
-function resolveOperatorWebAppUrl() {
-  return process.env.RCS_ONBOARDING_OPERATOR_WEB_APP_URL ||
-    process.env.RCS_ONBOARDING_WEB_APP_URL ||
-    DEFAULT_WEB_APP_URL;
-}
+import { runOperatorAction } from "./operator-api-client.mjs";
 
 const FIELD_ALIASES = {
   "application-id": "applicationId",
@@ -122,26 +115,6 @@ function sanitisePayload(payload) {
   return copy;
 }
 
-async function postJson(url, payload) {
-  const response = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-    redirect: "follow"
-  });
-  const text = await response.text();
-  let data;
-  try {
-    data = JSON.parse(text);
-  } catch (error) {
-    throw new Error("Non-JSON response from Apps Script: " + text.slice(0, 500));
-  }
-  if (!response.ok || data.ok === false) {
-    throw new Error(data.error || "Apps Script request failed with HTTP " + response.status);
-  }
-  return data;
-}
-
 async function main() {
   const options = parseArgs(process.argv.slice(2));
   if (options.help) {
@@ -155,8 +128,7 @@ async function main() {
     return;
   }
 
-  const webAppUrl = resolveOperatorWebAppUrl();
-  const result = await postJson(webAppUrl, payload);
+  const result = await runOperatorAction(payload);
   console.log(JSON.stringify(result, null, 2));
 }
 
