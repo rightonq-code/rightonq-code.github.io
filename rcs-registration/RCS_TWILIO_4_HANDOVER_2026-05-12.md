@@ -2448,7 +2448,7 @@ Cleanup:
 
 Current conclusion:
 
-- public v25 deployment is still the safe live endpoint;
+- at this point in the timeline, public v25 deployment was still the safe live endpoint;
 - authenticated operator API is the preferred design, but blocked until the Apps Script project is associated with a standard Google Cloud project and the required Apps Script API / Execution API setup is complete;
 - do not loosen `executionApi.access` to `ANYONE`.
 
@@ -2526,7 +2526,8 @@ Local follow-up:
 Critical warning:
 
 - do not run `clasp deploy -i` against the clean v30 deployment while `appsscript.json` still contains the `webapp` block;
-- if a future code update needs an API-only deployment, create/update it carefully through the Apps Script UI with only API executable selected, or first remove public web app deployment settings from the manifest and confirm the public v25 path is not affected.
+- if a future code update needs an API-only deployment, create/update it carefully through the Apps Script UI with only API executable selected, or first remove public web app deployment settings from the manifest and confirm the public web app path is not affected.
+- Later update: public web app moved to v31 in Slice 8F.
 
 Recommended next step:
 
@@ -2596,7 +2597,7 @@ Updated wrappers:
 
 Public path preserved:
 
-- `proof-public-part-a-submit.mjs` still uses the public v25 web app for blocked/valid customer Part A submissions;
+- `proof-public-part-a-submit.mjs` uses the public v31 web app for blocked/valid customer Part A submissions;
 - public customer B2/B3 paths are unchanged.
 
 Proof:

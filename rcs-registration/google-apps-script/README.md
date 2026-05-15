@@ -117,7 +117,7 @@ Current pilot state:
 
 - public customer actions run through the anonymous public web app;
 - operator actions run through `rcsOperatorAction` using authenticated Apps Script API execution;
-- HEAD code now rejects operator-only actions if they arrive through the anonymous `doPost` web app path.
+- public version `31` rejects operator-only actions if they arrive through the anonymous `doPost` web app path.
 
 Target state before public website integration:
 

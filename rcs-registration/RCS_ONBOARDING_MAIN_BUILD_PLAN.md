@@ -2454,7 +2454,7 @@ Step 2F update:
 
 - local operator wrappers now use an authenticated Apps Script Execution API client instead of posting to the web app;
 - the shared helper is `rcs-registration/tools/operator-api-client.mjs`;
-- public customer submissions still use public v25;
+- public customer submissions use the public web app deployment, now updated to v31;
 - `operator-status.mjs` live proof returned strict JSON with `ok: true`;
 - this completes the practical public/operator transport split for the pilot.
 

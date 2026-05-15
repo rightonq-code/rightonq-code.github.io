@@ -2,7 +2,7 @@
 
 These tools are local RightOnQ operator helpers for the RCS onboarding pilot.
 
-Operator tools call the authenticated Apps Script Execution API through the clean `rcsOperatorAction` route. Public customer submissions still use the public v25 web app. The tools do not store PINs in this repo. Always use `--dry-run` first, then run the live command only when the Apps Script-side PIN has been configured.
+Operator tools call the authenticated Apps Script Execution API through the clean `rcsOperatorAction` route. Public customer submissions use the public v31 web app. The tools do not store PINs in this repo. Always use `--dry-run` first, then run the live command only when the Apps Script-side PIN has been configured.
 
 ## Apps Script Auth
 
@@ -28,7 +28,7 @@ The public Part A proof helper still uses a web app URL for fake/valid customer 
 
 1. `RCS_ONBOARDING_PUBLIC_WEB_APP_URL`;
 2. `RCS_ONBOARDING_WEB_APP_URL`;
-3. built-in public v25 deployment URL.
+3. built-in public v31 deployment URL.
 
 The proof helper uses the authenticated operator API for creating the private test application and reading the snapshot.
 
