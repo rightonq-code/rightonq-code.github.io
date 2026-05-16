@@ -3503,3 +3503,30 @@ Implication:
 - a declined attempt is not necessarily terminal for the order because the same hosted-checkout order can later complete;
 - webhook/Billing logic must process event sequence and final enrichment carefully, not collapse everything to final order state too early;
 - no live Billing write was made.
+
+## Slice 8P - Failed-Payment Mapping Prep
+
+Codex added local fake-data coverage before the terminal failed-payment sandbox proof.
+
+Code/docs changed:
+
+- `revolut-webhook-map.mjs --self-test` now includes `ORDER_PAYMENT_FAILED`;
+- expected mapping is `billingStatus = registration_fee_failed`, `paymentStatus = failed`;
+- `revolut-webhook-handler.mjs --self-test` now signs and handles a fake `ORDER_PAYMENT_FAILED` payload through the same verify-then-map dry-run path;
+- `tools/README.md` now mentions failed-payment mapping in the handler self-test description.
+
+Verification:
+
+- `node rcs-registration/tools/revolut-webhook-map.mjs --self-test` passed;
+- `node rcs-registration/tools/revolut-webhook-handler.mjs --self-test` passed;
+- `node rcs-registration/tools/revolut-webhook-verify.mjs --self-test` passed.
+
+Next live sandbox proof:
+
+- Revolut sandbox test-card docs checked on 2026-05-16 (`https://developer.revolut.com/docs/guides/accept-payments/get-started/test-implementation/test-cards`) list `4242424242424242` as the 3DS verification failure card;
+- for GBP orders, the docs say the order amount must be at least `2500` minor units; the RightOnQ registration-fee proof order amount is `12000`, so it qualifies;
+- expected decline reason is `customer_challenge_failed`;
+- expected payment state is `failed`;
+- likely webhook to capture is `ORDER_PAYMENT_FAILED`, but the proof must record the actual webhook.site event/body/headers and API retrieval result rather than assuming it.
+
+No live Revolut call, Apps Script call, Sheet write, or Billing update was made in this slice.

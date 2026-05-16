@@ -2540,6 +2540,11 @@ Active-checkout protection started:
   - webhook bodies included event, order ID, and merchant reference, but no payment ID;
   - mapper dry-run confirmed `ORDER_PAYMENT_DECLINED` -> `registration_fee_failed` / `declined` and later `ORDER_COMPLETED` -> `registration_fee_paid` / `paid`;
   - no live Billing update was made.
+- Failed-payment local coverage added before the terminal-failure sandbox proof:
+  - `revolut-webhook-map.mjs --self-test` now includes `ORDER_PAYMENT_FAILED` -> `registration_fee_failed` / `failed`;
+  - `revolut-webhook-handler.mjs --self-test` now includes a signed `ORDER_PAYMENT_FAILED` payload and keeps the response in dry-run/no-write mode;
+  - Revolut sandbox docs checked on 2026-05-16 (`https://developer.revolut.com/docs/guides/accept-payments/get-started/test-implementation/test-cards`) list card `4242424242424242` as a 3DS verification failure test card for GBP orders of at least `2500` minor units, expected decline reason `customer_challenge_failed`, payment state `failed`;
+  - next live proof should use a fresh `12000 GBP` order and confirm the actual webhook event/body shape before any Billing write.
 - Payment-order lookup is now deployed to a new clean API-only operator deployment after the Apps Script code push:
   - deployment ID `AKfycbzj0I9m_vld5Aw-zPQFsTZXslrmxlrDA6Ut0RtFnd6_fxXpVDc4qhhRuKVAA5EuhWG9`;
   - version `35`;

@@ -5,6 +5,7 @@ import { pathToFileURL } from "node:url";
 
 const SAMPLE_COMPLETED_PAYLOAD = "{\"event\":\"ORDER_COMPLETED\",\"order_id\":\"order_TEST\",\"merchant_order_ext_ref\":\"ROQ-RCS-TEST-REVOLUT-WEBHOOK\"}";
 const SAMPLE_DECLINED_PAYLOAD = "{\"event\":\"ORDER_PAYMENT_DECLINED\",\"order_id\":\"order_TEST\",\"merchant_order_ext_ref\":\"ROQ-RCS-TEST-REVOLUT-WEBHOOK\"}";
+const SAMPLE_FAILED_PAYLOAD = "{\"event\":\"ORDER_PAYMENT_FAILED\",\"order_id\":\"order_TEST\",\"merchant_order_ext_ref\":\"ROQ-RCS-TEST-REVOLUT-WEBHOOK\"}";
 const SAMPLE_REFUND_COMPLETED_PAYLOAD = "{\"event\":\"ORDER_COMPLETED\",\"order_id\":\"refund_order_TEST\"}";
 const SAMPLE_REFUND_ORDER = {
   id: "refund_order_TEST",
@@ -343,6 +344,9 @@ function runSelfTest() {
   const declined = mapWebhookPayload(SAMPLE_DECLINED_PAYLOAD, {
     requestTimestamp: String(Date.now())
   });
+  const failed = mapWebhookPayload(SAMPLE_FAILED_PAYLOAD, {
+    requestTimestamp: String(Date.now())
+  });
   const refundCompleted = mapWebhookPayload(SAMPLE_REFUND_COMPLETED_PAYLOAD, {
     requestTimestamp: String(Date.now())
   });
@@ -357,6 +361,9 @@ function runSelfTest() {
     && declined.mapped
     && declined.operatorBillingArgs.billingStatus === "registration_fee_failed"
     && declined.operatorBillingArgs.paymentStatus === "declined"
+    && failed.mapped
+    && failed.operatorBillingArgs.billingStatus === "registration_fee_failed"
+    && failed.operatorBillingArgs.paymentStatus === "failed"
     && refundCompleted.mapped === false
     && refundCompleted.enrichmentRequired === true
     && refundCompletedEnriched.mapped
@@ -369,6 +376,7 @@ function runSelfTest() {
     cases: {
       completed,
       declined,
+      failed,
       refundCompleted,
       refundCompletedEnriched
     },

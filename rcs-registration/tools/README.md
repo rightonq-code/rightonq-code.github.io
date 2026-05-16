@@ -383,7 +383,7 @@ Endpoint-core proof, using fake data only:
 node rcs-registration/tools/revolut-webhook-handler.mjs --self-test
 ```
 
-Expected result: `ok: true`. The handler self-test proves a completed payment maps to `verified_mapped_dry_run`, an invalid signature is rejected, and a refund-style event without `merchant_order_ext_ref` returns `enrichment_required`. The returned handler object deliberately separates the small public response body from internal verification/mapping diagnostics; a real endpoint should return only the public body to Revolut.
+Expected result: `ok: true`. The handler self-test proves a completed payment maps to `verified_mapped_dry_run`, a failed payment maps to the failed-payment dry-run path, an invalid signature is rejected, and a refund-style event without `merchant_order_ext_ref` returns `enrichment_required`. The returned handler object deliberately separates the small public response body from internal verification/mapping diagnostics; a real endpoint should return only the public body to Revolut.
 
 Before any live Billing update, enrich or otherwise prove the order type for `ORDER_COMPLETED` events; refund-order webhooks can also use `ORDER_COMPLETED`. Verify the signature/timestamp once at receipt, then use mapping/enrichment primitives for later internal processing rather than re-running the whole handler after the timestamp window may have aged.
 

@@ -10,6 +10,7 @@ import { mapWebhookPayload } from "./revolut-webhook-map.mjs";
 
 const SAMPLE_SECRET = "wsk_TEST_DO_NOT_USE_IN_PRODUCTION";
 const SAMPLE_COMPLETED_PAYLOAD = "{\"event\":\"ORDER_COMPLETED\",\"order_id\":\"order_TEST\",\"merchant_order_ext_ref\":\"ROQ-RCS-TEST-REVOLUT-WEBHOOK\"}";
+const SAMPLE_FAILED_PAYLOAD = "{\"event\":\"ORDER_PAYMENT_FAILED\",\"order_id\":\"order_TEST\",\"merchant_order_ext_ref\":\"ROQ-RCS-TEST-REVOLUT-WEBHOOK\"}";
 const SAMPLE_REFUND_PAYLOAD = "{\"event\":\"ORDER_COMPLETED\",\"order_id\":\"refund_order_TEST\"}";
 
 function normaliseHeaders(headers = {}) {
@@ -174,6 +175,11 @@ function runSelfTest() {
     headers: signedHeaders(SAMPLE_COMPLETED_PAYLOAD),
     signingSecret: SAMPLE_SECRET
   });
+  const failedPayment = handleRevolutWebhook({
+    rawBody: SAMPLE_FAILED_PAYLOAD,
+    headers: signedHeaders(SAMPLE_FAILED_PAYLOAD),
+    signingSecret: SAMPLE_SECRET
+  });
   const refundNeedsEnrichment = handleRevolutWebhook({
     rawBody: SAMPLE_REFUND_PAYLOAD,
     headers: signedHeaders(SAMPLE_REFUND_PAYLOAD),
@@ -186,6 +192,9 @@ function runSelfTest() {
     && invalidSignature.status === 401
     && invalidSignature.body.reason === "verification_failed"
     && invalidSignature.internal.verification.signatureMatched === false
+    && failedPayment.status === 202
+    && failedPayment.body.action === "verified_mapped_dry_run"
+    && failedPayment.internal.mapping.operatorBillingArgs.paymentStatus === "failed"
     && refundNeedsEnrichment.status === 202
     && refundNeedsEnrichment.body.action === "enrichment_required"
     && refundNeedsEnrichment.internal.mapping.enrichmentRequired === true;
@@ -196,6 +205,7 @@ function runSelfTest() {
     cases: {
       completed,
       invalidSignature,
+      failedPayment,
       refundNeedsEnrichment
     },
     note: "Self-test uses fake sample payloads only. It does not call Revolut, Apps Script, or Google Sheets."
