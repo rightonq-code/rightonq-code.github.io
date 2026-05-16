@@ -2573,6 +2573,11 @@ Active-checkout protection started:
   - rejected-method and missing-raw-body cases now emit redacted record-only log entries;
   - local self-tests cover the new rejection logs and confirm no raw body or signature is logged;
   - source remains undeployed and no Google Cloud, Revolut, Apps Script, or Billing action was taken.
+- Source-only Revolut order enrichment helper added:
+  - `cloud-run/revolut-webhook/enrich.mjs` retrieves/summarises an order through injected fetch;
+  - fake-fetch self-test covers payment order, refund order, and refund-without-related-order warning;
+  - helper returns `ledgerLookupOrderId` so refund webhooks can resolve through the original checkout order later;
+  - not wired to the endpoint and no live Revolut call was made.
 - Payment-order lookup is now deployed to a new clean API-only operator deployment after the Apps Script code push:
   - deployment ID `AKfycbzj0I9m_vld5Aw-zPQFsTZXslrmxlrDA6Ut0RtFnd6_fxXpVDc4qhhRuKVAA5EuhWG9`;
   - version `35`;

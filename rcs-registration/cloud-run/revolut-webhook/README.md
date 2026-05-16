@@ -14,12 +14,14 @@ Current behaviour:
 - returns only the small public response body;
 - logs only redacted record-mode fields, including rejected-method and missing-raw-body cases;
 - includes a Firestore dedupe-store adapter source, but the local self-test uses an in-memory store;
+- includes a source-only Revolut order enrichment helper with fake-fetch self-tests;
 - performs no Revolut enrichment call, no Apps Script call, and no Billing update.
 
 Local fake-data self-test:
 
 ```bash
 npm --prefix rcs-registration/cloud-run/revolut-webhook run self-test
+npm --prefix rcs-registration/cloud-run/revolut-webhook run enrichment-self-test
 ```
 
 Expected result: `ok: true`.
