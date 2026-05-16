@@ -190,7 +190,7 @@ function buildEnrichmentRequiredResult(payload, reason) {
     applicationId,
     orderId,
     reason,
-    nextAction: "Retrieve the Revolut order by order_id before applying any Billing update. If the order type is REFUND, route through the refund lifecycle using the original/related order, not as a paid registration-fee event."
+    nextAction: "Retrieve the Revolut order by order_id before applying any Billing update. If the order type normalises to refund, route through the refund lifecycle using the original/related order, not as a paid registration-fee event."
   };
 }
 

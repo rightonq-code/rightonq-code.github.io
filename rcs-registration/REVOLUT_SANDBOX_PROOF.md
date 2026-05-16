@@ -190,7 +190,7 @@ Build impact:
 
 - A refund webhook cannot be routed directly to an application from the webhook body alone.
 - The live webhook endpoint must retrieve/enrich the Revolut order by `order_id`.
-- If the enriched order is `type = REFUND`, route through refund lifecycle logic using the original/related order, not the normal paid registration-fee path.
+- If the enriched order type normalises to `refund`, route through refund lifecycle logic using the original/related order, not the normal paid registration-fee path.
 - Do not treat every `ORDER_COMPLETED` event as `registration_fee_paid`; it depends on the enriched order type.
 - The application ID for refund events must come from RightOnQ's ledger/original-order lookup, or from an explicit operator-supplied value during local dry-runs.
 

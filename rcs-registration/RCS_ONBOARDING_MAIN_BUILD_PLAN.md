@@ -2590,7 +2590,7 @@ Active-checkout protection started:
   - fake-fetch self-test covers payment completion, duplicate completion, and refund completion; no live Revolut, Google Cloud, Apps Script, or Billing action was taken.
 - Source-only runtime handler now wires Firestore dedupe:
   - exported `revolutWebhook(req, res)` obtains `FirestoreDedupeStore.fromDefault()` and passes it into the record-only handler path;
-  - the handler fails closed with `dedupe_store_unavailable` before enrichment if a recordable webhook cannot obtain the dedupe store;
+  - the handler fails closed with `dedupe_store_unavailable` before enrichment if a recordable webhook cannot obtain the dedupe store or if the dedupe record/transaction fails;
   - local self-tests still use an injected in-memory store and fake fetch; no live Firestore, Revolut, Google Cloud, Apps Script, or Billing action was taken.
 - Payment-order lookup is now deployed to a new clean API-only operator deployment after the Apps Script code push:
   - deployment ID `AKfycbzj0I9m_vld5Aw-zPQFsTZXslrmxlrDA6Ut0RtFnd6_fxXpVDc4qhhRuKVAA5EuhWG9`;

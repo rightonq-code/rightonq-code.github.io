@@ -3863,7 +3863,7 @@ Behaviour:
 - `revolutWebhook(req, res)` now passes a cached `FirestoreDedupeStore.fromDefault()` factory into `handleHttpRequest`;
 - `handleHttpRequest` still accepts an injected in-memory store for tests and local source-only proof;
 - the Firestore store is resolved only for recordable verified webhooks, after method/raw-body checks and signature/timestamp verification;
-- if a recordable webhook cannot obtain a dedupe store, the handler fails closed with `dedupe_store_unavailable` before enrichment;
+- if a recordable webhook cannot obtain a dedupe store, or if the dedupe record/transaction fails, the handler fails closed with `dedupe_store_unavailable` before enrichment;
 - local self-tests prove the dedupe-store factory path using an in-memory store, not Firestore;
 - no deploy path, Secret Manager binding, Apps Script call, or Billing write was added.
 

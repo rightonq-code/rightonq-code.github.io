@@ -97,6 +97,48 @@ function sanitiseErrorForLog(error) {
   return String(error && error.message || error || "").replace(/[{}[\]"']/g, "").slice(0, 240);
 }
 
+function buildDedupeUnavailableLog(result, {
+  error,
+  stage
+} = {}) {
+  return {
+    ...buildRecordOnlyLog(result),
+    status: 500,
+    action: "dedupe_store_unavailable",
+    accepted: false,
+    dedupeDecision: "not_attempted",
+    dedupeRecorded: false,
+    dedupeDuplicate: false,
+    receiptKey: "",
+    dedupeDocumentId: "",
+    dedupeState: "",
+    enrichmentAttempted: false,
+    enrichmentOk: false,
+    enrichmentSkippedReason: "dedupe_store_unavailable",
+    enrichmentClassification: "",
+    enrichmentLedgerLookupOrderId: "",
+    enrichmentRequiresPaymentOrderLookup: false,
+    enrichmentWarnings: [],
+    enrichedOrderType: "",
+    enrichedOrderState: "",
+    enrichedRelatedOrderId: "",
+    enrichmentError: "",
+    dedupeFailureStage: stage || "",
+    error: sanitiseErrorForLog(error)
+  };
+}
+
+function buildDedupeUnavailableResponse() {
+  return {
+    status: 500,
+    body: {
+      ok: false,
+      accepted: false,
+      reason: "dedupe_store_unavailable"
+    }
+  };
+}
+
 async function getRuntimeDedupeStore() {
   if (!runtimeDedupeStorePromise) {
     runtimeDedupeStorePromise = FirestoreDedupeStore.fromDefault();
@@ -247,42 +289,24 @@ async function handleHttpRequest(req, {
       dedupeStoreFactory
     });
   } catch (error) {
-    logger.info(JSON.stringify({
-      ...buildRecordOnlyLog(result),
-      status: 500,
-      action: "dedupe_store_unavailable",
-      accepted: false,
-      dedupeDecision: "not_attempted",
-      dedupeRecorded: false,
-      dedupeDuplicate: false,
-      receiptKey: "",
-      dedupeDocumentId: "",
-      dedupeState: "",
-      enrichmentAttempted: false,
-      enrichmentOk: false,
-      enrichmentSkippedReason: "dedupe_store_unavailable",
-      enrichmentClassification: "",
-      enrichmentLedgerLookupOrderId: "",
-      enrichmentRequiresPaymentOrderLookup: false,
-      enrichmentWarnings: [],
-      enrichedOrderType: "",
-      enrichedOrderState: "",
-      enrichedRelatedOrderId: "",
-      enrichmentError: "",
-      error: sanitiseErrorForLog(error)
-    }));
-    return {
-      status: 500,
-      body: {
-        ok: false,
-        accepted: false,
-        reason: "dedupe_store_unavailable"
-      }
-    };
+    logger.info(JSON.stringify(buildDedupeUnavailableLog(result, {
+      error,
+      stage: "store_create"
+    })));
+    return buildDedupeUnavailableResponse();
   }
-  const dedupe = await recordDedupeResult(result, {
-    store: activeDedupeStore
-  });
+  let dedupe = null;
+  try {
+    dedupe = await recordDedupeResult(result, {
+      store: activeDedupeStore
+    });
+  } catch (error) {
+    logger.info(JSON.stringify(buildDedupeUnavailableLog(result, {
+      error,
+      stage: "record"
+    })));
+    return buildDedupeUnavailableResponse();
+  }
   const enrichment = await runRecordOnlyEnrichment(result, dedupe, {
     env,
     fetchImpl
@@ -336,6 +360,11 @@ async function runSelfTest() {
   const logs = [];
   const enrichmentCalls = [];
   const dedupeStore = new InMemoryDedupeStore();
+  const failingRecordDedupeStore = {
+    async record() {
+      throw new Error("fake Firestore transaction failed");
+    }
+  };
   let dedupeStoreFactoryCalls = 0;
   let failingDedupeStoreFactoryCalls = 0;
   const dedupeStoreFactory = async () => {
@@ -490,6 +519,20 @@ async function runSelfTest() {
     logger
   });
 
+  const dedupeRecordFailed = await handleHttpRequest({
+    method: "POST",
+    rawBody: Buffer.from(SAMPLE_COMPLETED_PAYLOAD, "utf8"),
+    headers: signedHeaders(SAMPLE_COMPLETED_PAYLOAD)
+  }, {
+    env: {
+      [SIGNING_SECRET_ENV]: SAMPLE_SECRET,
+      [MERCHANT_API_SECRET_ENV]: SAMPLE_MERCHANT_SECRET
+    },
+    dedupeStore: failingRecordDedupeStore,
+    fetchImpl,
+    logger
+  });
+
   const missingSecret = await handleHttpRequest({
     method: "POST",
     rawBody: Buffer.from(SAMPLE_PAYLOAD, "utf8"),
@@ -516,9 +559,11 @@ async function runSelfTest() {
     && wrongMethod.body.reason === "method_not_allowed"
     && dedupeStoreUnavailable.status === 500
     && dedupeStoreUnavailable.body.reason === "dedupe_store_unavailable"
+    && dedupeRecordFailed.status === 500
+    && dedupeRecordFailed.body.reason === "dedupe_store_unavailable"
     && missingSecret.status === 500
     && missingSecret.body.reason === "missing_signing_secret"
-    && logs.length === 9
+    && logs.length === 10
     && logs[0].event === "ORDER_PAYMENT_FAILED"
     && logs[0].paymentStatus === "failed"
     && logs[0].dedupeDecision === "create"
@@ -548,9 +593,17 @@ async function runSelfTest() {
     && logs[7].signatureMatched === true
     && logs[7].enrichmentAttempted === false
     && logs[7].dedupeDecision === "not_attempted"
+    && logs[7].dedupeFailureStage === "store_create"
     && logs[7].error === "fake Firestore dedupe store unavailable"
-    && logs[8].action === "missing_signing_secret"
-    && logs[8].dedupeDecision === "not_recordable"
+    && logs[8].action === "dedupe_store_unavailable"
+    && logs[8].event === "ORDER_COMPLETED"
+    && logs[8].signatureMatched === true
+    && logs[8].enrichmentAttempted === false
+    && logs[8].dedupeDecision === "not_attempted"
+    && logs[8].dedupeFailureStage === "record"
+    && logs[8].error === "fake Firestore transaction failed"
+    && logs[9].action === "missing_signing_secret"
+    && logs[9].dedupeDecision === "not_recordable"
     && dedupeStoreFactoryCalls === 2
     && failingDedupeStoreFactoryCalls === 1
     && enrichmentCalls.length === 2
@@ -572,6 +625,7 @@ async function runSelfTest() {
       missingRawBody,
       wrongMethod,
       dedupeStoreUnavailable,
+      dedupeRecordFailed,
       missingSecret
     },
     logs,
