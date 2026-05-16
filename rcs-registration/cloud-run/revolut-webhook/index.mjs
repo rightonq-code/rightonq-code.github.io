@@ -7,10 +7,21 @@ import {
   InMemoryDedupeStore,
   recordDedupeResult
 } from "./dedupe.mjs";
+import {
+  DEFAULT_API_BASE_URL,
+  DEFAULT_API_VERSION,
+  enrichRevolutOrder
+} from "./enrich.mjs";
 
 const SIGNING_SECRET_ENV = "REVOLUT_WEBHOOK_SIGNING_SECRET";
+const MERCHANT_API_SECRET_ENV = "REVOLUT_MERCHANT_API_SECRET";
+const MERCHANT_API_BASE_URL_ENV = "REVOLUT_MERCHANT_API_BASE_URL";
+const REVOLUT_API_VERSION_ENV = "REVOLUT_API_VERSION";
 const SAMPLE_SECRET = "wsk_TEST_DO_NOT_USE_IN_PRODUCTION";
+const SAMPLE_MERCHANT_SECRET = "sk_test_DO_NOT_USE_IN_PRODUCTION";
 const SAMPLE_PAYLOAD = "{\"event\":\"ORDER_PAYMENT_FAILED\",\"order_id\":\"order_TEST\",\"merchant_order_ext_ref\":\"ROQ-RCS-TEST-REVOLUT-WEBHOOK\"}";
+const SAMPLE_COMPLETED_PAYLOAD = "{\"event\":\"ORDER_COMPLETED\",\"order_id\":\"order_completed_TEST\",\"merchant_order_ext_ref\":\"ROQ-RCS-TEST-REVOLUT-WEBHOOK\"}";
+const SAMPLE_REFUND_PAYLOAD = "{\"event\":\"ORDER_COMPLETED\",\"order_id\":\"refund_order_TEST\"}";
 
 function getRawBody(req) {
   if (typeof req.rawBody === "string" || Buffer.isBuffer(req.rawBody)) return req.rawBody;
@@ -74,10 +85,78 @@ function buildRejectionLog({
   };
 }
 
+function shouldAttemptRecordOnlyEnrichment(result, dedupe) {
+  const verification = result.internal && result.internal.verification || {};
+  return result.status === 202
+    && verification.signatureMatched === true
+    && verification.timestampAccepted === true
+    && verification.event === "ORDER_COMPLETED"
+    && Boolean(verification.orderId)
+    && !dedupe.duplicate;
+}
+
+function buildSkippedEnrichment(reason = "not_required") {
+  return {
+    attempted: false,
+    ok: false,
+    reason,
+    classification: "",
+    ledgerLookupOrderId: "",
+    requiresPaymentOrderLookup: false,
+    warnings: [],
+    orderType: "",
+    orderState: "",
+    relatedOrderId: ""
+  };
+}
+
+async function runRecordOnlyEnrichment(result, dedupe, {
+  env = process.env,
+  fetchImpl = globalThis.fetch
+} = {}) {
+  const verification = result.internal && result.internal.verification || {};
+  if (!shouldAttemptRecordOnlyEnrichment(result, dedupe)) {
+    return buildSkippedEnrichment(verification.event === "ORDER_COMPLETED" && dedupe.duplicate
+      ? "duplicate"
+      : "not_required");
+  }
+
+  const merchantApiSecret = env[MERCHANT_API_SECRET_ENV] || "";
+  if (!merchantApiSecret) return buildSkippedEnrichment("missing_merchant_api_secret");
+
+  try {
+    const enrichment = await enrichRevolutOrder(verification.orderId, {
+      fetchImpl,
+      merchantApiSecret,
+      apiBaseUrl: env[MERCHANT_API_BASE_URL_ENV] || DEFAULT_API_BASE_URL,
+      apiVersion: env[REVOLUT_API_VERSION_ENV] || DEFAULT_API_VERSION
+    });
+    return {
+      attempted: true,
+      ok: true,
+      reason: "",
+      classification: enrichment.classification || "",
+      ledgerLookupOrderId: enrichment.ledgerLookupOrderId || "",
+      requiresPaymentOrderLookup: Boolean(enrichment.requiresPaymentOrderLookup),
+      warnings: enrichment.warnings || [],
+      orderType: enrichment.order && enrichment.order.normalisedType || "",
+      orderState: enrichment.order && enrichment.order.state || "",
+      relatedOrderId: enrichment.order && enrichment.order.relatedOrderId || ""
+    };
+  } catch (error) {
+    return {
+      ...buildSkippedEnrichment("enrichment_failed"),
+      attempted: true,
+      error: String(error.message || error).replace(/[{}[\]"']/g, "").slice(0, 240)
+    };
+  }
+}
+
 async function handleHttpRequest(req, {
   env = process.env,
   logger = console,
-  dedupeStore = null
+  dedupeStore = null,
+  fetchImpl = globalThis.fetch
 } = {}) {
   if (req.method !== "POST") {
     logger.info(JSON.stringify(buildRejectionLog({
@@ -120,6 +199,10 @@ async function handleHttpRequest(req, {
   const dedupe = await recordDedupeResult(result, {
     store: dedupeStore
   });
+  const enrichment = await runRecordOnlyEnrichment(result, dedupe, {
+    env,
+    fetchImpl
+  });
 
   logger.info(JSON.stringify({
     ...buildRecordOnlyLog(result),
@@ -128,7 +211,18 @@ async function handleHttpRequest(req, {
     dedupeDuplicate: Boolean(dedupe.duplicate),
     receiptKey: dedupe.receiptKey || "",
     dedupeDocumentId: dedupe.documentId || "",
-    dedupeState: dedupe.state || ""
+    dedupeState: dedupe.state || "",
+    enrichmentAttempted: Boolean(enrichment.attempted),
+    enrichmentOk: Boolean(enrichment.ok),
+    enrichmentSkippedReason: enrichment.reason || "",
+    enrichmentClassification: enrichment.classification || "",
+    enrichmentLedgerLookupOrderId: enrichment.ledgerLookupOrderId || "",
+    enrichmentRequiresPaymentOrderLookup: Boolean(enrichment.requiresPaymentOrderLookup),
+    enrichmentWarnings: enrichment.warnings || [],
+    enrichedOrderType: enrichment.orderType || "",
+    enrichedOrderState: enrichment.orderState || "",
+    enrichedRelatedOrderId: enrichment.relatedOrderId || "",
+    enrichmentError: enrichment.error || ""
   }));
   return {
     status: result.status,
@@ -154,11 +248,52 @@ function signedHeaders(payload, timestamp = String(Date.now())) {
 
 async function runSelfTest() {
   const logs = [];
+  const enrichmentCalls = [];
   const dedupeStore = new InMemoryDedupeStore();
   const logger = {
     info(message) {
       logs.push(JSON.parse(message));
     }
+  };
+  const fetchImpl = async (url, options) => {
+    enrichmentCalls.push({
+      url,
+      method: options.method,
+      authorizationPresent: Boolean(options.headers.Authorization)
+    });
+    const isRefund = url.endsWith("/orders/refund_order_TEST");
+    return {
+      ok: true,
+      status: 200,
+      async text() {
+        return JSON.stringify(isRefund ? {
+          id: "refund_order_TEST",
+          type: "refund",
+          state: "completed",
+          related_order_id: "order_completed_TEST",
+          payments: [
+            {
+              id: "refund_payment_TEST",
+              state: "completed"
+            }
+          ]
+        } : {
+          id: "order_completed_TEST",
+          type: "payment",
+          state: "completed",
+          merchant_order_data: {
+            reference: "ROQ-RCS-TEST-REVOLUT-WEBHOOK"
+          },
+          merchant_order_ext_ref: "ROQ-RCS-TEST-REVOLUT-WEBHOOK",
+          payments: [
+            {
+              id: "payment_TEST",
+              state: "captured"
+            }
+          ]
+        });
+      }
+    };
   };
 
   const valid = await handleHttpRequest({
@@ -181,6 +316,45 @@ async function runSelfTest() {
       [SIGNING_SECRET_ENV]: SAMPLE_SECRET
     },
     dedupeStore,
+    logger
+  });
+  const completedPayment = await handleHttpRequest({
+    method: "POST",
+    rawBody: Buffer.from(SAMPLE_COMPLETED_PAYLOAD, "utf8"),
+    headers: signedHeaders(SAMPLE_COMPLETED_PAYLOAD)
+  }, {
+    env: {
+      [SIGNING_SECRET_ENV]: SAMPLE_SECRET,
+      [MERCHANT_API_SECRET_ENV]: SAMPLE_MERCHANT_SECRET
+    },
+    dedupeStore,
+    fetchImpl,
+    logger
+  });
+  const completedPaymentDuplicate = await handleHttpRequest({
+    method: "POST",
+    rawBody: Buffer.from(SAMPLE_COMPLETED_PAYLOAD, "utf8"),
+    headers: signedHeaders(SAMPLE_COMPLETED_PAYLOAD)
+  }, {
+    env: {
+      [SIGNING_SECRET_ENV]: SAMPLE_SECRET,
+      [MERCHANT_API_SECRET_ENV]: SAMPLE_MERCHANT_SECRET
+    },
+    dedupeStore,
+    fetchImpl,
+    logger
+  });
+  const refundCompleted = await handleHttpRequest({
+    method: "POST",
+    rawBody: Buffer.from(SAMPLE_REFUND_PAYLOAD, "utf8"),
+    headers: signedHeaders(SAMPLE_REFUND_PAYLOAD)
+  }, {
+    env: {
+      [SIGNING_SECRET_ENV]: SAMPLE_SECRET,
+      [MERCHANT_API_SECRET_ENV]: SAMPLE_MERCHANT_SECRET
+    },
+    dedupeStore,
+    fetchImpl,
     logger
   });
 
@@ -221,27 +395,46 @@ async function runSelfTest() {
     && valid.body.billingUpdateApplied === false
     && duplicate.status === 202
     && duplicate.body.action === "verified_mapped_dry_run"
+    && completedPayment.status === 202
+    && completedPayment.body.action === "verified_mapped_dry_run"
+    && completedPaymentDuplicate.status === 202
+    && refundCompleted.status === 202
+    && refundCompleted.body.action === "enrichment_required"
     && missingRawBody.status === 500
     && missingRawBody.body.reason === "raw_body_unavailable"
     && wrongMethod.status === 405
     && wrongMethod.body.reason === "method_not_allowed"
     && missingSecret.status === 500
     && missingSecret.body.reason === "missing_signing_secret"
-    && logs.length === 5
+    && logs.length === 8
     && logs[0].event === "ORDER_PAYMENT_FAILED"
     && logs[0].paymentStatus === "failed"
     && logs[0].dedupeDecision === "create"
     && logs[1].dedupeDecision === "duplicate_terminal"
-    && logs[2].action === "raw_body_unavailable"
-    && logs[2].dedupeDecision === "not_attempted"
-    && logs[3].action === "method_not_allowed"
-    && logs[3].dedupeDecision === "not_attempted"
-    && logs[4].action === "missing_signing_secret"
-    && logs[4].dedupeDecision === "not_recordable"
+    && logs[2].event === "ORDER_COMPLETED"
+    && logs[2].dedupeState === "enrichment_required"
+    && logs[2].enrichmentAttempted === true
+    && logs[2].enrichmentClassification === "payment_order"
+    && logs[2].enrichmentLedgerLookupOrderId === "order_completed_TEST"
+    && logs[3].dedupeDecision === "duplicate_terminal"
+    && logs[3].enrichmentAttempted === false
+    && logs[3].enrichmentSkippedReason === "duplicate"
+    && logs[4].action === "enrichment_required"
+    && logs[4].enrichmentAttempted === true
+    && logs[4].enrichmentClassification === "refund_order"
+    && logs[4].enrichmentLedgerLookupOrderId === "order_completed_TEST"
+    && logs[5].action === "raw_body_unavailable"
+    && logs[5].dedupeDecision === "not_attempted"
+    && logs[6].action === "method_not_allowed"
+    && logs[6].dedupeDecision === "not_attempted"
+    && logs[7].action === "missing_signing_secret"
+    && logs[7].dedupeDecision === "not_recordable"
+    && enrichmentCalls.length === 2
     && !Object.prototype.hasOwnProperty.call(logs[0], "rawBody")
     && !Object.prototype.hasOwnProperty.call(logs[0], "signature")
-    && !Object.prototype.hasOwnProperty.call(logs[2], "rawBody")
-    && !Object.prototype.hasOwnProperty.call(logs[2], "signature");
+    && !Object.prototype.hasOwnProperty.call(logs[5], "rawBody")
+    && !Object.prototype.hasOwnProperty.call(logs[5], "signature")
+    && !JSON.stringify({ logs, enrichmentCalls }).includes(SAMPLE_MERCHANT_SECRET);
 
   return {
     ok: passed,
@@ -249,12 +442,16 @@ async function runSelfTest() {
     cases: {
       valid,
       duplicate,
+      completedPayment,
+      completedPaymentDuplicate,
+      refundCompleted,
       missingRawBody,
       wrongMethod,
       missingSecret
     },
     logs,
-    note: "Self-test uses fake payloads and a fake signing secret only. It does not call Revolut, Firestore, Apps Script, or Google Sheets."
+    enrichmentCalls,
+    note: "Self-test uses fake payloads, fake secrets, and an injected fake fetch only. It does not call Revolut, Firestore, Apps Script, or Google Sheets."
   };
 }
 
@@ -273,6 +470,7 @@ export {
   buildRecordOnlyLog,
   buildRejectionLog,
   handleHttpRequest,
+  runRecordOnlyEnrichment,
   revolutWebhook,
   runSelfTest
 };

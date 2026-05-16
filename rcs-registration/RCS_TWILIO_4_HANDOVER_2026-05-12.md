@@ -3784,3 +3784,63 @@ Status:
 - no Firestore database has been enabled or written to by this work;
 - no Revolut webhook URL has been changed;
 - no Apps Script call or Billing update was made.
+
+## Slice 8X - Record-Only Handler Enrichment Wiring
+
+Codex wired the enrichment helper into the source-only Cloud Run / Functions Framework handler path.
+
+Files:
+
+- `rcs-registration/cloud-run/revolut-webhook/index.mjs`;
+- `rcs-registration/cloud-run/revolut-webhook/dedupe.mjs`;
+- `rcs-registration/cloud-run/revolut-webhook/README.md`;
+- `rcs-registration/REVOLUT_WEBHOOK_ENDPOINT_DESIGN.md`;
+- this handover and the build plan.
+
+Behaviour:
+
+- handler still verifies signature/timestamp before any mapping or enrichment;
+- handler records/checks dedupe before enrichment;
+- fresh non-duplicate `ORDER_COMPLETED` events attempt record-only enrichment when a Merchant API secret and fetch implementation are configured;
+- duplicate `ORDER_COMPLETED` events skip enrichment, preventing repeated Merchant API calls on Revolut retries;
+- non-completed events skip enrichment as not required;
+- `ORDER_COMPLETED` dedupe records now use state `enrichment_required` even when the initial payload contains a merchant reference and maps to a paid dry-run;
+- public HTTP response bodies are unchanged;
+- no Billing write path was added.
+
+Record-only log additions:
+
+- `enrichmentAttempted`;
+- `enrichmentOk`;
+- `enrichmentSkippedReason`;
+- `enrichmentClassification`;
+- `enrichmentLedgerLookupOrderId`;
+- `enrichmentRequiresPaymentOrderLookup`;
+- `enrichmentWarnings`;
+- `enrichedOrderType`;
+- `enrichedOrderState`;
+- `enrichedRelatedOrderId`;
+- `enrichmentError`.
+
+Verification:
+
+- `node --check rcs-registration/cloud-run/revolut-webhook/index.mjs` passed;
+- `node --check rcs-registration/cloud-run/revolut-webhook/dedupe.mjs` passed;
+- `node --check rcs-registration/cloud-run/revolut-webhook/enrich.mjs` passed;
+- `node rcs-registration/cloud-run/revolut-webhook/index.mjs --self-test` passed:
+  - fake-fetch enrichment call count was `2`;
+  - duplicate failed-payment enrichment skip reason was `not_required`;
+  - duplicate completed-payment enrichment skip reason was `duplicate`;
+- `node rcs-registration/cloud-run/revolut-webhook/dedupe.mjs --self-test` passed and confirmed `ORDER_COMPLETED` record state `enrichment_required`;
+- `node rcs-registration/cloud-run/revolut-webhook/enrich.mjs --self-test` passed;
+- `node rcs-registration/tools/revolut-webhook-handler.mjs --self-test` passed;
+- `node rcs-registration/tools/revolut-webhook-map.mjs --self-test` passed.
+
+Status:
+
+- source-only wiring; no endpoint has been deployed;
+- self-tests use fake payloads/orders/secrets and injected fake fetch;
+- no live Revolut call was made by this slice;
+- no Firestore database has been enabled or written to by this work;
+- no Revolut webhook URL has been changed;
+- no Apps Script call or Billing update was made.

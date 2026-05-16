@@ -2583,6 +2583,11 @@ Active-checkout protection started:
   - returned `type = refund`, `state = completed`, `amount = 12000`, `currency = GBP`;
   - returned `relatedOrderId = 6a0866ef-9b11-a041-bfa2-e973e15e564d`, confirming the original checkout order link needed for `lookupPaymentOrder`;
   - enrichment self-test now mirrors the observed lowercase refund shape and camelCase `relatedOrderId` summary path.
+- Source-only record-mode handler now wires enrichment after verification and dedupe:
+  - fresh non-duplicate `ORDER_COMPLETED` events attempt enrichment when a Merchant API secret/fetch implementation is configured;
+  - duplicate `ORDER_COMPLETED` events skip enrichment, so Revolut retries do not cause repeated Merchant API calls;
+  - `ORDER_COMPLETED` dedupe records stay in `enrichment_required` state until a later apply flow is explicitly built;
+  - fake-fetch self-test covers payment completion, duplicate completion, and refund completion; no live Revolut, Google Cloud, Apps Script, or Billing action was taken.
 - Payment-order lookup is now deployed to a new clean API-only operator deployment after the Apps Script code push:
   - deployment ID `AKfycbzj0I9m_vld5Aw-zPQFsTZXslrmxlrDA6Ut0RtFnd6_fxXpVDc4qhhRuKVAA5EuhWG9`;
   - version `35`;

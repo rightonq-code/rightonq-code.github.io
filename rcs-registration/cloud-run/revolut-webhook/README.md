@@ -14,8 +14,9 @@ Current behaviour:
 - returns only the small public response body;
 - logs only redacted record-mode fields, including rejected-method and missing-raw-body cases;
 - includes a Firestore dedupe-store adapter source, but the local self-test uses an in-memory store;
-- includes a source-only Revolut order enrichment helper with fake-fetch self-tests;
-- performs no Revolut enrichment call, no Apps Script call, and no Billing update.
+- enriches fresh, non-duplicate `ORDER_COMPLETED` events in record-only mode when a Merchant API secret and fetch implementation are configured;
+- skips enrichment for duplicate `ORDER_COMPLETED` events and all non-completed events;
+- performs no live Revolut call in local self-tests, no Apps Script call, and no Billing update.
 
 Local fake-data self-test:
 

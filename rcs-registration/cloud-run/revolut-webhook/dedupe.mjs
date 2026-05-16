@@ -59,6 +59,7 @@ function isExpired(isoTimestamp, now = new Date()) {
 
 function determineRecordState(mapping) {
   if (mapping.enrichmentRequired) return "enrichment_required";
+  if (mapping.event === "ORDER_COMPLETED") return "enrichment_required";
   if (mapping.mapped) return "mapped";
   return "ignored";
 }
@@ -348,6 +349,25 @@ function runSelfTest() {
     }
   };
   const ignored = buildDedupeRecord(unmappedResult, { now });
+  const completedResult = {
+    ...fakeResult,
+    internal: {
+      verification: {
+        ...fakeResult.internal.verification,
+        event: "ORDER_COMPLETED"
+      },
+      mapping: {
+        ...fakeResult.internal.mapping,
+        event: "ORDER_COMPLETED",
+        operatorBillingArgs: {
+          billingStatus: "registration_fee_paid",
+          paymentStatus: "paid",
+          refundStatus: "not_required"
+        }
+      }
+    }
+  };
+  const completed = buildDedupeRecord(completedResult, { now });
   const unresolved = buildDedupeRecord({
     ...fakeResult,
     internal: {
@@ -367,7 +387,8 @@ function runSelfTest() {
     && first.logicalDedupeKey === "revolut:ORDER_PAYMENT_FAILED:order_TEST:ROQ-RCS-TEST-REVOLUT-WEBHOOK"
     && unresolved.documentId === first.documentId
     && unresolved.logicalDedupeKey === "revolut:ORDER_PAYMENT_FAILED:order_TEST:unresolved"
-    && ignored.state === "ignored";
+    && ignored.state === "ignored"
+    && completed.state === "enrichment_required";
 
   return Promise.all([create, duplicate, notRecordable]).then(([created, duplicated, skipped]) => ({
     ok: passed
@@ -381,6 +402,7 @@ function runSelfTest() {
       first,
       unresolved,
       ignored,
+      completed,
       created,
       duplicated,
       skipped

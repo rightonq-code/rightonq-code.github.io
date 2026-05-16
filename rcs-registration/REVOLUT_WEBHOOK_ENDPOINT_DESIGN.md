@@ -72,6 +72,7 @@ These files are the source of truth for the first endpoint implementation:
   - requires `POST`, `req.rawBody`, and `REVOLUT_WEBHOOK_SIGNING_SECRET`.
   - returns only the public handler body.
   - logs redacted record-mode fields only.
+  - in source-only record mode, enriches fresh non-duplicate `ORDER_COMPLETED` events when a Merchant API secret and fetch implementation are configured.
 - `cloud-run/revolut-webhook/dedupe.mjs`
   - builds payload-stable receipt keys and Firestore document IDs.
   - stores application context in `logicalDedupeKey`, not in the document ID.
@@ -290,7 +291,7 @@ Forbidden until explicitly approved:
 4. Return only `result.body` to Revolut. Done in source skeleton.
 5. Log/store only redacted `result.internal`. Source skeleton logs redacted record-mode fields only.
 6. Add Firestore dedupe in record-only mode. Source primitives and adapter exist; deployment wiring to the real Google project/database is still to do.
-7. Add order enrichment using the Revolut Merchant API secret from Secret Manager. Source helper exists in `cloud-run/revolut-webhook/enrich.mjs`; it is not wired to the endpoint yet.
+7. Add order enrichment using the Revolut Merchant API secret from Secret Manager. Source helper exists in `cloud-run/revolut-webhook/enrich.mjs` and is wired into the source-only record-mode handler for fresh non-duplicate `ORDER_COMPLETED` events.
 8. Use `lookupPaymentOrder` on the original/related order ID from refund-order enrichment to resolve application context when refund events arrive without `merchant_order_ext_ref`. Source helper now returns `ledgerLookupOrderId` for this purpose.
 9. Keep Billing updates disabled until the record-only path has been proven with sandbox webhooks.
 
