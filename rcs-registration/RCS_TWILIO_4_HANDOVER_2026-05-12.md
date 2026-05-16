@@ -1516,6 +1516,36 @@ Latest follow-up on Saturday 16 May 2026 confirmed the yes/no build matrix:
   - sensitive evidence not stored by RightOnQ where Twilio-managed embeddable is available;
   - persist `inquiry_id` / `registration_id`, not session token.
 
+### Isa/Twilio AI Reply Verification Pass
+
+Bugs flagged that Isa Bell's replies are AI-assisted and asked for a focused verification pass against official Twilio docs.
+
+RCS-Twilio-4 spawned three narrow verification agents and also spot-checked the same official docs directly.
+
+Verification result: the reply is reliable for current build direction, with two caveats.
+
+Confirmed:
+
+- Compliance Embeddable FAQ lists `Regulatory Compliance Bundles for Long Codes`.
+- Compliance Embeddable API access requires prior registration/enablement.
+- The embeddable onboarding guide's ISV pattern expects a primary business profile with business identity set to `ISV/Reseller`.
+- Public docs do not clearly confirm generic Secondary Compliance Profile embeddable support; the explicit FAQ item is narrower: `Secondary Customer Profiles for Voice Trust`.
+- Secondary profile API/policy docs include both `authorized_representative_1` and `authorized_representative_2`.
+- Embeddable docs support prefill, white-label/self-service embed, callbacks, `inquiry_id`, `registration_id`, and ephemeral 24-hour session token.
+- Compliance Embeddable FAQ says data is stored in the US.
+
+Nuance:
+
+- The docs support the conclusion that the end client does not need Twilio Console login for an embeddable-supported lane, but the docs frame it as self-service embedding rather than stating the login point verbatim.
+- Rep count is product/policy-specific. Generic secondary profile API/policy docs support two reps, while Voice Integrity docs can treat rep 2 as optional. Keep the canonical state model two-rep capable and still fetch/observe live policy requirements dynamically where possible.
+
+Implementation stance after verification:
+
+- UK RC Bundle: embeddable-supported in product scope, but gated by Twilio access/registration.
+- Secondary Compliance Profile: keep RightOnQ/API/Console-managed for now.
+- Sensitive evidence: Twilio-managed path where supported; no raw ID storage in the static app/Sheet.
+- Store durable IDs/statuses/rejection reasons/callback history, not session tokens or raw documents.
+
 ### Spawned Agent Research Added - Twilio KYC Docs
 
 Bugs then spawned agents to review the Twilio pages referenced by Isa's reply and pasted the consolidated build impact.

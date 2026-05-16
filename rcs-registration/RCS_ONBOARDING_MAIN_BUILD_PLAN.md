@@ -263,6 +263,36 @@ State-machine / storage impact:
 - Do not persist `inquiry_session_token` as a durable identifier.
 - Store IDs/status/rejection reasons/callback history, not raw identity documents.
 
+### AI Reply Verification Pass - 2026-05-16
+
+Bugs asked for the Isa Bell / Twilio AI-assisted reply to be checked against official Twilio documentation.
+
+Verification result: confirmed with nuance.
+
+| Claim | Verification result | Implementation stance |
+| --- | --- | --- |
+| Compliance Embeddable supports Regulatory Compliance Bundles for Long Codes | Confirmed. Twilio's Compliance Embeddable FAQ lists `Regulatory Compliance Bundles for Long Codes`. | UK RC Bundle lane can target Compliance Embeddable once access is enabled. |
+| Compliance Embeddable access requires prior registration | Confirmed. Twilio's onboarding guide says Compliance Embeddable API access requires prior registration. | Do not build a live UX assuming access is already available. |
+| ISV flow expects ISV/Reseller primary profile | Confirmed in the Compliance Embeddable onboarding guide, with adjacent Trust Hub docs requiring approved primary profiles for registrations. | Ensure RightOnQ's primary profile / business identity is ready before relying on the embeddable path. |
+| Generic Secondary Compliance Profile embeddable support | Not confirmed by public docs. FAQ explicitly lists `Secondary Customer Profiles for Voice Trust`, not generic Trust Hub secondary profiles. | Keep Secondary Compliance Profile RightOnQ/API/Console-managed unless Twilio confirms account/use-case support. |
+| Secondary Profile representative count | Confirmed with product-specific nuance. Generic API/policy docs include both `authorized_representative_1` and `authorized_representative_2`, while Voice Integrity docs can treat rep 2 as optional. | Canonical model supports two reps; still fetch/observe live policy requirements dynamically where possible. |
+| End client does not need Twilio Console login for embeddable-supported flow | Supported by the self-service white-label embed model, but not found as a literal login statement. | Safe UX assumption for embeddable-supported lanes, but phrase as RightOnQ-hosted/Twilio-managed rather than promising Console details. |
+| Prefill, callbacks, session token, data residency | Confirmed. Docs show prefill through initialize API, callbacks including `onReady`, `onInquirySubmitted`, `onComplete`, `onCancel`, `onError`, an ephemeral 24-hour session token, and US data storage. | Persist `inquiry_id` / `registration_id`, not session token; flag US storage for privacy review. |
+
+Official references used:
+
+- Twilio Compliance Embeddable FAQ: `https://help.twilio.com/articles/31769870199707-What-is-the-Compliance-Embeddable`
+- Twilio Toll-Free Verification Compliance Embeddable Onboarding Guide: `https://www.twilio.com/docs/messaging/compliance/toll-free/compliance-embeddable-onboarding`
+- Twilio Secondary Compliance Profiles: `https://www.twilio.com/docs/trust-hub/profiles/secondary-compliance-profiles`
+- Twilio API: Create a Secondary Customer Profile: `https://www.twilio.com/docs/trust-hub/trusthub-rest-api/api-create-secondary-customer-profile`
+- Twilio Policies Resource: `https://www.twilio.com/docs/trust-hub/trusthub-rest-api/policies`
+- Twilio Profiles: `https://www.twilio.com/docs/trust-hub/profiles`
+
+Bottom line:
+
+- The Isa/Twilio AI-assisted reply is reliable enough for current build direction.
+- Remaining uncertainty is not architecture; it is account/program enablement and exact live policy requirements.
+
 ### Spawned Agent Research - Twilio KYC Docs
 
 Bugs spawned research agents after Isa's reply and pasted the consolidated build impact on Thursday 14 May 2026.
