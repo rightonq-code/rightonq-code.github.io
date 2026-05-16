@@ -28,4 +28,6 @@ Expected result: `ok: true`.
 
 Deployment is intentionally out of scope for this slice. Before deployment, add record-only Firestore dedupe and Secret Manager wiring according to `../../REVOLUT_WEBHOOK_ENDPOINT_DESIGN.md`.
 
+The enrichment helper defaults to the Revolut sandbox Merchant API base URL for local proof work. Any future production deployment must explicitly configure the live Revolut Merchant API base URL and use separate live Secret Manager secrets.
+
 The next slice should wire `FirestoreDedupeStore.fromDefault()` into the deployed handler after the Google project, Firestore database, and Secret Manager boundary are explicitly confirmed.

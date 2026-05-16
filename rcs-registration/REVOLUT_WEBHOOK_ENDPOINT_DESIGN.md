@@ -162,6 +162,21 @@ Observed refund webhook:
 
 That event did not include `merchant_order_ext_ref`, refund-specific fields, or the refund payment ID.
 
+Observed sandbox refund order retrieval:
+
+```json
+{
+  "id": "6a0872b4-89b8-a82d-884b-703f6470c124",
+  "type": "refund",
+  "state": "completed",
+  "amount": 12000,
+  "currency": "GBP",
+  "relatedOrderId": "6a0866ef-9b11-a041-bfa2-e973e15e564d"
+}
+```
+
+The actual sandbox proof confirms the refund order type is lowercase `refund` and the original checkout order is exposed as `relatedOrderId` in the local proof-tool summary. The enrichment helper accepts both raw Revolut snake_case (`related_order_id`) and summary camelCase (`relatedOrderId`) forms.
+
 Rules:
 
 1. Always enrich `ORDER_COMPLETED` before any live Billing update until refund-vs-payment distinguishability is independently proven.

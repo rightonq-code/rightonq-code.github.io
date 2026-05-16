@@ -152,13 +152,34 @@ async function runSelfTest() {
   };
   const sampleRefundOrder = {
     id: "refund_order_TEST",
-    type: "REFUND",
-    state: "PROCESSING",
+    type: "refund",
+    state: "completed",
+    amount: 12000,
+    currency: "GBP",
     related_order_id: "order_payment_TEST",
     payments: [
       {
         id: "refund_payment_TEST",
-        state: "COMPLETED"
+        state: "completed",
+        amount: 12000,
+        currency: "GBP"
+      }
+    ]
+  };
+  const observedRefundSummary = {
+    id: "refund_order_OBSERVED",
+    type: "refund",
+    state: "completed",
+    amount: 12000,
+    currency: "GBP",
+    relatedOrderId: "order_payment_TEST",
+    payments: [
+      {
+        id: "refund_payment_OBSERVED",
+        state: "completed",
+        amount: 12000,
+        currency: "GBP",
+        paymentMethodType: "card"
       }
     ]
   };
@@ -189,9 +210,10 @@ async function runSelfTest() {
     fetchImpl,
     merchantApiSecret: SAMPLE_SECRET
   });
+  const observedRefund = buildEnrichmentContext(observedRefundSummary);
   const missingRelated = buildEnrichmentContext({
     id: "refund_without_related_TEST",
-    type: "REFUND"
+    type: "refund"
   });
 
   const passed = payment.classification === "payment_order"
@@ -203,6 +225,8 @@ async function runSelfTest() {
     && refund.classification === "refund_order"
     && refund.ledgerLookupOrderId === "order_payment_TEST"
     && refund.requiresPaymentOrderLookup === true
+    && observedRefund.classification === "refund_order"
+    && observedRefund.ledgerLookupOrderId === "order_payment_TEST"
     && missingRelated.warnings.includes("refund_order_missing_related_order_id")
     && calls.length === 2
     && calls.every((call) => call.authorizationPresent === true)
@@ -214,6 +238,7 @@ async function runSelfTest() {
     cases: {
       payment,
       refund,
+      observedRefund,
       missingRelated,
       calls
     },

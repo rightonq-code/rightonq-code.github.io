@@ -2578,6 +2578,11 @@ Active-checkout protection started:
   - fake-fetch self-test covers payment order, refund order, and refund-without-related-order warning;
   - helper returns `ledgerLookupOrderId` so refund webhooks can resolve through the original checkout order later;
   - not wired to the endpoint and no live Revolut call was made.
+- Refund-order retrieval proof closed the enrichment-shape caveat:
+  - existing sandbox refund order `6a0872b4-89b8-a82d-884b-703f6470c124` retrieved successfully;
+  - returned `type = refund`, `state = completed`, `amount = 12000`, `currency = GBP`;
+  - returned `relatedOrderId = 6a0866ef-9b11-a041-bfa2-e973e15e564d`, confirming the original checkout order link needed for `lookupPaymentOrder`;
+  - enrichment self-test now mirrors the observed lowercase refund shape and camelCase `relatedOrderId` summary path.
 - Payment-order lookup is now deployed to a new clean API-only operator deployment after the Apps Script code push:
   - deployment ID `AKfycbzj0I9m_vld5Aw-zPQFsTZXslrmxlrDA6Ut0RtFnd6_fxXpVDc4qhhRuKVAA5EuhWG9`;
   - version `35`;

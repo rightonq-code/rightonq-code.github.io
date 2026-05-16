@@ -3642,45 +3642,6 @@ Status:
 - no Revolut webhook URL has been changed;
 - no Apps Script call or Billing update was made.
 
-## Slice 8V - Source-Only Revolut Order Enrichment Helper
-
-Codex added the first source-only enrichment helper for the future record-only webhook endpoint.
-
-Files:
-
-- `rcs-registration/cloud-run/revolut-webhook/enrich.mjs`;
-- `rcs-registration/cloud-run/revolut-webhook/package.json`;
-- `rcs-registration/cloud-run/revolut-webhook/README.md`;
-- `rcs-registration/REVOLUT_WEBHOOK_ENDPOINT_DESIGN.md`;
-- this handover and the build plan.
-
-Behaviour:
-
-- retrieves `/orders/{order_id}` through an injected `fetch` implementation;
-- builds Merchant API headers from a supplied secret, but the helper never prints or returns the secret;
-- summarises order/payment fields without returning order tokens, full payment-method IDs, raw bodies, signatures, HMACs, PINs, OAuth credentials, card data, or secrets;
-- classifies enriched orders as `payment_order` or `refund_order`;
-- returns `ledgerLookupOrderId`:
-  - payment orders use their own Revolut order ID;
-  - refund orders use `related_order_id` / original order ID so the endpoint can later call `lookupPaymentOrder(originalOrderId)`;
-- warns with `refund_order_missing_related_order_id` if a refund order lacks a related/original order ID.
-
-Verification:
-
-- `node --check rcs-registration/cloud-run/revolut-webhook/enrich.mjs` passed;
-- `npm --prefix rcs-registration/cloud-run/revolut-webhook run enrichment-self-test` passed with fake orders and fake fetch only;
-- `npm --prefix rcs-registration/cloud-run/revolut-webhook run self-test` passed;
-- `npm --prefix rcs-registration/cloud-run/revolut-webhook run dedupe-self-test` passed.
-
-Status:
-
-- enrichment helper is not wired into the live handler yet;
-- no endpoint has been deployed;
-- no Firestore database has been enabled or written to by this work;
-- no live Revolut call was made;
-- no Revolut webhook URL has been changed;
-- no Apps Script call or Billing update was made.
-
 ## Slice 8T - Google Cloud Boundary Plan
 
 Codex recorded a docs-only Google Cloud boundary plan for the Revolut webhook endpoint.
@@ -3745,6 +3706,80 @@ Verification:
 
 Status:
 
+- no endpoint has been deployed;
+- no Firestore database has been enabled or written to by this work;
+- no Revolut webhook URL has been changed;
+- no Apps Script call or Billing update was made.
+
+## Slice 8V - Source-Only Revolut Order Enrichment Helper
+
+Codex added the first source-only enrichment helper for the future record-only webhook endpoint.
+
+Files:
+
+- `rcs-registration/cloud-run/revolut-webhook/enrich.mjs`;
+- `rcs-registration/cloud-run/revolut-webhook/package.json`;
+- `rcs-registration/cloud-run/revolut-webhook/README.md`;
+- `rcs-registration/REVOLUT_WEBHOOK_ENDPOINT_DESIGN.md`;
+- this handover and the build plan.
+
+Behaviour:
+
+- retrieves `/orders/{order_id}` through an injected `fetch` implementation;
+- builds Merchant API headers from a supplied secret, but the helper never prints or returns the secret;
+- summarises order/payment fields without returning order tokens, full payment-method IDs, raw bodies, signatures, HMACs, PINs, OAuth credentials, card data, or secrets;
+- classifies enriched orders as `payment_order` or `refund_order`;
+- returns `ledgerLookupOrderId`:
+  - payment orders use their own Revolut order ID;
+  - refund orders use `related_order_id` / original order ID so the endpoint can later call `lookupPaymentOrder(originalOrderId)`;
+- warns with `refund_order_missing_related_order_id` if a refund order lacks a related/original order ID.
+
+Verification:
+
+- `node --check rcs-registration/cloud-run/revolut-webhook/enrich.mjs` passed;
+- `npm --prefix rcs-registration/cloud-run/revolut-webhook run enrichment-self-test` passed with fake orders and fake fetch only;
+- `npm --prefix rcs-registration/cloud-run/revolut-webhook run self-test` passed;
+- `npm --prefix rcs-registration/cloud-run/revolut-webhook run dedupe-self-test` passed.
+
+Status:
+
+- enrichment helper is not wired into the live handler yet;
+- no endpoint has been deployed;
+- no Firestore database has been enabled or written to by this work;
+- no live Revolut call was made;
+- no Revolut webhook URL has been changed;
+- no Apps Script call or Billing update was made.
+
+## Slice 8W - Refund Order Retrieval Shape Proof
+
+Adam ran a read-only Revolut sandbox retrieval for the existing refund order.
+
+Command purpose:
+
+- retrieve order ID `6a0872b4-89b8-a82d-884b-703f6470c124`;
+- confirm the real refund order shape before wiring enrichment into the handler.
+
+Observed summary:
+
+- `type = refund`;
+- `state = completed`;
+- `amount = 12000`;
+- `currency = GBP`;
+- `relatedOrderId = 6a0866ef-9b11-a041-bfa2-e973e15e564d`;
+- refund payment ID `6a0872b4-395a-a536-8ca5-0ab9c27056af`;
+- payment state `completed`;
+- payment method type `card`;
+- no checkout URL present.
+
+Implication:
+
+- Claude Code's Medium caveat on refund-order shape is now materially resolved for sandbox: the refund type is lowercase `refund`, and the original checkout order link is present as `relatedOrderId` in the local proof-tool summary;
+- `enrich.mjs` already normalises type case and supports both raw snake_case `related_order_id` and summary camelCase `relatedOrderId`;
+- the enrichment self-test now mirrors the observed lowercase refund shape and camelCase summary path.
+
+Status:
+
+- read-only Revolut sandbox retrieval only;
 - no endpoint has been deployed;
 - no Firestore database has been enabled or written to by this work;
 - no Revolut webhook URL has been changed;
