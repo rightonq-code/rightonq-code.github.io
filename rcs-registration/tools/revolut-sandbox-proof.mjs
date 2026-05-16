@@ -423,7 +423,9 @@ async function main() {
     const result = await requestJson(`/orders/${encodeURIComponent(options.orderId)}/payments`, {
       method: "GET"
     });
-    const payments = Array.isArray(result.payments) ? result.payments : [];
+    const payments = Array.isArray(result)
+      ? result
+      : Array.isArray(result.payments) ? result.payments : [];
     console.log(JSON.stringify({
       ok: true,
       action: "retrieve_payments",

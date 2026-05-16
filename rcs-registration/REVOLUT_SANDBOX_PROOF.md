@@ -2,7 +2,7 @@
 
 Created: 2026-05-15
 Owner: RCS-Twilio-4
-Status: draft proof plan, not production implementation
+Status: first live sandbox registration-fee payment proof passed; not production implementation
 
 ## Purpose
 
@@ -63,6 +63,40 @@ Potential doc/API naming caution:
 - Current Revolut order docs show `merchant_order_data.reference` as the internal order reference field.
 - External feedback mentioned `merchant_order_ext_ref`; verify the exact field name in the selected API version during sandbox proof.
 - For RightOnQ, the external reference should be the `applicationId` wherever Revolut supports it, so webhooks can route directly back to the application.
+
+## Live Sandbox Proof Results - 2026-05-16
+
+First happy-path registration-fee payment proof passed using the Revolut Merchant sandbox.
+
+Inputs:
+
+- RightOnQ application ID / Revolut reference: `ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747`
+- Amount: `12000` minor units (`GBP 120.00`, representing `GBP 100 + VAT`)
+- API base URL: `https://sandbox-merchant.revolut.com/api`
+- API version: `2026-04-20`
+- Secret handling: `REVOLUT_MERCHANT_API_SECRET` was pasted into the local terminal prompt only, then unset. It was not pasted into chat, docs, commits, or command history as a literal value.
+
+Observed results:
+
+- Create-order call succeeded.
+- Revolut returned order ID `6a082426-a2c7-ae93-bcf2-5f3a5e75af5b`, token `66b0fb6a-e9ed-488b-88ba-987a95841108`, state `pending`, reference `ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747`, customer ID `ca1466ba-0058-4f41-a758-ae8fbcf38dc2`, and a hosted checkout URL.
+- Repeating create-order with the same `Idempotency-Key` created a second order, ID `6a08245f-ad3a-a1b5-848c-d0395ea20303`, token `dd1e2496-ac67-454c-b70f-df58d0ce1cf9`, customer ID `f62fc775-9ae9-4dbf-a343-9e61d26e7443`.
+- Revolut's current create-order docs do not document `Idempotency-Key` for order creation. Treat create-order as not idempotent in the RightOnQ design.
+- Listing orders by `merchant_order_data_reference` returned both pending orders for the application ID. Therefore RightOnQ must enforce one active registration-fee order per application in its own Billing lane before creating another Revolut order.
+- Direct order retrieval returns the checkout URL while the order is pending. List-order results did not include checkout URLs, so RightOnQ should store the returned checkout URL/token at create time.
+- The newer order `6a08245f-ad3a-a1b5-848c-d0395ea20303` was paid through sandbox Hosted Checkout using Revolut sandbox test card data supplied by Revolut.
+- The hosted checkout redirected to a RightOnQ URL that showed a 404 after payment. The API still confirmed successful payment, so this is a frontend redirect/return-page issue, not a payment proof failure.
+- After payment, order retrieval returned state `completed` with embedded payment ID `6a082633-a973-ac00-837c-e68c28186597`, payment state `captured`, payment type `card`, amount `12000`, currency `GBP`.
+- The separate payment-list endpoint returned an array directly, not `{ payments: [...] }`; `revolut-sandbox-proof.mjs` now handles both response shapes.
+- The corrected `--retrieve-payments` command returned one captured payment for order `6a08245f-ad3a-a1b5-848c-d0395ea20303`.
+
+Build impact:
+
+- Revolut Merchant Hosted Checkout is viable for the one-off `GBP 100 + VAT` registration-fee gate.
+- RightOnQ must not rely on Revolut create-order idempotency. Store/check Billing state before creating a checkout order.
+- Store at least: Revolut order ID, token or checkout URL while pending, customer ID, payment ID, order/payment state, amount/currency, and the application reference.
+- The RightOnQ return URL needs a payment-return state/page before public launch.
+- Webhook capture/signature verification, failed-payment proof, refund proof, saved-method/MIT proof, and subscription proof remain outstanding.
 
 ## Proof Questions
 
@@ -280,12 +314,12 @@ export REVOLUT_API_VERSION="2026-04-20"
 
 First live sandbox sequence, once Bugs has the sandbox Merchant API secret:
 
-1. Create one registration-fee order with a fixed idempotency key.
-2. Run the exact same create command again with the same idempotency key and confirm the returned order identity/status does not duplicate the payment attempt.
-3. Retrieve the order by ID.
-4. List orders by `merchant_order_data_reference` using the same application ID.
-5. Open the checkout URL in a browser and complete one sandbox card payment.
-6. Retrieve the order and payment list after payment.
+1. Create one registration-fee order with a fixed idempotency key. Done on 2026-05-16.
+2. Run the exact same create command again with the same idempotency key and confirm behaviour. Done on 2026-05-16; Revolut created a second order, so RightOnQ must enforce duplicate protection internally.
+3. Retrieve the order by ID. Done on 2026-05-16.
+4. List orders by `merchant_order_data_reference` using the same application ID. Done on 2026-05-16.
+5. Open the checkout URL in a browser and complete one sandbox card payment. Done on 2026-05-16.
+6. Retrieve the order and payment list after payment. Done on 2026-05-16.
 7. Capture one sandbox webhook payload plus headers and verify it with
    `revolut-webhook-verify.mjs`.
 8. Map the verified webhook with `revolut-webhook-map.mjs` and review the proposed Billing update.
@@ -298,13 +332,13 @@ First live sandbox sequence, once Bugs has the sandbox Merchant API secret:
 
 Minimum useful proof:
 
-- sandbox order created for `£120.00`;
-- response includes `id` and `checkout_url`;
-- order can be retrieved by ID;
-- `applicationId` appears in Revolut reference/metadata fields and can route the order back to the application;
-- idempotency behaviour is observed with a repeated request;
-- hosted checkout page opens;
-- successful sandbox payment changes order/payment state as expected;
+- sandbox order created for `£120.00`; done.
+- response includes `id` and `checkout_url`; done.
+- order can be retrieved by ID; done.
+- `applicationId` appears in Revolut reference/metadata fields and can route the order back to the application; done for create/retrieve/list.
+- idempotency behaviour is observed with a repeated request; done, and create-order is not idempotent in the observed sandbox behaviour.
+- hosted checkout page opens; done.
+- successful sandbox payment changes order/payment state as expected; done.
 - failed sandbox payment can be observed and mapped;
 - full refund path is observed and mapped;
 - captured webhook signature verifies locally using the raw payload and Revolut headers;
@@ -322,6 +356,6 @@ Stronger proof:
 
 ## Current Next Action
 
-Get or create a Revolut Business Sandbox Merchant account and sandbox Merchant API Secret key. Do not paste the key into chat. Use it locally through an environment variable or a future secret-loader helper.
+Create/register a sandbox webhook endpoint or otherwise capture a sandbox webhook payload plus `Revolut-Request-Timestamp` and `Revolut-Signature`, then verify it locally with `revolut-webhook-verify.mjs` and map it with `revolut-webhook-map.mjs`.
 
-No live Revolut call has been made yet. The local helpers have passed dry-run checks for create order, refund, saved-method payment payloads, fake-data webhook signature verification, and fake-data webhook-to-billing mapping.
+The first live sandbox Hosted Checkout payment proof has passed. No production Revolut call has been made. No real customer card data has been handled. No sandbox webhook has been registered/captured yet.

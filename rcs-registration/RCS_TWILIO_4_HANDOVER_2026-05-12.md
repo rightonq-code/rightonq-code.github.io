@@ -2901,3 +2901,55 @@ Current boundary:
 - no Revolut secret has been used;
 - no sandbox webhook has been registered;
 - all current Revolut work is local/offline tooling and documentation.
+
+### Slice 8G Continued - First Revolut Sandbox Payment Passed
+
+RCS-Twilio-4 ran the first live Revolut Merchant sandbox Hosted Checkout proof on Saturday 16 May 2026.
+
+Inputs:
+
+- application/reference: `ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747`;
+- amount: `12000` minor units (`GBP 120.00`, representing `GBP 100 + VAT`);
+- API base URL: `https://sandbox-merchant.revolut.com/api`;
+- API version: `2026-04-20`;
+- secret handling: Bugs pasted the sandbox Merchant API secret only into a local silent terminal prompt, then the environment variable was unset.
+
+Successful order/payment proof:
+
+- create order succeeded;
+- paid sandbox order ID: `6a08245f-ad3a-a1b5-848c-d0395ea20303`;
+- paid order token: `dd1e2496-ac67-454c-b70f-df58d0ce1cf9`;
+- customer ID: `f62fc775-9ae9-4dbf-a343-9e61d26e7443`;
+- payment ID: `6a082633-a973-ac00-837c-e68c28186597`;
+- final order state: `completed`;
+- final payment state: `captured`;
+- payment method type: `card`;
+- amount/currency: `12000 GBP`.
+
+Important findings:
+
+- Repeating create-order with the same `Idempotency-Key` created a second pending order, not the same order. Revolut's current create-order docs do not document create-order idempotency. RightOnQ must enforce one active checkout order per application in the Billing lane before creating a new Revolut order.
+- Listing by `merchant_order_data_reference` returned both orders for the application ID, so the reference is usable for reconciliation/search.
+- List-order responses did not include checkout URLs; direct order retrieval did while pending. Store checkout URL/token at create time.
+- The Hosted Checkout success redirect landed on a RightOnQ 404 page after payment. API state confirmed success, so this is a payment-return UX/page issue to fix before public launch.
+- `--retrieve-payments` initially printed zero because the payment-list endpoint returns an array directly rather than `{ payments: [...] }`. RCS-Twilio-4 patched `revolut-sandbox-proof.mjs` to handle both response shapes, then confirmed it returned the captured payment.
+
+Verification:
+
+- `node --check rcs-registration/tools/revolut-sandbox-proof.mjs` passed after the parser fix.
+- `--retrieve-payments --order-id 6a08245f-ad3a-a1b5-848c-d0395ea20303` returned one captured payment.
+
+Current boundary:
+
+- first live sandbox Hosted Checkout payment proof passed;
+- no production Revolut call has been made;
+- no real customer card data has been handled;
+- no sandbox webhook has been registered/captured yet;
+- no live Billing row update has been made from this sandbox payment yet.
+
+Next job:
+
+- capture/register a sandbox webhook event for the completed order;
+- verify the raw payload and headers with `revolut-webhook-verify.mjs`;
+- map the verified event with `revolut-webhook-map.mjs`;
+- then consider an `operator-billing.mjs --dry-run` followed by a live operator Billing update for the test application.

@@ -2439,7 +2439,16 @@ Slice 8 continuation after public/operator hardening:
 - Dry-run checks passed for create-order, refund, and saved-method payment payloads.
 - Webhook verifier self-test passed for valid, tampered-payload, and stale-timestamp cases.
 - Webhook mapper self-test passed for completed-payment and declined-payment cases.
-- No live Revolut API call has been made yet.
+- First live Revolut Merchant sandbox Hosted Checkout proof passed on 2026-05-16:
+  - `GBP 120.00` order created for application `ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747`;
+  - Hosted Checkout accepted a sandbox card payment;
+  - final order state was `completed`;
+  - final payment state was `captured`;
+  - payment ID was `6a082633-a973-ac00-837c-e68c28186597`.
+- Repeating create-order with the same `Idempotency-Key` created a second order. RightOnQ must enforce duplicate checkout protection in its own Billing lane before creating another Revolut order.
+- List by `merchant_order_data_reference` works for reconciliation, but list responses did not include checkout URLs; store checkout URL/token at create time.
+- The payment-success redirect hit a RightOnQ 404 page after payment, so add a real payment-return state/page before public launch.
+- No production Revolut API call has been made yet. No sandbox webhook has been registered/captured yet.
 
 ### Slice 8B - Public Endpoint Hardening Started
 
