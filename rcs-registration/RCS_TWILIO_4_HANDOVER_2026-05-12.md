@@ -3846,3 +3846,31 @@ Status:
 - no Firestore database has been enabled or written to by this work;
 - no Revolut webhook URL has been changed;
 - no Apps Script call or Billing update was made.
+
+## Slice 8Y - Runtime Firestore Dedupe Wiring
+
+Codex wired the exported Cloud Run / Functions Framework handler to use the Firestore dedupe adapter at runtime, while preserving fully offline local self-tests.
+
+Files:
+
+- `rcs-registration/cloud-run/revolut-webhook/index.mjs`;
+- `rcs-registration/cloud-run/revolut-webhook/README.md`;
+- `rcs-registration/REVOLUT_WEBHOOK_ENDPOINT_DESIGN.md`;
+- this handover and the build plan.
+
+Behaviour:
+
+- `revolutWebhook(req, res)` now passes a cached `FirestoreDedupeStore.fromDefault()` factory into `handleHttpRequest`;
+- `handleHttpRequest` still accepts an injected in-memory store for tests and local source-only proof;
+- the Firestore store is resolved only for recordable verified webhooks, after method/raw-body checks and signature/timestamp verification;
+- if a recordable webhook cannot obtain a dedupe store, the handler fails closed with `dedupe_store_unavailable` before enrichment;
+- local self-tests prove the dedupe-store factory path using an in-memory store, not Firestore;
+- no deploy path, Secret Manager binding, Apps Script call, or Billing write was added.
+
+Status:
+
+- source-only wiring; no endpoint has been deployed;
+- no Firestore database has been enabled or written to by this work;
+- no live Revolut call was made by this slice;
+- no Revolut webhook URL has been changed;
+- no Apps Script call or Billing update was made.

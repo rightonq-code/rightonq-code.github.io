@@ -2554,14 +2554,14 @@ Active-checkout protection started:
   - requires `POST`, `req.rawBody`, and `REVOLUT_WEBHOOK_SIGNING_SECRET`;
   - returns only the public response body and logs redacted record-mode fields;
   - self-test passed with fake data;
-  - not deployed; no Revolut webhook URL changed; no Firestore, Revolut enrichment, Apps Script, or Billing write exists yet.
+  - not deployed; no Revolut webhook URL changed; no Firestore database, Apps Script call, or Billing write exists yet.
 - Source-only dedupe primitives added:
   - `rcs-registration/cloud-run/revolut-webhook/dedupe.mjs`;
   - Firestore collection name `revolut_webhook_events`;
   - document ID is `sha256(revolut:{event}:{orderId})`, so it stays stable across unresolved/resolved application context;
   - `logicalDedupeKey` stores the richer `revolut:{event}:{orderId}:{applicationId-or-unresolved}` audit key;
   - in-memory self-test proves first create vs duplicate terminal detection;
-  - Firestore adapter source exists but is not wired to a live Google project/database.
+  - Firestore adapter source exists and the exported runtime handler now wires `FirestoreDedupeStore.fromDefault()`, but no live Google project/database has been enabled or deployed.
 - Google Cloud boundary planning recorded:
   - candidate project remains `rightonq-gog`, but must be confirmed in Google Cloud console before any action;
   - endpoint should use Cloud Run functions / Functions Framework Node.js source deployment;
@@ -2588,6 +2588,10 @@ Active-checkout protection started:
   - duplicate `ORDER_COMPLETED` events skip enrichment, so Revolut retries do not cause repeated Merchant API calls;
   - `ORDER_COMPLETED` dedupe records stay in `enrichment_required` state until a later apply flow is explicitly built;
   - fake-fetch self-test covers payment completion, duplicate completion, and refund completion; no live Revolut, Google Cloud, Apps Script, or Billing action was taken.
+- Source-only runtime handler now wires Firestore dedupe:
+  - exported `revolutWebhook(req, res)` obtains `FirestoreDedupeStore.fromDefault()` and passes it into the record-only handler path;
+  - the handler fails closed with `dedupe_store_unavailable` before enrichment if a recordable webhook cannot obtain the dedupe store;
+  - local self-tests still use an injected in-memory store and fake fetch; no live Firestore, Revolut, Google Cloud, Apps Script, or Billing action was taken.
 - Payment-order lookup is now deployed to a new clean API-only operator deployment after the Apps Script code push:
   - deployment ID `AKfycbzj0I9m_vld5Aw-zPQFsTZXslrmxlrDA6Ut0RtFnd6_fxXpVDc4qhhRuKVAA5EuhWG9`;
   - version `35`;
