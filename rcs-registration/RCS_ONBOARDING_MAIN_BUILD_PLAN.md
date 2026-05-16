@@ -18,6 +18,21 @@ Keep this file practical and current. When the plan changes, update it here so f
 
 The RCS registration form is not a standalone public form. It is one screen inside a wider client onboarding system.
 
+### Legal Entity / Brand Naming
+
+Important correction from Bugs on Saturday 16 May 2026:
+
+- The operating UK limited company is `Continuity AI Ltd`.
+- `Continuity AI Ltd` was registered at Companies House at the end of March 2026.
+- `RightOnQ` is the trading name / product brand of `Continuity AI Ltd`.
+- `RightOnQ` is going through trademark application; expected timing from Bugs is roughly 8-10 weeks from 16 May 2026 if no objection is raised.
+
+Implementation rule:
+
+- Use `Continuity AI Ltd` where the legal business/entity name is required.
+- Use `RightOnQ` where the customer-facing product, brand, platform, or trading name is required.
+- Do not treat `RightOnQ` as the legal business name in Twilio, Revolut, Trust Hub, RC Bundle, privacy, terms, or billing/compliance records.
+
 The client is becoming a RightOnQ customer. The journey needs to cover:
 
 - commercial acceptance;
@@ -136,7 +151,7 @@ Important discovery on Thursday 14 May 2026:
 - Subaccounts are runtime/account containers under Twilio `Accounts`.
 - Trust Hub stores KYC/compliance profiles under `trusthub.twilio.com/v1`.
 - For a RightOnQ-managed client such as `ABC Ltd`, the expected model is:
-  - RightOnQ primary compliance profile remains the approved parent profile;
+  - `Continuity AI Ltd`, trading as `RightOnQ`, primary compliance profile remains the approved parent profile;
   - each end-client gets its own Secondary Compliance Profile / Secondary Customer Profile;
   - phone numbers and other channel resources are linked to that compliance profile by assignment resources.
 - Treat this as a third onboarding track beside commercial/payment and RCS sender registration.
@@ -161,7 +176,7 @@ Compliance Embeddable design boundary from Isa/Twilio follow-up:
 
 - UK long-code Regulatory Compliance Bundles are explicitly within Compliance Embeddable scope.
 - Follow-up confirmation on Saturday 16 May 2026: this is supported at product-scope level, but not self-serve/default on every account. RightOnQ must complete the Compliance Embeddable access/registration step before building a live UX around it.
-- The published ISV pattern also assumes an approved primary business compliance profile with business identity set to ISV/Reseller.
+- The published ISV pattern also assumes an approved primary business compliance profile with business identity set to ISV/Reseller. This should be the legal `Continuity AI Ltd` profile, with `RightOnQ` as trading/product brand where relevant.
 - Generic Trust Hub Secondary Compliance Profile support through Compliance Embeddable is not clearly confirmed by public docs; public docs explicitly list Secondary Customer Profiles for Voice Trust, which is narrower.
 - Therefore, treat UK RC Bundle evidence/resubmission as the likely embeddable/self-service lane, but keep Secondary Compliance Profile creation/resubmission RightOnQ/API/Console-managed unless Twilio confirms account/use-case enablement.
 - Compliance Embeddable is white-label and does not require the end client to have a Twilio login.
@@ -188,7 +203,7 @@ Bugs emailed Isa Bell at Twilio on Thursday 14 May 2026 to confirm the build-cri
 
 The email asked, in practical terms:
 
-- whether each UK limited-company client should have a Secondary Customer/Compliance Profile under RightOnQ's approved Primary Profile;
+- whether each UK limited-company client should have a Secondary Customer/Compliance Profile under the approved Primary Profile for `Continuity AI Ltd`, trading as `RightOnQ`;
 - whether the UK long-code Regulatory Compliance Bundle is separate from, or fed by, the Secondary Customer/Compliance Profile;
 - what identity evidence is normally required for the authorised representative of a UK limited company;
 - whether RightOnQ can complete or trigger any passport/driving-licence verification through Twilio/Persona without storing copies of personal ID;
@@ -199,8 +214,8 @@ The email asked, in practical terms:
 Isa replied on Thursday 14 May 2026 with these build-impacting answers:
 
 - RightOnQ's ISV model is correct:
-  - RightOnQ keeps the approved Primary Compliance Profile on the parent account;
-  - each end-client UK limited company gets its own Secondary Compliance Profile when the brand/entity differs from RightOnQ;
+  - `Continuity AI Ltd`, trading as `RightOnQ`, keeps the approved Primary Compliance Profile on the parent account;
+  - each end-client UK limited company gets its own Secondary Compliance Profile when the brand/entity differs from `Continuity AI Ltd` or the `RightOnQ` brand;
   - Twilio docs now use `Compliance Profile` where older docs may say `Customer Profile`.
 - The UK long-code Regulatory Compliance Bundle is separate from the Secondary Compliance Profile:
   - the data overlaps;
@@ -273,7 +288,7 @@ Verification result: confirmed with nuance.
 | --- | --- | --- |
 | Compliance Embeddable supports Regulatory Compliance Bundles for Long Codes | Confirmed. Twilio's Compliance Embeddable FAQ lists `Regulatory Compliance Bundles for Long Codes`. | UK RC Bundle lane can target Compliance Embeddable once access is enabled. |
 | Compliance Embeddable access requires prior registration | Confirmed. Twilio's onboarding guide says Compliance Embeddable API access requires prior registration. | Do not build a live UX assuming access is already available. |
-| ISV flow expects ISV/Reseller primary profile | Confirmed in the Compliance Embeddable onboarding guide, with adjacent Trust Hub docs requiring approved primary profiles for registrations. | Ensure RightOnQ's primary profile / business identity is ready before relying on the embeddable path. |
+| ISV flow expects ISV/Reseller primary profile | Confirmed in the Compliance Embeddable onboarding guide, with adjacent Trust Hub docs requiring approved primary profiles for registrations. | Ensure `Continuity AI Ltd`, trading as `RightOnQ`, has the correct primary profile / business identity ready before relying on the embeddable path. |
 | Generic Secondary Compliance Profile embeddable support | Not confirmed by public docs. FAQ explicitly lists `Secondary Customer Profiles for Voice Trust`, not generic Trust Hub secondary profiles. | Keep Secondary Compliance Profile RightOnQ/API/Console-managed unless Twilio confirms account/use-case support. |
 | Secondary Profile representative count | Confirmed with product-specific nuance. Generic API/policy docs include both `authorized_representative_1` and `authorized_representative_2`, while Voice Integrity docs can treat rep 2 as optional. | Canonical model supports two reps; still fetch/observe live policy requirements dynamically where possible. |
 | End client does not need Twilio Console login for embeddable-supported flow | Supported by the self-service white-label embed model, but not found as a literal login statement. | Safe UX assumption for embeddable-supported lanes, but phrase as RightOnQ-hosted/Twilio-managed rather than promising Console details. |
@@ -299,8 +314,8 @@ Bugs spawned research agents after Isa's reply and pasted the consolidated build
 
 The research supports the current architecture:
 
-- RightOnQ keeps the approved parent Primary Compliance Profile.
-- Each end-client company gets its own Secondary Compliance Profile when the brand/entity differs from RightOnQ.
+- `Continuity AI Ltd`, trading as `RightOnQ`, keeps the approved parent Primary Compliance Profile.
+- Each end-client company gets its own Secondary Compliance Profile when the brand/entity differs from `Continuity AI Ltd` or the `RightOnQ` brand.
 - If UK long-code SMS fallback is used, RightOnQ should build a separate UK Regulatory Compliance Bundle for the end business, then assign the UK number to that approved bundle.
 
 Earlier intake fields from this research should now be read with the follow-up correction above:

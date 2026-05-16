@@ -50,6 +50,20 @@ Also read and update the main product build plan:
 
 The handover diary is for agent continuity and local repo state. The main build plan is the durable product/workflow source of truth across Twilio-4, Twilio-5, Twilio-6, and later agents.
 
+## Legal Entity / Brand Naming
+
+Important correction from Bugs on Saturday 16 May 2026:
+
+- The operating UK limited company is `Continuity AI Ltd`.
+- `RightOnQ` is the trading name / product brand of `Continuity AI Ltd`.
+- `RightOnQ` is going through trademark application.
+
+Implementation rule:
+
+- Use `Continuity AI Ltd` for legal entity / business-name fields.
+- Use `RightOnQ` for product, brand, trading name, customer-facing platform, and campaign language.
+- Do not use `RightOnQ` as the legal business name in Twilio, Revolut, Trust Hub, RC Bundle, privacy, terms, or billing/compliance records.
+
 Twilio-2 and Twilio-3 handover copies are currently untracked in the dirty checkout, but Twilio-3 says they were safely preserved on a separate docs/handover branch and merged via PR #2. Leave them alone unless Bugs explicitly asks.
 
 ## Starting State For Twilio-4
@@ -1433,8 +1447,8 @@ Bugs received a comprehensive reply from Isa Bell at Twilio on Thursday 14 May 2
 Build-impacting points from Isa's reply:
 
 - RightOnQ's ISV model is correct:
-  - RightOnQ keeps the approved Primary Compliance Profile on the parent account;
-  - each end-client UK limited company gets its own Secondary Compliance Profile when the registered brand/entity differs from RightOnQ;
+  - `Continuity AI Ltd`, trading as `RightOnQ`, keeps the approved Primary Compliance Profile on the parent account;
+  - each end-client UK limited company gets its own Secondary Compliance Profile when the registered brand/entity differs from `Continuity AI Ltd` or the `RightOnQ` brand;
   - Twilio docs now use `Compliance Profile` where older docs may say `Customer Profile`.
 - UK long-code RC Bundle is separate from the Secondary Compliance Profile:
   - data overlaps;
@@ -1555,7 +1569,7 @@ RCS-Twilio-4 added that consolidation to `RCS_ONBOARDING_MAIN_BUILD_PLAN.md`.
 Key build additions:
 
 - confirmed the architecture remains:
-  - RightOnQ parent Primary Compliance Profile;
+  - `Continuity AI Ltd`, trading as `RightOnQ`, parent Primary Compliance Profile;
   - one Secondary Compliance Profile per end-client company;
   - separate UK RC Bundle for UK long-code SMS fallback;
   - assign UK numbers to the approved end-business bundle/profile.
