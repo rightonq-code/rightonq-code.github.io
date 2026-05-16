@@ -23,6 +23,9 @@ Official docs checked:
 - Cloud Run Node.js runtime: https://docs.cloud.google.com/run/docs/runtimes/nodejs
 - Cloud Run environment variables and Secret Manager recommendation: https://docs.cloud.google.com/run/docs/configuring/services/environment-variables
 - Cloud Run logging: https://docs.cloud.google.com/run/docs/logging
+- Cloud Run locations: https://cloud.google.com/run/docs/locations
+- Secret Manager locations: https://cloud.google.com/secret-manager/docs/locations
+- Cloud Firestore locations: https://firebase.google.com/docs/firestore/locations
 - Firestore add/set document model: https://firebase.google.com/docs/firestore/manage-data/add-data
 
 ## Endpoint Boundary
@@ -231,10 +234,11 @@ Traffic expectation:
 Recommended boundary:
 
 - Google account / organisation: `rightonq.co.uk` / RightOnQ-controlled Google account.
-- Candidate Google Cloud project: `rightonq-gog` (to be confirmed in console before any action).
+- Candidate Google Cloud project: `rightonq-gog`. Adam confirmed on 2026-05-16 that this is the intended paid Google Cloud project unless console verification shows a clash or better existing project boundary.
 - Runtime: Cloud Run functions / Functions Framework Node.js source deployment for `roq-rcs-revolut-webhook`.
-- Region: choose one UK/Europe region and keep Cloud Run, Firestore, Secret Manager, and logs in the same region where possible; exact region still requires console confirmation.
+- Proposed region: `europe-west2` / London. Official docs list `europe-west2` for Cloud Run, Secret Manager, and Cloud Firestore, making it the natural UK-first choice for a UK-based RightOnQ workflow. Confirm availability in the console before any action.
 - Dedupe/event store: Firestore Native mode, collection `revolut_webhook_events`.
+- Firestore state: not currently enabled/created for this lane, per Adam's 2026-05-16 confirmation. Enabling Firestore Native mode is a separate explicit console action and remains forbidden until approved.
 - Secret store: Secret Manager.
 - Initial endpoint mode: record-only. It may verify, dedupe, log, and later enrich; it must not update Apps Script Billing automatically.
 
@@ -267,10 +271,10 @@ roq-rcs-revolut-merchant-api-secret-live
 
 Pre-deployment checklist:
 
-1. Confirm the Google Cloud project ID in the console.
+1. Confirm the Google Cloud project ID `rightonq-gog` in the console and verify it does not clash with another intended project boundary.
 2. Confirm billing/permissions are suitable for Cloud Run, Secret Manager, Firestore, and Cloud Logging.
-3. Confirm Firestore Native mode state. If it is not enabled, enabling it is a separate explicit action.
-4. Confirm the target region.
+3. Confirm Firestore Native mode state. Current planning assumption is not enabled; if it is not enabled, enabling it is a separate explicit action.
+4. Confirm `europe-west2` / London as the target region for Cloud Run, Firestore, Secret Manager, and logging.
 5. Confirm service account name and minimum IAM roles.
 6. Confirm Secret Manager secret names.
 7. Confirm the endpoint will start in record-only mode.
@@ -300,9 +304,9 @@ Forbidden until explicitly approved:
 
 ## Remaining Confirmations
 
-- Confirm exact Google Cloud project/account boundary; current candidate is `rightonq-gog`.
-- Confirm the target Google Cloud region.
-- Confirm Firestore Native mode state; if it is not enabled, enablement is a separate explicit console step.
+- Confirm exact Google Cloud project/account boundary in-console; current candidate is `rightonq-gog` and Adam has approved that direction unless a clash appears.
+- Confirm `europe-west2` / London in-console as the target region.
+- Confirm Firestore Native mode state; current planning assumption is not enabled, and enablement is a separate explicit console step.
 - Confirm Cloud Run functions / Functions Framework source deployment is available and suitable in the selected project/region.
 - Confirm service account name and minimum IAM roles.
 - Confirm Secret Manager secret names before creating anything.

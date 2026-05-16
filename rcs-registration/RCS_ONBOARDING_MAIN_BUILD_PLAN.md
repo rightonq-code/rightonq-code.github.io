@@ -2563,10 +2563,11 @@ Active-checkout protection started:
   - in-memory self-test proves first create vs duplicate terminal detection;
   - Firestore adapter source exists and the exported runtime handler now wires `FirestoreDedupeStore.fromDefault()`, but no live Google project/database has been enabled or deployed.
 - Google Cloud boundary planning recorded:
-  - candidate project remains `rightonq-gog`, but must be confirmed in Google Cloud console before any action;
+  - candidate project is `rightonq-gog`; Adam confirmed on 2026-05-16 that this is the intended paid Google Cloud project unless console verification shows a clash;
   - endpoint should use Cloud Run functions / Functions Framework Node.js source deployment;
+  - proposed target region is `europe-west2` / London, because official docs list London for Cloud Run, Secret Manager, and Cloud Firestore and the RightOnQ workflow is UK-first;
   - Secret Manager names proposed separately for sandbox and live Revolut secrets;
-  - Firestore Native mode remains the dedupe/event store choice;
+  - Firestore Native mode remains the dedupe/event store choice, but it is not currently enabled/created for this lane and enabling it is a separate explicit action;
   - first deployed mode must be record-only;
   - enabling Firestore, creating secrets/service accounts/IAM, deploying Cloud Run, changing Revolut webhook URL, automatic Billing writes, and strict payment gating remain explicitly forbidden until approved.
 - Cloud webhook source observability tightened:

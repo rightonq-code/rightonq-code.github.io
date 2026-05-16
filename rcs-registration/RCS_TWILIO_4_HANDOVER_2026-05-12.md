@@ -3874,3 +3874,24 @@ Status:
 - no live Revolut call was made by this slice;
 - no Revolut webhook URL has been changed;
 - no Apps Script call or Billing update was made.
+
+## Slice 8Z - Google Cloud Boundary Decision Update
+
+Codex recorded Adam's initial Google Cloud boundary decisions in the webhook design docs. This is a written planning update only; no Google Cloud console action, `gcloud` command, deployment, Firestore enablement, Secret Manager action, Revolut URL change, Apps Script call, or Billing update was made.
+
+Decisions recorded:
+
+- candidate Google Cloud project: `rightonq-gog`;
+- Adam confirmed on 2026-05-16 that `rightonq-gog` is the intended paid project unless console verification later shows a clash or better existing project boundary;
+- proposed region: `europe-west2` / London;
+- rationale: RightOnQ is UK-based, expected account/client base is mostly UK, and official docs list `europe-west2` / London for Cloud Run, Secret Manager, and Cloud Firestore;
+- Firestore Native remains the dedupe/event store choice, but it is not currently enabled/created for this lane;
+- enabling Firestore Native mode remains a separate explicit action and is still forbidden until approved.
+
+Next boundary work:
+
+- verify `rightonq-gog` in the Google Cloud console;
+- confirm `europe-west2` availability in-console for the chosen runtime/database/secrets setup;
+- confirm billing/permissions;
+- confirm Secret Manager names and service account/IAM plan;
+- do not enable or create anything until Adam explicitly approves the console action.
