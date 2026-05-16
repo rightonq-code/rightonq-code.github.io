@@ -77,24 +77,28 @@ Collection: `revolut_webhook_events`.
 Document ID:
 
 ```text
-sha256(dedupeKey)
+sha256(receiptKey)
 ```
 
-Where `dedupeKey` should be:
+Where `receiptKey` must be payload-stable across first receipt, enrichment, and Revolut retries:
 
 ```text
-revolut:{event}:{orderId}:{applicationId-or-resolved-context}
+revolut:{event}:{orderId}
 ```
 
-For events that cannot be mapped yet, use:
+Do not include `applicationId`, resolved context, classification, or enrichment-derived values in the Firestore document ID. A retry of the same webhook will resend the original payload, so the document ID must be derivable from fields present before enrichment.
+
+Store the richer logical/audit key separately as a field:
 
 ```text
-revolut:{event}:{orderId}:unresolved
+logicalDedupeKey = revolut:{event}:{orderId}:{applicationId-or-unresolved}
 ```
 
 Record fields:
 
+- `receiptKey`
 - `dedupeKey`
+- `logicalDedupeKey`
 - `event`
 - `orderId`
 - `applicationId`
@@ -103,23 +107,30 @@ Record fields:
 - `requestTimestamp`
 - `signatureMatched`
 - `timestampAccepted`
-- `state`: one of `received`, `enrichment_required`, `mapped`, `applied`, `duplicate`, `failed`
+- `state`: one of `received`, `processing`, `enrichment_required`, `mapped`, `applied`, `failed`
 - `billingUpdateApplied`: boolean
 - `billingStatus`
 - `paymentStatus`
 - `refundStatus`
 - `revolutOrderType`
 - `relatedOrderId`
+- `leaseExpiresAt`
 - `errorCode`
-- `errorMessage`
+- `errorMessage`: sanitised/truncated; do not store raw payload fragments
 
 Atomic behavior:
 
 1. Start a Firestore transaction.
-2. Check the document ID for the dedupe key.
-3. If it exists in `applied`, `mapped`, or `enrichment_required`, return duplicate/no-op.
-4. If it does not exist, create it as `received`.
-5. Continue processing outside or inside the transaction depending on the final implementation, but never perform the same Billing write twice.
+2. Compute `receiptKey = revolut:{event}:{orderId}` from the verified payload.
+3. Check `sha256(receiptKey)`.
+4. If it does not exist, create it as `received` with a short lease.
+5. If it exists in `applied`, `mapped`, or `enrichment_required`, return duplicate/no-op for record-only mode.
+6. If it exists in `processing` and the lease has not expired, return duplicate/in-flight.
+7. If it exists in `processing` or `received` and the lease has expired, reacquire the lease and continue.
+8. If it exists in `failed`, retry only when the failure is marked retryable; otherwise keep failed and return no-op.
+9. Never perform the same Billing write twice. When automatic apply is later enabled, transition to `applied` only after the Apps Script operator API call succeeds.
+
+`duplicate` is a response outcome, not a stored state.
 
 Do not use the Google Sheet as the dedupe source of truth. Sheets are still useful for operator-visible Billing/Payment-order state, but dedupe needs an atomic store.
 
@@ -137,10 +148,11 @@ That event did not include `merchant_order_ext_ref`, refund-specific fields, or 
 
 Rules:
 
-1. `ORDER_COMPLETED` must be enriched before any live Billing update unless the endpoint has another reliable proof that the order is a payment order.
+1. Always enrich `ORDER_COMPLETED` before any live Billing update until refund-vs-payment distinguishability is independently proven.
 2. If the enriched order type is `REFUND`, route through refund lifecycle logic, not the registration-fee-paid path.
 3. If the event is missing `merchant_order_ext_ref`, retrieve/enrich the order and resolve application context through the RightOnQ Payment orders ledger or original/related order.
-4. Verify signature/timestamp once at initial receipt. Do not call the full handler again after a slow enrichment step; use `mapWebhookPayload` with the already verified raw payload and enriched order.
+4. For refund-order webhooks, use the enriched refund order's original/related order ID, then call `lookupPaymentOrder(originalOrderId)` to resolve the RightOnQ application ID. Calling `lookupPaymentOrder(refundOrderId)` is expected to return not found because the Payment orders ledger stores original checkout/payment orders.
+5. Verify signature/timestamp once at initial receipt. Do not call the full handler again after a slow enrichment step; use `mapWebhookPayload` with the already verified raw payload and enriched order.
 
 ## Apply Rules
 
@@ -180,7 +192,7 @@ When automatic apply is finally enabled:
 5. Log/store only redacted `result.internal`.
 6. Add Firestore dedupe in record-only mode.
 7. Add order enrichment using the Revolut Merchant API secret from Secret Manager.
-8. Use `lookupPaymentOrder` to resolve application context when refund events arrive without `merchant_order_ext_ref`.
+8. Use `lookupPaymentOrder` on the original/related order ID from refund-order enrichment to resolve application context when refund events arrive without `merchant_order_ext_ref`.
 9. Keep Billing updates disabled until the record-only path has been proven with sandbox webhooks.
 
 ## Open Questions

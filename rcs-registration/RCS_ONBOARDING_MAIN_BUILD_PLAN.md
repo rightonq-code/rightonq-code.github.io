@@ -2532,6 +2532,7 @@ Active-checkout protection started:
 - Webhook host/dedupe design started in `REVOLUT_WEBHOOK_ENDPOINT_DESIGN.md`:
   - recommended host is a small Google Cloud Run function/service;
   - dedupe source of truth should be Firestore Native mode, not the Google Sheet;
+  - Firestore document identity is now payload-stable: `sha256(revolut:{event}:{orderId})`, with application/resolution context stored as fields after enrichment;
   - first live implementation should be record-only/dry-run, with automatic Billing writes still disabled.
 - Payment-order lookup is now deployed to a new clean API-only operator deployment after the Apps Script code push:
   - deployment ID `AKfycbzj0I9m_vld5Aw-zPQFsTZXslrmxlrDA6Ut0RtFnd6_fxXpVDc4qhhRuKVAA5EuhWG9`;

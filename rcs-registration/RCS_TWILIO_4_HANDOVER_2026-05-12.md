@@ -3458,3 +3458,11 @@ Key contract:
 - `ORDER_COMPLETED` requires enrichment/type proof before any Billing write;
 - refund events without `merchant_order_ext_ref` resolve application context through order enrichment plus RightOnQ Payment orders/original-order lookup;
 - the endpoint should return only a small public body to Revolut and keep diagnostics internal.
+
+Post-review correction:
+
+- Claude Code found one High design issue: the Firestore document ID originally included `applicationId-or-resolved-context`, which would change after enrichment and could let a retry miss the applied record.
+- Fixed design: Firestore document ID is now `sha256(receiptKey)` where `receiptKey = revolut:{event}:{orderId}` from payload-stable fields only.
+- The richer logical/audit key is stored as a field, not used as the document identity.
+- State machine now distinguishes `received`, `processing`, `enrichment_required`, `mapped`, `applied`, and `failed`; `duplicate` is a response outcome, not a stored state.
+- Enrichment rules now say to always enrich `ORDER_COMPLETED` before live Billing writes, and refund-order application lookup must use the enriched original/related order ID before calling `lookupPaymentOrder`.
