@@ -2497,7 +2497,8 @@ Full refund proof follow-up:
   - no `merchant_order_ext_ref`, refund payment ID, or refund-specific body fields;
   - signature verification matched using the local webhook signing secret.
 - `revolut-webhook-map.mjs` now treats recognised events with no `merchant_order_ext_ref` as `enrichmentRequired` rather than throwing or producing a Billing update.
-- Build implication: store refund order ID, refund payment ID where present, refund amount/currency, refund reference, and original order ID; refund webhooks must retrieve/enrich the order before automating Billing refund updates.
+- `revolut-webhook-map.mjs` can now accept an enriched refund order plus an application ID and classify the event as `refund_order`, producing a refund-status dry-run that does not overwrite the original checkout/order ID.
+- Build implication: store refund order ID, refund payment ID where present, refund amount/currency, refund reference, and original order ID; refund webhooks must retrieve/enrich the order and resolve the application from RightOnQ's ledger/original-order lookup before automating Billing refund updates.
 - The webhook payload did not include `payment_id`, so payment ID must be enriched from order/payment retrieval if needed.
 - No live Billing row update has been made from the webhook proof.
 - Replace the previous "capture a real sandbox webhook" blocker with:

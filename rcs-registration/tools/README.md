@@ -383,9 +383,17 @@ node rcs-registration/tools/revolut-webhook-map.mjs --self-test
 node rcs-registration/tools/revolut-webhook-map.mjs \
   --payload-file /path/to/revolut-webhook-payload.json \
   --request-timestamp "1683650202360"
+
+node rcs-registration/tools/revolut-webhook-map.mjs \
+  --payload-file /path/to/refund-webhook-payload.json \
+  --enriched-order-file /path/to/retrieved-refund-order.json \
+  --application-id ROQ-RCS-... \
+  --request-timestamp "1683650202360"
 ```
 
-Expected happy-path result: JSON containing `mapped: true`, a `dedupeKey`, proposed `operatorBillingArgs`, and an `operatorBillingDryRunCommand`. The mapper warns if `merchant_order_ext_ref` does not look like a `ROQ-RCS-...` application ID. If a recognised event is missing `merchant_order_ext_ref`, the mapper returns `mapped: false` with `enrichmentRequired: true`; retrieve the Revolut order by `order_id` before applying any Billing update. This is required for refund webhooks, which can arrive as `ORDER_COMPLETED` for the refund order ID without an application reference. The mapper does not call Apps Script or update the Sheet.
+Expected happy-path payment result: JSON containing `mapped: true`, a `dedupeKey`, proposed `operatorBillingArgs`, and an `operatorBillingDryRunCommand`. The mapper warns if `merchant_order_ext_ref` does not look like a `ROQ-RCS-...` application ID. If a recognised event is missing `merchant_order_ext_ref`, the mapper returns `mapped: false` with `enrichmentRequired: true`; retrieve the Revolut order by `order_id` before applying any Billing update. This is required for refund webhooks, which can arrive as `ORDER_COMPLETED` for the refund order ID without an application reference.
+
+For refund events, pass the retrieved refund order JSON plus the application ID resolved from the RightOnQ ledger/original order. The mapper then classifies the event as `refund_order` and produces a refund-status dry-run without overwriting the original checkout/order ID. The mapper does not call Apps Script or update the Sheet.
 
 ## Recommended Operator Order
 

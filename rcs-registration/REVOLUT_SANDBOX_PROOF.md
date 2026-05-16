@@ -166,6 +166,24 @@ Mapping result:
 - No `merchant_order_ext_ref` was present.
 - No refund payment ID or refund-specific field was present in the webhook body.
 - `revolut-webhook-map.mjs` now returns `mapped: false` and `enrichmentRequired: true` for this shape instead of producing a Billing update.
+- With an enriched refund order and the application ID supplied, `revolut-webhook-map.mjs` classifies the event as `refund_order` and produces a refund-status dry-run. It does not overwrite the original checkout/order ID.
+
+Enriched refund mapping dry-run:
+
+```json
+{
+  "mapped": true,
+  "classification": "refund_order",
+  "applicationId": "ROQ-RCS-TEST-RETURN-PAGE-20260516-001",
+  "orderId": "6a0872b4-89b8-a82d-884b-703f6470c124",
+  "operatorBillingArgs": {
+    "paymentProvider": "revolut",
+    "paymentStatus": "refunded",
+    "refundStatus": "refunded",
+    "refundProcessedAt": "2026-05-16T13:35:54.035Z"
+  }
+}
+```
 
 Build impact:
 
@@ -173,6 +191,7 @@ Build impact:
 - The live webhook endpoint must retrieve/enrich the Revolut order by `order_id`.
 - If the enriched order is `type = REFUND`, route through refund lifecycle logic using the original/related order, not the normal paid registration-fee path.
 - Do not treat every `ORDER_COMPLETED` event as `registration_fee_paid`; it depends on the enriched order type.
+- The application ID for refund events must come from RightOnQ's ledger/original-order lookup, or from an explicit operator-supplied value during local dry-runs.
 
 ## Proof Questions
 

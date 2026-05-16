@@ -3322,10 +3322,12 @@ Mapper change:
 - `revolut-webhook-map.mjs` now treats recognised events with missing `merchant_order_ext_ref` as `mapped = false`, `enrichmentRequired = true`;
 - the self-test now includes a refund-style `ORDER_COMPLETED` payload with no application reference;
 - this prevents a refund-order `ORDER_COMPLETED` webhook from being misclassified as `registration_fee_paid`.
+- the mapper can now accept `--enriched-order-file` plus `--application-id` and classify the event as `refund_order`;
+- enriched refund mapping produces a refund-status dry-run (`paymentStatus = refunded`, `refundStatus = refunded`, `refundProcessedAt = webhook timestamp`) without overwriting the original checkout/order ID.
 
 Still to do before public payment gate:
 
 - wire a real order-create path that stores the created order in `Payment orders` before exposing checkout to customers;
 - build the automated webhook endpoint with raw-body signature/timestamp verification, dedupe, optional payment enrichment, and Billing update;
-- implement enrichment-backed refund Billing updates from retrieved refund/original order data;
+- implement automatic application lookup for refund webhooks from RightOnQ's ledger/original-order data before any live webhook Billing write;
 - run failed/declined sandbox path.

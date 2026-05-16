@@ -5,6 +5,17 @@ import fs from "node:fs";
 const SAMPLE_COMPLETED_PAYLOAD = "{\"event\":\"ORDER_COMPLETED\",\"order_id\":\"order_TEST\",\"merchant_order_ext_ref\":\"ROQ-RCS-TEST-REVOLUT-WEBHOOK\"}";
 const SAMPLE_DECLINED_PAYLOAD = "{\"event\":\"ORDER_PAYMENT_DECLINED\",\"order_id\":\"order_TEST\",\"merchant_order_ext_ref\":\"ROQ-RCS-TEST-REVOLUT-WEBHOOK\"}";
 const SAMPLE_REFUND_COMPLETED_PAYLOAD = "{\"event\":\"ORDER_COMPLETED\",\"order_id\":\"refund_order_TEST\"}";
+const SAMPLE_REFUND_ORDER = {
+  id: "refund_order_TEST",
+  type: "REFUND",
+  state: "PROCESSING",
+  payments: [
+    {
+      id: "refund_payment_TEST",
+      state: "COMPLETED"
+    }
+  ]
+};
 
 const BOOLEAN_FLAGS = {
   "self-test": "selfTest"
@@ -13,6 +24,9 @@ const BOOLEAN_FLAGS = {
 const VALUE_FLAGS = {
   "payload": "payload",
   "payload-file": "payloadFile",
+  "enriched-order": "enrichedOrder",
+  "enriched-order-file": "enrichedOrderFile",
+  "application-id": "applicationId",
   "request-timestamp": "requestTimestamp",
   "received-at": "receivedAt"
 };
@@ -65,11 +79,15 @@ function usage() {
     "Usage:",
     "  node rcs-registration/tools/revolut-webhook-map.mjs --self-test",
     "  node rcs-registration/tools/revolut-webhook-map.mjs --payload-file webhook.json --request-timestamp 1683650202360",
+    "  node rcs-registration/tools/revolut-webhook-map.mjs --payload-file webhook.json --enriched-order-file order.json --application-id ROQ-RCS-...",
     "",
     "Options:",
     "  --self-test                    Run local fake-data mapping proofs",
     "  --payload '{...}'              Debug only; raw Revolut webhook payload",
     "  --payload-file webhook.json    Preferred for captured webhook payloads",
+    "  --enriched-order '{...}'       Debug only; retrieved Revolut order JSON",
+    "  --enriched-order-file order.json",
+    "  --application-id ROQ-RCS-...   Required to map refund-order events after enrichment",
     "  --request-timestamp 168...     Revolut-Request-Timestamp header, used for paymentReceivedAt when relevant",
     "  --received-at 2026-05-15T...   Explicit received timestamp override",
     "",
@@ -115,6 +133,22 @@ function readPayload(options) {
   throw new Error("Provide --payload or --payload-file");
 }
 
+function readEnrichedOrder(options) {
+  if (options.enrichedOrder && options.enrichedOrderFile) {
+    throw new Error("Use either --enriched-order or --enriched-order-file, not both");
+  }
+  const rawOrder = options.enrichedOrderFile
+    ? fs.readFileSync(options.enrichedOrderFile, "utf8")
+    : options.enrichedOrder || "";
+  if (!rawOrder) return null;
+  try {
+    const parsed = JSON.parse(rawOrder);
+    return parsed.order || parsed.refund || parsed;
+  } catch (error) {
+    throw new Error("Enriched order is not valid JSON: " + error.message);
+  }
+}
+
 function parsePayload(rawPayload) {
   try {
     return JSON.parse(rawPayload);
@@ -158,10 +192,50 @@ function buildEnrichmentRequiredResult(payload, reason) {
   };
 }
 
-function buildOperatorBillingArgs(payload) {
+function normaliseOrderType(order) {
+  return String(order && order.type || "").trim().toLowerCase();
+}
+
+function firstPayment(order) {
+  return order && Array.isArray(order.payments) && order.payments.length ? order.payments[0] : {};
+}
+
+function buildRefundBillingArgs(payload, options) {
+  const order = options.enrichedOrder || {};
+  const applicationId = options.applicationId || "";
+  if (!applicationId) {
+    return buildEnrichmentRequiredResult(payload, "Enriched order is a refund, but no application ID was supplied or found in the ledger.");
+  }
+
+  const refundPayment = firstPayment(order);
+  const refundOrderId = order.id || getPayloadValue(payload, "order_id");
+  const refundPaymentId = refundPayment.id || "";
+  const receivedAt = payload.paymentReceivedAt || "";
+  const completed = payload.event === "ORDER_COMPLETED";
+  const noteParts = [
+    "Revolut reported " + (payload.event || "an event") + " for refund order",
+    refundOrderId + "."
+  ];
+  if (refundPaymentId) noteParts.push("Refund payment ID: " + refundPaymentId + ".");
+
+  return {
+    applicationId,
+    paymentProvider: "revolut",
+    paymentStatus: completed ? "refunded" : "refund_processing",
+    refundStatus: completed ? "refunded" : "processing",
+    refundProcessedAt: completed ? receivedAt : "",
+    internalNotes: noteParts.join(" ")
+  };
+}
+
+function buildOperatorBillingArgs(payload, options = {}) {
   const event = payload.event || "";
   const mapping = EVENT_MAP[event];
   if (!mapping) return null;
+
+  if (normaliseOrderType(options.enrichedOrder) === "refund") {
+    return buildRefundBillingArgs(payload, options);
+  }
 
   const applicationId = getPayloadValue(payload, "merchant_order_ext_ref");
   const orderId = getPayloadValue(payload, "order_id");
@@ -191,20 +265,27 @@ function buildDryRunCommand(args) {
     "node",
     "rcs-registration/tools/operator-billing.mjs",
     "--dry-run",
-    "--application-id", args.applicationId,
-    "--billing-status", args.billingStatus,
-    "--payment-provider", args.paymentProvider,
-    "--checkout-order-id", args.checkoutOrderId,
-    "--payment-status", args.paymentStatus,
-    "--refund-status", args.refundStatus,
-    "--internal-notes", args.internalNotes
+    "--application-id", args.applicationId
   ];
-  if (args.paymentId) {
-    parts.push("--payment-id", args.paymentId);
-  }
-  if (args.paymentReceivedAt) {
-    parts.push("--payment-received-at", args.paymentReceivedAt);
-  }
+  [
+    ["--billing-status", args.billingStatus],
+    ["--payment-provider", args.paymentProvider],
+    ["--checkout-order-id", args.checkoutOrderId],
+    ["--payment-status", args.paymentStatus],
+    ["--refund-status", args.refundStatus],
+    ["--refund-processed-at", args.refundProcessedAt],
+    ["--internal-notes", args.internalNotes]
+  ].forEach(function(pair) {
+    if (pair[1]) parts.push(pair[0], pair[1]);
+  });
+  [
+    ["--payment-id", args.paymentId],
+    ["--payment-received-at", args.paymentReceivedAt],
+    ["--refund-amount-gbp", args.refundAmountGbp],
+    ["--refund-reason", args.refundReason]
+  ].forEach(function(pair) {
+    if (pair[1]) parts.push(pair[0], pair[1]);
+  });
   return parts.map(shellQuote).join(" ");
 }
 
@@ -212,7 +293,7 @@ function mapWebhookPayload(rawPayload, options = {}) {
   const payload = parsePayload(rawPayload);
   const receivedAt = options.receivedAt || timestampToIso(options.requestTimestamp);
   if (receivedAt) payload.paymentReceivedAt = receivedAt;
-  const operatorBillingArgs = buildOperatorBillingArgs(payload);
+  const operatorBillingArgs = buildOperatorBillingArgs(payload, options);
   const event = payload.event || "";
   const warnings = [];
 
@@ -240,11 +321,12 @@ function mapWebhookPayload(rawPayload, options = {}) {
     mapped: true,
     event,
     applicationId: operatorBillingArgs.applicationId,
-    orderId: operatorBillingArgs.checkoutOrderId,
+    orderId: operatorBillingArgs.checkoutOrderId || getPayloadValue(payload, "order_id"),
+    classification: normaliseOrderType(options.enrichedOrder) === "refund" ? "refund_order" : "payment_order",
     dedupeKey: [
       "revolut",
       event,
-      operatorBillingArgs.checkoutOrderId,
+      operatorBillingArgs.checkoutOrderId || getPayloadValue(payload, "order_id"),
       operatorBillingArgs.applicationId
     ].join(":"),
     warnings,
@@ -263,6 +345,11 @@ function runSelfTest() {
   const refundCompleted = mapWebhookPayload(SAMPLE_REFUND_COMPLETED_PAYLOAD, {
     requestTimestamp: String(Date.now())
   });
+  const refundCompletedEnriched = mapWebhookPayload(SAMPLE_REFUND_COMPLETED_PAYLOAD, {
+    requestTimestamp: String(Date.now()),
+    enrichedOrder: SAMPLE_REFUND_ORDER,
+    applicationId: "ROQ-RCS-TEST-REVOLUT-WEBHOOK"
+  });
   const passed = completed.mapped
     && completed.operatorBillingArgs.billingStatus === "registration_fee_paid"
     && completed.operatorBillingArgs.paymentStatus === "paid"
@@ -270,7 +357,10 @@ function runSelfTest() {
     && declined.operatorBillingArgs.billingStatus === "registration_fee_failed"
     && declined.operatorBillingArgs.paymentStatus === "declined"
     && refundCompleted.mapped === false
-    && refundCompleted.enrichmentRequired === true;
+    && refundCompleted.enrichmentRequired === true
+    && refundCompletedEnriched.mapped
+    && refundCompletedEnriched.classification === "refund_order"
+    && refundCompletedEnriched.operatorBillingArgs.refundStatus === "refunded";
 
   return {
     ok: passed,
@@ -278,7 +368,8 @@ function runSelfTest() {
     cases: {
       completed,
       declined,
-      refundCompleted
+      refundCompleted,
+      refundCompletedEnriched
     },
     note: "Self-test uses fake sample payloads only. No network calls or Sheet updates are made."
   };
@@ -298,7 +389,10 @@ function main() {
     return;
   }
 
-  const result = mapWebhookPayload(readPayload(options), options);
+  const result = mapWebhookPayload(readPayload(options), {
+    ...options,
+    enrichedOrder: readEnrichedOrder(options)
+  });
   console.log(JSON.stringify(result, null, 2));
 }
 
