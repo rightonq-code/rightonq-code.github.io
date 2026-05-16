@@ -96,7 +96,7 @@ Build impact:
 - RightOnQ must not rely on Revolut create-order idempotency. Store/check Billing state before creating a checkout order.
 - Store at least: Revolut order ID, token or checkout URL while pending, customer ID, payment ID, order/payment state, amount/currency, and the application reference.
 - The RightOnQ return URL now has a static `payment-return.html` page. It confirms browser return only; payment still needs to be verified through Revolut order/webhook state before Billing changes.
-- Webhook capture/signature verification and full-refund proof have passed. Declined-attempt proof has passed, but a terminal failed/abandoned order proof is still outstanding. Local fake-data coverage for `ORDER_PAYMENT_FAILED` now passes before that live proof. Saved-method/MIT proof and subscription proof also remain outstanding.
+- Webhook capture/signature verification, full-refund proof, declined-attempt proof, and terminal failed-payment proof have passed. Saved-method/MIT proof and subscription proof remain outstanding.
 - Declined-attempt proof has passed. A hosted-checkout order can emit `ORDER_PAYMENT_DECLINED` for one attempt and later emit `ORDER_AUTHORISED` / `ORDER_COMPLETED` for the same order after a successful retry.
 
 ## Full Refund Proof Results - 2026-05-16
@@ -427,7 +427,8 @@ First live sandbox sequence, once Bugs has the sandbox Merchant API secret:
 10. Run one failed/declined sandbox payment if Revolut sandbox provides a suitable test card. Done on 2026-05-16 as a declined-attempt proof; the same hosted-checkout order later completed after a successful retry.
 11. Run a full refund only after the order reaches `completed`. Done on 2026-05-16 against order `6a0866ef-9b11-a041-bfa2-e973e15e564d`; original order retrieval returned `refundedAmount: 12000`.
 11a. Capture and verify the refund-order webhook. Done on 2026-05-16; Revolut sent `ORDER_COMPLETED` for refund order `6a0872b4-89b8-a82d-884b-703f6470c124` without `merchant_order_ext_ref`, and the mapper now returns `enrichmentRequired`.
-12. Record webhook requirements, but do not expose a public webhook endpoint until signature verification is wired into that endpoint.
+12. Run a terminal failed-payment sandbox proof. Done on 2026-05-16 with Revolut's 3DS verification failure test card; Revolut emitted `ORDER_PAYMENT_FAILED`.
+13. Record webhook requirements, but do not expose a public webhook endpoint until signature verification is wired into that endpoint.
 
 ## Proof Success Criteria
 
@@ -441,7 +442,7 @@ Minimum useful proof:
 - hosted checkout page opens; done.
 - successful sandbox payment changes order/payment state as expected; done.
 - fresh hosted checkout returns to `payment-return.html` instead of a 404; done.
-- failed/declined sandbox payment attempt can be observed and mapped; done for `ORDER_PAYMENT_DECLINED` on order `6a08af68-51f9-ae4b-be9e-c388fc6f400e`.
+- failed/declined sandbox payment attempt can be observed and mapped; done for retryable `ORDER_PAYMENT_DECLINED` on order `6a08af68-51f9-ae4b-be9e-c388fc6f400e`, and terminal `ORDER_PAYMENT_FAILED` on order `6a08b551-d18e-a506-9cfa-6a27983dd1de`.
 - full refund path is observed; refund webhook event-name/field shape is observed, and enrichment-backed Billing implementation remains to do;
 - captured webhook signature verifies locally using the raw payload and Revolut headers; done for archived sample. Signature matched; timestamp was outside the 5-minute live replay window by the time it was verified.
 - verified webhook payload maps to the expected Billing status without writing to the Sheet; done.
@@ -458,7 +459,7 @@ Stronger proof:
 
 ## Current Next Action
 
-Run a terminal failed-payment sandbox proof before public payment gating. Revolut's current sandbox test-card docs list `4242424242424242` as a 3DS verification failure card which should produce decline reason `customer_challenge_failed` and payment state `failed` for GBP orders of at least `2500` minor units; the RightOnQ registration-fee proof order is `12000` minor units, so it qualifies.
+The terminal failed-payment sandbox proof is now complete. Continue with record-only webhook endpoint design/implementation before public payment gating.
 
 Do not run webhook-driven live Billing updates until dedupe storage and payment enrichment are implemented and proven in record-only mode.
 
@@ -478,16 +479,6 @@ Endpoint design direction started on 2026-05-16:
 - Integration caution: do not treat a live `ORDER_COMPLETED` event as paid until the endpoint has either enriched the order or otherwise proved it is a payment order, not a refund order. Refund-order webhooks can also arrive as `ORDER_COMPLETED`.
 - Integration caution: verify the Revolut signature/timestamp once at first receipt. If later order enrichment is needed, reuse the verified raw payload with `mapWebhookPayload`; do not call the full handler again after a slow enrichment step because the timestamp window may have expired.
 - The handler's `mapping_failed` public body intentionally omits parser details; diagnostics stay in the internal object.
-
-Next failed-payment proof target:
-
-- source: Revolut sandbox test-card docs checked on 2026-05-16 (`https://developer.revolut.com/docs/guides/accept-payments/get-started/test-implementation/test-cards`);
-- card: `4242424242424242`;
-- expected case: 3DS verification failure;
-- expected decline reason: `customer_challenge_failed`;
-- expected payment state: `failed`;
-- amount condition: at least `2500` GBP minor units, which the `12000 GBP` registration-fee proof order satisfies;
-- expected webhook to watch for: likely `ORDER_PAYMENT_FAILED`, then confirm actual event/body shape from webhook.site and API retrieval.
 
 The first live sandbox Hosted Checkout payment proof has passed. Sandbox webhook registration/capture also passed. No production Revolut call has been made. No real customer card data has been handled. No live Billing row update has been made from this webhook proof.
 
@@ -576,6 +567,60 @@ Build implication:
 - a declined attempt does not necessarily mean the order is terminally failed;
 - for customer UX, the hosted checkout may let the customer retry and complete the same order;
 - no live Billing row update was made from this declined-attempt proof.
+
+## Live Sandbox Terminal Failed-Payment Proof Results - 2026-05-16
+
+Fresh sandbox checkout:
+
+- application/reference: `ROQ-RCS-TEST-FAILED-20260516-002`;
+- idempotency key: `roq-rcs-failed-proof-20260516-002`;
+- order ID: `6a08b551-d18e-a506-9cfa-6a27983dd1de`;
+- token: `8a814a4f-773c-4bf9-b35c-e4931982c7c2`;
+- customer ID: `d8ebb82b-bf3e-4f8a-a7c1-a3a41e515a88`;
+- amount/currency: `12000 GBP`;
+- initial order state: `pending`.
+
+Browser checkout:
+
+- Revolut sandbox 3DS verification failure test card used: `4242424242424242`;
+- source docs checked on 2026-05-16: `https://developer.revolut.com/docs/guides/accept-payments/get-started/test-implementation/test-cards`;
+- checkout UI showed: `3DS Verification failed. Please try to pay again or use another card`.
+
+API retrieval after the failed payment:
+
+- order state stayed `pending`;
+- embedded payment ID: `6a08b5b0-1eef-af17-9eed-f34734a1db3b`;
+- embedded payment state: `failed`;
+- embedded decline reason: `customer_challenge_failed`;
+- payment-list endpoint returned one payment for the order;
+- payment-list state: `failed`;
+- payment-list endpoint did not include the decline reason.
+
+Webhook event captured:
+
+- webhook.site request ID `58fcd33e-85fa-4cd3-9a6d-fc6601783e89`;
+- received at `2026-05-16 18:21:42 UTC`;
+- `Revolut-Request-Timestamp`: `1778955702535`;
+- `Revolut-Signature`: `v1=5837d22e50f9e17aa9e49bb066dc09900981be2c3d3b09afa7089e96d1f80b76`;
+- raw body `{"event":"ORDER_PAYMENT_FAILED","order_id":"6a08b551-d18e-a506-9cfa-6a27983dd1de","merchant_order_ext_ref":"ROQ-RCS-TEST-FAILED-20260516-002"}`;
+- no payment ID, decline reason, or card data appeared in the webhook body.
+
+Mapping proof:
+
+- local mapping of the captured raw body returned `mapped = true`;
+- event `ORDER_PAYMENT_FAILED`;
+- `billingStatus = registration_fee_failed`;
+- `paymentStatus = failed`;
+- `checkoutOrderId = 6a08b551-d18e-a506-9cfa-6a27983dd1de`;
+- dry-run only; no live Billing row update was made.
+
+Build implication:
+
+- `ORDER_PAYMENT_FAILED` is distinct from the retryable `ORDER_PAYMENT_DECLINED` proof;
+- for this 3DS failure case, Revolut emitted exactly one matching webhook and no later `ORDER_AUTHORISED` / `ORDER_COMPLETED` event was observed in the capture window;
+- the order can remain `pending` while the payment attempt is terminally `failed`, so the endpoint should treat the event/payment state carefully and avoid assuming order-level `pending` means no failure happened;
+- payment ID and decline reason require order/payment enrichment because the webhook body only carries event, order ID, and merchant reference;
+- no card data was exposed.
 
 ## Live Sandbox Webhook Proof Results - 2026-05-16
 

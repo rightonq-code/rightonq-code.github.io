@@ -3530,3 +3530,48 @@ Next live sandbox proof:
 - likely webhook to capture is `ORDER_PAYMENT_FAILED`, but the proof must record the actual webhook.site event/body/headers and API retrieval result rather than assuming it.
 
 No live Revolut call, Apps Script call, Sheet write, or Billing update was made in this slice.
+
+## Slice 8Q - Terminal Failed-Payment Proof
+
+Codex recorded the live terminal failed-payment sandbox proof.
+
+Order:
+
+- application/reference `ROQ-RCS-TEST-FAILED-20260516-002`;
+- order ID `6a08b551-d18e-a506-9cfa-6a27983dd1de`;
+- token `8a814a4f-773c-4bf9-b35c-e4931982c7c2`;
+- amount `12000 GBP`.
+
+Browser checkout:
+
+- Revolut sandbox 3DS verification failure card `4242424242424242` was used;
+- checkout UI displayed `3DS Verification failed. Please try to pay again or use another card`.
+
+API retrieval:
+
+- order state stayed `pending`;
+- payment ID `6a08b5b0-1eef-af17-9eed-f34734a1db3b`;
+- embedded payment state `failed`;
+- embedded decline reason `customer_challenge_failed`;
+- payment-list endpoint returned one failed payment but did not include the decline reason.
+
+Webhook capture:
+
+- webhook.site request ID `58fcd33e-85fa-4cd3-9a6d-fc6601783e89`;
+- received `2026-05-16 18:21:42 UTC`;
+- `Revolut-Request-Timestamp = 1778955702535`;
+- `Revolut-Signature = v1=5837d22e50f9e17aa9e49bb066dc09900981be2c3d3b09afa7089e96d1f80b76`;
+- raw body `{"event":"ORDER_PAYMENT_FAILED","order_id":"6a08b551-d18e-a506-9cfa-6a27983dd1de","merchant_order_ext_ref":"ROQ-RCS-TEST-FAILED-20260516-002"}`;
+- body contained no payment ID, decline reason, or card data.
+
+Mapping proof:
+
+- captured body mapped locally with `revolut-webhook-map.mjs`;
+- `ORDER_PAYMENT_FAILED` -> `billingStatus = registration_fee_failed`, `paymentStatus = failed`;
+- dry-run only; no live Billing update was made.
+
+Implication:
+
+- this is the terminal failure counterpart to the earlier retryable declined-attempt proof;
+- endpoint enrichment still matters because the webhook body omits payment ID and decline reason;
+- order-level state can remain `pending` even when the payment attempt is terminally `failed`.
