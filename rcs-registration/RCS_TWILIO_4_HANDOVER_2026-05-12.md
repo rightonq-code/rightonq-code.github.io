@@ -3125,13 +3125,35 @@ Verification so far:
 - dry-run `--check-active` payload printed correctly;
 - dry-run `--record` payload printed correctly.
 
+Live proof completed:
+
+- first `operator-payment-order.mjs --check-active` against `ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747` returned:
+  - `decision = safe_to_create`;
+  - `canCreateCheckout = true`;
+  - reason `No completed or open non-superseded Revolut checkout was found for this application.`;
+- `operator-payment-order.mjs --record` then appended completed sandbox order `6a084d13-d84d-a49b-bb44-916bb9237ba4` into `Payment orders`;
+- recorded values included:
+  - order state `completed`;
+  - amount minor `12000`;
+  - currency `GBP`;
+  - checkout URL `https://sandbox-checkout.revolut.com/payment-link/6e705351-f49a-4dd0-b0a4-9a979dbbfe7e`;
+  - merchant order reference `ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747`;
+  - idempotency key `roq-rcs-webhook-proof-20260516-001`;
+  - payment state `captured`;
+  - order purpose `registration_fee`;
+- the record response immediately returned `activeCheckout.decision = already_paid`;
+- a fresh second `--check-active` call also returned:
+  - `decision = already_paid`;
+  - `canCreateCheckout = false`;
+  - reason `A non-superseded Revolut order is already completed for this application.`;
+- no card data, Revolut API secret, webhook signing secret, or operator PIN was recorded in the repo.
+
 Still to do before public payment gate:
 
-- run a live operator proof against the existing sandbox order:
-  - check active before ledger row exists;
-  - record the completed Revolut order snapshot;
-  - check active again and confirm `already_paid`;
 - later add the automated raw-body webhook endpoint with signature/timestamp verification, dedupe, enrichment, and Billing update.
+- add a payment-return page/state so successful hosted checkout does not land on a 404;
+- finish refund/refunded status and event mapping;
+- keep this active-checkout flow operator-run until the automated public payment gate has an atomic reserve/record path.
 
 ### Slice 8H Continued - Clean API Deployment Restored
 
@@ -3164,8 +3186,9 @@ Local repo follow-up:
 - `google-apps-script/README.md` records the current deployment and archived v32 caveat;
 - do not run `clasp deploy -i` against the clean v33 deployment while the manifest still contains public web app deployment settings.
 
-Immediate proof still required:
+Completed live proof:
 
-- rerun `operator-payment-order.mjs --check-active` through the clean v33 deployment;
-- record the completed sandbox Revolut order into `Payment orders`;
-- rerun `--check-active` and confirm it returns `already_paid`.
+- `operator-payment-order.mjs --check-active` reached the clean v33 deployment and returned `safe_to_create`;
+- `operator-payment-order.mjs --record` stored completed sandbox order `6a084d13-d84d-a49b-bb44-916bb9237ba4`;
+- the immediate and follow-up active-checkout readbacks returned `already_paid` with `canCreateCheckout = false`;
+- this proves the operator-run duplicate-checkout guard can stop a second checkout for an application once a completed order is in `Payment orders`.

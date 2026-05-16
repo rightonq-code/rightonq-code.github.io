@@ -2508,6 +2508,12 @@ Active-checkout protection started:
   - access `Anyone within rightonq.co.uk`.
 - The previous v32 active-checkout-guard operator deployment `AKfycbyG5yW-r0sfaKt1bwUUGFAHHdQoKK8wBCfR1riVxvYamu9YhfOBpRJhnRL_5iBP0VSC` was archived after it picked up a Web app entry point during deployment refresh.
 - `.clasp.json` now points operator wrappers at the clean v33 API-only deployment.
+- Live operator proof passed through the clean v33 API-only deployment:
+  - first `checkActiveCheckout` returned `safe_to_create` and `canCreateCheckout = true`;
+  - `recordPaymentOrder` appended completed sandbox order `6a084d13-d84d-a49b-bb44-916bb9237ba4`;
+  - second `checkActiveCheckout` returned `already_paid` and `canCreateCheckout = false`;
+  - stored checkout URL is present for the completed sandbox order;
+  - no card data or Revolut secret was stored.
 - This is still operator-run pilot protection, not the automated public payment gate.
 
 ### Slice 8B - Public Endpoint Hardening Started
