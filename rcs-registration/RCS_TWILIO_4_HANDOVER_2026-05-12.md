@@ -3212,9 +3212,20 @@ Behaviour:
 - copy is deliberately conservative: it confirms browser return from Revolut, but says payment is verified by RightOnQ using Revolut order/webhook records before registration work moves forward;
 - no secrets, PINs, card data, or webhook signing values are used by the page.
 
+Fresh sandbox return proof:
+
+- application/reference `ROQ-RCS-TEST-RETURN-PAGE-20260516-001`;
+- order ID `6a0866ef-9b11-a041-bfa2-e973e15e564d`;
+- checkout token `7bd10568-e1f1-4d32-a733-0ccd9b0033f9`;
+- customer ID `d565e618-f459-495c-8f7b-e1e51b8a28dd`;
+- browser landed after payment on `https://www.rightonq.co.uk/rcs-registration/payment-return.html?applicationId=ROQ-RCS-TEST-RETURN-PAGE-20260516-001`;
+- retrieval after payment returned order state `completed`;
+- payment-list retrieval returned payment `6a08673c-80db-a36d-97a3-ec673b09e3cd` with state `captured`;
+- no live Billing row update was made from this return-page proof.
+
 Still to do before public payment gate:
 
 - wire a real order-create path that stores the created order in `Payment orders` before exposing checkout to customers;
 - build the automated webhook endpoint with raw-body signature/timestamp verification, dedupe, optional payment enrichment, and Billing update;
 - finish refund/refunded status and event mapping;
-- run a fresh sandbox checkout using the new return URL and capture the real post-payment browser landing.
+- run failed/declined and refund sandbox paths.

@@ -2517,6 +2517,12 @@ Active-checkout protection started:
   - path `rcs-registration/payment-return.html`;
   - future sandbox proof orders now default to `https://rightonq-code.github.io/rcs-registration/payment-return.html?applicationId=...`;
   - page clearly says browser return is not the authoritative payment verification source.
+- Fresh sandbox checkout proved the return page:
+  - application/reference `ROQ-RCS-TEST-RETURN-PAGE-20260516-001`;
+  - order `6a0866ef-9b11-a041-bfa2-e973e15e564d`;
+  - browser landed on `https://www.rightonq.co.uk/rcs-registration/payment-return.html?applicationId=ROQ-RCS-TEST-RETURN-PAGE-20260516-001`;
+  - API retrieval confirmed order `completed` and payment `captured`;
+  - no live Billing row update was made from this proof.
 - This is still operator-run pilot protection, not the automated public payment gate.
 
 ### Slice 8B - Public Endpoint Hardening Started
