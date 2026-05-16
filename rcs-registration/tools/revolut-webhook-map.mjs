@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import fs from "node:fs";
+import { pathToFileURL } from "node:url";
 
 const SAMPLE_COMPLETED_PAYLOAD = "{\"event\":\"ORDER_COMPLETED\",\"order_id\":\"order_TEST\",\"merchant_order_ext_ref\":\"ROQ-RCS-TEST-REVOLUT-WEBHOOK\"}";
 const SAMPLE_DECLINED_PAYLOAD = "{\"event\":\"ORDER_PAYMENT_DECLINED\",\"order_id\":\"order_TEST\",\"merchant_order_ext_ref\":\"ROQ-RCS-TEST-REVOLUT-WEBHOOK\"}";
@@ -396,9 +397,21 @@ function main() {
   console.log(JSON.stringify(result, null, 2));
 }
 
-try {
-  main();
-} catch (error) {
-  console.error(error.message);
-  process.exit(1);
+export {
+  EVENT_MAP,
+  timestampToIso,
+  buildEnrichmentRequiredResult,
+  buildOperatorBillingArgs,
+  buildDryRunCommand,
+  mapWebhookPayload,
+  runSelfTest
+};
+
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  try {
+    main();
+  } catch (error) {
+    console.error(error.message);
+    process.exit(1);
+  }
 }

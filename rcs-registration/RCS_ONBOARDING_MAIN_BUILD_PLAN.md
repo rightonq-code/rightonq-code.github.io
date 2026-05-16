@@ -2521,6 +2521,11 @@ Active-checkout protection started:
 - `lookupPaymentOrder` reads the latest ledger snapshot by Revolut order ID across the `Payment orders` ledger. This is the first local building block for resolving refund webhook application context.
 - `getOperatorSnapshot` now includes `activeCheckout` plus recent `paymentOrders`.
 - Local tool added: `rcs-registration/tools/operator-payment-order.mjs`.
+- Webhook endpoint groundwork started:
+  - `revolut-webhook-verify.mjs` exports the tested signature/timestamp verification primitives while preserving the CLI;
+  - `revolut-webhook-map.mjs` exports the tested event mapping primitives while preserving the CLI;
+  - future live webhook endpoint should import these instead of copying crypto/mapping logic;
+  - endpoint host must support exact raw body and `Revolut-Request-Timestamp` / `Revolut-Signature` headers.
 - Payment-order lookup is now deployed to a new clean API-only operator deployment after the Apps Script code push:
   - deployment ID `AKfycbzj0I9m_vld5Aw-zPQFsTZXslrmxlrDA6Ut0RtFnd6_fxXpVDc4qhhRuKVAA5EuhWG9`;
   - version `35`;

@@ -3397,3 +3397,25 @@ Deployment cleanup:
   - v35 clean Operator API executable `AKfycbzj0I9m_vld5Aw-zPQFsTZXslrmxlrDA6Ut0RtFnd6_fxXpVDc4qhhRuKVAA5EuhWG9`;
   - public web app `AKfycbyI81Ir2xvHLar0R0iFBBWyXa1Nj93T4_8Ni5_eX3XEYDA-AKQbVYbPHnTROLm8e4a6`;
   - RCS Part A intake receiver.
+
+## Slice 8M - Revolut Webhook Endpoint Primitives
+
+Codex started the next endpoint-design slice after the v35 deployment cleanup.
+
+Code change:
+
+- `rcs-registration/tools/revolut-webhook-verify.mjs` now exports its tested verification primitives while keeping the CLI entrypoint unchanged;
+- `rcs-registration/tools/revolut-webhook-map.mjs` now exports its tested mapping primitives while keeping the CLI entrypoint unchanged.
+
+Verification:
+
+- `node rcs-registration/tools/revolut-webhook-verify.mjs --self-test` passed;
+- `node rcs-registration/tools/revolut-webhook-map.mjs --self-test` passed;
+- dynamic import smoke test confirmed `verifyWebhook`, `computeSignature`, `mapWebhookPayload`, and `buildOperatorBillingArgs` are functions and that importing the modules does not run the CLI.
+
+Build implication:
+
+- future live webhook endpoint should import these primitives rather than copy crypto or mapping code;
+- endpoint host must expose the exact raw body and the `Revolut-Request-Timestamp` / `Revolut-Signature` headers;
+- GitHub Pages is static and cannot receive POST webhooks;
+- do not trust the existing Apps Script web app as the direct Revolut webhook entrypoint unless it separately proves access to the exact raw body and custom Revolut headers.

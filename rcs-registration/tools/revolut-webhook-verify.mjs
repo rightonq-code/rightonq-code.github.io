@@ -2,6 +2,7 @@
 
 import crypto from "node:crypto";
 import fs from "node:fs";
+import { pathToFileURL } from "node:url";
 
 const SIGNATURE_VERSION = "v1";
 const DEFAULT_TOLERANCE_SECONDS = 300;
@@ -279,9 +280,20 @@ function main() {
   if (!result.ok) process.exit(1);
 }
 
-try {
-  main();
-} catch (error) {
-  console.error(error.message);
-  process.exit(1);
+export {
+  DEFAULT_TOLERANCE_SECONDS,
+  computeSignature,
+  parseSignatureHeader,
+  checkTimestamp,
+  verifyWebhook,
+  runSelfTest
+};
+
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  try {
+    main();
+  } catch (error) {
+    console.error(error.message);
+    process.exit(1);
+  }
 }

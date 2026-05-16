@@ -372,6 +372,10 @@ Webhook signature proof, using fake data only:
 node rcs-registration/tools/revolut-webhook-verify.mjs --self-test
 ```
 
+The verifier and mapper are also importable endpoint primitives. A future real webhook handler should import `verifyWebhook` from `revolut-webhook-verify.mjs` and `mapWebhookPayload` from `revolut-webhook-map.mjs` rather than copying the HMAC or event-mapping logic.
+
+The live endpoint must run on infrastructure that can read the raw request body and custom Revolut headers. Do not use GitHub Pages for webhook receipt, and do not trust an Apps Script web app as the direct webhook entrypoint unless it has separately proven access to the exact raw body and `Revolut-Request-Timestamp` / `Revolut-Signature` headers.
+
 Webhook signature proof for a captured sandbox callback:
 
 ```bash
