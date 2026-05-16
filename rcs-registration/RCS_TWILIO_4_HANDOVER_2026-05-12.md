@@ -3881,17 +3881,19 @@ Codex recorded Adam's initial Google Cloud boundary decisions in the webhook des
 
 Decisions recorded:
 
-- candidate Google Cloud project: `rightonq-gog`;
-- Adam confirmed on 2026-05-16 that `rightonq-gog` is the intended paid project unless console verification later shows a clash or better existing project boundary;
+- correct-account read-only console check confirmed project `RightOnQ-GOG` / `rightonq-gog` / project number `872475523113`;
+- project sits under organisation `rightonq.co.uk`;
+- earlier wrong-account browser check is superseded;
+- avoid `Personal-GOG` / `personal-gog-490412` for this webhook unless Adam explicitly reverses this later;
 - proposed region: `europe-west2` / London;
 - rationale: RightOnQ is UK-based, expected account/client base is mostly UK, and official docs list `europe-west2` / London for Cloud Run, Secret Manager, and Cloud Firestore;
-- Firestore Native remains the dedupe/event store choice, but it is not currently enabled/created for this lane;
-- enabling Firestore Native mode remains a separate explicit action and is still forbidden until approved.
+- project is currently bare: no billing linked, no Firestore database, no Cloud Run service, Cloud Run Admin API not enabled, Secret Manager API not enabled, and no webhook-suitable service account;
+- Firestore Native remains the dedupe/event store choice, but it is not currently enabled/created for this lane.
 
 Next boundary work:
 
-- verify `rightonq-gog` in the Google Cloud console;
-- confirm `europe-west2` availability in-console for the chosen runtime/database/secrets setup;
-- confirm billing/permissions;
+- link billing only after Adam explicitly approves that console action;
+- then confirm billing/permissions;
+- enable/create Firestore Native, Cloud Run Admin API, Secret Manager API, service account/IAM, and secrets only as separate explicit steps;
 - confirm Secret Manager names and service account/IAM plan;
 - do not enable or create anything until Adam explicitly approves the console action.

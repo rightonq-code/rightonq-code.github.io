@@ -2563,13 +2563,16 @@ Active-checkout protection started:
   - in-memory self-test proves first create vs duplicate terminal detection;
   - Firestore adapter source exists and the exported runtime handler now wires `FirestoreDedupeStore.fromDefault()`, but no live Google project/database has been enabled or deployed.
 - Google Cloud boundary planning recorded:
-  - candidate project is `rightonq-gog`; Adam confirmed on 2026-05-16 that this is the intended paid Google Cloud project unless console verification shows a clash;
+  - correct-account read-only console check confirmed project `RightOnQ-GOG` / `rightonq-gog` / project number `872475523113` under organisation `rightonq.co.uk`;
+  - earlier wrong-account browser check is superseded;
+  - do not use `Personal-GOG` / `personal-gog-490412` for this webhook unless Adam explicitly reverses this later; it appears personal/dev-adjacent, not the intended Revolut/payment infrastructure boundary;
   - endpoint should use Cloud Run functions / Functions Framework Node.js source deployment;
   - proposed target region is `europe-west2` / London, because official docs list London for Cloud Run, Secret Manager, and Cloud Firestore and the RightOnQ workflow is UK-first;
   - Secret Manager names proposed separately for sandbox and live Revolut secrets;
-  - Firestore Native mode remains the dedupe/event store choice, but it is not currently enabled/created for this lane and enabling it is a separate explicit action;
+  - project is currently bare: no billing linked, no Firestore database, no Cloud Run service, Cloud Run Admin API not enabled, Secret Manager API not enabled, and no webhook-suitable service account;
+  - Firestore Native mode remains the dedupe/event store choice, but it is not currently enabled/created for this lane;
   - first deployed mode must be record-only;
-  - enabling Firestore, creating secrets/service accounts/IAM, deploying Cloud Run, changing Revolut webhook URL, automatic Billing writes, and strict payment gating remain explicitly forbidden until approved.
+  - linking billing, enabling APIs/Firestore/Secret Manager, creating secrets/service accounts/IAM, deploying Cloud Run, changing Revolut webhook URL, automatic Billing writes, and strict payment gating remain explicitly forbidden until approved.
 - Cloud webhook source observability tightened:
   - rejected-method and missing-raw-body cases now emit redacted record-only log entries;
   - local self-tests cover the new rejection logs and confirm no raw body or signature is logged;

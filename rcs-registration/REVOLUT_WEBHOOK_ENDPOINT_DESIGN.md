@@ -234,11 +234,18 @@ Traffic expectation:
 Recommended boundary:
 
 - Google account / organisation: `rightonq.co.uk` / RightOnQ-controlled Google account.
-- Candidate Google Cloud project: `rightonq-gog`. Adam confirmed on 2026-05-16 that this is the intended paid Google Cloud project unless console verification shows a clash or better existing project boundary.
+- Google Cloud project: `RightOnQ-GOG` / `rightonq-gog` / project number `872475523113`.
+- Organisation/folder: `rightonq.co.uk`, directly under the Workspace organisation; no folder shown in the read-only console check.
+- Boundary status: confirmed reachable from the correct `adam@rightonq.co.uk` Workspace account on 2026-05-16. An earlier wrong-account browser check is superseded.
+- Do not use `Personal-GOG` / `personal-gog-490412` for this webhook unless Adam explicitly reverses this later. It appears personal/dev-adjacent, not the intended Revolut/payment infrastructure boundary.
 - Runtime: Cloud Run functions / Functions Framework Node.js source deployment for `roq-rcs-revolut-webhook`.
 - Proposed region: `europe-west2` / London. Official docs list `europe-west2` for Cloud Run, Secret Manager, and Cloud Firestore, making it the natural UK-first choice for a UK-based RightOnQ workflow. Confirm availability in the console before any action.
 - Dedupe/event store: Firestore Native mode, collection `revolut_webhook_events`.
-- Firestore state: not currently enabled/created for this lane, per Adam's 2026-05-16 confirmation. Enabling Firestore Native mode is a separate explicit console action and remains forbidden until approved.
+- Billing state: not linked. Console showed "This project has no billing account" on 2026-05-16. Linking billing is a separate explicit action.
+- Firestore state: not enabled/created. Firestore Databases showed no databases and a "Create a Firestore database" CTA on 2026-05-16. Enabling/creating Firestore Native mode is a separate explicit console action.
+- Cloud Run state: available as a product page, but no services exist and the Cloud Run Services page warned that clicking "Create service" will enable the Cloud Run Admin API. Enabling/deploying Cloud Run is a separate explicit action.
+- Secret Manager state: Secret Manager API page showed an "Enable" button, so the API is not yet enabled. Enabling Secret Manager and creating secrets are separate explicit actions.
+- Service account state: only existing user-managed service account is `gog-keep-access@rightonq-gog.iam.gserviceaccount.com` for gog CLI / Google Keep domain-wide delegation. Do not reuse it for this webhook.
 - Secret store: Secret Manager.
 - Initial endpoint mode: record-only. It may verify, dedupe, log, and later enrich; it must not update Apps Script Billing automatically.
 
@@ -271,9 +278,9 @@ roq-rcs-revolut-merchant-api-secret-live
 
 Pre-deployment checklist:
 
-1. Confirm the Google Cloud project ID `rightonq-gog` in the console and verify it does not clash with another intended project boundary.
-2. Confirm billing/permissions are suitable for Cloud Run, Secret Manager, Firestore, and Cloud Logging.
-3. Confirm Firestore Native mode state. Current planning assumption is not enabled; if it is not enabled, enabling it is a separate explicit action.
+1. Link a billing account to `rightonq-gog` only after explicit approval.
+2. Confirm billing/permissions are suitable for Cloud Run, Secret Manager, Firestore, and Cloud Logging after billing is linked.
+3. Enable/create Firestore Native mode only after explicit approval.
 4. Confirm `europe-west2` / London as the target region for Cloud Run, Firestore, Secret Manager, and logging.
 5. Confirm service account name and minimum IAM roles.
 6. Confirm Secret Manager secret names.
@@ -282,7 +289,10 @@ Pre-deployment checklist:
 
 Forbidden until explicitly approved:
 
+- linking billing;
+- enabling Cloud Run Admin API;
 - enabling Firestore;
+- enabling Secret Manager API;
 - creating Secret Manager secrets;
 - creating service accounts or IAM grants;
 - deploying Cloud Run;
@@ -304,10 +314,11 @@ Forbidden until explicitly approved:
 
 ## Remaining Confirmations
 
-- Confirm exact Google Cloud project/account boundary in-console; current candidate is `rightonq-gog` and Adam has approved that direction unless a clash appears.
-- Confirm `europe-west2` / London in-console as the target region.
-- Confirm Firestore Native mode state; current planning assumption is not enabled, and enablement is a separate explicit console step.
-- Confirm Cloud Run functions / Functions Framework source deployment is available and suitable in the selected project/region.
+- Link billing to `rightonq-gog` after explicit approval.
+- Confirm `europe-west2` / London in-console as the target region without starting a create/deploy flow where possible.
+- Enable/create Firestore Native mode as a separate explicit console step.
+- Enable Cloud Run Admin API / Cloud Run functions only as a separate explicit console step.
+- Enable Secret Manager API only as a separate explicit console step.
 - Confirm service account name and minimum IAM roles.
 - Confirm Secret Manager secret names before creating anything.
 - Whether Revolut retry behavior expects a `2xx` for enrichment-required events. Current design returns `202` to avoid retries while recording the need for internal enrichment.
