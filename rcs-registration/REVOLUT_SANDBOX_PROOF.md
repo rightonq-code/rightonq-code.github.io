@@ -48,7 +48,7 @@ Official Revolut Merchant docs reviewed on 2026-05-15:
 - Webhooks: Revolut supports order lifecycle events such as `ORDER_AUTHORISED` and `ORDER_COMPLETED`; delivery order is not guaranteed, so RightOnQ must treat webhook handling as idempotent.
 - Current Hosted Checkout API guidance says order creation must be done server-side because the Merchant API secret must not be exposed to frontend code.
 - `merchant_order_data.reference` is the internal reference field at order creation; webhook payloads expose this back as `merchant_order_ext_ref`, so RightOnQ should treat both names as the same business reference crossing different API surfaces.
-- Refunds can be full or partial, but only for completed orders, and should use `Idempotency-Key` to avoid duplicate refund processing.
+- Refunds can be full or partial, but only for completed orders, and should use `Idempotency-Key` to avoid duplicate refund processing. Revolut's current refund request body uses `merchant_order_data.reference`; the refund response creates a new order with `type: refund` and `related_order_id` pointing back to the paid order.
 - Merchant-initiated saved-method payments require a payment method saved for the merchant; customer-only saved methods are not enough for unattended monthly charges.
 - Webhook callback headers include `Revolut-Request-Timestamp` and `Revolut-Signature`; the webhook creation response includes a `signing_secret`.
 - Webhook signature verification uses:
@@ -96,7 +96,43 @@ Build impact:
 - RightOnQ must not rely on Revolut create-order idempotency. Store/check Billing state before creating a checkout order.
 - Store at least: Revolut order ID, token or checkout URL while pending, customer ID, payment ID, order/payment state, amount/currency, and the application reference.
 - The RightOnQ return URL now has a static `payment-return.html` page. It confirms browser return only; payment still needs to be verified through Revolut order/webhook state before Billing changes.
-- Webhook capture/signature verification, failed-payment proof, refund proof, saved-method/MIT proof, and subscription proof remain outstanding.
+- Webhook capture/signature verification and full-refund proof have passed. Failed-payment proof, saved-method/MIT proof, and subscription proof remain outstanding.
+
+## Full Refund Proof Results - 2026-05-16
+
+Full refund proof passed against the fresh return-page sandbox order.
+
+Original paid order:
+
+- Application/reference: `ROQ-RCS-TEST-RETURN-PAGE-20260516-001`
+- Order ID: `6a0866ef-9b11-a041-bfa2-e973e15e564d`
+- Payment ID: `6a08673c-80db-a36d-97a3-ec673b09e3cd`
+- Original order state before refund: `completed`
+- Original payment state before refund: `captured`
+- Amount/currency: `12000 GBP`
+
+Refund command:
+
+- Refund amount: `12000 GBP`
+- Refund reference: `ROQ-RCS-TEST-RETURN-PAGE-20260516-001-REFUND-001`
+- Idempotency key: `refund-ROQ-RCS-TEST-RETURN-PAGE-20260516-001`
+- Secret handling: `REVOLUT_MERCHANT_API_SECRET` was pasted into the local terminal prompt only, then unset. It was not pasted into chat, docs, commits, or command history as a literal value.
+
+Observed refund result:
+
+- Refund request returned `ok: true`.
+- Revolut returned refund order ID `6a0872b4-89b8-a82d-884b-703f6470c124`.
+- Refund response summary exposed `type: "REFUND"` and `state: "PROCESSING"`.
+- Embedded refund payment ID was `6a0872b4-395a-a536-8ca5-0ab9c27056af` with state `COMPLETED`.
+- Immediate retrieval of the original order returned `refundedAmount: 12000`, while the original order remained `state: "completed"`.
+- `retrieve-payments` for the original order continued to return the original captured card payment. Do not rely on the original payment-list response alone to infer refund state.
+
+Build impact:
+
+- Revolut sandbox can process a full refund for the registration handling fee.
+- RightOnQ should store refund order ID, refund payment ID where present, refund amount/currency, refund status, refund reference, and original order ID.
+- Billing/refund state should be derived from the original order's `refunded_amount`/refund order lifecycle and future refund webhooks, not from the original order payment-list alone.
+- Refund lifecycle mapping still needs a webhook capture/event-name proof before any automated Billing write.
 
 ## Proof Questions
 
@@ -223,7 +259,9 @@ node rcs-registration/tools/revolut-sandbox-proof.mjs \
   --idempotency-key proof-ROQ-RCS-TEST-PUBLIC-PARTA-20260514211901
 ```
 
-Dry run the refund shape:
+Dry run the refund shape. The refund reference is sent as
+`merchant_order_data.reference`; webhook payloads may expose the same business
+reference as `merchant_order_ext_ref`.
 
 ```bash
 node rcs-registration/tools/revolut-sandbox-proof.mjs \
@@ -327,7 +365,7 @@ First live sandbox sequence, once Bugs has the sandbox Merchant API secret:
 8b. Run a fresh sandbox Hosted Checkout using the neutral payment-return URL. Done on 2026-05-16; Revolut returned to the payment-return page and API retrieval confirmed completed/captured state.
 9. Update the existing Billing row with `operator-billing.mjs` using provider/order/payment IDs only.
 10. Run one failed/declined sandbox payment if Revolut sandbox provides a suitable test card.
-11. Run a full refund only after the order reaches `completed`.
+11. Run a full refund only after the order reaches `completed`. Done on 2026-05-16 against order `6a0866ef-9b11-a041-bfa2-e973e15e564d`; original order retrieval returned `refundedAmount: 12000`.
 12. Record webhook requirements, but do not expose a public webhook endpoint until signature verification is wired into that endpoint.
 
 ## Proof Success Criteria
@@ -343,7 +381,7 @@ Minimum useful proof:
 - successful sandbox payment changes order/payment state as expected; done.
 - fresh hosted checkout returns to `payment-return.html` instead of a 404; done.
 - failed sandbox payment can be observed and mapped;
-- full refund path is observed and mapped;
+- full refund path is observed; webhook/event mapping for refunds remains to do;
 - captured webhook signature verifies locally using the raw payload and Revolut headers; done for archived sample. Signature matched; timestamp was outside the 5-minute live replay window by the time it was verified.
 - verified webhook payload maps to the expected Billing status without writing to the Sheet; done.
 - IDs/statuses can be copied into the existing `Billing` sheet through `operator-billing.mjs`; dry-run done, live update not yet run.

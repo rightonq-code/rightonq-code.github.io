@@ -3263,3 +3263,53 @@ Visible form changes:
 Tooling change:
 
 - `revolut-sandbox-proof.mjs` now labels the Revolut proof order and line item as `RightOnQ RCS registration handling fee`.
+
+### Slice 8K Started - Revolut Full Refund Proof
+
+RCS-Twilio-4 continued the Revolut sandbox payment proof by running a full refund against the fresh return-page proof order.
+
+Official docs refreshed:
+
+- Revolut refund creates a new refund order against a completed original order;
+- current refund request shape uses `merchant_order_data.reference` for the merchant's internal refund reference;
+- the original order can expose the aggregate refunded amount as `refunded_amount`.
+
+Files updated:
+
+- `rcs-registration/tools/revolut-sandbox-proof.mjs`;
+- `rcs-registration/REVOLUT_SANDBOX_PROOF.md`;
+- `rcs-registration/RCS_ONBOARDING_MAIN_BUILD_PLAN.md`;
+- `rcs-registration/RCS_TWILIO_4_HANDOVER_2026-05-12.md`.
+
+Tooling change:
+
+- `buildRefundPayload()` now sends refund references as `merchant_order_data.reference` instead of the older/alternate `merchant_order_ext_ref` shape;
+- `summariseOrder()` now includes `type`, `refundedAmount`, and `relatedOrderId` so refund/order retrieval output exposes the fields needed by the proof.
+
+Full refund proof:
+
+- original application/reference: `ROQ-RCS-TEST-RETURN-PAGE-20260516-001`;
+- original paid order ID: `6a0866ef-9b11-a041-bfa2-e973e15e564d`;
+- original payment ID: `6a08673c-80db-a36d-97a3-ec673b09e3cd`;
+- refund amount: `12000 GBP`;
+- refund reference: `ROQ-RCS-TEST-RETURN-PAGE-20260516-001-REFUND-001`;
+- refund idempotency key: `refund-ROQ-RCS-TEST-RETURN-PAGE-20260516-001`;
+- refund order ID returned: `6a0872b4-89b8-a82d-884b-703f6470c124`;
+- refund response summary showed `type = REFUND` and `state = PROCESSING`;
+- embedded refund payment ID returned: `6a0872b4-395a-a536-8ca5-0ab9c27056af`, state `COMPLETED`;
+- immediate retrieval of the original order returned `refundedAmount = 12000`;
+- original order remained `state = completed`, and original payment-list retrieval still returned the captured card payment.
+
+Build impact:
+
+- full registration-handling-fee refund is viable in Revolut sandbox;
+- store refund order ID, refund payment ID where present, refund amount/currency, refund reference, original order ID, and refund status;
+- do not infer refund state from the original order payment-list alone;
+- capture real refund webhook events before wiring automated Billing refund updates.
+
+Still to do before public payment gate:
+
+- wire a real order-create path that stores the created order in `Payment orders` before exposing checkout to customers;
+- build the automated webhook endpoint with raw-body signature/timestamp verification, dedupe, optional payment enrichment, and Billing update;
+- finish refund/refunded webhook event mapping;
+- run failed/declined sandbox path.

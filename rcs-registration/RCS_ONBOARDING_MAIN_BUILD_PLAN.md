@@ -2451,7 +2451,7 @@ Slice 8 continuation after public/operator hardening:
 - Repeating create-order with the same `Idempotency-Key` created a second order. RightOnQ must enforce duplicate checkout protection in its own Billing lane before creating another Revolut order.
 - List by `merchant_order_data_reference` works for reconciliation, but list responses did not include checkout URLs; store checkout URL/token at create time.
 - The first payment-success redirect hit a RightOnQ 404 page after payment; this has since been addressed with a static payment-return page for future checkout tests.
-- No production Revolut API call has been made yet. A sandbox webhook has now been registered/captured and dry-run mapped as recorded below.
+- No production Revolut API call has been made yet. A sandbox webhook has now been registered/captured and dry-run mapped as recorded below, and a full sandbox refund has been created successfully.
 
 Payment-side review follow-up:
 
@@ -2463,7 +2463,7 @@ Payment-side review follow-up:
 - Syntax check passed with `node --check --input-type=commonjs < rcs-registration/google-apps-script/Code.gs`.
 - Remaining payment blockers before public gate:
   - keep the active-checkout guard in the create-order path before exposing customer checkout;
-  - finish refund/refunded status and event mapping;
+  - finish refund/refunded status and event mapping after capturing refund webhook event names;
   - build a real raw-body webhook endpoint with signature/timestamp verification, dedupe, and payment enrichment;
   - run a fresh sandbox checkout using the new payment-return URL and capture the real post-payment browser landing.
 
@@ -2482,6 +2482,16 @@ Webhook proof follow-up:
   - `paymentProvider = revolut`;
   - `paymentStatus = paid`;
   - `checkoutOrderId = 6a084d13-d84d-a49b-bb44-916bb9237ba4`.
+
+Full refund proof follow-up:
+
+- Official Revolut refund docs were refreshed again on 2026-05-16 before the live sandbox refund proof.
+- `revolut-sandbox-proof.mjs` now sends refund references in the current documented request shape: `merchant_order_data.reference`.
+- Full sandbox refund succeeded for return-page proof order `6a0866ef-9b11-a041-bfa2-e973e15e564d`.
+- Refund response summary exposed refund order ID `6a0872b4-89b8-a82d-884b-703f6470c124`, `type = REFUND`, `state = PROCESSING`, and embedded refund payment ID `6a0872b4-395a-a536-8ca5-0ab9c27056af` with state `COMPLETED`.
+- Immediate original-order retrieval returned `refundedAmount = 12000`, confirming the full `GBP 120.00` sandbox refund was associated with the paid order.
+- Original order payment-list still returned the original captured payment only, so refund status should not be inferred from original payment-list retrieval alone.
+- Build implication: store refund order ID, refund payment ID where present, refund amount/currency, refund reference, and original order ID; finish refund webhook capture before automating Billing refund updates.
 - The webhook payload did not include `payment_id`, so payment ID must be enriched from order/payment retrieval if needed.
 - No live Billing row update has been made from the webhook proof.
 - Replace the previous "capture a real sandbox webhook" blocker with:

@@ -189,7 +189,11 @@ function buildRefundPayload(options) {
     description: options.refundDescription || "RightOnQ RCS registration handling fee refund"
   };
   const reference = options.refundReference || options.reference || options.applicationId;
-  if (reference) payload.merchant_order_ext_ref = reference;
+  if (reference) {
+    payload.merchant_order_data = {
+      reference
+    };
+  }
   return payload;
 }
 
@@ -253,11 +257,14 @@ function summariseOrder(order) {
   return {
     id: order.id || "",
     token: order.token || "",
+    type: order.type || "",
     state: order.state || "",
     amount: order.amount || "",
+    refundedAmount: order.refunded_amount || "",
     currency: order.currency || "",
     reference: order.merchant_order_data && order.merchant_order_data.reference || "",
     externalReference: order.merchant_order_ext_ref || "",
+    relatedOrderId: order.related_order_id || "",
     checkoutUrlPresent: Boolean(order.checkout_url),
     checkoutUrl: order.checkout_url || "",
     customerId: order.customer && order.customer.id || "",
@@ -406,7 +413,7 @@ async function main() {
       method: "POST",
       body: JSON.stringify(refundPayload),
       idempotencyKey,
-      reference: refundPayload.merchant_order_ext_ref || orderPayload.merchant_order_data.reference
+      reference: refundPayload.merchant_order_data && refundPayload.merchant_order_data.reference || orderPayload.merchant_order_data.reference
     });
     console.log(JSON.stringify({
       ok: true,
