@@ -3422,3 +3422,11 @@ Build implication:
 - endpoint host must expose the exact raw body and the `Revolut-Request-Timestamp` / `Revolut-Signature` headers;
 - GitHub Pages is static and cannot receive POST webhooks;
 - do not trust the existing Apps Script web app as the direct Revolut webhook entrypoint unless it separately proves access to the exact raw body and custom Revolut headers.
+
+Post-review notes:
+
+- Claude Code read-only sanity check found no Critical/High issues and said commit `75d0e82` is safe to leave pushed;
+- low polish applied after the review: `mapping_failed` no longer exposes the parser error message in the public response body; the message is retained only in the internal diagnostics object;
+- live `ORDER_COMPLETED` Billing writes must first enrich/type the order so refund-order `ORDER_COMPLETED` events are not misclassified as paid registration-fee events;
+- do not re-run the full handler after a slow enrichment step; verify the signature/timestamp once at receipt, then use the mapping primitives for later internal enrichment handling;
+- the earlier `updateBilling` default-clobber issue is already fixed in current `Code.gs` (`billingPayload = { ...payload }` plus `applyDefaultPayloadValue(...)`).

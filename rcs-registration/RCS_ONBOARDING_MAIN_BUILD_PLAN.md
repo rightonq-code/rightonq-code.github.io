@@ -2460,6 +2460,7 @@ Payment-side review follow-up:
 - It also confirmed public payment-gate wiring is not safe yet.
 - Highest-risk issue found: Apps Script `updateBilling` was injecting default fee/refund/usage/plan values into every billing update, which could reset refund or usage state during later webhook/operator updates.
 - RCS-Twilio-4 fixed `updateBilling` so defaults are only applied when the caller did not provide the field and the existing Billing row is blank.
+- Rechecked on 2026-05-16: current `updateBilling` uses `const billingPayload = { ...payload }` plus `applyDefaultPayloadValue(...)`, so this default-clobber issue is fixed in the current code.
 - Syntax check passed with `node --check --input-type=commonjs < rcs-registration/google-apps-script/Code.gs`.
 - Remaining payment blockers before public gate:
   - keep the active-checkout guard in the create-order path before exposing customer checkout;
@@ -2527,6 +2528,7 @@ Active-checkout protection started:
   - `revolut-webhook-handler.mjs` proves the endpoint-core shape offline without live calls or writes;
   - future live webhook endpoint should import these instead of copying crypto/mapping logic;
   - endpoint host must support exact raw body and `Revolut-Request-Timestamp` / `Revolut-Signature` headers.
+  - live Billing apply remains blocked until `ORDER_COMPLETED` events are enriched/typed, dedupe storage is designed, and slow enrichment is separated from the first signature/timestamp verification pass.
 - Payment-order lookup is now deployed to a new clean API-only operator deployment after the Apps Script code push:
   - deployment ID `AKfycbzj0I9m_vld5Aw-zPQFsTZXslrmxlrDA6Ut0RtFnd6_fxXpVDc4qhhRuKVAA5EuhWG9`;
   - version `35`;

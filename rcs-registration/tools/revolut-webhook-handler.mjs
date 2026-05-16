@@ -144,9 +144,9 @@ function handleRevolutWebhook({
     return jsonResponse(400, {
       ok: false,
       accepted: false,
-      reason: "mapping_failed",
-      message: error.message
+      reason: "mapping_failed"
     }, {
+      message: error.message,
       verification
     });
   }
