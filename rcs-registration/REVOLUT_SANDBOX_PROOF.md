@@ -96,7 +96,8 @@ Build impact:
 - RightOnQ must not rely on Revolut create-order idempotency. Store/check Billing state before creating a checkout order.
 - Store at least: Revolut order ID, token or checkout URL while pending, customer ID, payment ID, order/payment state, amount/currency, and the application reference.
 - The RightOnQ return URL now has a static `payment-return.html` page. It confirms browser return only; payment still needs to be verified through Revolut order/webhook state before Billing changes.
-- Webhook capture/signature verification and full-refund proof have passed. Failed-payment proof, saved-method/MIT proof, and subscription proof remain outstanding.
+- Webhook capture/signature verification and full-refund proof have passed. Declined-attempt proof has passed, but a terminal failed/abandoned order proof is still outstanding. Saved-method/MIT proof and subscription proof also remain outstanding.
+- Declined-attempt proof has passed. A hosted-checkout order can emit `ORDER_PAYMENT_DECLINED` for one attempt and later emit `ORDER_AUTHORISED` / `ORDER_COMPLETED` for the same order after a successful retry.
 
 ## Full Refund Proof Results - 2026-05-16
 
@@ -423,7 +424,7 @@ First live sandbox sequence, once Bugs has the sandbox Merchant API secret:
 8a. Add a customer-facing payment return page so future hosted-checkout redirects do not land on a 404. Done on 2026-05-16 with `payment-return.html`.
 8b. Run a fresh sandbox Hosted Checkout using the neutral payment-return URL. Done on 2026-05-16; Revolut returned to the payment-return page and API retrieval confirmed completed/captured state.
 9. Update the existing Billing row with `operator-billing.mjs` using provider/order/payment IDs only.
-10. Run one failed/declined sandbox payment if Revolut sandbox provides a suitable test card.
+10. Run one failed/declined sandbox payment if Revolut sandbox provides a suitable test card. Done on 2026-05-16 as a declined-attempt proof; the same hosted-checkout order later completed after a successful retry.
 11. Run a full refund only after the order reaches `completed`. Done on 2026-05-16 against order `6a0866ef-9b11-a041-bfa2-e973e15e564d`; original order retrieval returned `refundedAmount: 12000`.
 11a. Capture and verify the refund-order webhook. Done on 2026-05-16; Revolut sent `ORDER_COMPLETED` for refund order `6a0872b4-89b8-a82d-884b-703f6470c124` without `merchant_order_ext_ref`, and the mapper now returns `enrichmentRequired`.
 12. Record webhook requirements, but do not expose a public webhook endpoint until signature verification is wired into that endpoint.
@@ -440,7 +441,7 @@ Minimum useful proof:
 - hosted checkout page opens; done.
 - successful sandbox payment changes order/payment state as expected; done.
 - fresh hosted checkout returns to `payment-return.html` instead of a 404; done.
-- failed sandbox payment can be observed and mapped;
+- failed/declined sandbox payment attempt can be observed and mapped; done for `ORDER_PAYMENT_DECLINED` on order `6a08af68-51f9-ae4b-be9e-c388fc6f400e`.
 - full refund path is observed; refund webhook event-name/field shape is observed, and enrichment-backed Billing implementation remains to do;
 - captured webhook signature verifies locally using the raw payload and Revolut headers; done for archived sample. Signature matched; timestamp was outside the 5-minute live replay window by the time it was verified.
 - verified webhook payload maps to the expected Billing status without writing to the Sheet; done.
@@ -509,6 +510,60 @@ Important nuance:
 - the browser-return page is still non-authoritative by design;
 - payment state is confirmed by Revolut order/payment retrieval or webhook processing;
 - no live Billing row update has been made from this return-page proof.
+
+## Live Sandbox Declined-Attempt Proof Results - 2026-05-16
+
+Fresh sandbox checkout:
+
+- application/reference: `ROQ-RCS-TEST-DECLINED-20260516-001`;
+- idempotency key: `roq-rcs-declined-proof-20260516-001`;
+- order ID: `6a08af68-51f9-ae4b-be9e-c388fc6f400e`;
+- token: `694632ca-a8fa-442e-beb0-61f704e7d377`;
+- customer ID: `1a21a8ef-fc6c-442c-863a-fcb2b8fa2a05`;
+- amount/currency: `12000 GBP`;
+- initial order state: `pending`.
+
+Payment attempts:
+
+- first attempt used Revolut's sandbox insufficient-funds test card and declined;
+- declined payment ID from order retrieval: `6a08afb8-937c-ae29-8437-9e0045df3bac`;
+- embedded order retrieval showed declined attempt state `declined` and decline reason `insufficient_funds`;
+- the payment-list endpoint returned the declined payment attempt but did not include the decline reason;
+- the hosted checkout later allowed a successful retry on the same order;
+- captured payment ID: `6a08affd-b4b7-ae3e-9d39-4c3eb1c05f79`;
+- final order state: `completed`.
+
+Webhook events captured for the same order:
+
+- `ORDER_PAYMENT_DECLINED`
+  - webhook.site request ID `6b31a6a4-4a94-4bb2-ba99-7e14dc70afb2`;
+  - timestamp `1778954177544`;
+  - raw body `{"event":"ORDER_PAYMENT_DECLINED","order_id":"6a08af68-51f9-ae4b-be9e-c388fc6f400e","merchant_order_ext_ref":"ROQ-RCS-TEST-DECLINED-20260516-001"}`;
+  - no payment ID in the body.
+- `ORDER_AUTHORISED`
+  - webhook.site request ID `d128f21f-e2a4-433b-be4e-b70eacba560c`;
+  - timestamp `1778954247076`;
+  - raw body `{"event":"ORDER_AUTHORISED","order_id":"6a08af68-51f9-ae4b-be9e-c388fc6f400e","merchant_order_ext_ref":"ROQ-RCS-TEST-DECLINED-20260516-001"}`;
+  - no payment ID in the body.
+- `ORDER_COMPLETED`
+  - webhook.site request ID `b7427a92-8b26-48f7-86cb-cff5583fffeb`;
+  - timestamp `1778954247253`;
+  - raw body `{"event":"ORDER_COMPLETED","order_id":"6a08af68-51f9-ae4b-be9e-c388fc6f400e","merchant_order_ext_ref":"ROQ-RCS-TEST-DECLINED-20260516-001"}`;
+  - no payment ID in the body.
+
+Mapping proof:
+
+- `ORDER_PAYMENT_DECLINED` maps to `billingStatus = registration_fee_failed` and `paymentStatus = declined`;
+- later `ORDER_COMPLETED` maps to `billingStatus = registration_fee_paid` and `paymentStatus = paid`;
+- this confirms the endpoint must process event order carefully and dedupe per event/order, not just final order state.
+
+Build implication:
+
+- a single hosted-checkout order can have multiple payment attempts;
+- declined-attempt webhook bodies do not include payment IDs, so payment-attempt correlation requires order retrieval;
+- a declined attempt does not necessarily mean the order is terminally failed;
+- for customer UX, the hosted checkout may let the customer retry and complete the same order;
+- no live Billing row update was made from this declined-attempt proof.
 
 ## Live Sandbox Webhook Proof Results - 2026-05-16
 

@@ -3466,3 +3466,40 @@ Post-review correction:
 - The richer logical/audit key is stored as a field, not used as the document identity.
 - State machine now distinguishes `received`, `processing`, `enrichment_required`, `mapped`, `applied`, and `failed`; `duplicate` is a response outcome, not a stored state.
 - Enrichment rules now say to always enrich `ORDER_COMPLETED` before live Billing writes, and refund-order application lookup must use the enriched original/related order ID before calling `lookupPaymentOrder`.
+
+## Slice 8O - Revolut Declined-Attempt Proof
+
+Codex recorded a declined-attempt sandbox proof.
+
+Order:
+
+- application/reference `ROQ-RCS-TEST-DECLINED-20260516-001`;
+- order ID `6a08af68-51f9-ae4b-be9e-c388fc6f400e`;
+- amount `12000 GBP`.
+
+Observed payment attempts:
+
+- first attempt declined with payment ID `6a08afb8-937c-ae29-8437-9e0045df3bac`;
+- order retrieval embedded decline reason `insufficient_funds`;
+- payment-list retrieval included the declined attempt but did not include the decline reason;
+- same hosted-checkout order later succeeded with captured payment ID `6a08affd-b4b7-ae3e-9d39-4c3eb1c05f79`;
+- final order state became `completed`.
+
+Webhook events captured:
+
+- `ORDER_PAYMENT_DECLINED` at timestamp `1778954177544`, request ID `6b31a6a4-4a94-4bb2-ba99-7e14dc70afb2`;
+- `ORDER_AUTHORISED` at timestamp `1778954247076`, request ID `d128f21f-e2a4-433b-be4e-b70eacba560c`;
+- `ORDER_COMPLETED` at timestamp `1778954247253`, request ID `b7427a92-8b26-48f7-86cb-cff5583fffeb`;
+- bodies included event, order ID, and `merchant_order_ext_ref`; none included a payment ID.
+
+Mapping proof:
+
+- `ORDER_PAYMENT_DECLINED` dry-run mapped to `billingStatus = registration_fee_failed`, `paymentStatus = declined`;
+- later `ORDER_COMPLETED` dry-run mapped to `billingStatus = registration_fee_paid`, `paymentStatus = paid`.
+
+Implication:
+
+- declined attempts are observable via webhook and API retrieval;
+- a declined attempt is not necessarily terminal for the order because the same hosted-checkout order can later complete;
+- webhook/Billing logic must process event sequence and final enrichment carefully, not collapse everything to final order state too early;
+- no live Billing write was made.

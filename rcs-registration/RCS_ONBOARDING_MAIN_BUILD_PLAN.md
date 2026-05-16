@@ -2534,6 +2534,12 @@ Active-checkout protection started:
   - dedupe source of truth should be Firestore Native mode, not the Google Sheet;
   - Firestore document identity is now payload-stable: `sha256(revolut:{event}:{orderId})`, with application/resolution context stored as fields after enrichment;
   - first live implementation should be record-only/dry-run, with automatic Billing writes still disabled.
+- Declined-attempt sandbox proof passed:
+  - order `6a08af68-51f9-ae4b-be9e-c388fc6f400e` first emitted `ORDER_PAYMENT_DECLINED` then later `ORDER_AUTHORISED` and `ORDER_COMPLETED` after a successful retry;
+  - declined payment attempt ID `6a08afb8-937c-ae29-8437-9e0045df3bac`, captured payment attempt ID `6a08affd-b4b7-ae3e-9d39-4c3eb1c05f79`;
+  - webhook bodies included event, order ID, and merchant reference, but no payment ID;
+  - mapper dry-run confirmed `ORDER_PAYMENT_DECLINED` -> `registration_fee_failed` / `declined` and later `ORDER_COMPLETED` -> `registration_fee_paid` / `paid`;
+  - no live Billing update was made.
 - Payment-order lookup is now deployed to a new clean API-only operator deployment after the Apps Script code push:
   - deployment ID `AKfycbzj0I9m_vld5Aw-zPQFsTZXslrmxlrDA6Ut0RtFnd6_fxXpVDc4qhhRuKVAA5EuhWG9`;
   - version `35`;
