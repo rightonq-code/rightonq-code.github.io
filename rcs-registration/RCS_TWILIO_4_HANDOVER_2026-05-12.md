@@ -3331,3 +3331,35 @@ Still to do before public payment gate:
 - build the automated webhook endpoint with raw-body signature/timestamp verification, dedupe, optional payment enrichment, and Billing update;
 - implement automatic application lookup for refund webhooks from RightOnQ's ledger/original-order data before any live webhook Billing write;
 - run failed/declined sandbox path.
+
+### Slice 8L Started - Payment Order Lookup
+
+RCS-Twilio-4 added the first read-only lookup needed by refund webhook enrichment.
+
+Files updated:
+
+- `rcs-registration/google-apps-script/Code.gs`;
+- `rcs-registration/tools/operator-payment-order.mjs`;
+- `rcs-registration/tools/README.md`;
+- `rcs-registration/RCS_ONBOARDING_MAIN_BUILD_PLAN.md`;
+- `rcs-registration/RCS_TWILIO_4_HANDOVER_2026-05-12.md`.
+
+Behaviour:
+
+- new operator action: `lookupPaymentOrder`;
+- new CLI mode: `operator-payment-order.mjs --lookup --revolut-order-id <id>`;
+- lookup scans the `Payment orders` ledger by Revolut order ID and returns the latest matching snapshot plus `applicationId`;
+- lookup is strictly read-only: it uses `getSheetByName`, returns `found: false` if the `Payment orders` sheet is absent, and does not create/repair sheets or write Billing, Applications, Payment orders, or Status events;
+- this gives the future webhook endpoint a local source of truth for resolving refund-order webhooks that arrive without `merchant_order_ext_ref`.
+
+Local verification:
+
+- `node --check rcs-registration/tools/operator-payment-order.mjs` passed;
+- `node --check --input-type=commonjs < rcs-registration/google-apps-script/Code.gs` passed;
+- dry-run `--lookup --revolut-order-id 6a084d13-d84d-a49b-bb44-916bb9237ba4` printed `action = lookupPaymentOrder`;
+- dry-run `--check-active --application-id ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747` still printed `action = checkActiveCheckout`.
+
+Deployment still needed:
+
+- Apps Script code now needs to be pushed/deployed to the clean API-only operator deployment before a live lookup proof can run.
+- Do not use `clasp deploy -i` against the clean deployment if the Apps Script UI would reattach a public web app type; use the established clean deployment workflow.

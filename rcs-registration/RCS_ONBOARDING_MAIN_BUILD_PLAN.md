@@ -2518,6 +2518,7 @@ Active-checkout protection started:
   - `creating` / `pending` / `processing` / `authorised` / `authorized` -> `reuse`, reuse the stored checkout URL;
   - no completed/open order -> `safe_to_create`.
 - `recordPaymentOrder` appends a ledger snapshot containing Revolut order ID, state, amount, currency, checkout URL, merchant reference, idempotency key, payment ID/state, purpose, superseded flag, and notes.
+- `lookupPaymentOrder` reads the latest ledger snapshot by Revolut order ID across the `Payment orders` ledger. This is the first local building block for resolving refund webhook application context.
 - `getOperatorSnapshot` now includes `activeCheckout` plus recent `paymentOrders`.
 - Local tool added: `rcs-registration/tools/operator-payment-order.mjs`.
 - Apps Script HEAD was pushed and a clean API-only operator deployment now serves this slice:

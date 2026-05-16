@@ -543,6 +543,7 @@ function isOperatorOnlyAction(action) {
     updateBilling: true,
     checkActiveCheckout: true,
     recordPaymentOrder: true,
+    lookupPaymentOrder: true,
     updateInternalReview: true,
     updateTrustHubKyc: true,
     updateUkRcBundle: true
@@ -581,6 +582,10 @@ function rcsOperatorAction(payload) {
     if (payload.action === "recordPaymentOrder") {
       requireOperatorPin(payload);
       return recordPaymentOrder(spreadsheet, payload);
+    }
+    if (payload.action === "lookupPaymentOrder") {
+      requireOperatorPin(payload);
+      return lookupPaymentOrder(spreadsheet, payload);
     }
     if (payload.action === "updateInternalReview") {
       requireOperatorPin(payload);
@@ -1223,6 +1228,30 @@ function recordPaymentOrder(spreadsheet, payload) {
   };
 }
 
+function lookupPaymentOrder(spreadsheet, payload) {
+  const revolutOrderId = firstValue(payload.revolutOrderId, payload.checkoutOrderId, payload.orderId);
+  if (!revolutOrderId) throw new Error("Missing Revolut order ID");
+
+  const record = findLatestPaymentOrderByRevolutOrderId(spreadsheet, revolutOrderId);
+  if (!record) {
+    return {
+      ok: true,
+      found: false,
+      revolutOrderId: revolutOrderId,
+      reason: "No Payment orders ledger row was found for this Revolut order ID."
+    };
+  }
+
+  return {
+    ok: true,
+    found: true,
+    applicationId: record["Application ID"] || "",
+    revolutOrderId: revolutOrderId,
+    order: buildPaymentOrderSummary(record),
+    reason: "Found the latest Payment orders ledger row for this Revolut order ID."
+  };
+}
+
 function findLatestPaymentOrderSnapshots(spreadsheet, applicationId) {
   const records = findRecentRecordsByApplicationId(spreadsheet, PAYMENT_ORDERS_SHEET_NAME, applicationId, 200, PAYMENT_ORDER_HEADERS);
   const seen = {};
@@ -1239,8 +1268,25 @@ function findLatestPaymentOrderSnapshots(spreadsheet, applicationId) {
   });
 }
 
+function findLatestPaymentOrderByRevolutOrderId(spreadsheet, revolutOrderId) {
+  const sheet = spreadsheet.getSheetByName(PAYMENT_ORDERS_SHEET_NAME);
+  if (!sheet) return null;
+  const values = sheet.getDataRange().getValues();
+  const headers = normaliseHeaders(values[0] || PAYMENT_ORDER_HEADERS);
+  const orderIdColumn = headers.indexOf("Revolut order ID");
+  if (orderIdColumn === -1) throw new Error("Revolut order ID column not found in Payment orders sheet");
+
+  for (let index = values.length - 1; index >= 1; index -= 1) {
+    if (String(values[index][orderIdColumn]) === String(revolutOrderId)) {
+      return rowToObject(values[index], headers);
+    }
+  }
+  return null;
+}
+
 function buildPaymentOrderSummary(record) {
   return {
+    applicationId: record["Application ID"] || "",
     revolutOrderId: record["Revolut order ID"] || "",
     orderState: record["Order state"] || "",
     amountMinor: record["Amount minor"] || "",

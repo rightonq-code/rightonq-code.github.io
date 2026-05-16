@@ -42,7 +42,7 @@ The proof helper uses the authenticated operator API for creating the private te
 | `operator-trusthub-kyc.mjs` | Update the internal Trust Hub KYC tracking row and sync the application Trust Hub status. | `RCS_ONBOARDING_OPERATOR_PIN` |
 | `operator-rc-bundle.mjs` | Update the internal UK RC Bundle tracking row. | `RCS_ONBOARDING_OPERATOR_PIN` |
 | `operator-billing.mjs` | Update the internal billing/payment tracking row. | `RCS_ONBOARDING_OPERATOR_PIN` |
-| `operator-payment-order.mjs` | Check or append Revolut payment-order ledger snapshots for active-checkout protection. | `RCS_ONBOARDING_OPERATOR_PIN` |
+| `operator-payment-order.mjs` | Check, append, or look up Revolut payment-order ledger snapshots for active-checkout protection. | `RCS_ONBOARDING_OPERATOR_PIN` |
 | `proof-public-part-a-submit.mjs` | Create a private test link, submit Part A through the public path, then prove Trust Hub KYC and UK RC Bundle tracking rows were created. | `RCS_ONBOARDING_CREATE_PIN` and `RCS_ONBOARDING_OPERATOR_PIN` |
 | `revolut-sandbox-proof.mjs` | Prepare and test Revolut sandbox Hosted Checkout requests. | No RCS PIN; uses `REVOLUT_MERCHANT_API_SECRET` for live sandbox calls |
 | `revolut-webhook-verify.mjs` | Verify Revolut webhook signatures/timestamp tolerance against captured sandbox payloads. | No RCS PIN; uses `REVOLUT_WEBHOOK_SIGNING_SECRET` for real samples |
@@ -292,9 +292,19 @@ RCS_ONBOARDING_OPERATOR_PIN="..." node rcs-registration/tools/operator-payment-o
   --internal-notes "Sandbox order created. No card data stored."
 ```
 
+Look up the latest ledger snapshot by Revolut order ID:
+
+```bash
+RCS_ONBOARDING_OPERATOR_PIN="..." node rcs-registration/tools/operator-payment-order.mjs \
+  --lookup \
+  --revolut-order-id order_...
+```
+
 This ledger is the active-checkout source of truth. The Billing row may mirror the
 latest provider IDs for readability, but checkout creation guards must read the
 `Payment orders` ledger, not the single Billing checkout/order cell.
+Refund webhook enrichment should also resolve application context from this ledger or
+the original-order record before writing any Billing update.
 
 ## Revolut Sandbox Proof
 
