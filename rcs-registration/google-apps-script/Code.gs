@@ -1053,14 +1053,23 @@ function updateBilling(spreadsheet, payload) {
   const applicationRecord = findApplicationRecord(spreadsheet, { applicationId: applicationId });
   if (!applicationRecord) throw new Error("Application ID not found");
 
-  const billingPayload = {
-    registrationFeeGbp: "100",
-    registrationFeeVatTreatment: "+ VAT",
-    refundStatus: "not_required",
-    usageTopUpStatus: "not_started",
-    monthlyPlan: firstValue(applicationRecord["Package name"], applicationRecord["Package interest"]),
-    ...payload
-  };
+  const billingPayload = { ...payload };
+  const existingBillingRecord = findLatestRecordByApplicationId(
+    spreadsheet,
+    BILLING_SHEET_NAME,
+    applicationId,
+    BILLING_HEADERS
+  );
+  applyDefaultPayloadValue(billingPayload, "registrationFeeGbp", existingBillingRecord["Registration fee GBP"], "100");
+  applyDefaultPayloadValue(billingPayload, "registrationFeeVatTreatment", existingBillingRecord["Registration fee VAT treatment"], "+ VAT");
+  applyDefaultPayloadValue(billingPayload, "refundStatus", existingBillingRecord["Refund status"], "not_required");
+  applyDefaultPayloadValue(billingPayload, "usageTopUpStatus", existingBillingRecord["Usage/top-up status"], "not_started");
+  applyDefaultPayloadValue(
+    billingPayload,
+    "monthlyPlan",
+    existingBillingRecord["Monthly plan"],
+    firstValue(applicationRecord["Package name"], applicationRecord["Package interest"])
+  );
 
   const result = upsertTrackingRecord(
     spreadsheet,
@@ -1091,6 +1100,14 @@ function updateBilling(spreadsheet, payload) {
     paymentStatus: result.record["Payment status"] || "",
     updatedAt: now.toISOString()
   };
+}
+
+function applyDefaultPayloadValue(payload, key, existingValue, defaultValue) {
+  if (Object.prototype.hasOwnProperty.call(payload, key)) return;
+  if (firstValue(existingValue, "")) return;
+  const value = firstValue(defaultValue, "");
+  if (!value) return;
+  payload[key] = value;
 }
 
 function upsertTrackingRecord(spreadsheet, sheetName, headersList, fieldMap, payload, now) {

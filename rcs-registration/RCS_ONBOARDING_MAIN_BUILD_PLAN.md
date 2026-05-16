@@ -2450,6 +2450,21 @@ Slice 8 continuation after public/operator hardening:
 - The payment-success redirect hit a RightOnQ 404 page after payment, so add a real payment-return state/page before public launch.
 - No production Revolut API call has been made yet. No sandbox webhook has been registered/captured yet.
 
+Payment-side review follow-up:
+
+- Claude Code read-only review found no Critical payment issues after the sandbox proof.
+- It confirmed webhook proof is safe to continue as a sandbox/local dry-run activity.
+- It also confirmed public payment-gate wiring is not safe yet.
+- Highest-risk issue found: Apps Script `updateBilling` was injecting default fee/refund/usage/plan values into every billing update, which could reset refund or usage state during later webhook/operator updates.
+- RCS-Twilio-4 fixed `updateBilling` so defaults are only applied when the caller did not provide the field and the existing Billing row is blank.
+- Syntax check passed with `node --check --input-type=commonjs < rcs-registration/google-apps-script/Code.gs`.
+- Remaining payment blockers before public gate:
+  - enforce one active checkout/order per application before creating another Revolut order;
+  - add/store checkout URL/token or equivalent active-order details;
+  - finish refund/refunded status and event mapping;
+  - capture a real sandbox webhook and reconcile actual event names/field paths;
+  - build a real payment-return page/state instead of the current 404 redirect.
+
 ### Slice 8B - Public Endpoint Hardening Started
 
 Purpose:

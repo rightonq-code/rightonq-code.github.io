@@ -2953,3 +2953,48 @@ Next job:
 - verify the raw payload and headers with `revolut-webhook-verify.mjs`;
 - map the verified event with `revolut-webhook-map.mjs`;
 - then consider an `operator-billing.mjs --dry-run` followed by a live operator Billing update for the test application.
+
+### Slice 8G Review Follow-Up - Billing Default Clobber Fixed
+
+Bugs asked Claude Code for a read-only payment-side comb-through after the first Revolut sandbox payment proof.
+
+Useful findings:
+
+- no Critical issues;
+- safe to proceed to webhook proof as a sandbox/local dry-run activity;
+- not safe to wire the public payment gate yet;
+- highest-risk code issue was `updateBilling` injecting default billing fields into every billing update.
+
+The clobber risk:
+
+- every `updateBilling` call previously included default values for:
+  - `Registration fee GBP`;
+  - `Registration fee VAT treatment`;
+  - `Refund status`;
+  - `Usage/top-up status`;
+  - `Monthly plan`;
+- because `upsertTrackingRecord` writes any mapped key present in the payload, a later unrelated billing update could reset a refunded row back to `not_required`, reset usage/top-up state, or overwrite plan/fee values.
+
+Fix applied locally:
+
+- `rcs-registration/google-apps-script/Code.gs` now builds `billingPayload` from explicit payload values first;
+- defaults are applied only when the caller did not provide the field and the existing Billing row value is blank;
+- explicit operator/webhook values still win;
+- existing nonblank Billing row values are preserved.
+
+Verification:
+
+- `node --check --input-type=commonjs < rcs-registration/google-apps-script/Code.gs` passed.
+
+Still not solved by this fix:
+
+- duplicate checkout/order protection is only documented, not enforced yet;
+- Billing still needs active checkout/order modelling before the public payment gate;
+- refund event mapping/status design still needs completion;
+- webhook event names/field paths remain assumptions until a real sandbox webhook is captured.
+
+Next smallest safe path:
+
+1. Capture/verify/map a sandbox webhook as dry-run proof.
+2. Add active-checkout protection and checkout URL/token storage before any public payment gate.
+3. Only then consider live Billing updates from payment events.
