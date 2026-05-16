@@ -2488,6 +2488,21 @@ Webhook proof follow-up:
   - dedupe events before writing;
   - optionally enrich payment ID/state from Revolut before updating Billing.
 
+Active-checkout protection started:
+
+- Claude Code read-only design review recommended an append-only `Payment orders` ledger as the source of truth, with Billing remaining a derived/operator summary.
+- RCS-Twilio-4 added a `Payment orders` sheet model with guarded operator actions:
+  - `checkActiveCheckout`;
+  - `recordPaymentOrder`.
+- `checkActiveCheckout` scans the latest non-superseded order snapshots for an application:
+  - `completed` -> `already_paid`, do not create another checkout;
+  - `creating` / `pending` / `processing` / `authorised` / `authorized` -> `reuse`, reuse the stored checkout URL;
+  - no completed/open order -> `safe_to_create`.
+- `recordPaymentOrder` appends a ledger snapshot containing Revolut order ID, state, amount, currency, checkout URL, merchant reference, idempotency key, payment ID/state, purpose, superseded flag, and notes.
+- `getOperatorSnapshot` now includes `activeCheckout` plus recent `paymentOrders`.
+- Local tool added: `rcs-registration/tools/operator-payment-order.mjs`.
+- This is still operator-run pilot protection, not the automated public payment gate.
+
 ### Slice 8B - Public Endpoint Hardening Started
 
 Purpose:

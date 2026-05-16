@@ -65,6 +65,7 @@ Deployment:
 - Version `23` adds billing/commercial tracking scaffolding.
 - Version `24` fixes default billing fee fields for future billing updates.
 - Version `25` hardens public Part A submission by requiring an existing private application link/token, adds advisory/strict payment gate support, and rate-limits Adam MailApp notifications.
+- Version `32` adds the `Payment orders` ledger plus guarded `checkActiveCheckout` and `recordPaymentOrder` operator actions for Revolut active-checkout protection. The public web app is still pinned to version `31`.
 
 ## Behaviour
 
@@ -130,6 +131,8 @@ Target state before public website integration:
   - `getOperatorSnapshot`;
   - `updateApplicationStatus`;
   - `updateBilling`;
+  - `checkActiveCheckout`;
+  - `recordPaymentOrder`;
   - `updateInternalReview`;
   - `updateTrustHubKyc`;
   - `updateUkRcBundle`;

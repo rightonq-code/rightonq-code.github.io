@@ -42,6 +42,7 @@ The proof helper uses the authenticated operator API for creating the private te
 | `operator-trusthub-kyc.mjs` | Update the internal Trust Hub KYC tracking row and sync the application Trust Hub status. | `RCS_ONBOARDING_OPERATOR_PIN` |
 | `operator-rc-bundle.mjs` | Update the internal UK RC Bundle tracking row. | `RCS_ONBOARDING_OPERATOR_PIN` |
 | `operator-billing.mjs` | Update the internal billing/payment tracking row. | `RCS_ONBOARDING_OPERATOR_PIN` |
+| `operator-payment-order.mjs` | Check or append Revolut payment-order ledger snapshots for active-checkout protection. | `RCS_ONBOARDING_OPERATOR_PIN` |
 | `proof-public-part-a-submit.mjs` | Create a private test link, submit Part A through the public path, then prove Trust Hub KYC and UK RC Bundle tracking rows were created. | `RCS_ONBOARDING_CREATE_PIN` and `RCS_ONBOARDING_OPERATOR_PIN` |
 | `revolut-sandbox-proof.mjs` | Prepare and test Revolut sandbox Hosted Checkout requests. | No RCS PIN; uses `REVOLUT_MERCHANT_API_SECRET` for live sandbox calls |
 | `revolut-webhook-verify.mjs` | Verify Revolut webhook signatures/timestamp tolerance against captured sandbox payloads. | No RCS PIN; uses `REVOLUT_WEBHOOK_SIGNING_SECRET` for real samples |
@@ -256,6 +257,44 @@ RCS_ONBOARDING_OPERATOR_PIN="..." node rcs-registration/tools/operator-billing.m
 ```
 
 Expected live result: JSON showing `billingStatus`, provider/order/payment references, payment status, and update timestamp. Store provider IDs/statuses only; do not store card details.
+
+## Check Or Record Payment Orders
+
+Check whether an application already has a completed or open Revolut checkout before
+creating another order:
+
+```bash
+RCS_ONBOARDING_OPERATOR_PIN="..." node rcs-registration/tools/operator-payment-order.mjs \
+  --check-active \
+  --application-id ROQ-RCS-...
+```
+
+Expected decisions:
+
+- `already_paid`: a non-superseded completed order exists; do not create a new checkout.
+- `reuse`: a non-superseded open order exists; reuse the stored checkout URL.
+- `safe_to_create`: no completed/open order was found.
+
+Record a created Revolut order snapshot after a successful sandbox/order-create call:
+
+```bash
+RCS_ONBOARDING_OPERATOR_PIN="..." node rcs-registration/tools/operator-payment-order.mjs \
+  --record \
+  --application-id ROQ-RCS-... \
+  --revolut-order-id order_... \
+  --order-state pending \
+  --amount-minor 12000 \
+  --currency GBP \
+  --checkout-url https://sandbox-checkout.revolut.com/payment-link/... \
+  --merchant-order-reference ROQ-RCS-... \
+  --idempotency-key proof-ROQ-RCS-... \
+  --order-purpose registration_fee \
+  --internal-notes "Sandbox order created. No card data stored."
+```
+
+This ledger is the active-checkout source of truth. The Billing row may mirror the
+latest provider IDs for readability, but checkout creation guards must read the
+`Payment orders` ledger, not the single Billing checkout/order cell.
 
 ## Revolut Sandbox Proof
 

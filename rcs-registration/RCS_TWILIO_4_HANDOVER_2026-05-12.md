@@ -3067,3 +3067,70 @@ Next safe implementation work:
 - design active-checkout/order storage so RightOnQ reuses an existing pending checkout instead of creating duplicate Revolut orders;
 - design webhook endpoint pipeline: raw body -> signature/timestamp verify -> dedupe -> optional order/payment enrichment -> Billing update;
 - only after that consider public payment gating.
+
+### Slice 8H Started - Active Checkout Guard Foundation
+
+Bugs ran a focused Claude Code read-only design review for active Revolut checkout protection.
+
+Design decision:
+
+- use a new `Payment orders` ledger as the active-checkout source of truth;
+- keep `Billing` as a derived/operator summary, not the guard source;
+- do not trust the single Billing `Checkout/order ID` cell for duplicate-checkout protection because Revolut can create multiple orders per application.
+
+Implemented locally:
+
+- added Apps Script sheet/tab model:
+  - `Payment orders`;
+- added payment-order headers:
+  - `Created at`;
+  - `Application ID`;
+  - `Revolut order ID`;
+  - `Order state`;
+  - `Amount minor`;
+  - `Currency`;
+  - `Checkout URL`;
+  - `Merchant order reference`;
+  - `Idempotency key`;
+  - `Payment ID`;
+  - `Payment state`;
+  - `Order purpose`;
+  - `Superseded`;
+  - `Internal notes`;
+  - `Last updated`;
+- added guarded operator actions:
+  - `checkActiveCheckout`;
+  - `recordPaymentOrder`;
+- `getOperatorSnapshot` now includes:
+  - `activeCheckout`;
+  - recent `paymentOrders`;
+- added local tool:
+  - `rcs-registration/tools/operator-payment-order.mjs`.
+
+Guard behaviour:
+
+- if a non-superseded `completed` order exists, return `decision = already_paid`;
+- if a non-superseded open order exists, return `decision = reuse` plus checkout URL/order details;
+- open states currently include:
+  - `creating`;
+  - `pending`;
+  - `processing`;
+  - `authorised`;
+  - `authorized`;
+- otherwise return `decision = safe_to_create`.
+
+Verification so far:
+
+- `node --check --input-type=commonjs < rcs-registration/google-apps-script/Code.gs` passed;
+- `node --check rcs-registration/tools/operator-payment-order.mjs` passed;
+- dry-run `--check-active` payload printed correctly;
+- dry-run `--record` payload printed correctly.
+
+Still to do before public payment gate:
+
+- push Apps Script HEAD after commit;
+- run a live operator proof against the existing sandbox order:
+  - check active before ledger row exists;
+  - record the completed Revolut order snapshot;
+  - check active again and confirm `already_paid`;
+- later add the automated raw-body webhook endpoint with signature/timestamp verification, dedupe, enrichment, and Billing update.

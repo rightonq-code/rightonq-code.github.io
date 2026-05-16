@@ -9,6 +9,7 @@ const INTERNAL_REVIEWS_SHEET_NAME = "Internal reviews";
 const TRUST_HUB_KYC_SHEET_NAME = "Trust Hub KYC";
 const UK_RC_BUNDLES_SHEET_NAME = "UK RC bundles";
 const BILLING_SHEET_NAME = "Billing";
+const PAYMENT_ORDERS_SHEET_NAME = "Payment orders";
 const PUBLIC_FORM_URL = "https://rightonq-code.github.io/rcs-registration/index.html";
 const NOTIFY_EMAIL = "adam@rightonq.co.uk";
 const NOTIFY_RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
@@ -146,6 +147,25 @@ const BILLING_HEADERS = [
   "Internal notes",
   "Last updated"
 ];
+const PAYMENT_ORDER_HEADERS = [
+  "Created at",
+  "Application ID",
+  "Revolut order ID",
+  "Order state",
+  "Amount minor",
+  "Currency",
+  "Checkout URL",
+  "Merchant order reference",
+  "Idempotency key",
+  "Payment ID",
+  "Payment state",
+  "Order purpose",
+  "Superseded",
+  "Internal notes",
+  "Last updated"
+];
+const PAYMENT_ORDER_OPEN_STATES = ["creating", "pending", "processing", "authorised", "authorized"];
+const PAYMENT_ORDER_PAID_STATES = ["completed"];
 const INTERNAL_REVIEW_HEADERS = [
   "Created at",
   "Application ID",
@@ -552,6 +572,14 @@ function rcsOperatorAction(payload) {
       requireOperatorPin(payload);
       return updateBilling(spreadsheet, payload);
     }
+    if (payload.action === "checkActiveCheckout") {
+      requireOperatorPin(payload);
+      return checkActiveCheckout(spreadsheet, payload);
+    }
+    if (payload.action === "recordPaymentOrder") {
+      requireOperatorPin(payload);
+      return recordPaymentOrder(spreadsheet, payload);
+    }
     if (payload.action === "updateInternalReview") {
       requireOperatorPin(payload);
       return updateInternalReview(spreadsheet, payload);
@@ -825,6 +853,8 @@ function getOperatorSnapshot(spreadsheet, payload) {
     applicationId: applicationId,
     application: buildOperatorApplicationSummary(applicationRecord),
     billing: findLatestRecordByApplicationId(spreadsheet, BILLING_SHEET_NAME, applicationId, BILLING_HEADERS),
+    activeCheckout: checkActiveCheckout(spreadsheet, payload),
+    paymentOrders: findRecentRecordsByApplicationId(spreadsheet, PAYMENT_ORDERS_SHEET_NAME, applicationId, 10, PAYMENT_ORDER_HEADERS),
     internalReview: findLatestRecordByApplicationId(spreadsheet, INTERNAL_REVIEWS_SHEET_NAME, applicationId, INTERNAL_REVIEW_HEADERS),
     trustHubKyc: findLatestRecordByApplicationId(spreadsheet, TRUST_HUB_KYC_SHEET_NAME, applicationId, TRUST_HUB_KYC_HEADERS),
     ukRcBundle: findLatestRecordByApplicationId(spreadsheet, UK_RC_BUNDLES_SHEET_NAME, applicationId, UK_RC_BUNDLE_HEADERS),
@@ -1100,6 +1130,144 @@ function updateBilling(spreadsheet, payload) {
     paymentStatus: result.record["Payment status"] || "",
     updatedAt: now.toISOString()
   };
+}
+
+function checkActiveCheckout(spreadsheet, payload) {
+  const applicationId = payload.applicationId;
+  if (!applicationId) throw new Error("Missing application ID");
+
+  const applicationRecord = findApplicationRecord(spreadsheet, { applicationId: applicationId });
+  if (!applicationRecord) throw new Error("Application ID not found");
+
+  const latestOrders = findLatestPaymentOrderSnapshots(spreadsheet, applicationId);
+  const paidOrder = latestOrders.find(function(record) {
+    return !isTruthy(record["Superseded"]) && PAYMENT_ORDER_PAID_STATES.indexOf(normaliseState(record["Order state"])) !== -1;
+  });
+  if (paidOrder) {
+    return {
+      ok: true,
+      applicationId: applicationId,
+      decision: "already_paid",
+      canCreateCheckout: false,
+      order: buildPaymentOrderSummary(paidOrder),
+      reason: "A non-superseded Revolut order is already completed for this application."
+    };
+  }
+
+  const activeOrder = latestOrders.find(function(record) {
+    return !isTruthy(record["Superseded"]) && PAYMENT_ORDER_OPEN_STATES.indexOf(normaliseState(record["Order state"])) !== -1;
+  });
+  if (activeOrder) {
+    return {
+      ok: true,
+      applicationId: applicationId,
+      decision: "reuse",
+      canCreateCheckout: false,
+      order: buildPaymentOrderSummary(activeOrder),
+      reason: "A non-superseded Revolut checkout is still open for this application."
+    };
+  }
+
+  return {
+    ok: true,
+    applicationId: applicationId,
+    decision: "safe_to_create",
+    canCreateCheckout: true,
+    order: null,
+    reason: "No completed or open non-superseded Revolut checkout was found for this application."
+  };
+}
+
+function recordPaymentOrder(spreadsheet, payload) {
+  const now = new Date();
+  const applicationId = payload.applicationId;
+  if (!applicationId) throw new Error("Missing application ID");
+
+  const applicationRecord = findApplicationRecord(spreadsheet, { applicationId: applicationId });
+  if (!applicationRecord) throw new Error("Application ID not found");
+  if (!payload.revolutOrderId && normaliseState(payload.orderState) !== "creating") {
+    throw new Error("Missing Revolut order ID");
+  }
+
+  const record = {
+    "Created at": firstValue(payload.orderCreatedAt, now),
+    "Application ID": applicationId,
+    "Revolut order ID": firstValue(payload.revolutOrderId, payload.checkoutOrderId),
+    "Order state": firstValue(payload.orderState, "pending"),
+    "Amount minor": payload.amountMinor,
+    "Currency": payload.currency,
+    "Checkout URL": payload.checkoutUrl,
+    "Merchant order reference": firstValue(payload.merchantOrderReference, payload.reference, applicationId),
+    "Idempotency key": payload.idempotencyKey,
+    "Payment ID": payload.paymentId,
+    "Payment state": payload.paymentState,
+    "Order purpose": firstValue(payload.orderPurpose, "registration_fee"),
+    "Superseded": firstValue(payload.superseded, "no"),
+    "Internal notes": payload.internalNotes,
+    "Last updated": now
+  };
+
+  appendTrackingRecord(spreadsheet, PAYMENT_ORDERS_SHEET_NAME, PAYMENT_ORDER_HEADERS, record);
+  const activeCheckout = checkActiveCheckout(spreadsheet, { applicationId: applicationId });
+
+  return {
+    ok: true,
+    applicationId: applicationId,
+    revolutOrderId: record["Revolut order ID"] || "",
+    orderState: record["Order state"] || "",
+    orderPurpose: record["Order purpose"] || "",
+    activeCheckout: activeCheckout,
+    updatedAt: now.toISOString()
+  };
+}
+
+function findLatestPaymentOrderSnapshots(spreadsheet, applicationId) {
+  const records = findRecentRecordsByApplicationId(spreadsheet, PAYMENT_ORDERS_SHEET_NAME, applicationId, 200, PAYMENT_ORDER_HEADERS);
+  const seen = {};
+  return records.filter(function(record) {
+    const orderId = record["Revolut order ID"] || "";
+    const key = orderId || [
+      record["Created at"] || "",
+      record["Order state"] || "",
+      record["Checkout URL"] || ""
+    ].join("|");
+    if (seen[key]) return false;
+    seen[key] = true;
+    return true;
+  });
+}
+
+function buildPaymentOrderSummary(record) {
+  return {
+    revolutOrderId: record["Revolut order ID"] || "",
+    orderState: record["Order state"] || "",
+    amountMinor: record["Amount minor"] || "",
+    currency: record["Currency"] || "",
+    checkoutUrlPresent: Boolean(record["Checkout URL"]),
+    checkoutUrl: record["Checkout URL"] || "",
+    merchantOrderReference: record["Merchant order reference"] || "",
+    idempotencyKey: record["Idempotency key"] || "",
+    paymentId: record["Payment ID"] || "",
+    paymentState: record["Payment state"] || "",
+    orderPurpose: record["Order purpose"] || "",
+    superseded: record["Superseded"] || "",
+    lastUpdated: serialiseDate(record["Last updated"] || "")
+  };
+}
+
+function normaliseState(value) {
+  return String(value || "").trim().toLowerCase();
+}
+
+function isTruthy(value) {
+  return ["yes", "true", "1", "superseded"].indexOf(normaliseState(value)) !== -1;
+}
+
+function appendTrackingRecord(spreadsheet, sheetName, headersList, record) {
+  const sheet = getOrCreateSheet(spreadsheet, sheetName, headersList);
+  sheet.appendRow(headersList.map(function(header) {
+    return safeCell(record[header]);
+  }));
 }
 
 function applyDefaultPayloadValue(payload, key, existingValue, defaultValue) {
