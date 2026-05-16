@@ -7,7 +7,7 @@ const DEFAULT_ORDER = {
   amount: 12000,
   currency: "GBP",
   description: "RightOnQ RCS registration fee",
-  redirect_url: "https://rightonq-code.github.io/rcs-registration/payment-return.html?payment=success",
+  redirect_url: "https://rightonq-code.github.io/rcs-registration/payment-return.html",
   customer: {
     email: "test-public-parta@example.com",
     full_name: "Test Public Submitter"
@@ -173,7 +173,6 @@ function buildOrderPayload(options) {
 
 function buildPaymentReturnUrl(applicationId) {
   const url = new URL("https://rightonq-code.github.io/rcs-registration/payment-return.html");
-  url.searchParams.set("payment", "success");
   url.searchParams.set("applicationId", applicationId);
   return url.toString();
 }

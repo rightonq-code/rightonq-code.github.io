@@ -2515,7 +2515,7 @@ Active-checkout protection started:
   - no card data or Revolut secret was stored.
 - Static payment-return page added:
   - path `rcs-registration/payment-return.html`;
-  - future sandbox proof orders now default to `https://rightonq-code.github.io/rcs-registration/payment-return.html?payment=success&applicationId=...`;
+  - future sandbox proof orders now default to `https://rightonq-code.github.io/rcs-registration/payment-return.html?applicationId=...`;
   - page clearly says browser return is not the authoritative payment verification source.
 - This is still operator-run pilot protection, not the automated public payment gate.
 

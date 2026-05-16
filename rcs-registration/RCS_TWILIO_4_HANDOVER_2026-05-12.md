@@ -3206,7 +3206,7 @@ Files changed:
 
 Behaviour:
 
-- future sandbox proof orders default to `https://rightonq-code.github.io/rcs-registration/payment-return.html?payment=success&applicationId=...`;
+- future sandbox proof orders default to `https://rightonq-code.github.io/rcs-registration/payment-return.html?applicationId=...`;
 - page reads `payment`, `status`, `applicationId`, `merchant_order_ext_ref`, `reference`, `order_id`, and `id` style query parameters;
 - page preserves the application ID when linking back to `index.html`;
 - copy is deliberately conservative: it confirms browser return from Revolut, but says payment is verified by RightOnQ using Revolut order/webhook records before registration work moves forward;
