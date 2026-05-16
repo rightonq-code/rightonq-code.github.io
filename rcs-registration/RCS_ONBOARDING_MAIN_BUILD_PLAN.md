@@ -2448,7 +2448,7 @@ Slice 8 continuation after public/operator hardening:
 - Repeating create-order with the same `Idempotency-Key` created a second order. RightOnQ must enforce duplicate checkout protection in its own Billing lane before creating another Revolut order.
 - List by `merchant_order_data_reference` works for reconciliation, but list responses did not include checkout URLs; store checkout URL/token at create time.
 - The payment-success redirect hit a RightOnQ 404 page after payment, so add a real payment-return state/page before public launch.
-- No production Revolut API call has been made yet. No sandbox webhook has been registered/captured yet.
+- No production Revolut API call has been made yet. A sandbox webhook has now been registered/captured and dry-run mapped as recorded below.
 
 Payment-side review follow-up:
 
@@ -2501,6 +2501,13 @@ Active-checkout protection started:
 - `recordPaymentOrder` appends a ledger snapshot containing Revolut order ID, state, amount, currency, checkout URL, merchant reference, idempotency key, payment ID/state, purpose, superseded flag, and notes.
 - `getOperatorSnapshot` now includes `activeCheckout` plus recent `paymentOrders`.
 - Local tool added: `rcs-registration/tools/operator-payment-order.mjs`.
+- Apps Script HEAD was pushed and a clean API-only operator deployment now serves this slice:
+  - deployment ID `AKfycbwSdO73nyxrOKVPQVQgkoGg29RwvYmJXWDYAgFqs5cdxyI4pJXFW3cZZSS1-6y3zlex`;
+  - version `33`;
+  - description `Operator API executable (Step 8H clean API-only)`;
+  - access `Anyone within rightonq.co.uk`.
+- The previous v32 active-checkout-guard operator deployment `AKfycbyG5yW-r0sfaKt1bwUUGFAHHdQoKK8wBCfR1riVxvYamu9YhfOBpRJhnRL_5iBP0VSC` was archived after it picked up a Web app entry point during deployment refresh.
+- `.clasp.json` now points operator wrappers at the clean v33 API-only deployment.
 - This is still operator-run pilot protection, not the automated public payment gate.
 
 ### Slice 8B - Public Endpoint Hardening Started
@@ -2634,12 +2641,13 @@ Remaining proof gap:
 Step 2C update:
 
 - a clean API-only deployment now exists:
-  - deployment ID `AKfycbyG5yW-r0sfaKt1bwUUGFAHHdQoKK8wBCfR1riVxvYamu9YhfOBpRJhnRL_5iBP0VSC`;
-  - version `30`;
-  - description `Operator API executable (Step 2C clean API-only)`;
-- local `.clasp.json` points at this clean v30 deployment;
+  - deployment ID `AKfycbwSdO73nyxrOKVPQVQgkoGg29RwvYmJXWDYAgFqs5cdxyI4pJXFW3cZZSS1-6y3zlex`;
+  - version `33`;
+  - description `Operator API executable (Step 8H clean API-only)`;
+- local `.clasp.json` points at this clean v33 deployment;
+- the previous v32 active-checkout-guard deployment `AKfycbyG5yW-r0sfaKt1bwUUGFAHHdQoKK8wBCfR1riVxvYamu9YhfOBpRJhnRL_5iBP0VSC` was contaminated with Web app + API executable types and has been archived after approval;
 - the contaminated v29 deployment `AKfycbzogKHOijtu6kjp2MVrL9WcVuF6mWrgQyKUzQGRvpTfozdUSA9y_B6X_eWpQeQ-mWtS` has been archived after approval;
-- do not run `clasp deploy -i` against the clean v30 deployment while the manifest still has web app deployment settings;
+- do not run `clasp deploy -i` against the clean v33 deployment while the manifest still has web app deployment settings;
 - `clasp run` still fails before executing `rcsOperatorAction`, so the OAuth / execution-permission proof remains open.
 
 Step 2E update:

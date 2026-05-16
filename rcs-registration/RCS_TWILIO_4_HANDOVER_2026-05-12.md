@@ -2736,7 +2736,7 @@ Deployment:
 - public deployment description is now `Harden public Part A submission + block public operator actions`;
 - public web app URL is unchanged;
 - public deployment has no API executable section;
-- clean operator API deployment `AKfycbyG5yW-r0sfaKt1bwUUGFAHHdQoKK8wBCfR1riVxvYamu9YhfOBpRJhnRL_5iBP0VSC` remains without a Web app section.
+- later update: the v30 clean operator API deployment was superseded during Slice 8H by the v33 clean API-only deployment recorded below.
 
 Verification:
 
@@ -2748,11 +2748,10 @@ Verification:
   - `Operator action is not supported on the public endpoint...`;
 - dummy-PIN proof against the clean API executable deployment reached `rcsOperatorAction` and returned `Invalid onboarding operator PIN`.
 
-Current caveat:
+Superseded caveat:
 
-- the clean operator API deployment still points at version `30`, while public web app is version `31`;
-- version `31` mainly adds the public `doPost` block plus small helper/docs hardening, so operator status reads still work through the pinned clean API deployment;
-- if future operator-side Apps Script changes matter, update the clean operator API deployment through the Apps Script UI to the new version, preserving no-Web-app exposure.
+- this caveat applied before Slice 8H;
+- the current clean operator API deployment now points at version `33`, preserving no-Web-app exposure.
 
 ### Slice 8G Started - Revolut Sandbox Proof Harness
 
@@ -3128,9 +3127,45 @@ Verification so far:
 
 Still to do before public payment gate:
 
-- push Apps Script HEAD after commit;
 - run a live operator proof against the existing sandbox order:
   - check active before ledger row exists;
   - record the completed Revolut order snapshot;
   - check active again and confirm `already_paid`;
 - later add the automated raw-body webhook endpoint with signature/timestamp verification, dedupe, enrichment, and Billing update.
+
+### Slice 8H Continued - Clean API Deployment Restored
+
+The active checkout guard code was pushed to Apps Script and versioned, but a CLI deployment refresh contaminated the previous operator API deployment with a Web app entry point. The browser-side helper agent then created a replacement API-only deployment through the Apps Script UI and archived the contaminated one.
+
+Current clean operator API deployment:
+
+- deployment ID `AKfycbwSdO73nyxrOKVPQVQgkoGg29RwvYmJXWDYAgFqs5cdxyI4pJXFW3cZZSS1-6y3zlex`;
+- version `33`;
+- description `Operator API executable (Step 8H clean API-only)`;
+- type `API executable only`;
+- access `Anyone within rightonq.co.uk`;
+- configuration pane showed the `script.googleapis.com/v1/scripts/...` API executable URL and no Web app section.
+
+Archived during cleanup:
+
+- contaminated deployment `AKfycbyG5yW-r0sfaKt1bwUUGFAHHdQoKK8wBCfR1riVxvYamu9YhfOBpRJhnRL_5iBP0VSC`;
+- it was at version `32` with description `Operator API executable (Step 8H active checkout guard)`;
+- it exposed both Web app and API executable entry points after the deployment refresh.
+
+Confirmed untouched:
+
+- public web app deployment `AKfycbyI81Ir2xvHLar0R0iFBBWyXa1Nj93T4_8Ni5_eX3XEYDA-AKQbVYbPHnTROLm8e4a6` remains version `31`;
+- original intake receiver deployment `AKfycbyyPTV0Dl4y0_gSrFWW2e1QK5uX_pTS-3atps3Qo6Ca7NSYjHzEckDZZE1SDTiHj...` remains version `1`;
+- code, script properties, OAuth settings, and PINs were not edited during the browser cleanup.
+
+Local repo follow-up:
+
+- `.clasp.json` now points at the clean v33 API-only deployment;
+- `google-apps-script/README.md` records the current deployment and archived v32 caveat;
+- do not run `clasp deploy -i` against the clean v33 deployment while the manifest still contains public web app deployment settings.
+
+Immediate proof still required:
+
+- rerun `operator-payment-order.mjs --check-active` through the clean v33 deployment;
+- record the completed sandbox Revolut order into `Payment orders`;
+- rerun `--check-active` and confirm it returns `already_paid`.
