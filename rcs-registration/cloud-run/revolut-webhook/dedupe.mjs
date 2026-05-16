@@ -3,7 +3,7 @@ import { pathToFileURL } from "node:url";
 
 const COLLECTION_NAME = "revolut_webhook_events";
 const DEFAULT_LEASE_MS = 60 * 1000;
-const TERMINAL_RECORD_ONLY_STATES = new Set(["applied", "mapped", "enrichment_required"]);
+const TERMINAL_RECORD_ONLY_STATES = new Set(["applied", "mapped", "enrichment_required", "ignored"]);
 
 function sha256Hex(value) {
   return crypto.createHash("sha256").update(String(value)).digest("hex");
@@ -57,6 +57,12 @@ function isExpired(isoTimestamp, now = new Date()) {
   return new Date(isoTimestamp).getTime() <= new Date(now).getTime();
 }
 
+function determineRecordState(mapping) {
+  if (mapping.enrichmentRequired) return "enrichment_required";
+  if (mapping.mapped) return "mapped";
+  return "ignored";
+}
+
 function buildDedupeRecord(result, {
   now = new Date(),
   leaseMs = DEFAULT_LEASE_MS
@@ -83,7 +89,7 @@ function buildDedupeRecord(result, {
     requestTimestamp: verification.requestTimestamp || "",
     signatureMatched: Boolean(verification.signatureMatched),
     timestampAccepted: Boolean(verification.timestampAccepted),
-    state: mapping.enrichmentRequired ? "enrichment_required" : mapping.mapped ? "mapped" : "failed",
+    state: determineRecordState(mapping),
     billingUpdateApplied: Boolean(result.body && result.body.billingUpdateApplied),
     billingStatus: operatorBillingArgs.billingStatus || "",
     paymentStatus: operatorBillingArgs.paymentStatus || "",
@@ -124,6 +130,7 @@ function decideExistingRecord(existing, {
     };
   }
 
+  // processing/received/failed retry paths are forward scaffolding for the later async apply flow.
   if (existing.state === "processing" && !isExpired(existing.leaseExpiresAt, now)) {
     return {
       decision: "duplicate_in_flight",
@@ -321,6 +328,26 @@ function runSelfTest() {
     }
   };
   const notRecordable = recordDedupeResult(invalidResult, { store, now });
+  const unmappedResult = {
+    ...fakeResult,
+    body: {
+      ...fakeResult.body,
+      action: "unmapped_event"
+    },
+    internal: {
+      verification: {
+        ...fakeResult.internal.verification,
+        event: "ORDER_TEST_UNKNOWN"
+      },
+      mapping: {
+        mapped: false,
+        event: "ORDER_TEST_UNKNOWN",
+        orderId: "order_TEST",
+        applicationId: "ROQ-RCS-TEST-REVOLUT-WEBHOOK"
+      }
+    }
+  };
+  const ignored = buildDedupeRecord(unmappedResult, { now });
   const unresolved = buildDedupeRecord({
     ...fakeResult,
     internal: {
@@ -339,7 +366,8 @@ function runSelfTest() {
   const passed = first.receiptKey === "revolut:ORDER_PAYMENT_FAILED:order_TEST"
     && first.logicalDedupeKey === "revolut:ORDER_PAYMENT_FAILED:order_TEST:ROQ-RCS-TEST-REVOLUT-WEBHOOK"
     && unresolved.documentId === first.documentId
-    && unresolved.logicalDedupeKey === "revolut:ORDER_PAYMENT_FAILED:order_TEST:unresolved";
+    && unresolved.logicalDedupeKey === "revolut:ORDER_PAYMENT_FAILED:order_TEST:unresolved"
+    && ignored.state === "ignored";
 
   return Promise.all([create, duplicate, notRecordable]).then(([created, duplicated, skipped]) => ({
     ok: passed
@@ -352,6 +380,7 @@ function runSelfTest() {
     cases: {
       first,
       unresolved,
+      ignored,
       created,
       duplicated,
       skipped

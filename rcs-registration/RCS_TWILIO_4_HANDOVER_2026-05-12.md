@@ -3624,6 +3624,7 @@ Behaviour:
 - Firestore document ID is `sha256(receiptKey)`;
 - richer application context is kept in `logicalDedupeKey`, not in the document ID;
 - duplicate terminal records return `duplicate_terminal`;
+- verified-but-unmapped events are recorded as `ignored`, not `failed`;
 - invalid/unverified events are not recordable;
 - source includes an in-memory store for local self-tests and a Firestore adapter for future deployment wiring.
 

@@ -117,7 +117,7 @@ Record fields:
 - `requestTimestamp`
 - `signatureMatched`
 - `timestampAccepted`
-- `state`: one of `received`, `processing`, `enrichment_required`, `mapped`, `applied`, `failed`
+- `state`: one of `received`, `processing`, `enrichment_required`, `mapped`, `ignored`, `applied`, `failed`
 - `billingUpdateApplied`: boolean
 - `billingStatus`
 - `paymentStatus`
@@ -134,7 +134,7 @@ Atomic behavior:
 2. Compute `receiptKey = revolut:{event}:{orderId}` from the verified payload.
 3. Check `sha256(receiptKey)`.
 4. If it does not exist, create it as `received` with a short lease.
-5. If it exists in `applied`, `mapped`, or `enrichment_required`, return duplicate/no-op for record-only mode.
+5. If it exists in `applied`, `mapped`, `ignored`, or `enrichment_required`, return duplicate/no-op for record-only mode.
 6. If it exists in `processing` and the lease has not expired, return duplicate/in-flight.
 7. If it exists in `processing` or `received` and the lease has expired, reacquire the lease and continue.
 8. If it exists in `failed`, retry only when the failure is marked retryable; otherwise keep failed and return no-op.
