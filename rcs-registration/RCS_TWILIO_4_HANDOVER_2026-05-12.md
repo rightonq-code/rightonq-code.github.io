@@ -3575,3 +3575,35 @@ Implication:
 - this is the terminal failure counterpart to the earlier retryable declined-attempt proof;
 - endpoint enrichment still matters because the webhook body omits payment ID and decline reason;
 - order-level state can remain `pending` even when the payment attempt is terminally `failed`.
+
+## Slice 8R - Local Cloud Run Webhook Skeleton
+
+Codex added the first source-only Cloud Run / Functions Framework webhook skeleton.
+
+Files:
+
+- `rcs-registration/cloud-run/revolut-webhook/index.mjs`;
+- `rcs-registration/cloud-run/revolut-webhook/package.json`;
+- `rcs-registration/cloud-run/revolut-webhook/README.md`.
+
+Behaviour:
+
+- requires `POST`;
+- requires exact `req.rawBody`;
+- reads `REVOLUT_WEBHOOK_SIGNING_SECRET` from the runtime environment, to be Secret Manager-backed later;
+- imports and calls the tested `handleRevolutWebhook` primitive;
+- returns only the public response body to Revolut;
+- logs only redacted record-mode fields;
+- performs no Firestore write, no Revolut enrichment call, no Apps Script call, and no Billing update.
+
+Verification:
+
+- `npm --prefix rcs-registration/cloud-run/revolut-webhook run self-test` passed;
+- `node rcs-registration/tools/revolut-webhook-handler.mjs --self-test` passed;
+- `node rcs-registration/tools/revolut-webhook-map.mjs --self-test` passed.
+
+Status:
+
+- no endpoint has been deployed;
+- no Revolut webhook URL has been changed;
+- next implementation work is record-only Firestore dedupe and enrichment, not public payment gating.

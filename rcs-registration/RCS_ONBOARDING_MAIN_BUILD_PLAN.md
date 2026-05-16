@@ -2548,6 +2548,13 @@ Active-checkout protection started:
   - webhook.site captured `ORDER_PAYMENT_FAILED` with body containing only event, order ID, and merchant reference; no payment ID, decline reason, or card data;
   - mapper dry-run confirmed `ORDER_PAYMENT_FAILED` -> `registration_fee_failed` / `failed`;
   - no live Billing update was made.
+- Local Cloud Run webhook source skeleton added:
+  - folder `rcs-registration/cloud-run/revolut-webhook/`;
+  - imports the shared `handleRevolutWebhook` primitive;
+  - requires `POST`, `req.rawBody`, and `REVOLUT_WEBHOOK_SIGNING_SECRET`;
+  - returns only the public response body and logs redacted record-mode fields;
+  - self-test passed with fake data;
+  - not deployed; no Revolut webhook URL changed; no Firestore, Revolut enrichment, Apps Script, or Billing write exists yet.
 - Payment-order lookup is now deployed to a new clean API-only operator deployment after the Apps Script code push:
   - deployment ID `AKfycbzj0I9m_vld5Aw-zPQFsTZXslrmxlrDA6Ut0RtFnd6_fxXpVDc4qhhRuKVAA5EuhWG9`;
   - version `35`;

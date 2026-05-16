@@ -459,7 +459,7 @@ Stronger proof:
 
 ## Current Next Action
 
-The terminal failed-payment sandbox proof is now complete. Continue with record-only webhook endpoint design/implementation before public payment gating.
+The terminal failed-payment sandbox proof is now complete. A first local Cloud Run / Functions Framework webhook source skeleton now exists under `cloud-run/revolut-webhook`, but it has not been deployed and no Revolut webhook URL has been changed. Continue with record-only Firestore dedupe and enrichment before public payment gating.
 
 Do not run webhook-driven live Billing updates until dedupe storage and payment enrichment are implemented and proven in record-only mode.
 
@@ -479,6 +479,7 @@ Endpoint design direction started on 2026-05-16:
 - Integration caution: do not treat a live `ORDER_COMPLETED` event as paid until the endpoint has either enriched the order or otherwise proved it is a payment order, not a refund order. Refund-order webhooks can also arrive as `ORDER_COMPLETED`.
 - Integration caution: verify the Revolut signature/timestamp once at first receipt. If later order enrichment is needed, reuse the verified raw payload with `mapWebhookPayload`; do not call the full handler again after a slow enrichment step because the timestamp window may have expired.
 - The handler's `mapping_failed` public body intentionally omits parser details; diagnostics stay in the internal object.
+- `cloud-run/revolut-webhook/index.mjs` is the first local Cloud Run source skeleton. It requires `POST`, `req.rawBody`, and `REVOLUT_WEBHOOK_SIGNING_SECRET`, returns only the public handler body, logs only redacted record-mode fields, and performs no Firestore, Revolut, Apps Script, or Billing writes.
 
 The first live sandbox Hosted Checkout payment proof has passed. Sandbox webhook registration/capture also passed. No production Revolut call has been made. No real customer card data has been handled. No live Billing row update has been made from this webhook proof.
 

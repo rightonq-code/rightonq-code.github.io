@@ -1,6 +1,6 @@
 # Revolut Webhook Endpoint Design
 
-Status: design slice only. No endpoint has been deployed, no webhook URL has been changed in Revolut, and no live Billing write is enabled from webhooks.
+Status: design plus local source skeleton. No endpoint has been deployed, no webhook URL has been changed in Revolut, and no live Billing write is enabled from webhooks.
 
 Last updated: 2026-05-16.
 
@@ -67,6 +67,12 @@ These files are the source of truth for the first endpoint implementation:
   - verifies first, maps second.
   - returns `body` for the public HTTP response and `internal` for diagnostics.
   - performs no network calls and no writes.
+- `cloud-run/revolut-webhook/index.mjs`
+  - first Cloud Run / Functions Framework source skeleton.
+  - requires `POST`, `req.rawBody`, and `REVOLUT_WEBHOOK_SIGNING_SECRET`.
+  - returns only the public handler body.
+  - logs redacted record-mode fields only.
+  - performs no Firestore write, no Revolut enrichment call, no Apps Script call, and no Billing update.
 
 ## Dedupe Store
 
@@ -185,11 +191,11 @@ When automatic apply is finally enabled:
 
 ## First Implementation Plan
 
-1. Add a small Cloud Run function source folder in a future slice.
-2. Import `handleRevolutWebhook`.
-3. Pass `req.rawBody`, `req.headers`, and signing secret from Secret Manager.
-4. Return only `result.body` to Revolut.
-5. Log/store only redacted `result.internal`.
+1. Add a small Cloud Run function source folder. Done locally in `cloud-run/revolut-webhook`; not deployed.
+2. Import `handleRevolutWebhook`. Done.
+3. Pass `req.rawBody`, `req.headers`, and signing secret from Secret Manager. Source skeleton reads `REVOLUT_WEBHOOK_SIGNING_SECRET`; deployment must wire it from Secret Manager.
+4. Return only `result.body` to Revolut. Done in source skeleton.
+5. Log/store only redacted `result.internal`. Source skeleton logs redacted record-mode fields only; Firestore storage still to do.
 6. Add Firestore dedupe in record-only mode.
 7. Add order enrichment using the Revolut Merchant API secret from Secret Manager.
 8. Use `lookupPaymentOrder` on the original/related order ID from refund-order enrichment to resolve application context when refund events arrive without `merchant_order_ext_ref`.
@@ -202,4 +208,4 @@ When automatic apply is finally enabled:
 - Whether Firestore is already enabled in the project; if not, enablement is a separate explicit console step.
 - Whether Revolut retry behavior expects a `2xx` for enrichment-required events. Current design returns `202` to avoid retries while recording the need for internal enrichment.
 - How long to retain dedupe/event records.
-- Whether a failed/declined sandbox card path is available and should be captured before first record-only endpoint registration.
+- Failed/declined sandbox paths are now captured: retryable `ORDER_PAYMENT_DECLINED` and terminal `ORDER_PAYMENT_FAILED`.
