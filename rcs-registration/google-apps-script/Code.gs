@@ -541,6 +541,8 @@ function isOperatorOnlyAction(action) {
     getOperatorSnapshot: true,
     updateApplicationStatus: true,
     updateBilling: true,
+    checkActiveCheckout: true,
+    recordPaymentOrder: true,
     updateInternalReview: true,
     updateTrustHubKyc: true,
     updateUkRcBundle: true
