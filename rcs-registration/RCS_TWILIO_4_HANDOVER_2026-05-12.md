@@ -3641,3 +3641,35 @@ Status:
 - no Firestore database has been enabled or written to by this work;
 - no Revolut webhook URL has been changed;
 - no Apps Script call or Billing update was made.
+
+## Slice 8T - Google Cloud Boundary Plan
+
+Codex recorded a docs-only Google Cloud boundary plan for the Revolut webhook endpoint.
+
+Decision direction:
+
+- low payment volume means correctness/auditability/duplicate safety matter more than throughput;
+- use managed Google Cloud pieces rather than a custom server;
+- candidate Google Cloud project is `rightonq-gog`, but it must be confirmed in the console before any action;
+- runtime remains Cloud Run functions / Functions Framework Node.js source deployment;
+- dedupe/event store remains Firestore Native mode;
+- secrets belong in Secret Manager;
+- first deployed endpoint must be record-only.
+
+Proposed secret names:
+
+- `roq-rcs-revolut-webhook-signing-secret-sandbox`;
+- `roq-rcs-revolut-merchant-api-secret-sandbox`;
+- future live secrets must use separate `...-live` names.
+
+Explicitly forbidden until approved:
+
+- enabling Firestore;
+- creating Secret Manager secrets;
+- creating service accounts or IAM grants;
+- deploying Cloud Run;
+- changing Revolut webhook URL;
+- enabling automatic Apps Script Billing writes;
+- enabling strict public payment gating from webhook state.
+
+No cloud command, console action, deployment, Firestore write, secret creation, Revolut URL change, Apps Script call, or Billing update was made in this slice.

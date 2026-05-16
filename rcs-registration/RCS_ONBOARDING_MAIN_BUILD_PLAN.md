@@ -2562,6 +2562,13 @@ Active-checkout protection started:
   - `logicalDedupeKey` stores the richer `revolut:{event}:{orderId}:{applicationId-or-unresolved}` audit key;
   - in-memory self-test proves first create vs duplicate terminal detection;
   - Firestore adapter source exists but is not wired to a live Google project/database.
+- Google Cloud boundary planning recorded:
+  - candidate project remains `rightonq-gog`, but must be confirmed in Google Cloud console before any action;
+  - endpoint should use Cloud Run functions / Functions Framework Node.js source deployment;
+  - Secret Manager names proposed separately for sandbox and live Revolut secrets;
+  - Firestore Native mode remains the dedupe/event store choice;
+  - first deployed mode must be record-only;
+  - enabling Firestore, creating secrets/service accounts/IAM, deploying Cloud Run, changing Revolut webhook URL, automatic Billing writes, and strict payment gating remain explicitly forbidden until approved.
 - Payment-order lookup is now deployed to a new clean API-only operator deployment after the Apps Script code push:
   - deployment ID `AKfycbzj0I9m_vld5Aw-zPQFsTZXslrmxlrDA6Ut0RtFnd6_fxXpVDc4qhhRuKVAA5EuhWG9`;
   - version `35`;

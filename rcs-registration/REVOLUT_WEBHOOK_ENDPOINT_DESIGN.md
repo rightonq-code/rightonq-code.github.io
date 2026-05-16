@@ -193,6 +193,74 @@ When automatic apply is finally enabled:
 5. Only call `rcsOperatorAction` through the clean operator API, never public `doPost`.
 6. Store the final apply result back to the dedupe/event record.
 
+## Google Cloud Boundary
+
+Status: planning decision only. Do not create, enable, deploy, or edit Google Cloud resources until this boundary is confirmed in the Google Cloud console and explicitly approved.
+
+Traffic expectation:
+
+- RightOnQ registration-fee volume is low compared with an online shop.
+- Optimise for correctness, auditability, duplicate safety, and low operational maintenance rather than high throughput.
+- Managed services are preferred over custom servers.
+
+Recommended boundary:
+
+- Google account / organisation: `rightonq.co.uk` / RightOnQ-controlled Google account.
+- Candidate Google Cloud project: `rightonq-gog` (to be confirmed in console before any action).
+- Runtime: Cloud Run functions / Functions Framework Node.js source deployment for `roq-rcs-revolut-webhook`.
+- Region: choose one UK/Europe region and keep Cloud Run, Firestore, Secret Manager, and logs in the same region where possible; exact region still requires console confirmation.
+- Dedupe/event store: Firestore Native mode, collection `revolut_webhook_events`.
+- Secret store: Secret Manager.
+- Initial endpoint mode: record-only. It may verify, dedupe, log, and later enrich; it must not update Apps Script Billing automatically.
+
+Proposed service account:
+
+```text
+roq-rcs-revolut-webhook
+```
+
+Minimum intended permissions, subject to console/IAM verification:
+
+- read the Revolut webhook signing secret;
+- later read the Revolut Merchant API secret for enrichment;
+- read/write Firestore documents in the dedupe/event collection;
+- write Cloud Logging entries.
+
+Proposed Secret Manager names:
+
+```text
+roq-rcs-revolut-webhook-signing-secret-sandbox
+roq-rcs-revolut-merchant-api-secret-sandbox
+```
+
+Later production names should be separate, not reused:
+
+```text
+roq-rcs-revolut-webhook-signing-secret-live
+roq-rcs-revolut-merchant-api-secret-live
+```
+
+Pre-deployment checklist:
+
+1. Confirm the Google Cloud project ID in the console.
+2. Confirm billing/permissions are suitable for Cloud Run, Secret Manager, Firestore, and Cloud Logging.
+3. Confirm Firestore Native mode state. If it is not enabled, enabling it is a separate explicit action.
+4. Confirm the target region.
+5. Confirm service account name and minimum IAM roles.
+6. Confirm Secret Manager secret names.
+7. Confirm the endpoint will start in record-only mode.
+8. Confirm Revolut sandbox webhook URL change will be a separate explicit action after deployment proof.
+
+Forbidden until explicitly approved:
+
+- enabling Firestore;
+- creating Secret Manager secrets;
+- creating service accounts or IAM grants;
+- deploying Cloud Run;
+- changing the Revolut webhook URL;
+- enabling automatic Apps Script Billing updates;
+- enabling strict public payment gating based on webhook state.
+
 ## First Implementation Plan
 
 1. Add a small Cloud Run function source folder. Done locally in `cloud-run/revolut-webhook`; not deployed.
@@ -205,11 +273,14 @@ When automatic apply is finally enabled:
 8. Use `lookupPaymentOrder` on the original/related order ID from refund-order enrichment to resolve application context when refund events arrive without `merchant_order_ext_ref`.
 9. Keep Billing updates disabled until the record-only path has been proven with sandbox webhooks.
 
-## Open Questions
+## Remaining Confirmations
 
-- Exact Google project/account boundary for the Cloud Run service: likely `rightonq-gog`, but confirm before any deployment.
-- Whether to use Cloud Run functions source deployment or a small Cloud Run service container.
-- Whether Firestore is already enabled in the project; if not, enablement is a separate explicit console step.
+- Confirm exact Google Cloud project/account boundary; current candidate is `rightonq-gog`.
+- Confirm the target Google Cloud region.
+- Confirm Firestore Native mode state; if it is not enabled, enablement is a separate explicit console step.
+- Confirm Cloud Run functions / Functions Framework source deployment is available and suitable in the selected project/region.
+- Confirm service account name and minimum IAM roles.
+- Confirm Secret Manager secret names before creating anything.
 - Whether Revolut retry behavior expects a `2xx` for enrichment-required events. Current design returns `202` to avoid retries while recording the need for internal enrichment.
 - How long to retain dedupe/event records.
 - Failed/declined sandbox paths are now captured: retryable `ORDER_PAYMENT_DECLINED` and terminal `ORDER_PAYMENT_FAILED`.
