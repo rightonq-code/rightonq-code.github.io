@@ -2529,6 +2529,10 @@ Active-checkout protection started:
   - future live webhook endpoint should import these instead of copying crypto/mapping logic;
   - endpoint host must support exact raw body and `Revolut-Request-Timestamp` / `Revolut-Signature` headers.
   - live Billing apply remains blocked until `ORDER_COMPLETED` events are enriched/typed, dedupe storage is designed, and slow enrichment is separated from the first signature/timestamp verification pass.
+- Webhook host/dedupe design started in `REVOLUT_WEBHOOK_ENDPOINT_DESIGN.md`:
+  - recommended host is a small Google Cloud Run function/service;
+  - dedupe source of truth should be Firestore Native mode, not the Google Sheet;
+  - first live implementation should be record-only/dry-run, with automatic Billing writes still disabled.
 - Payment-order lookup is now deployed to a new clean API-only operator deployment after the Apps Script code push:
   - deployment ID `AKfycbzj0I9m_vld5Aw-zPQFsTZXslrmxlrDA6Ut0RtFnd6_fxXpVDc4qhhRuKVAA5EuhWG9`;
   - version `35`;

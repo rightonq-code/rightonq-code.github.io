@@ -459,6 +459,8 @@ Stronger proof:
 
 Use the verified/mapped webhook proof and active-checkout guard to design the real webhook endpoint before public payment gating. Do not run webhook-driven live Billing updates until dedupe storage and payment enrichment are designed.
 
+Design note: `REVOLUT_WEBHOOK_ENDPOINT_DESIGN.md` now records the preferred host/dedupe/enrichment design. It recommends a small Google Cloud Run function/service, Firestore Native mode for dedupe/event records, and a record-only first implementation before any automatic Billing writes.
+
 Endpoint design direction started on 2026-05-16:
 
 - `revolut-webhook-verify.mjs` now exports its verification primitives (`verifyWebhook`, `computeSignature`, timestamp/signature helpers) while preserving the CLI.

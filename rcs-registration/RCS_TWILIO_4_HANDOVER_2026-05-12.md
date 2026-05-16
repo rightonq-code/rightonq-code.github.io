@@ -3430,3 +3430,31 @@ Post-review notes:
 - live `ORDER_COMPLETED` Billing writes must first enrich/type the order so refund-order `ORDER_COMPLETED` events are not misclassified as paid registration-fee events;
 - do not re-run the full handler after a slow enrichment step; verify the signature/timestamp once at receipt, then use the mapping primitives for later internal enrichment handling;
 - the earlier `updateBilling` default-clobber issue is already fixed in current `Code.gs` (`billingPayload = { ...payload }` plus `applyDefaultPayloadValue(...)`).
+
+## Slice 8N - Webhook Host And Dedupe Design
+
+Codex added `rcs-registration/REVOLUT_WEBHOOK_ENDPOINT_DESIGN.md`.
+
+Decision:
+
+- preferred webhook host is a small Google Cloud Run function/service;
+- GitHub Pages is rejected because it cannot receive webhook `POST` requests;
+- existing Apps Script public web app remains untrusted as the direct Revolut receiver unless raw body and custom-header access are separately proven;
+- Firestore Native mode is the recommended dedupe/event store;
+- Google Sheets remains the operator-visible Billing/Payment-order state, not the dedupe source of truth.
+
+Design boundary:
+
+- no Cloud Run service was created;
+- no Firestore database was enabled;
+- no Revolut webhook URL was changed;
+- no live Billing write was enabled;
+- first implementation should be record-only/dry-run with automatic Billing writes disabled.
+
+Key contract:
+
+- endpoint path should verify raw body + Revolut headers before JSON parsing/mapping;
+- dedupe key should be stored atomically before any apply step;
+- `ORDER_COMPLETED` requires enrichment/type proof before any Billing write;
+- refund events without `merchant_order_ext_ref` resolve application context through order enrichment plus RightOnQ Payment orders/original-order lookup;
+- the endpoint should return only a small public body to Revolut and keep diagnostics internal.
