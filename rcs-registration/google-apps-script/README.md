@@ -66,6 +66,7 @@ Deployment:
 - Version `24` fixes default billing fee fields for future billing updates.
 - Version `25` hardens public Part A submission by requiring an existing private application link/token, adds advisory/strict payment gate support, and rate-limits Adam MailApp notifications.
 - Version `32` adds the `Payment orders` ledger plus guarded `checkActiveCheckout` and `recordPaymentOrder` operator actions for Revolut active-checkout protection. The public web app is still pinned to version `31`.
+- Version `35` adds guarded `lookupPaymentOrder` for read-only Payment orders lookup by Revolut order ID. It is deployed as a clean API-only operator deployment; the public web app remains pinned to version `31`.
 
 ## Behaviour
 
@@ -149,7 +150,10 @@ Authenticated operator API scaffold:
 - `rcsOperatorAction(payload)` is available in `Code.gs` as the intended Apps Script API entry point for operator-only actions.
 - The manifest includes `executionApi.access = DOMAIN`.
 - The Apps Script project is now linked to standard Google Cloud project `rightonq-gog`.
-- The clean operator API executable deployment is `AKfycbwSdO73nyxrOKVPQVQgkoGg29RwvYmJXWDYAgFqs5cdxyI4pJXFW3cZZSS1-6y3zlex`.
+- The current clean operator API executable deployment is `AKfycbzj0I9m_vld5Aw-zPQFsTZXslrmxlrDA6Ut0RtFnd6_fxXpVDc4qhhRuKVAA5EuhWG9` (version `35`, `Operator API executable (Step 8L lookup after push)`).
+- The previous clean operator API executable deployments remain active pending Bugs approval to archive them:
+  - `AKfycbwPbeT3Mxpmr_Q88WdSp0hRnDk96Pm93GDTsA1eOsJxmiaVpSS2xAg78ox848YsqCQU` (version `34`);
+  - `AKfycbwSdO73nyxrOKVPQVQgkoGg29RwvYmJXWDYAgFqs5cdxyI4pJXFW3cZZSS1-6y3zlex` (version `33`).
 - Version `33` is deployed with description `Operator API executable (Step 8H clean API-only)`.
 - The earlier v32 deployment `AKfycbyG5yW-r0sfaKt1bwUUGFAHHdQoKK8wBCfR1riVxvYamu9YhfOBpRJhnRL_5iBP0VSC` was contaminated with Web app + API executable types during the active-checkout-guard deployment refresh and has been archived.
 - The earlier v29 deployment `AKfycbzogKHOijtu6kjp2MVrL9WcVuF6mWrgQyKUzQGRvpTfozdUSA9y_B6X_eWpQeQ-mWtS` was contaminated with Web app + API executable + Library types and has been archived.

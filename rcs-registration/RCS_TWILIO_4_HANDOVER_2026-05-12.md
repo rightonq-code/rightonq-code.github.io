@@ -3361,5 +3361,28 @@ Local verification:
 
 Deployment still needed:
 
-- Apps Script code now needs to be pushed/deployed to the clean API-only operator deployment before a live lookup proof can run.
-- Do not use `clasp deploy -i` against the clean deployment if the Apps Script UI would reattach a public web app type; use the established clean deployment workflow.
+- Apps Script code was pushed with `clasp push --force` after an OAuth refresh, then deployed through the Apps Script UI as a clean API-only operator deployment:
+  - deployment ID `AKfycbzj0I9m_vld5Aw-zPQFsTZXslrmxlrDA6Ut0RtFnd6_fxXpVDc4qhhRuKVAA5EuhWG9`;
+  - version `35`;
+  - description `Operator API executable (Step 8L lookup after push)`;
+  - access `Anyone within rightonq.co.uk`;
+  - no Web app section was present on the new deployment.
+- `.clasp.json` now points operator wrappers at the clean v35 API-only deployment.
+- Previous clean v34 operator deployment `AKfycbwPbeT3Mxpmr_Q88WdSp0hRnDk96Pm93GDTsA1eOsJxmiaVpSS2xAg78ox848YsqCQU` and v33 operator deployment `AKfycbwSdO73nyxrOKVPQVQgkoGg29RwvYmJXWDYAgFqs5cdxyI4pJXFW3cZZSS1-6y3zlex` remain active pending Bugs approval to archive them.
+- Public web app `AKfycbyI81Ir2xvHLar0R0iFBBWyXa1Nj93T4_8Ni5_eX3XEYDA-AKQbVYbPHnTROLm8e4a6` and the RCS Part A intake receiver were untouched.
+
+Live lookup proof:
+
+- first proof attempt against v34 failed with `Unsupported operator action: lookupPaymentOrder` because Apps Script code had not been pushed before v34 was created;
+- after `clasp push --force`, v35 was created, but the deployment ID was initially copied with `I` instead of `l` in `_vld5`, producing `Requested entity was not found`;
+- `.clasp.json` and docs now use the deployment ID confirmed by `clasp deployments`: `AKfycbzj0I9m_vld5Aw-zPQFsTZXslrmxlrDA6Ut0RtFnd6_fxXpVDc4qhhRuKVAA5EuhWG9`;
+- OAuth was refreshed with `spreadsheets` and `script.send_mail` scopes;
+- dummy-PIN proof reached `rcsOperatorAction` and failed correctly at `Invalid onboarding operator PIN`;
+- valid-PIN lookup proof for order `6a084d13-d84d-a49b-bb44-916bb9237ba4` returned:
+  - `found = true`;
+  - `applicationId = ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747`;
+  - `orderState = completed`;
+  - `paymentState = captured`;
+  - `amountMinor = 12000`;
+  - `currency = GBP`;
+  - `orderPurpose = registration_fee`.

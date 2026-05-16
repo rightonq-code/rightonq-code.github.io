@@ -2521,6 +2521,16 @@ Active-checkout protection started:
 - `lookupPaymentOrder` reads the latest ledger snapshot by Revolut order ID across the `Payment orders` ledger. This is the first local building block for resolving refund webhook application context.
 - `getOperatorSnapshot` now includes `activeCheckout` plus recent `paymentOrders`.
 - Local tool added: `rcs-registration/tools/operator-payment-order.mjs`.
+- Payment-order lookup is now deployed to a new clean API-only operator deployment after the Apps Script code push:
+  - deployment ID `AKfycbzj0I9m_vld5Aw-zPQFsTZXslrmxlrDA6Ut0RtFnd6_fxXpVDc4qhhRuKVAA5EuhWG9`;
+  - version `35`;
+  - description `Operator API executable (Step 8L lookup after push)`.
+- `.clasp.json` now points operator wrappers at the clean v35 API-only deployment.
+- Live lookup proof passed through v35:
+  - lookup order ID `6a084d13-d84d-a49b-bb44-916bb9237ba4`;
+  - returned `found = true`;
+  - returned `applicationId = ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747`;
+  - returned latest ledger snapshot with `orderState = completed`, `paymentState = captured`, amount `12000 GBP`, and `orderPurpose = registration_fee`.
 - Apps Script HEAD was pushed and a clean API-only operator deployment now serves this slice:
   - deployment ID `AKfycbwSdO73nyxrOKVPQVQgkoGg29RwvYmJXWDYAgFqs5cdxyI4pJXFW3cZZSS1-6y3zlex`;
   - version `33`;
