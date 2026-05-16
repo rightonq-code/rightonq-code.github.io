@@ -2465,6 +2465,29 @@ Payment-side review follow-up:
   - capture a real sandbox webhook and reconcile actual event names/field paths;
   - build a real payment-return page/state instead of the current 404 redirect.
 
+Webhook proof follow-up:
+
+- Temporary Revolut sandbox webhook was registered on 2026-05-16.
+- Revolut delivered real sandbox `ORDER_AUTHORISED` and `ORDER_COMPLETED` events for order `6a084d13-d84d-a49b-bb44-916bb9237ba4`.
+- The `ORDER_COMPLETED` payload contained:
+  - `event`;
+  - `order_id`;
+  - `merchant_order_ext_ref`.
+- Signature verification confirmed `signatureMatched: true`.
+- Timestamp verification failed only because the archived sample was verified after the 5-minute replay window. The future live endpoint must enforce that window.
+- `revolut-webhook-map.mjs` mapped the real `ORDER_COMPLETED` event into a dry-run Billing update:
+  - `registration_fee_paid`;
+  - `paymentProvider = revolut`;
+  - `paymentStatus = paid`;
+  - `checkoutOrderId = 6a084d13-d84d-a49b-bb44-916bb9237ba4`.
+- The webhook payload did not include `payment_id`, so payment ID must be enriched from order/payment retrieval if needed.
+- No live Billing row update has been made from the webhook proof.
+- Replace the previous "capture a real sandbox webhook" blocker with:
+  - build a real raw-body webhook endpoint;
+  - verify signature and timestamp atomically;
+  - dedupe events before writing;
+  - optionally enrich payment ID/state from Revolut before updating Billing.
+
 ### Slice 8B - Public Endpoint Hardening Started
 
 Purpose:

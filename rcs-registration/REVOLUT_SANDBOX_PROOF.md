@@ -321,8 +321,8 @@ First live sandbox sequence, once Bugs has the sandbox Merchant API secret:
 5. Open the checkout URL in a browser and complete one sandbox card payment. Done on 2026-05-16.
 6. Retrieve the order and payment list after payment. Done on 2026-05-16.
 7. Capture one sandbox webhook payload plus headers and verify it with
-   `revolut-webhook-verify.mjs`.
-8. Map the verified webhook with `revolut-webhook-map.mjs` and review the proposed Billing update.
+   `revolut-webhook-verify.mjs`. Done on 2026-05-16.
+8. Map the verified webhook with `revolut-webhook-map.mjs` and review the proposed Billing update. Done on 2026-05-16 as dry-run.
 9. Update the existing Billing row with `operator-billing.mjs` using provider/order/payment IDs only.
 10. Run one failed/declined sandbox payment if Revolut sandbox provides a suitable test card.
 11. Run a full refund only after the order reaches `completed`.
@@ -341,9 +341,9 @@ Minimum useful proof:
 - successful sandbox payment changes order/payment state as expected; done.
 - failed sandbox payment can be observed and mapped;
 - full refund path is observed and mapped;
-- captured webhook signature verifies locally using the raw payload and Revolut headers;
-- verified webhook payload maps to the expected Billing status without writing to the Sheet;
-- IDs/statuses can be copied into the existing `Billing` sheet through `operator-billing.mjs`.
+- captured webhook signature verifies locally using the raw payload and Revolut headers; done for archived sample. Signature matched; timestamp was outside the 5-minute live replay window by the time it was verified.
+- verified webhook payload maps to the expected Billing status without writing to the Sheet; done.
+- IDs/statuses can be copied into the existing `Billing` sheet through `operator-billing.mjs`; dry-run done, live update not yet run.
 
 Stronger proof:
 
@@ -356,6 +356,72 @@ Stronger proof:
 
 ## Current Next Action
 
-Create/register a sandbox webhook endpoint or otherwise capture a sandbox webhook payload plus `Revolut-Request-Timestamp` and `Revolut-Signature`, then verify it locally with `revolut-webhook-verify.mjs` and map it with `revolut-webhook-map.mjs`.
+Use the verified/mapped webhook proof to design the real webhook endpoint and active-checkout guard before public payment gating. Do not run webhook-driven live Billing updates until duplicate checkout protection, dedupe storage, and payment enrichment are designed.
 
-The first live sandbox Hosted Checkout payment proof has passed. No production Revolut call has been made. No real customer card data has been handled. No sandbox webhook has been registered/captured yet.
+The first live sandbox Hosted Checkout payment proof has passed. Sandbox webhook registration/capture also passed. No production Revolut call has been made. No real customer card data has been handled. No live Billing row update has been made from this webhook proof.
+
+## Live Sandbox Webhook Proof Results - 2026-05-16
+
+Sandbox webhook registration:
+
+- Temporary capture URL: `https://webhook.site/84da51c0-7f70-4475-830a-11a8d002a81f`
+- Revolut sandbox webhook ID: `e6f32548-ffef-4f77-92fa-a0d2ae0b7dea`
+- Events registered:
+  - `ORDER_AUTHORISED`
+  - `ORDER_COMPLETED`
+  - `ORDER_CANCELLED`
+  - `ORDER_FAILED`
+  - `ORDER_PAYMENT_DECLINED`
+  - `ORDER_PAYMENT_FAILED`
+- Signing secret was returned by Revolut and kept in `/tmp/revolut-webhook-create-response.json`; it was not pasted into chat or committed.
+
+Webhook-triggering order:
+
+- Order ID: `6a084d13-d84d-a49b-bb44-916bb9237ba4`
+- Token: `6e705351-f49a-4dd0-b0a4-9a979dbbfe7e`
+- Customer ID: `ecd04bc4-379a-411a-927e-9ed2b9f8b88d`
+- Reference: `ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747`
+
+Captured webhook events:
+
+- `ORDER_AUTHORISED`
+- `ORDER_COMPLETED`
+
+Captured `ORDER_COMPLETED` payload:
+
+```json
+{"event":"ORDER_COMPLETED","order_id":"6a084d13-d84d-a49b-bb44-916bb9237ba4","merchant_order_ext_ref":"ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747"}
+```
+
+Verification:
+
+- Raw payload was saved to `/tmp/revolut-webhook-5e006.json`.
+- Byte count was `145`, matching the browser-agent capture.
+- `Revolut-Request-Timestamp`: `1778929033752`
+- `Revolut-Signature`: `v1=98380183760c497ac9472d136d9ca121e267337d8309ddc9ef2079b233e478b9`
+- Signature verification result with normal 5-minute tolerance:
+  - `signatureMatched: true`
+  - `timestampAccepted: false`
+  - reason: `timestamp_outside_tolerance`
+  - age at verification: about `707` seconds
+- Archived-sample verification with `--skip-timestamp-tolerance` returned `ok: true`.
+
+Mapping result:
+
+- `ORDER_COMPLETED` mapped to:
+  - `billingStatus = registration_fee_paid`
+  - `paymentProvider = revolut`
+  - `checkoutOrderId = 6a084d13-d84d-a49b-bb44-916bb9237ba4`
+  - `paymentStatus = paid`
+  - `paymentReceivedAt = 2026-05-16T10:57:13.752Z`
+  - `refundStatus = not_required`
+- Dedupe key:
+  - `revolut:ORDER_COMPLETED:6a084d13-d84d-a49b-bb44-916bb9237ba4:ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747`
+- `operator-billing.mjs --dry-run` printed the expected proposed update and performed no Sheet write.
+
+Build impact:
+
+- Real Revolut sandbox event names and field paths match the mapper for the happy path.
+- The webhook payload does not include `payment_id`; payment ID must be enriched by order/payment retrieval if the Billing row requires it.
+- A live webhook endpoint must verify signature and timestamp before mapping; it must not use the CLI-only `--skip-timestamp-tolerance` behaviour.
+- A real endpoint also needs dedupe storage before writing Billing updates.
