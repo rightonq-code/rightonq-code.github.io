@@ -72,7 +72,7 @@ Revolut should ideally handle:
 
 - initial onboarding checkout/payment;
 - payment method saving where supported;
-- `£100 + VAT` registration fee payment;
+- `£100 + VAT` registration handling fee payment;
 - later post-approval monthly subscription payment;
 - later prepaid usage credit/top-up payment;
 - merchant-initiated top-up orders/charges where supported;
@@ -101,11 +101,14 @@ Do not rely on Revolut alone as the full SaaS billing brain until its sandbox an
 Bugs decided the customer journey should be simple and platform-led:
 
 - no standalone "application only" product for now;
-- every client pays a `£100 + VAT` RCS registration fee before RightOnQ starts the registration work;
-- the fee confirms the business is serious and covers application preparation, checking, submission support, phone preview work, and registration follow-up;
+- every client pays a `£100 + VAT` RCS registration handling fee before RightOnQ starts the registration work;
+- RightOnQ only accepts registered businesses / companies for this flow, not sole traders or unregistered businesses;
+- the customer must confirm they are applying on behalf of a registered business and entering the arrangement for business purposes;
+- the fee confirms the business is serious and covers application review, preparation, provider/compliance handling, administration, submission support, phone preview work, and registration follow-up;
 - monthly platform fees start only once the RCS sender is approved and ready to use;
-- if the RCS sender application is not approved for reasons outside the client's control, the `£100 + VAT` registration fee is refunded in full;
-- the registration fee is not refundable if the application cannot proceed or is rejected because the business provided inaccurate information, failed required checks, did not complete requested actions, withdrew, or has business/compliance history that prevents approval.
+- if the RCS sender application is not approved for reasons outside the client's control, the `£100 + VAT` handling fee is refunded in full;
+- the handling fee is not refundable once RightOnQ has started the registration handling work, except where the application cannot proceed for reasons outside the customer's control;
+- the handling fee is not refundable if the application cannot proceed or is rejected because the business provided inaccurate information, failed required checks, did not complete requested actions, withdrew, or has business/compliance history that prevents approval.
 
 Platform packages:
 
@@ -502,14 +505,14 @@ Target smooth journey:
 1. Client expresses interest and is qualified by RightOnQ/outreach.
 2. Client opens a RightOnQ registration gateway page or receives a guided link.
 3. Client sees the commercial terms:
-   - `£100 + VAT` RCS registration fee;
+   - `£100 + VAT` RCS registration handling fee;
    - refund guarantee if the application is not approved for reasons outside the client's control;
    - no monthly platform fee until approved and ready to use;
    - RightOnQ UK at `£25/month + VAT` after approval;
    - RightOnQ Global at `£49/month + VAT` after approval;
    - messaging costs charged separately.
 4. Client accepts service/payment terms.
-5. Client pays the `£100 + VAT` registration fee, likely via Revolut.
+5. Client pays the `£100 + VAT` registration handling fee, likely via Revolut.
 6. RightOnQ creates/sends a private onboarding/application link.
 7. Client completes the intake once, with fields accurate enough for both RCS sender registration and Twilio Trust Hub/KYC.
 8. RightOnQ checks the intake.
@@ -534,7 +537,7 @@ Target internal flow:
 1. Lead qualified.
 2. Commercial offer agreed.
 3. Revolut checkout/order/payment setup created.
-4. `£100 + VAT` registration fee received.
+4. `£100 + VAT` registration handling fee received.
 5. Payment method saved where supported.
 6. Post-approval subscription/base monthly entitlement recorded but not charged until approved and ready to use.
 7. Application record created with stable `application_id`.
@@ -2262,7 +2265,7 @@ Status:
 Output:
 
 - package explanation;
-- `£100 + VAT` RCS registration fee wording;
+- `£100 + VAT` RCS registration handling fee wording;
 - refund guarantee wording;
 - post-approval plan wording for RightOnQ UK and RightOnQ Global;
 - terms acceptance;
@@ -2272,7 +2275,7 @@ Output:
 Current implemented gateway mechanics:
 
 - customer chooses `RightOnQ UK` or `RightOnQ Global`;
-- customer acknowledges the `£100 + VAT` registration fee and refund terms;
+- customer acknowledges the `£100 + VAT` registration handling fee and refund terms;
 - `Complete Part A` is gated until plan choice and acknowledgement are complete;
 - Part A payload carries:
   - `packageName`;
@@ -2737,7 +2740,7 @@ Output:
 ## Open Questions
 
 - Exact sales-page wording for `RightOnQ UK` and `RightOnQ Global`.
-- Exact VAT-inclusive checkout amount for the `£100 + VAT` registration fee.
+- Exact VAT-inclusive checkout amount for the `£100 + VAT` registration handling fee.
 - Exact prepaid credit/top-up threshold.
 - Whether auto top-up is mandatory or optional.
 - Whether clients can use Direct Debit later.

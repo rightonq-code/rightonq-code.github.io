@@ -2383,14 +2383,14 @@
         <p>Part A collects the business, brand, message and compliance details RightOnQ needs to check your application before any RCS sender registration work begins.</p>
         <div class="gateway-fee">
           <strong>£100 + VAT</strong>
-          <span>RCS registration fee before work starts</span>
+          <span>RCS registration handling fee before work starts</span>
         </div>
-        <div class="gateway-guarantee">If your sender application is not approved for reasons outside your control, the registration fee is refunded in full.</div>
-        <p>The fee is not refundable if the application cannot proceed because information is inaccurate, required checks or actions are not completed, the business withdraws, or business/compliance history prevents approval.</p>
+        <div class="gateway-guarantee">If your sender application is not approved for reasons outside your control, the handling fee is refunded in full.</div>
+        <p>The handling fee covers application review, preparation, provider/compliance handling and administration. It is not refundable once RightOnQ has started that work, except where the application cannot proceed for reasons outside your control.</p>
         <div class="gateway-actions">
           <label class="gateway-ack" for="registrationFeeAcknowledgement">
             <input id="registrationFeeAcknowledgement" name="registrationFeeAcknowledgement" type="checkbox" value="Confirmed" form="registrationForm" required>
-            <span>I understand the £100 + VAT registration fee, the refund terms, and that monthly platform billing only starts after approval and ready-to-use setup.</span>
+            <span>I confirm I am applying on behalf of a registered business and entering into this arrangement for business purposes. I ask RightOnQ to begin the RCS registration handling work after payment. I understand the £100 + VAT handling fee is not refundable once that work has started, except where the application cannot proceed for reasons outside the customer's control. Monthly platform billing only starts after approval and ready-to-use setup.</span>
           </label>
           <button class="btn secondary" type="button" id="gatewayStartButton">Complete Part A</button>
           <div class="gateway-error" id="gatewayError" aria-live="polite"></div>
@@ -3099,7 +3099,7 @@
         fields: [
           ["Selected RightOnQ plan", "packageName"],
           ["Monthly base fee", "monthlyBaseFeeGbp"],
-          ["Registration fee acknowledged", "registrationFeeAcknowledgement"],
+          ["Registration handling fee acknowledged", "registrationFeeAcknowledgement"],
           ["Legal business name", "legalBusinessName"],
           ["Trading name", "tradingName"],
           ["Companies House number", "companiesHouseNumber"],
@@ -3603,7 +3603,7 @@
       const acknowledged = registrationFeeAcknowledgement.checked;
       const errors = [];
       if (!selected) errors.push("choose RightOnQ UK or RightOnQ Global");
-      if (!acknowledged) errors.push("confirm the registration fee and refund terms");
+      if (!acknowledged) errors.push("confirm the registration handling fee and refund terms");
       if (!errors.length) {
         clearGatewayError();
         return true;

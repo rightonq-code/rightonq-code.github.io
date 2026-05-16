@@ -2,7 +2,7 @@
 
 Created: 2026-05-15
 Owner: RCS-Twilio-4
-Status: first live sandbox registration-fee payment proof passed; not production implementation
+Status: first live sandbox registration-handling-fee payment proof passed; not production implementation
 
 ## Purpose
 
@@ -10,7 +10,7 @@ Prove the Revolut-first billing assumptions before wiring live customer payment 
 
 The proof should answer whether RightOnQ can safely use Revolut for:
 
-- the one-off `£100 + VAT` RCS registration fee;
+- the one-off `£100 + VAT` RCS registration handling fee;
 - a saved customer/payment method;
 - the post-approval monthly platform fee for `RightOnQ UK` or `RightOnQ Global`;
 - later PAYG/top-up payments;
@@ -21,7 +21,7 @@ The proof should answer whether RightOnQ can safely use Revolut for:
 Customer flow should become:
 
 1. customer chooses `RightOnQ UK` or `RightOnQ Global`;
-2. customer pays the `£100 + VAT` registration fee through Revolut;
+2. customer pays the `£100 + VAT` registration handling fee through Revolut;
 3. Revolut returns/updates order and payment status;
 4. RightOnQ records `registration_fee_paid`;
 5. RightOnQ creates/reveals the private Part A link;
@@ -100,7 +100,7 @@ Build impact:
 
 ## Proof Questions
 
-### A. One-off registration fee
+### A. One-off registration handling fee
 
 - Can a sandbox Merchant order be created for `12000` minor units (`£120.00`, representing `£100 + VAT`)?
 - Does the API treat `12000` as `£120.00` in GBP minor units?
@@ -156,7 +156,7 @@ Build impact:
 
 ### F. Refunds
 
-- Can a full sandbox refund be created for the registration fee?
+- Can a full sandbox refund be created for the registration handling fee?
 - Can a partial refund be created if needed?
 - Which refund IDs/statuses are returned?
 - What webhook events are emitted for refund created, refund completed, refund failed, or equivalent states?

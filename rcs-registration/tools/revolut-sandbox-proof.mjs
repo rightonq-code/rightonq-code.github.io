@@ -6,7 +6,7 @@ const DEFAULT_API_VERSION = "2026-04-20";
 const DEFAULT_ORDER = {
   amount: 12000,
   currency: "GBP",
-  description: "RightOnQ RCS registration fee",
+  description: "RightOnQ RCS registration handling fee",
   redirect_url: "https://rightonq-code.github.io/rcs-registration/payment-return.html",
   customer: {
     email: "test-public-parta@example.com",
@@ -17,14 +17,14 @@ const DEFAULT_ORDER = {
   },
   line_items: [
     {
-      name: "RightOnQ RCS registration fee",
+      name: "RightOnQ RCS registration handling fee",
       type: "service",
       quantity: {
         value: 1
       },
       unit_price_amount: 12000,
       total_amount: 12000,
-      description: "RCS sender registration work. Includes GBP 100 + VAT."
+      description: "RCS sender registration handling work. Includes GBP 100 + VAT."
     }
   ]
 };
@@ -92,7 +92,7 @@ function usage() {
     "  --refund-order                 Refund --order-id; use --refund-amount in minor units",
     "  --refund-amount 12000",
     "  --refund-reference ROQ-RCS-...",
-    "  --refund-description \"Registration fee refund\"",
+    "  --refund-description \"Registration handling fee refund\"",
     "  --pay-order                    Pay --order-id using a saved payment method",
     "  --payment-method-id <id>",
     "  --payment-method-type card|revolut_pay",
@@ -186,7 +186,7 @@ function buildRefundPayload(options) {
   const payload = {
     amount,
     currency: options.refundCurrency || options.currency || DEFAULT_ORDER.currency,
-    description: options.refundDescription || "RightOnQ RCS registration fee refund"
+    description: options.refundDescription || "RightOnQ RCS registration handling fee refund"
   };
   const reference = options.refundReference || options.reference || options.applicationId;
   if (reference) payload.merchant_order_ext_ref = reference;

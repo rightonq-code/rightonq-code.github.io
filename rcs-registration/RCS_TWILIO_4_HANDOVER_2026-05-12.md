@@ -379,7 +379,7 @@ Research direction from Twilio-4 plus payment-focused and Revolut-focused sub-ag
 - Use Revolut for:
   - initial checkout/payment;
   - saved payment method where available;
-  - `£100 + VAT` registration fee collection;
+  - `£100 + VAT` registration handling fee collection;
   - possible post-approval monthly subscription after sandbox testing;
   - merchant-initiated top-up orders/charges;
   - webhooks/reporting for reconciliation.
@@ -404,7 +404,7 @@ Important Twilio billing point:
 Recommended early risk rule:
 
 - No client should get live Twilio-backed usage with unlimited postpaid exposure.
-- Require the `£100 + VAT` RCS registration fee before RightOnQ starts registration work.
+- Require the `£100 + VAT` RCS registration handling fee before RightOnQ starts registration work.
 - Do not charge monthly platform fees during the 4-6 week registration wait.
 - Start monthly platform fees only once the sender is approved and ready to use.
 - Keep auto top-up / pause rules for later live Twilio usage.
@@ -412,8 +412,12 @@ Recommended early risk rule:
 Commercial decision from Bugs on 2026-05-15:
 
 - no standalone "application only" product for now;
-- every client pays a `£100 + VAT` RCS registration fee to start;
-- if the RCS sender application is not approved for reasons outside the client's control, refund the registration fee in full;
+- every client pays a `£100 + VAT` RCS registration handling fee to start;
+- this flow is B2B only: registered businesses / companies are accepted; sole traders and unregistered businesses are not accepted;
+- the client must confirm they are applying on behalf of a registered business and entering the arrangement for business purposes;
+- the handling fee covers application review, preparation, provider/compliance handling, administration, submission support, phone preview work, and registration follow-up;
+- refund the handling fee in full if the RCS sender application is not approved for reasons outside the client's control;
+- do not refund once RightOnQ has started the registration handling work, except where the application cannot proceed for reasons outside the customer's control;
 - do not refund where the application cannot proceed or is rejected because the business provided inaccurate information, failed required checks, did not complete requested actions, withdrew, or has business/compliance history that prevents approval;
 - RightOnQ UK after approval: `£25/month + VAT`, plus messaging costs;
 - RightOnQ Global after approval: `£49/month + VAT`, plus messaging costs.
@@ -425,7 +429,7 @@ Likely customer journey:
 1. Lead agrees in principle to use RightOnQ RCS.
 2. Customer sees the RCS registration gateway and platform package summary.
 3. Customer accepts service/payment terms.
-4. Customer pays the `£100 + VAT` registration fee, likely via Revolut checkout/hosted payment.
+4. Customer pays the `£100 + VAT` registration handling fee, likely via Revolut checkout/hosted payment.
 5. RightOnQ creates/sends a private RCS application link.
 6. Customer receives the private RCS application link.
 7. Customer completes Part A.
@@ -443,7 +447,7 @@ Likely internal journey:
 1. Lead qualified.
 2. Commercial offer agreed.
 3. Revolut customer/payment record created, or checkout session/order prepared.
-4. `£100 + VAT` registration fee paid.
+4. `£100 + VAT` registration handling fee paid.
 5. Payment method saved where supported.
 6. Subscription/base monthly entitlement recorded but not charged until approved and ready to use.
 7. Application record created with stable `application_id`.
@@ -2171,7 +2175,7 @@ Current gateway behaviour:
 - customer must choose either:
   - `RightOnQ UK` at `£25/month + VAT after approval`; or
   - `RightOnQ Global` at `£49/month + VAT after approval`;
-- customer must acknowledge the `£100 + VAT` registration fee and refund terms before continuing into Part A;
+- customer must acknowledge the `£100 + VAT` registration handling fee and refund terms before continuing into Part A;
 - `Complete Part A` now validates the plan choice and acknowledgement before scrolling into the form;
 - the selected plan, monthly base fee, registration fee, VAT treatment, acknowledgement, and billing status are included in the Part A payload;
 - review/export data now includes:
@@ -2336,7 +2340,7 @@ Official Revolut doc points captured in the proof plan:
 Proof helper behaviour:
 
 - `node rcs-registration/tools/revolut-sandbox-proof.mjs --dry-run` prints the intended sandbox order request without needing a secret;
-- intended first live sandbox call is a `GBP 120.00` order for the `GBP 100 + VAT` registration fee;
+- intended first live sandbox call is a `GBP 120.00` order for the `GBP 100 + VAT` registration handling fee;
 - live sandbox calls require `REVOLUT_MERCHANT_API_SECRET` in the local environment;
 - no Revolut API secret should be pasted into chat or committed to the repo.
 
@@ -3229,3 +3233,33 @@ Still to do before public payment gate:
 - build the automated webhook endpoint with raw-body signature/timestamp verification, dedupe, optional payment enrichment, and Billing update;
 - finish refund/refunded status and event mapping;
 - run failed/declined and refund sandbox paths.
+
+### Slice 8J Started - B2B Registration Handling Fee Wording
+
+Bugs clarified the commercial/refund posture:
+
+- RightOnQ will only deal with registered businesses / companies in this onboarding flow;
+- sole traders and unregistered businesses are not accepted;
+- this is B2B, not a consumer checkout;
+- the `£100 + VAT` charge should be described as an RCS registration handling fee, because it pays for application review, preparation, provider/compliance handling and administration;
+- RightOnQ may start that handling work after payment;
+- once RightOnQ has started the handling work, change-of-mind refund is not available;
+- refund remains available where the application cannot proceed for reasons outside the customer's control.
+
+Files updated:
+
+- `rcs-registration/index.html`;
+- `rcs-registration/tools/revolut-sandbox-proof.mjs`;
+- `rcs-registration/REVOLUT_SANDBOX_PROOF.md`;
+- `rcs-registration/RCS_ONBOARDING_MAIN_BUILD_PLAN.md`;
+- `rcs-registration/RCS_TWILIO_4_HANDOVER_2026-05-12.md`.
+
+Visible form changes:
+
+- gateway now says `RCS registration handling fee before work starts`;
+- refund guarantee now refers to the handling fee;
+- acknowledgement checkbox now confirms the customer is applying on behalf of a registered business for business purposes, asks RightOnQ to start handling work after payment, and confirms no refund once work has started except where the application cannot proceed for reasons outside the customer's control.
+
+Tooling change:
+
+- `revolut-sandbox-proof.mjs` now labels the Revolut proof order and line item as `RightOnQ RCS registration handling fee`.
