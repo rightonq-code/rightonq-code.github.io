@@ -3887,13 +3887,14 @@ Decisions recorded:
 - avoid `Personal-GOG` / `personal-gog-490412` for this webhook unless Adam explicitly reverses this later;
 - proposed region: `europe-west2` / London;
 - rationale: RightOnQ is UK-based, expected account/client base is mostly UK, and official docs list `europe-west2` / London for Cloud Run, Secret Manager, and Cloud Firestore;
-- project is currently bare: no billing linked, no Firestore database, no Cloud Run service, Cloud Run Admin API not enabled, Secret Manager API not enabled, and no webhook-suitable service account;
+- billing is now linked to `My Billing Account` / `01D966-E98801-B3C276` under `rightonq.co.uk`, but it is currently a Free trial account and full pay-as-you-go activation was not clicked;
+- project remains otherwise bare: no Firestore database, no Cloud Run service, Cloud Run Admin API not enabled, Secret Manager API not enabled, and no webhook-suitable service account;
 - Firestore Native remains the dedupe/event store choice, but it is not currently enabled/created for this lane.
 
 Next boundary work:
 
-- link billing only after Adam explicitly approves that console action;
-- then confirm billing/permissions;
+- decide whether/when to activate the linked free-trial billing account to full pay-as-you-go;
+- confirm billing/permissions;
 - enable/create Firestore Native, Cloud Run Admin API, Secret Manager API, service account/IAM, and secrets only as separate explicit steps;
 - confirm Secret Manager names and service account/IAM plan;
 - do not enable or create anything until Adam explicitly approves the console action.

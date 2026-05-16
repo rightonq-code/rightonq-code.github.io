@@ -241,7 +241,7 @@ Recommended boundary:
 - Runtime: Cloud Run functions / Functions Framework Node.js source deployment for `roq-rcs-revolut-webhook`.
 - Proposed region: `europe-west2` / London. Official docs list `europe-west2` for Cloud Run, Secret Manager, and Cloud Firestore, making it the natural UK-first choice for a UK-based RightOnQ workflow. Confirm availability in the console before any action.
 - Dedupe/event store: Firestore Native mode, collection `revolut_webhook_events`.
-- Billing state: not linked. Console showed "This project has no billing account" on 2026-05-16. Linking billing is a separate explicit action.
+- Billing state: linked on 2026-05-16 to billing account `My Billing Account` / `01D966-E98801-B3C276` under `rightonq.co.uk`. Current status is Free trial account with a visible credit/time-remaining banner. The full pay-as-you-go activation banner was not clicked; activation is a separate explicit action.
 - Firestore state: not enabled/created. Firestore Databases showed no databases and a "Create a Firestore database" CTA on 2026-05-16. Enabling/creating Firestore Native mode is a separate explicit console action.
 - Cloud Run state: available as a product page, but no services exist and the Cloud Run Services page warned that clicking "Create service" will enable the Cloud Run Admin API. Enabling/deploying Cloud Run is a separate explicit action.
 - Secret Manager state: Secret Manager API page showed an "Enable" button, so the API is not yet enabled. Enabling Secret Manager and creating secrets are separate explicit actions.
@@ -278,8 +278,8 @@ roq-rcs-revolut-merchant-api-secret-live
 
 Pre-deployment checklist:
 
-1. Link a billing account to `rightonq-gog` only after explicit approval.
-2. Confirm billing/permissions are suitable for Cloud Run, Secret Manager, Firestore, and Cloud Logging after billing is linked.
+1. Decide whether/when to activate the linked free-trial billing account to full pay-as-you-go; this is a separate explicit action.
+2. Confirm billing/permissions are suitable for Cloud Run, Secret Manager, Firestore, and Cloud Logging.
 3. Enable/create Firestore Native mode only after explicit approval.
 4. Confirm `europe-west2` / London as the target region for Cloud Run, Firestore, Secret Manager, and logging.
 5. Confirm service account name and minimum IAM roles.
@@ -289,7 +289,7 @@ Pre-deployment checklist:
 
 Forbidden until explicitly approved:
 
-- linking billing;
+- activating the free-trial billing account to full pay-as-you-go;
 - enabling Cloud Run Admin API;
 - enabling Firestore;
 - enabling Secret Manager API;
@@ -314,7 +314,7 @@ Forbidden until explicitly approved:
 
 ## Remaining Confirmations
 
-- Link billing to `rightonq-gog` after explicit approval.
+- Decide whether/when to activate the linked free-trial billing account to full pay-as-you-go.
 - Confirm `europe-west2` / London in-console as the target region without starting a create/deploy flow where possible.
 - Enable/create Firestore Native mode as a separate explicit console step.
 - Enable Cloud Run Admin API / Cloud Run functions only as a separate explicit console step.
