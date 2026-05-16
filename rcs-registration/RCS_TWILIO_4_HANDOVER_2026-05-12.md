@@ -3673,3 +3673,40 @@ Explicitly forbidden until approved:
 - enabling strict public payment gating from webhook state.
 
 No cloud command, console action, deployment, Firestore write, secret creation, Revolut URL change, Apps Script call, or Billing update was made in this slice.
+
+## Slice 8U - Cloud Webhook Rejection Logging
+
+Codex tightened the source-only Cloud Run / Functions Framework webhook skeleton's observability.
+
+Files:
+
+- `rcs-registration/cloud-run/revolut-webhook/index.mjs`;
+- `rcs-registration/cloud-run/revolut-webhook/README.md`;
+- this handover and the build plan.
+
+Change:
+
+- `handleHttpRequest` now logs redacted record-only entries for early rejections before handler/dedupe processing:
+  - non-`POST` requests -> `method_not_allowed`;
+  - missing `req.rawBody` -> `raw_body_unavailable`.
+- The missing-signing-secret path remains handled by the shared webhook handler and is logged as `not_recordable` when a dedupe store is present.
+
+Safety:
+
+- rejection logs include method/status/reason and dedupe state only;
+- they do not include raw body, Revolut signature, signing secret, Merchant API secret, PIN, OAuth credential, card data, or HMAC;
+- public HTTP responses are unchanged.
+
+Verification:
+
+- `node --check rcs-registration/cloud-run/revolut-webhook/index.mjs` passed;
+- `npm --prefix rcs-registration/cloud-run/revolut-webhook run self-test` passed;
+- `npm --prefix rcs-registration/cloud-run/revolut-webhook run dedupe-self-test` passed;
+- `node rcs-registration/tools/revolut-webhook-handler.mjs --self-test` passed.
+
+Status:
+
+- no endpoint has been deployed;
+- no Firestore database has been enabled or written to by this work;
+- no Revolut webhook URL has been changed;
+- no Apps Script call or Billing update was made.

@@ -2569,6 +2569,10 @@ Active-checkout protection started:
   - Firestore Native mode remains the dedupe/event store choice;
   - first deployed mode must be record-only;
   - enabling Firestore, creating secrets/service accounts/IAM, deploying Cloud Run, changing Revolut webhook URL, automatic Billing writes, and strict payment gating remain explicitly forbidden until approved.
+- Cloud webhook source observability tightened:
+  - rejected-method and missing-raw-body cases now emit redacted record-only log entries;
+  - local self-tests cover the new rejection logs and confirm no raw body or signature is logged;
+  - source remains undeployed and no Google Cloud, Revolut, Apps Script, or Billing action was taken.
 - Payment-order lookup is now deployed to a new clean API-only operator deployment after the Apps Script code push:
   - deployment ID `AKfycbzj0I9m_vld5Aw-zPQFsTZXslrmxlrDA6Ut0RtFnd6_fxXpVDc4qhhRuKVAA5EuhWG9`;
   - version `35`;

@@ -48,12 +48,43 @@ function buildRecordOnlyLog(result) {
   };
 }
 
+function buildRejectionLog({
+  status,
+  reason,
+  method = ""
+}) {
+  return {
+    component: "roq-rcs-revolut-webhook",
+    mode: "record_only",
+    status,
+    action: reason,
+    accepted: false,
+    method,
+    mapped: false,
+    enrichmentRequired: false,
+    billingUpdateApplied: false,
+    timestampAccepted: false,
+    signatureMatched: false,
+    dedupeDecision: "not_attempted",
+    dedupeRecorded: false,
+    dedupeDuplicate: false,
+    receiptKey: "",
+    dedupeDocumentId: "",
+    dedupeState: ""
+  };
+}
+
 async function handleHttpRequest(req, {
   env = process.env,
   logger = console,
   dedupeStore = null
 } = {}) {
   if (req.method !== "POST") {
+    logger.info(JSON.stringify(buildRejectionLog({
+      status: 405,
+      reason: "method_not_allowed",
+      method: req.method || ""
+    })));
     return {
       status: 405,
       body: {
@@ -66,6 +97,11 @@ async function handleHttpRequest(req, {
 
   const rawBody = getRawBody(req);
   if (rawBody === null) {
+    logger.info(JSON.stringify(buildRejectionLog({
+      status: 500,
+      reason: "raw_body_unavailable",
+      method: req.method || ""
+    })));
     return {
       status: 500,
       body: {
@@ -176,6 +212,7 @@ async function runSelfTest() {
     headers: signedHeaders(SAMPLE_PAYLOAD)
   }, {
     env: {},
+    dedupeStore,
     logger
   });
 
@@ -190,13 +227,21 @@ async function runSelfTest() {
     && wrongMethod.body.reason === "method_not_allowed"
     && missingSecret.status === 500
     && missingSecret.body.reason === "missing_signing_secret"
-    && logs.length === 3
+    && logs.length === 5
     && logs[0].event === "ORDER_PAYMENT_FAILED"
     && logs[0].paymentStatus === "failed"
     && logs[0].dedupeDecision === "create"
     && logs[1].dedupeDecision === "duplicate_terminal"
+    && logs[2].action === "raw_body_unavailable"
+    && logs[2].dedupeDecision === "not_attempted"
+    && logs[3].action === "method_not_allowed"
+    && logs[3].dedupeDecision === "not_attempted"
+    && logs[4].action === "missing_signing_secret"
+    && logs[4].dedupeDecision === "not_recordable"
     && !Object.prototype.hasOwnProperty.call(logs[0], "rawBody")
-    && !Object.prototype.hasOwnProperty.call(logs[0], "signature");
+    && !Object.prototype.hasOwnProperty.call(logs[0], "signature")
+    && !Object.prototype.hasOwnProperty.call(logs[2], "rawBody")
+    && !Object.prototype.hasOwnProperty.call(logs[2], "signature");
 
   return {
     ok: passed,
@@ -226,6 +271,7 @@ async function main() {
 
 export {
   buildRecordOnlyLog,
+  buildRejectionLog,
   handleHttpRequest,
   revolutWebhook,
   runSelfTest

@@ -12,7 +12,7 @@ Current behaviour:
 - reads `REVOLUT_WEBHOOK_SIGNING_SECRET` from the runtime environment, which should be Secret Manager-backed when deployed;
 - verifies before mapping;
 - returns only the small public response body;
-- logs only redacted record-mode fields;
+- logs only redacted record-mode fields, including rejected-method and missing-raw-body cases;
 - includes a Firestore dedupe-store adapter source, but the local self-test uses an in-memory store;
 - performs no Revolut enrichment call, no Apps Script call, and no Billing update.
 
