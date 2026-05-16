@@ -2531,6 +2531,10 @@ Active-checkout protection started:
   - returned `found = true`;
   - returned `applicationId = ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747`;
   - returned latest ledger snapshot with `orderState = completed`, `paymentState = captured`, amount `12000 GBP`, and `orderPurpose = registration_fee`.
+- Deployment cleanup after the v35 proof:
+  - archived previous clean operator v34 `AKfycbwPbeT3Mxpmr_Q88WdSp0hRnDk96Pm93GDTsA1eOsJxmiaVpSS2xAg78ox848YsqCQU`;
+  - archived previous clean operator v33 `AKfycbwSdO73nyxrOKVPQVQgkoGg29RwvYmJXWDYAgFqs5cdxyI4pJXFW3cZZSS1-6y3zlex`;
+  - final Active Apps Script deployments are v35 clean Operator API executable, public web app v31, and the RCS Part A intake receiver.
 - Apps Script HEAD was pushed and a clean API-only operator deployment now serves this slice:
   - deployment ID `AKfycbwSdO73nyxrOKVPQVQgkoGg29RwvYmJXWDYAgFqs5cdxyI4pJXFW3cZZSS1-6y3zlex`;
   - version `33`;

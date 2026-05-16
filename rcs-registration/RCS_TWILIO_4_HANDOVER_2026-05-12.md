@@ -3359,7 +3359,7 @@ Local verification:
 - dry-run `--lookup --revolut-order-id 6a084d13-d84d-a49b-bb44-916bb9237ba4` printed `action = lookupPaymentOrder`;
 - dry-run `--check-active --application-id ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747` still printed `action = checkActiveCheckout`.
 
-Deployment still needed:
+Deployment status:
 
 - Apps Script code was pushed with `clasp push --force` after an OAuth refresh, then deployed through the Apps Script UI as a clean API-only operator deployment:
   - deployment ID `AKfycbzj0I9m_vld5Aw-zPQFsTZXslrmxlrDA6Ut0RtFnd6_fxXpVDc4qhhRuKVAA5EuhWG9`;
@@ -3368,7 +3368,7 @@ Deployment still needed:
   - access `Anyone within rightonq.co.uk`;
   - no Web app section was present on the new deployment.
 - `.clasp.json` now points operator wrappers at the clean v35 API-only deployment.
-- Previous clean v34 operator deployment `AKfycbwPbeT3Mxpmr_Q88WdSp0hRnDk96Pm93GDTsA1eOsJxmiaVpSS2xAg78ox848YsqCQU` and v33 operator deployment `AKfycbwSdO73nyxrOKVPQVQgkoGg29RwvYmJXWDYAgFqs5cdxyI4pJXFW3cZZSS1-6y3zlex` remain active pending Bugs approval to archive them.
+- Previous clean v34 operator deployment `AKfycbwPbeT3Mxpmr_Q88WdSp0hRnDk96Pm93GDTsA1eOsJxmiaVpSS2xAg78ox848YsqCQU` and v33 operator deployment `AKfycbwSdO73nyxrOKVPQVQgkoGg29RwvYmJXWDYAgFqs5cdxyI4pJXFW3cZZSS1-6y3zlex` were archived after the v35 lookup proof passed.
 - Public web app `AKfycbyI81Ir2xvHLar0R0iFBBWyXa1Nj93T4_8Ni5_eX3XEYDA-AKQbVYbPHnTROLm8e4a6` and the RCS Part A intake receiver were untouched.
 
 Live lookup proof:
@@ -3386,3 +3386,14 @@ Live lookup proof:
   - `amountMinor = 12000`;
   - `currency = GBP`;
   - `orderPurpose = registration_fee`.
+
+Deployment cleanup:
+
+- v34 archive succeeded after a ref-based Archive click and explicit `Deployment successfully archived.` success message;
+- server-fresh Manage deployments reload confirmed v34 moved from Active to Archived;
+- v33 archive then succeeded with the same explicit success message;
+- server-fresh Manage deployments reload confirmed v33 moved from Active to Archived;
+- final Active deployments are:
+  - v35 clean Operator API executable `AKfycbzj0I9m_vld5Aw-zPQFsTZXslrmxlrDA6Ut0RtFnd6_fxXpVDc4qhhRuKVAA5EuhWG9`;
+  - public web app `AKfycbyI81Ir2xvHLar0R0iFBBWyXa1Nj93T4_8Ni5_eX3XEYDA-AKQbVYbPHnTROLm8e4a6`;
+  - RCS Part A intake receiver.

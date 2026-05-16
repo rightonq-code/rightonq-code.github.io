@@ -151,10 +151,9 @@ Authenticated operator API scaffold:
 - The manifest includes `executionApi.access = DOMAIN`.
 - The Apps Script project is now linked to standard Google Cloud project `rightonq-gog`.
 - The current clean operator API executable deployment is `AKfycbzj0I9m_vld5Aw-zPQFsTZXslrmxlrDA6Ut0RtFnd6_fxXpVDc4qhhRuKVAA5EuhWG9` (version `35`, `Operator API executable (Step 8L lookup after push)`).
-- The previous clean operator API executable deployments remain active pending Bugs approval to archive them:
+- The previous clean operator API executable deployments have been archived after the v35 lookup proof passed:
   - `AKfycbwPbeT3Mxpmr_Q88WdSp0hRnDk96Pm93GDTsA1eOsJxmiaVpSS2xAg78ox848YsqCQU` (version `34`);
-  - `AKfycbwSdO73nyxrOKVPQVQgkoGg29RwvYmJXWDYAgFqs5cdxyI4pJXFW3cZZSS1-6y3zlex` (version `33`).
-- Version `33` is deployed with description `Operator API executable (Step 8H clean API-only)`.
+  - `AKfycbwSdO73nyxrOKVPQVQgkoGg29RwvYmJXWDYAgFqs5cdxyI4pJXFW3cZZSS1-6y3zlex` (version `33`, description `Operator API executable (Step 8H clean API-only)`).
 - The earlier v32 deployment `AKfycbyG5yW-r0sfaKt1bwUUGFAHHdQoKK8wBCfR1riVxvYamu9YhfOBpRJhnRL_5iBP0VSC` was contaminated with Web app + API executable types during the active-checkout-guard deployment refresh and has been archived.
 - The earlier v29 deployment `AKfycbzogKHOijtu6kjp2MVrL9WcVuF6mWrgQyKUzQGRvpTfozdUSA9y_B6X_eWpQeQ-mWtS` was contaminated with Web app + API executable + Library types and has been archived.
 - `rcsOperatorAction(payload)` now enforces the same PIN guard as the web app operator path:
