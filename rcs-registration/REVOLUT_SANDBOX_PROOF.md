@@ -459,7 +459,7 @@ Stronger proof:
 
 ## Current Next Action
 
-The terminal failed-payment sandbox proof is now complete. A first local Cloud Run / Functions Framework webhook source skeleton now exists under `cloud-run/revolut-webhook`, but it has not been deployed and no Revolut webhook URL has been changed. Continue with record-only Firestore dedupe and enrichment before public payment gating.
+The terminal failed-payment sandbox proof is now complete. A local Cloud Run / Functions Framework webhook source skeleton and dedupe module now exist under `cloud-run/revolut-webhook`, but nothing has been deployed and no Revolut webhook URL has been changed. Continue with live Google-project confirmation, Secret Manager wiring, Firestore database enablement, and enrichment before public payment gating.
 
 Do not run webhook-driven live Billing updates until dedupe storage and payment enrichment are implemented and proven in record-only mode.
 
@@ -480,6 +480,7 @@ Endpoint design direction started on 2026-05-16:
 - Integration caution: verify the Revolut signature/timestamp once at first receipt. If later order enrichment is needed, reuse the verified raw payload with `mapWebhookPayload`; do not call the full handler again after a slow enrichment step because the timestamp window may have expired.
 - The handler's `mapping_failed` public body intentionally omits parser details; diagnostics stay in the internal object.
 - `cloud-run/revolut-webhook/index.mjs` is the first local Cloud Run source skeleton. It requires `POST`, `req.rawBody`, and `REVOLUT_WEBHOOK_SIGNING_SECRET`, returns only the public handler body, logs only redacted record-mode fields, and performs no Firestore, Revolut, Apps Script, or Billing writes.
+- `cloud-run/revolut-webhook/dedupe.mjs` provides source-only dedupe primitives: payload-stable `receiptKey = revolut:{event}:{orderId}`, `sha256(receiptKey)` document ID, `logicalDedupeKey` for resolved application context, duplicate-terminal handling, lease-aware in-flight decisions, an in-memory self-test store, and a Firestore adapter source.
 
 The first live sandbox Hosted Checkout payment proof has passed. Sandbox webhook registration/capture also passed. No production Revolut call has been made. No real customer card data has been handled. No live Billing row update has been made from this webhook proof.
 

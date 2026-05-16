@@ -3,6 +3,10 @@
 import { pathToFileURL } from "node:url";
 import { computeSignature } from "../../tools/revolut-webhook-verify.mjs";
 import { handleRevolutWebhook } from "../../tools/revolut-webhook-handler.mjs";
+import {
+  InMemoryDedupeStore,
+  recordDedupeResult
+} from "./dedupe.mjs";
 
 const SIGNING_SECRET_ENV = "REVOLUT_WEBHOOK_SIGNING_SECRET";
 const SAMPLE_SECRET = "wsk_TEST_DO_NOT_USE_IN_PRODUCTION";
@@ -44,9 +48,10 @@ function buildRecordOnlyLog(result) {
   };
 }
 
-function handleHttpRequest(req, {
+async function handleHttpRequest(req, {
   env = process.env,
-  logger = console
+  logger = console,
+  dedupeStore = null
 } = {}) {
   if (req.method !== "POST") {
     return {
@@ -76,16 +81,27 @@ function handleHttpRequest(req, {
     headers: req.headers || {},
     signingSecret: env[SIGNING_SECRET_ENV] || ""
   });
+  const dedupe = await recordDedupeResult(result, {
+    store: dedupeStore
+  });
 
-  logger.info(JSON.stringify(buildRecordOnlyLog(result)));
+  logger.info(JSON.stringify({
+    ...buildRecordOnlyLog(result),
+    dedupeDecision: dedupe.decision,
+    dedupeRecorded: Boolean(dedupe.recorded),
+    dedupeDuplicate: Boolean(dedupe.duplicate),
+    receiptKey: dedupe.receiptKey || "",
+    dedupeDocumentId: dedupe.documentId || "",
+    dedupeState: dedupe.state || ""
+  }));
   return {
     status: result.status,
     body: result.body
   };
 }
 
-function revolutWebhook(req, res) {
-  const result = handleHttpRequest(req);
+async function revolutWebhook(req, res) {
+  const result = await handleHttpRequest(req);
   sendJson(res, result.status, result.body);
 }
 
@@ -100,15 +116,16 @@ function signedHeaders(payload, timestamp = String(Date.now())) {
   };
 }
 
-function runSelfTest() {
+async function runSelfTest() {
   const logs = [];
+  const dedupeStore = new InMemoryDedupeStore();
   const logger = {
     info(message) {
       logs.push(JSON.parse(message));
     }
   };
 
-  const valid = handleHttpRequest({
+  const valid = await handleHttpRequest({
     method: "POST",
     rawBody: Buffer.from(SAMPLE_PAYLOAD, "utf8"),
     headers: signedHeaders(SAMPLE_PAYLOAD)
@@ -116,10 +133,22 @@ function runSelfTest() {
     env: {
       [SIGNING_SECRET_ENV]: SAMPLE_SECRET
     },
+    dedupeStore,
+    logger
+  });
+  const duplicate = await handleHttpRequest({
+    method: "POST",
+    rawBody: Buffer.from(SAMPLE_PAYLOAD, "utf8"),
+    headers: signedHeaders(SAMPLE_PAYLOAD)
+  }, {
+    env: {
+      [SIGNING_SECRET_ENV]: SAMPLE_SECRET
+    },
+    dedupeStore,
     logger
   });
 
-  const missingRawBody = handleHttpRequest({
+  const missingRawBody = await handleHttpRequest({
     method: "POST",
     body: JSON.parse(SAMPLE_PAYLOAD),
     headers: signedHeaders(SAMPLE_PAYLOAD)
@@ -130,7 +159,7 @@ function runSelfTest() {
     logger
   });
 
-  const wrongMethod = handleHttpRequest({
+  const wrongMethod = await handleHttpRequest({
     method: "GET",
     rawBody: Buffer.from("", "utf8"),
     headers: {}
@@ -141,7 +170,7 @@ function runSelfTest() {
     logger
   });
 
-  const missingSecret = handleHttpRequest({
+  const missingSecret = await handleHttpRequest({
     method: "POST",
     rawBody: Buffer.from(SAMPLE_PAYLOAD, "utf8"),
     headers: signedHeaders(SAMPLE_PAYLOAD)
@@ -153,15 +182,19 @@ function runSelfTest() {
   const passed = valid.status === 202
     && valid.body.action === "verified_mapped_dry_run"
     && valid.body.billingUpdateApplied === false
+    && duplicate.status === 202
+    && duplicate.body.action === "verified_mapped_dry_run"
     && missingRawBody.status === 500
     && missingRawBody.body.reason === "raw_body_unavailable"
     && wrongMethod.status === 405
     && wrongMethod.body.reason === "method_not_allowed"
     && missingSecret.status === 500
     && missingSecret.body.reason === "missing_signing_secret"
-    && logs.length === 2
+    && logs.length === 3
     && logs[0].event === "ORDER_PAYMENT_FAILED"
     && logs[0].paymentStatus === "failed"
+    && logs[0].dedupeDecision === "create"
+    && logs[1].dedupeDecision === "duplicate_terminal"
     && !Object.prototype.hasOwnProperty.call(logs[0], "rawBody")
     && !Object.prototype.hasOwnProperty.call(logs[0], "signature");
 
@@ -170,6 +203,7 @@ function runSelfTest() {
     mode: "self_test",
     cases: {
       valid,
+      duplicate,
       missingRawBody,
       wrongMethod,
       missingSecret
@@ -179,9 +213,9 @@ function runSelfTest() {
   };
 }
 
-function main() {
+async function main() {
   if (process.argv.includes("--self-test")) {
-    const result = runSelfTest();
+    const result = await runSelfTest();
     console.log(JSON.stringify(result, null, 2));
     if (!result.ok) process.exit(1);
     return;

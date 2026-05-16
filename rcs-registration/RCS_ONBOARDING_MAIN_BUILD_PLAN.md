@@ -2555,6 +2555,13 @@ Active-checkout protection started:
   - returns only the public response body and logs redacted record-mode fields;
   - self-test passed with fake data;
   - not deployed; no Revolut webhook URL changed; no Firestore, Revolut enrichment, Apps Script, or Billing write exists yet.
+- Source-only dedupe primitives added:
+  - `rcs-registration/cloud-run/revolut-webhook/dedupe.mjs`;
+  - Firestore collection name `revolut_webhook_events`;
+  - document ID is `sha256(revolut:{event}:{orderId})`, so it stays stable across unresolved/resolved application context;
+  - `logicalDedupeKey` stores the richer `revolut:{event}:{orderId}:{applicationId-or-unresolved}` audit key;
+  - in-memory self-test proves first create vs duplicate terminal detection;
+  - Firestore adapter source exists but is not wired to a live Google project/database.
 - Payment-order lookup is now deployed to a new clean API-only operator deployment after the Apps Script code push:
   - deployment ID `AKfycbzj0I9m_vld5Aw-zPQFsTZXslrmxlrDA6Ut0RtFnd6_fxXpVDc4qhhRuKVAA5EuhWG9`;
   - version `35`;

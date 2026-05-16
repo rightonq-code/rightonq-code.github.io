@@ -6,9 +6,11 @@
   "main": "index.mjs",
   "scripts": {
     "start": "functions-framework --target=revolutWebhook",
-    "self-test": "node index.mjs --self-test"
+    "self-test": "node index.mjs --self-test",
+    "dedupe-self-test": "node dedupe.mjs --self-test"
   },
   "dependencies": {
+    "@google-cloud/firestore": "^7.11.0",
     "@google-cloud/functions-framework": "^3.4.6"
   }
 }

@@ -72,7 +72,11 @@ These files are the source of truth for the first endpoint implementation:
   - requires `POST`, `req.rawBody`, and `REVOLUT_WEBHOOK_SIGNING_SECRET`.
   - returns only the public handler body.
   - logs redacted record-mode fields only.
-  - performs no Firestore write, no Revolut enrichment call, no Apps Script call, and no Billing update.
+- `cloud-run/revolut-webhook/dedupe.mjs`
+  - builds payload-stable receipt keys and Firestore document IDs.
+  - stores application context in `logicalDedupeKey`, not in the document ID.
+  - includes an in-memory test store and a Firestore adapter source.
+  - the source skeleton can log dedupe create/duplicate decisions, but it is not deployed or connected to a live Firestore database yet.
 
 ## Dedupe Store
 
@@ -195,8 +199,8 @@ When automatic apply is finally enabled:
 2. Import `handleRevolutWebhook`. Done.
 3. Pass `req.rawBody`, `req.headers`, and signing secret from Secret Manager. Source skeleton reads `REVOLUT_WEBHOOK_SIGNING_SECRET`; deployment must wire it from Secret Manager.
 4. Return only `result.body` to Revolut. Done in source skeleton.
-5. Log/store only redacted `result.internal`. Source skeleton logs redacted record-mode fields only; Firestore storage still to do.
-6. Add Firestore dedupe in record-only mode.
+5. Log/store only redacted `result.internal`. Source skeleton logs redacted record-mode fields only.
+6. Add Firestore dedupe in record-only mode. Source primitives and adapter exist; deployment wiring to the real Google project/database is still to do.
 7. Add order enrichment using the Revolut Merchant API secret from Secret Manager.
 8. Use `lookupPaymentOrder` on the original/related order ID from refund-order enrichment to resolve application context when refund events arrive without `merchant_order_ext_ref`.
 9. Keep Billing updates disabled until the record-only path has been proven with sandbox webhooks.

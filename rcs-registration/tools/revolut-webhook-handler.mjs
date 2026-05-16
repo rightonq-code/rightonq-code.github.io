@@ -81,14 +81,17 @@ function handleRevolutWebhook({
     });
   }
 
-  const verification = verifyWebhook({
-    secret: signingSecret,
-    timestamp,
-    payload,
-    signatureHeader: signature,
-    toleranceSeconds,
-    skipTimestampTolerance: false
-  });
+  const verification = {
+    ...verifyWebhook({
+      secret: signingSecret,
+      timestamp,
+      payload,
+      signatureHeader: signature,
+      toleranceSeconds,
+      skipTimestampTolerance: false
+    }),
+    requestTimestamp: timestamp
+  };
   if (!verification.ok) {
     return jsonResponse(401, {
       ok: false,

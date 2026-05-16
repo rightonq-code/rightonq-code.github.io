@@ -3607,3 +3607,36 @@ Status:
 - no endpoint has been deployed;
 - no Revolut webhook URL has been changed;
 - next implementation work is record-only Firestore dedupe and enrichment, not public payment gating.
+
+## Slice 8S - Source-Only Webhook Dedupe
+
+Codex added source-only dedupe primitives for the future record-only webhook endpoint.
+
+Files:
+
+- `rcs-registration/cloud-run/revolut-webhook/dedupe.mjs`;
+- updated `index.mjs` to accept an optional dedupe store and log dedupe decisions;
+- updated `package.json` with `dedupe-self-test` and `@google-cloud/firestore` as a future deployment dependency.
+
+Behaviour:
+
+- receipt key is payload-stable: `revolut:{event}:{orderId}`;
+- Firestore document ID is `sha256(receiptKey)`;
+- richer application context is kept in `logicalDedupeKey`, not in the document ID;
+- duplicate terminal records return `duplicate_terminal`;
+- invalid/unverified events are not recordable;
+- source includes an in-memory store for local self-tests and a Firestore adapter for future deployment wiring.
+
+Verification:
+
+- `npm --prefix rcs-registration/cloud-run/revolut-webhook run dedupe-self-test` passed;
+- `npm --prefix rcs-registration/cloud-run/revolut-webhook run self-test` passed;
+- `node rcs-registration/tools/revolut-webhook-handler.mjs --self-test` passed;
+- `node rcs-registration/tools/revolut-webhook-map.mjs --self-test` passed.
+
+Status:
+
+- no endpoint has been deployed;
+- no Firestore database has been enabled or written to by this work;
+- no Revolut webhook URL has been changed;
+- no Apps Script call or Billing update was made.
