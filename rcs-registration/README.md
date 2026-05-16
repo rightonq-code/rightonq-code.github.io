@@ -19,5 +19,6 @@ The main website should only link to this form when ready. This folder should st
 ## Contents
 
 - `index.html` - single-file RCS registration form
+- `payment-return.html` - Revolut hosted-checkout return page; it confirms browser return only, while payment status remains verified by order/webhook records
 - `RCS_TWILIO_1_HANDOVER_2026-05-06.md` - detailed handover notes from the first build session
 - `backups/` - timestamped local backup copies

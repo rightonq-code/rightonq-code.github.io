@@ -7,7 +7,7 @@ const DEFAULT_ORDER = {
   amount: 12000,
   currency: "GBP",
   description: "RightOnQ RCS registration fee",
-  redirect_url: "https://rightonq-code.github.io/rcs-registration/index.html?payment=success",
+  redirect_url: "https://rightonq-code.github.io/rcs-registration/payment-return.html?payment=success",
   customer: {
     email: "test-public-parta@example.com",
     full_name: "Test Public Submitter"
@@ -84,7 +84,7 @@ function usage() {
     "  --customer-id <id>              Use an existing Revolut customer ID on order creation",
     "  --reference ROQ-RCS-...         Override the Revolut merchant_order_data.reference",
     "  --idempotency-key key           Use a repeatable key to prove duplicate protection",
-    "  --redirect-url https://...",
+    "  --redirect-url https://...       Overrides the default payment-return.html redirect",
     "  --list-orders                  Retrieve orders, optionally filtered by --reference and --state",
     "  --limit 100",
     "  --state completed",
@@ -155,10 +155,27 @@ function buildOrderPayload(options) {
   if (options.customerEmail) payload.customer.email = options.customerEmail;
   if (options.customerName) payload.customer.full_name = options.customerName;
   if (options.customerId) payload.customer = { id: options.customerId };
-  if (options.applicationId) payload.merchant_order_data.reference = options.applicationId;
-  if (options.reference) payload.merchant_order_data.reference = options.reference;
+  if (options.applicationId) {
+    payload.merchant_order_data.reference = options.applicationId;
+    if (!options.redirectUrl) {
+      payload.redirect_url = buildPaymentReturnUrl(options.applicationId);
+    }
+  }
+  if (options.reference) {
+    payload.merchant_order_data.reference = options.reference;
+    if (!options.redirectUrl) {
+      payload.redirect_url = buildPaymentReturnUrl(options.reference);
+    }
+  }
   if (options.redirectUrl) payload.redirect_url = options.redirectUrl;
   return payload;
+}
+
+function buildPaymentReturnUrl(applicationId) {
+  const url = new URL("https://rightonq-code.github.io/rcs-registration/payment-return.html");
+  url.searchParams.set("payment", "success");
+  url.searchParams.set("applicationId", applicationId);
+  return url.toString();
 }
 
 function buildRefundPayload(options) {

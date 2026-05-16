@@ -2930,7 +2930,7 @@ Important findings:
 - Repeating create-order with the same `Idempotency-Key` created a second pending order, not the same order. Revolut's current create-order docs do not document create-order idempotency. RightOnQ must enforce one active checkout order per application in the Billing lane before creating a new Revolut order.
 - Listing by `merchant_order_data_reference` returned both orders for the application ID, so the reference is usable for reconciliation/search.
 - List-order responses did not include checkout URLs; direct order retrieval did while pending. Store checkout URL/token at create time.
-- The Hosted Checkout success redirect landed on a RightOnQ 404 page after payment. API state confirmed success, so this is a payment-return UX/page issue to fix before public launch.
+- The Hosted Checkout success redirect landed on a RightOnQ 404 page after payment. API state confirmed success, so this was a payment-return UX/page issue; Slice 8I adds `payment-return.html` for future checkout tests.
 - `--retrieve-payments` initially printed zero because the payment-list endpoint returns an array directly rather than `{ payments: [...] }`. RCS-Twilio-4 patched `revolut-sandbox-proof.mjs` to handle both response shapes, then confirmed it returned the captured payment.
 
 Verification:
@@ -3151,7 +3151,6 @@ Live proof completed:
 Still to do before public payment gate:
 
 - later add the automated raw-body webhook endpoint with signature/timestamp verification, dedupe, enrichment, and Billing update.
-- add a payment-return page/state so successful hosted checkout does not land on a 404;
 - finish refund/refunded status and event mapping;
 - keep this active-checkout flow operator-run until the automated public payment gate has an atomic reserve/record path.
 
@@ -3192,3 +3191,30 @@ Completed live proof:
 - `operator-payment-order.mjs --record` stored completed sandbox order `6a084d13-d84d-a49b-bb44-916bb9237ba4`;
 - the immediate and follow-up active-checkout readbacks returned `already_paid` with `canCreateCheckout = false`;
 - this proves the operator-run duplicate-checkout guard can stop a second checkout for an application once a completed order is in `Payment orders`.
+
+### Slice 8I Started - Payment Return Page
+
+RCS-Twilio-4 added a static customer-facing hosted-checkout return page so future Revolut checkout returns do not land on a generic 404.
+
+Files changed:
+
+- `rcs-registration/payment-return.html`;
+- `rcs-registration/tools/revolut-sandbox-proof.mjs`;
+- `rcs-registration/README.md`;
+- `rcs-registration/REVOLUT_SANDBOX_PROOF.md`;
+- `rcs-registration/RCS_ONBOARDING_MAIN_BUILD_PLAN.md`.
+
+Behaviour:
+
+- future sandbox proof orders default to `https://rightonq-code.github.io/rcs-registration/payment-return.html?payment=success&applicationId=...`;
+- page reads `payment`, `status`, `applicationId`, `merchant_order_ext_ref`, `reference`, `order_id`, and `id` style query parameters;
+- page preserves the application ID when linking back to `index.html`;
+- copy is deliberately conservative: it confirms browser return from Revolut, but says payment is verified by RightOnQ using Revolut order/webhook records before registration work moves forward;
+- no secrets, PINs, card data, or webhook signing values are used by the page.
+
+Still to do before public payment gate:
+
+- wire a real order-create path that stores the created order in `Payment orders` before exposing checkout to customers;
+- build the automated webhook endpoint with raw-body signature/timestamp verification, dedupe, optional payment enrichment, and Billing update;
+- finish refund/refunded status and event mapping;
+- run a fresh sandbox checkout using the new return URL and capture the real post-payment browser landing.

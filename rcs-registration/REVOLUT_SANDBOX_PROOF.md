@@ -85,7 +85,7 @@ Observed results:
 - Listing orders by `merchant_order_data_reference` returned both pending orders for the application ID. Therefore RightOnQ must enforce one active registration-fee order per application in its own Billing lane before creating another Revolut order.
 - Direct order retrieval returns the checkout URL while the order is pending. List-order results did not include checkout URLs, so RightOnQ should store the returned checkout URL/token at create time.
 - The newer order `6a08245f-ad3a-a1b5-848c-d0395ea20303` was paid through sandbox Hosted Checkout using Revolut sandbox test card data supplied by Revolut.
-- The hosted checkout redirected to a RightOnQ URL that showed a 404 after payment. The API still confirmed successful payment, so this is a frontend redirect/return-page issue, not a payment proof failure.
+- The hosted checkout originally redirected to a RightOnQ URL that showed a 404 after payment. The API still confirmed successful payment, so this was a frontend redirect/return-page issue, not a payment proof failure. A static `payment-return.html` page has now been added for future checkout returns.
 - After payment, order retrieval returned state `completed` with embedded payment ID `6a082633-a973-ac00-837c-e68c28186597`, payment state `captured`, payment type `card`, amount `12000`, currency `GBP`.
 - The separate payment-list endpoint returned an array directly, not `{ payments: [...] }`; `revolut-sandbox-proof.mjs` now handles both response shapes.
 - The corrected `--retrieve-payments` command returned one captured payment for order `6a08245f-ad3a-a1b5-848c-d0395ea20303`.
@@ -95,7 +95,7 @@ Build impact:
 - Revolut Merchant Hosted Checkout is viable for the one-off `GBP 100 + VAT` registration-fee gate.
 - RightOnQ must not rely on Revolut create-order idempotency. Store/check Billing state before creating a checkout order.
 - Store at least: Revolut order ID, token or checkout URL while pending, customer ID, payment ID, order/payment state, amount/currency, and the application reference.
-- The RightOnQ return URL needs a payment-return state/page before public launch.
+- The RightOnQ return URL now has a static `payment-return.html` page. It confirms browser return only; payment still needs to be verified through Revolut order/webhook state before Billing changes.
 - Webhook capture/signature verification, failed-payment proof, refund proof, saved-method/MIT proof, and subscription proof remain outstanding.
 
 ## Proof Questions
@@ -323,6 +323,7 @@ First live sandbox sequence, once Bugs has the sandbox Merchant API secret:
 7. Capture one sandbox webhook payload plus headers and verify it with
    `revolut-webhook-verify.mjs`. Done on 2026-05-16.
 8. Map the verified webhook with `revolut-webhook-map.mjs` and review the proposed Billing update. Done on 2026-05-16 as dry-run.
+8a. Add a customer-facing payment return page so future hosted-checkout redirects do not land on a 404. Done on 2026-05-16 with `payment-return.html`.
 9. Update the existing Billing row with `operator-billing.mjs` using provider/order/payment IDs only.
 10. Run one failed/declined sandbox payment if Revolut sandbox provides a suitable test card.
 11. Run a full refund only after the order reaches `completed`.
@@ -356,7 +357,7 @@ Stronger proof:
 
 ## Current Next Action
 
-Use the verified/mapped webhook proof to design the real webhook endpoint and active-checkout guard before public payment gating. Do not run webhook-driven live Billing updates until duplicate checkout protection, dedupe storage, and payment enrichment are designed.
+Use the verified/mapped webhook proof and active-checkout guard to design the real webhook endpoint before public payment gating. Do not run webhook-driven live Billing updates until dedupe storage and payment enrichment are designed.
 
 The first live sandbox Hosted Checkout payment proof has passed. Sandbox webhook registration/capture also passed. No production Revolut call has been made. No real customer card data has been handled. No live Billing row update has been made from this webhook proof.
 

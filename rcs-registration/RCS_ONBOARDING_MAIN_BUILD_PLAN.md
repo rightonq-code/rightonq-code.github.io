@@ -2447,7 +2447,7 @@ Slice 8 continuation after public/operator hardening:
   - payment ID was `6a082633-a973-ac00-837c-e68c28186597`.
 - Repeating create-order with the same `Idempotency-Key` created a second order. RightOnQ must enforce duplicate checkout protection in its own Billing lane before creating another Revolut order.
 - List by `merchant_order_data_reference` works for reconciliation, but list responses did not include checkout URLs; store checkout URL/token at create time.
-- The payment-success redirect hit a RightOnQ 404 page after payment, so add a real payment-return state/page before public launch.
+- The first payment-success redirect hit a RightOnQ 404 page after payment; this has since been addressed with a static payment-return page for future checkout tests.
 - No production Revolut API call has been made yet. A sandbox webhook has now been registered/captured and dry-run mapped as recorded below.
 
 Payment-side review follow-up:
@@ -2459,11 +2459,10 @@ Payment-side review follow-up:
 - RCS-Twilio-4 fixed `updateBilling` so defaults are only applied when the caller did not provide the field and the existing Billing row is blank.
 - Syntax check passed with `node --check --input-type=commonjs < rcs-registration/google-apps-script/Code.gs`.
 - Remaining payment blockers before public gate:
-  - enforce one active checkout/order per application before creating another Revolut order;
-  - add/store checkout URL/token or equivalent active-order details;
+  - keep the active-checkout guard in the create-order path before exposing customer checkout;
   - finish refund/refunded status and event mapping;
-  - capture a real sandbox webhook and reconcile actual event names/field paths;
-  - build a real payment-return page/state instead of the current 404 redirect.
+  - build a real raw-body webhook endpoint with signature/timestamp verification, dedupe, and payment enrichment;
+  - run a fresh sandbox checkout using the new payment-return URL and capture the real post-payment browser landing.
 
 Webhook proof follow-up:
 
@@ -2514,6 +2513,10 @@ Active-checkout protection started:
   - second `checkActiveCheckout` returned `already_paid` and `canCreateCheckout = false`;
   - stored checkout URL is present for the completed sandbox order;
   - no card data or Revolut secret was stored.
+- Static payment-return page added:
+  - path `rcs-registration/payment-return.html`;
+  - future sandbox proof orders now default to `https://rightonq-code.github.io/rcs-registration/payment-return.html?payment=success&applicationId=...`;
+  - page clearly says browser return is not the authoritative payment verification source.
 - This is still operator-run pilot protection, not the automated public payment gate.
 
 ### Slice 8B - Public Endpoint Hardening Started
