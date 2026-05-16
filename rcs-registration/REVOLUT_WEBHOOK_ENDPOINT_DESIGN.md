@@ -129,6 +129,9 @@ Record fields:
 - `billingStatus`
 - `paymentStatus`
 - `refundStatus`
+- `provisionalBillingStatus`
+- `provisionalPaymentStatus`
+- `provisionalRefundStatus`
 - `revolutOrderType`
 - `relatedOrderId`
 - `leaseExpiresAt`
@@ -141,7 +144,7 @@ Atomic behavior:
 2. Compute `receiptKey = revolut:{event}:{orderId}` from the verified payload.
 3. Check `sha256(receiptKey)`.
 4. If it does not exist, create it as `received` with a short lease.
-5. If it exists in `applied`, `mapped`, `ignored`, or `enrichment_required`, return duplicate/no-op for record-only mode.
+5. If it exists in `applied`, `mapped`, `ignored`, or `enrichment_required`, return duplicate/no-op for record-only mode. `enrichment_required` is terminal only for the current record-only endpoint; the later automatic apply flow must introduce a separate progress state before any Billing side effect.
 6. If it exists in `processing` and the lease has not expired, return duplicate/in-flight.
 7. If it exists in `processing` or `received` and the lease has expired, reacquire the lease and continue.
 8. If it exists in `failed`, retry only when the failure is marked retryable; otherwise keep failed and return no-op.
@@ -181,7 +184,7 @@ The actual sandbox proof confirms the refund order type is lowercase `refund` an
 Rules:
 
 1. Always enrich `ORDER_COMPLETED` before any live Billing update until refund-vs-payment distinguishability is independently proven.
-2. If the enriched order type is `REFUND`, route through refund lifecycle logic, not the registration-fee-paid path.
+2. If the enriched order type is `refund` (case-insensitive), route through refund lifecycle logic, not the registration-fee-paid path.
 3. If the event is missing `merchant_order_ext_ref`, retrieve/enrich the order and resolve application context through the RightOnQ Payment orders ledger or original/related order.
 4. For refund-order webhooks, use the enriched refund order's original/related order ID, then call `lookupPaymentOrder(originalOrderId)` to resolve the RightOnQ application ID. Calling `lookupPaymentOrder(refundOrderId)` is expected to return not found because the Payment orders ledger stores original checkout/payment orders.
 5. Verify signature/timestamp once at initial receipt. Do not call the full handler again after a slow enrichment step; use `mapWebhookPayload` with the already verified raw payload and enriched order.

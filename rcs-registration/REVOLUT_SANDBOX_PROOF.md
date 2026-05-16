@@ -123,7 +123,7 @@ Observed refund result:
 
 - Refund request returned `ok: true`.
 - Revolut returned refund order ID `6a0872b4-89b8-a82d-884b-703f6470c124`.
-- Refund response summary exposed `type: "REFUND"` and `state: "PROCESSING"`.
+- Initial refund response summary exposed `type: "REFUND"` and `state: "PROCESSING"` from the proof tool's then-current summary. A later direct retrieval of the refund order returned lowercase `type: "refund"` and `state: "completed"`.
 - Embedded refund payment ID was `6a0872b4-395a-a536-8ca5-0ab9c27056af` with state `COMPLETED`.
 - Immediate retrieval of the original order returned `refundedAmount: 12000`, while the original order remained `state: "completed"`.
 - `retrieve-payments` for the original order continued to return the original captured card payment. Do not rely on the original payment-list response alone to infer refund state.

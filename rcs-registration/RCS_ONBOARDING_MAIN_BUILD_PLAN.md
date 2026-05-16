@@ -2489,7 +2489,7 @@ Full refund proof follow-up:
 - Official Revolut refund docs were refreshed again on 2026-05-16 before the live sandbox refund proof.
 - `revolut-sandbox-proof.mjs` now sends refund references in the current documented request shape: `merchant_order_data.reference`.
 - Full sandbox refund succeeded for return-page proof order `6a0866ef-9b11-a041-bfa2-e973e15e564d`.
-- Refund response summary exposed refund order ID `6a0872b4-89b8-a82d-884b-703f6470c124`, `type = REFUND`, `state = PROCESSING`, and embedded refund payment ID `6a0872b4-395a-a536-8ca5-0ab9c27056af` with state `COMPLETED`.
+- Initial refund response summary exposed refund order ID `6a0872b4-89b8-a82d-884b-703f6470c124`, `type = REFUND`, `state = PROCESSING`, and embedded refund payment ID `6a0872b4-395a-a536-8ca5-0ab9c27056af` with state `COMPLETED`; later direct retrieval of the refund order returned lowercase `type = refund` and `state = completed`.
 - Immediate original-order retrieval returned `refundedAmount = 12000`, confirming the full `GBP 120.00` sandbox refund was associated with the paid order.
 - Original order payment-list still returned the original captured payment only, so refund status should not be inferred from original payment-list retrieval alone.
 - Refund webhook capture found a real sandbox event for the refund order:

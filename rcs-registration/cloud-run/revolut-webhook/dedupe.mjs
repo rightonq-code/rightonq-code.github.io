@@ -3,6 +3,7 @@ import { pathToFileURL } from "node:url";
 
 const COLLECTION_NAME = "revolut_webhook_events";
 const DEFAULT_LEASE_MS = 60 * 1000;
+// "enrichment_required" is terminal only while this endpoint is record-only; the later apply flow must revisit it.
 const TERMINAL_RECORD_ONLY_STATES = new Set(["applied", "mapped", "enrichment_required", "ignored"]);
 
 function sha256Hex(value) {
@@ -72,6 +73,7 @@ function buildDedupeRecord(result, {
   const mapping = result.internal && result.internal.mapping || {};
   const operatorBillingArgs = mapping.operatorBillingArgs || {};
   const event = verification.event || mapping.event || "";
+  const isCompletionEvent = event === "ORDER_COMPLETED";
   const orderId = verification.orderId || mapping.orderId || "";
   const applicationId = mapping.applicationId || verification.merchantOrderExtRef || "";
   const receiptKey = buildReceiptKey({ event, orderId });
@@ -92,9 +94,12 @@ function buildDedupeRecord(result, {
     timestampAccepted: Boolean(verification.timestampAccepted),
     state: determineRecordState(mapping),
     billingUpdateApplied: Boolean(result.body && result.body.billingUpdateApplied),
-    billingStatus: operatorBillingArgs.billingStatus || "",
-    paymentStatus: operatorBillingArgs.paymentStatus || "",
-    refundStatus: operatorBillingArgs.refundStatus || "",
+    billingStatus: isCompletionEvent ? "" : operatorBillingArgs.billingStatus || "",
+    paymentStatus: isCompletionEvent ? "" : operatorBillingArgs.paymentStatus || "",
+    refundStatus: isCompletionEvent ? "" : operatorBillingArgs.refundStatus || "",
+    provisionalBillingStatus: isCompletionEvent ? operatorBillingArgs.billingStatus || "" : "",
+    provisionalPaymentStatus: isCompletionEvent ? operatorBillingArgs.paymentStatus || "" : "",
+    provisionalRefundStatus: isCompletionEvent ? operatorBillingArgs.refundStatus || "" : "",
     revolutOrderType: mapping.classification || "",
     relatedOrderId: "",
     leaseExpiresAt: leaseExpiry(now, leaseMs),
@@ -388,7 +393,11 @@ function runSelfTest() {
     && unresolved.documentId === first.documentId
     && unresolved.logicalDedupeKey === "revolut:ORDER_PAYMENT_FAILED:order_TEST:unresolved"
     && ignored.state === "ignored"
-    && completed.state === "enrichment_required";
+    && completed.state === "enrichment_required"
+    && completed.billingStatus === ""
+    && completed.provisionalBillingStatus === "registration_fee_paid"
+    && completed.paymentStatus === ""
+    && completed.provisionalPaymentStatus === "paid";
 
   return Promise.all([create, duplicate, notRecordable]).then(([created, duplicated, skipped]) => ({
     ok: passed

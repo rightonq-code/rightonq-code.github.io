@@ -3295,7 +3295,7 @@ Full refund proof:
 - refund reference: `ROQ-RCS-TEST-RETURN-PAGE-20260516-001-REFUND-001`;
 - refund idempotency key: `refund-ROQ-RCS-TEST-RETURN-PAGE-20260516-001`;
 - refund order ID returned: `6a0872b4-89b8-a82d-884b-703f6470c124`;
-- refund response summary showed `type = REFUND` and `state = PROCESSING`;
+- initial refund response summary showed `type = REFUND` and `state = PROCESSING`; later direct retrieval of the refund order showed lowercase `type = refund` and `state = completed`;
 - embedded refund payment ID returned: `6a0872b4-395a-a536-8ca5-0ab9c27056af`, state `COMPLETED`;
 - immediate retrieval of the original order returned `refundedAmount = 12000`;
 - original order remained `state = completed`, and original payment-list retrieval still returned the captured card payment.
@@ -3805,6 +3805,8 @@ Behaviour:
 - duplicate `ORDER_COMPLETED` events skip enrichment, preventing repeated Merchant API calls on Revolut retries;
 - non-completed events skip enrichment as not required;
 - `ORDER_COMPLETED` dedupe records now use state `enrichment_required` even when the initial payload contains a merchant reference and maps to a paid dry-run;
+- `enrichment_required` is terminal only for this record-only endpoint; the later automatic apply flow must introduce a separate progress state before any Billing side effect;
+- pre-enrichment completion mapping values are logged and stored as `provisionalBillingStatus` / `provisionalPaymentStatus` / `provisionalRefundStatus`, not as final Billing fields;
 - public HTTP response bodies are unchanged;
 - no Billing write path was added.
 

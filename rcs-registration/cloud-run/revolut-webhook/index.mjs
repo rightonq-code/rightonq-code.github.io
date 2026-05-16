@@ -38,6 +38,7 @@ function buildRecordOnlyLog(result) {
   const verification = result.internal && result.internal.verification || {};
   const mapping = result.internal && result.internal.mapping || {};
   const operatorBillingArgs = mapping.operatorBillingArgs || {};
+  const isCompletionEvent = (verification.event || mapping.event || "") === "ORDER_COMPLETED";
 
   return {
     component: "roq-rcs-revolut-webhook",
@@ -51,9 +52,12 @@ function buildRecordOnlyLog(result) {
     mapped: Boolean(mapping.mapped),
     enrichmentRequired: Boolean(mapping.enrichmentRequired),
     billingUpdateApplied: Boolean(result.body && result.body.billingUpdateApplied),
-    billingStatus: operatorBillingArgs.billingStatus || "",
-    paymentStatus: operatorBillingArgs.paymentStatus || "",
-    refundStatus: operatorBillingArgs.refundStatus || "",
+    billingStatus: isCompletionEvent ? "" : operatorBillingArgs.billingStatus || "",
+    paymentStatus: isCompletionEvent ? "" : operatorBillingArgs.paymentStatus || "",
+    refundStatus: isCompletionEvent ? "" : operatorBillingArgs.refundStatus || "",
+    provisionalBillingStatus: isCompletionEvent ? operatorBillingArgs.billingStatus || "" : "",
+    provisionalPaymentStatus: isCompletionEvent ? operatorBillingArgs.paymentStatus || "" : "",
+    provisionalRefundStatus: isCompletionEvent ? operatorBillingArgs.refundStatus || "" : "",
     timestampAccepted: Boolean(verification.timestampAccepted),
     signatureMatched: Boolean(verification.signatureMatched)
   };
@@ -413,6 +417,10 @@ async function runSelfTest() {
     && logs[1].dedupeDecision === "duplicate_terminal"
     && logs[2].event === "ORDER_COMPLETED"
     && logs[2].dedupeState === "enrichment_required"
+    && logs[2].billingStatus === ""
+    && logs[2].provisionalBillingStatus === "registration_fee_paid"
+    && logs[2].paymentStatus === ""
+    && logs[2].provisionalPaymentStatus === "paid"
     && logs[2].enrichmentAttempted === true
     && logs[2].enrichmentClassification === "payment_order"
     && logs[2].enrichmentLedgerLookupOrderId === "order_completed_TEST"
