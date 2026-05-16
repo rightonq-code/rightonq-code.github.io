@@ -160,6 +160,8 @@ Do not collect date of birth, passport, driving licence, government ID, or proof
 Compliance Embeddable design boundary from Isa/Twilio follow-up:
 
 - UK long-code Regulatory Compliance Bundles are explicitly within Compliance Embeddable scope.
+- Follow-up confirmation on Saturday 16 May 2026: this is supported at product-scope level, but not self-serve/default on every account. RightOnQ must complete the Compliance Embeddable access/registration step before building a live UX around it.
+- The published ISV pattern also assumes an approved primary business compliance profile with business identity set to ISV/Reseller.
 - Generic Trust Hub Secondary Compliance Profile support through Compliance Embeddable is not clearly confirmed by public docs; public docs explicitly list Secondary Customer Profiles for Voice Trust, which is narrower.
 - Therefore, treat UK RC Bundle evidence/resubmission as the likely embeddable/self-service lane, but keep Secondary Compliance Profile creation/resubmission RightOnQ/API/Console-managed unless Twilio confirms account/use-case enablement.
 - Compliance Embeddable is white-label and does not require the end client to have a Twilio login.
@@ -226,6 +228,10 @@ Bugs later received a more specific Twilio/Isa follow-up about Compliance Embedd
 Build-impacting corrections:
 
 - Compliance Embeddable can be used for Regulatory Compliance Bundles for Long Codes, so the UK long-code RC Bundle lane should be designed as the client self-service / Twilio-managed evidence path where account enablement is available.
+- Latest Isa/Twilio follow-up confirms the build matrix as:
+  - `UK long-code RC Bundle via Compliance Embeddable`: yes, supported in scope;
+  - `Availability by default`: no, prior Compliance Embeddable access/registration is required;
+  - `Secondary Compliance Profile via Compliance Embeddable`: do not assume; keep RightOnQ/API/Console-managed for now.
 - Public docs do not clearly confirm generic Secondary Compliance Profile support in Compliance Embeddable. They explicitly mention Secondary Customer Profiles for Voice Trust, which is not the same as saying all Trust Hub secondary profile flows are embeddable-supported.
 - Do not assume Secondary Compliance Profile evidence/resubmission uses the same embedded UX unless Twilio confirms it for RightOnQ's account/use case.
 - Compliance Embeddable can appear inside RightOnQ without visible Twilio branding, but:

@@ -1499,6 +1499,23 @@ RCS-Twilio-4 updated `RCS_ONBOARDING_MAIN_BUILD_PLAN.md` with:
 - UK RC Bundle embeddable inquiry/status fields in the planned state model;
 - explicit instruction not to store embeddable session tokens as durable identifiers.
 
+Latest follow-up on Saturday 16 May 2026 confirmed the yes/no build matrix:
+
+- UK long-code RC Bundle via Compliance Embeddable:
+  - supported at product-scope level;
+  - not self-serve/default on every account;
+  - requires prior Compliance Embeddable API access/registration before RightOnQ builds live UX around it.
+- Published ISV pattern assumes an approved primary business compliance profile with business identity set to ISV/Reseller.
+- Secondary Compliance Profile lane:
+  - generic embeddable support is not publicly documented;
+  - keep this lane RightOnQ/API/Console-managed for now;
+  - continue tracking it separately from the UK RC Bundle lane.
+- The current working design remains correct:
+  - two authorised reps for Secondary Profile readiness;
+  - UK RC Bundle and Secondary Compliance Profile tracked separately;
+  - sensitive evidence not stored by RightOnQ where Twilio-managed embeddable is available;
+  - persist `inquiry_id` / `registration_id`, not session token.
+
 ### Spawned Agent Research Added - Twilio KYC Docs
 
 Bugs then spawned agents to review the Twilio pages referenced by Isa's reply and pasted the consolidated build impact.
