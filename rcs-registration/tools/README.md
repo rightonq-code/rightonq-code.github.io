@@ -11,7 +11,7 @@ Operator tools use the named clasp/OAuth login:
 - clasp user: `rightonq-gog`;
 - local OAuth credential source: `~/.clasprc.json`;
 - Apps Script project config: `rcs-registration/google-apps-script/.clasp.json`;
-- clean API executable deployment: `AKfycbyG5yW-r0sfaKt1bwUUGFAHHdQoKK8wBCfR1riVxvYamu9YhfOBpRJhnRL_5iBP0VSC`;
+- clean API executable deployment: `AKfycbzj0I9m_vld5Aw-zPQFsTZXslrmxlrDA6Ut0RtFnd6_fxXpVDc4qhhRuKVAA5EuhWG9`;
 - public customer web app deployment: `AKfycbyI81Ir2xvHLar0R0iFBBWyXa1Nj93T4_8Ni5_eX3XEYDA-AKQbVYbPHnTROLm8e4a6`.
 
 Operator wrappers call `scripts.run` against the clean API executable deployment ID in `.clasp.json` with `devMode: false`. They are pinned to the deployed operator API version rather than Apps Script HEAD.
@@ -47,6 +47,7 @@ The proof helper uses the authenticated operator API for creating the private te
 | `revolut-sandbox-proof.mjs` | Prepare and test Revolut sandbox Hosted Checkout requests. | No RCS PIN; uses `REVOLUT_MERCHANT_API_SECRET` for live sandbox calls |
 | `revolut-webhook-verify.mjs` | Verify Revolut webhook signatures/timestamp tolerance against captured sandbox payloads. | No RCS PIN; uses `REVOLUT_WEBHOOK_SIGNING_SECRET` for real samples |
 | `revolut-webhook-map.mjs` | Map a verified Revolut webhook payload into a proposed `operator-billing.mjs --dry-run` update. | No RCS PIN; performs no writes |
+| `revolut-webhook-handler.mjs` | Offline endpoint-core proof: verify headers/body, map payload, and return public/internal handler results without writes. | No RCS PIN; fake-data self-test only for now |
 
 ## Safety Rules
 
@@ -375,6 +376,14 @@ node rcs-registration/tools/revolut-webhook-verify.mjs --self-test
 The verifier and mapper are also importable endpoint primitives. A future real webhook handler should import `verifyWebhook` from `revolut-webhook-verify.mjs` and `mapWebhookPayload` from `revolut-webhook-map.mjs` rather than copying the HMAC or event-mapping logic.
 
 The live endpoint must run on infrastructure that can read the raw request body and custom Revolut headers. Do not use GitHub Pages for webhook receipt, and do not trust an Apps Script web app as the direct webhook entrypoint unless it has separately proven access to the exact raw body and `Revolut-Request-Timestamp` / `Revolut-Signature` headers.
+
+Endpoint-core proof, using fake data only:
+
+```bash
+node rcs-registration/tools/revolut-webhook-handler.mjs --self-test
+```
+
+Expected result: `ok: true`. The handler self-test proves a completed payment maps to `verified_mapped_dry_run`, an invalid signature is rejected, and a refund-style event without `merchant_order_ext_ref` returns `enrichment_required`. The returned handler object deliberately separates the small public response body from internal verification/mapping diagnostics; a real endpoint should return only the public body to Revolut.
 
 Webhook signature proof for a captured sandbox callback:
 

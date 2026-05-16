@@ -2524,6 +2524,7 @@ Active-checkout protection started:
 - Webhook endpoint groundwork started:
   - `revolut-webhook-verify.mjs` exports the tested signature/timestamp verification primitives while preserving the CLI;
   - `revolut-webhook-map.mjs` exports the tested event mapping primitives while preserving the CLI;
+  - `revolut-webhook-handler.mjs` proves the endpoint-core shape offline without live calls or writes;
   - future live webhook endpoint should import these instead of copying crypto/mapping logic;
   - endpoint host must support exact raw body and `Revolut-Request-Timestamp` / `Revolut-Signature` headers.
 - Payment-order lookup is now deployed to a new clean API-only operator deployment after the Apps Script code push:

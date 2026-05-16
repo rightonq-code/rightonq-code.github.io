@@ -463,11 +463,13 @@ Endpoint design direction started on 2026-05-16:
 
 - `revolut-webhook-verify.mjs` now exports its verification primitives (`verifyWebhook`, `computeSignature`, timestamp/signature helpers) while preserving the CLI.
 - `revolut-webhook-map.mjs` now exports mapping primitives (`mapWebhookPayload`, `buildOperatorBillingArgs`, `EVENT_MAP`) while preserving the CLI.
+- `revolut-webhook-handler.mjs` now provides an offline endpoint-core proof that verifies headers/body first, maps second, and returns public/internal handler results without calling Revolut, Apps Script, or Google Sheets.
 - This lets a future real endpoint import the same tested crypto/mapping code instead of copying it.
 - The future endpoint must be a real server/serverless handler that can read the exact raw request body and the `Revolut-Request-Timestamp` / `Revolut-Signature` headers.
 - GitHub Pages is static and cannot receive POST webhooks.
 - Do not assume the existing Apps Script public web app is suitable for direct Revolut webhook receipt; Apps Script is useful for the operator API and Sheets updates, but the live webhook entrypoint must prove it can read raw body bytes and custom Revolut headers before it is trusted.
 - The endpoint pipeline remains: raw body -> signature/timestamp verification -> dedupe -> order/payment enrichment where needed -> Billing update.
+- Handler self-test passed for completed-payment mapping, invalid-signature rejection, and refund-event enrichment-required behaviour.
 
 The first live sandbox Hosted Checkout payment proof has passed. Sandbox webhook registration/capture also passed. No production Revolut call has been made. No real customer card data has been handled. No live Billing row update has been made from this webhook proof.
 
