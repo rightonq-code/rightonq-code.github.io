@@ -385,7 +385,7 @@ node rcs-registration/tools/revolut-webhook-map.mjs \
   --request-timestamp "1683650202360"
 ```
 
-Expected result: JSON containing `mapped: true`, a `dedupeKey`, proposed `operatorBillingArgs`, and an `operatorBillingDryRunCommand`. The mapper warns if `merchant_order_ext_ref` does not look like a `ROQ-RCS-...` application ID. It does not call Apps Script or update the Sheet.
+Expected happy-path result: JSON containing `mapped: true`, a `dedupeKey`, proposed `operatorBillingArgs`, and an `operatorBillingDryRunCommand`. The mapper warns if `merchant_order_ext_ref` does not look like a `ROQ-RCS-...` application ID. If a recognised event is missing `merchant_order_ext_ref`, the mapper returns `mapped: false` with `enrichmentRequired: true`; retrieve the Revolut order by `order_id` before applying any Billing update. This is required for refund webhooks, which can arrive as `ORDER_COMPLETED` for the refund order ID without an application reference. The mapper does not call Apps Script or update the Sheet.
 
 ## Recommended Operator Order
 

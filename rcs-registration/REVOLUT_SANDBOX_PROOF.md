@@ -132,7 +132,47 @@ Build impact:
 - Revolut sandbox can process a full refund for the registration handling fee.
 - RightOnQ should store refund order ID, refund payment ID where present, refund amount/currency, refund status, refund reference, and original order ID.
 - Billing/refund state should be derived from the original order's `refunded_amount`/refund order lifecycle and future refund webhooks, not from the original order payment-list alone.
-- Refund lifecycle mapping still needs a webhook capture/event-name proof before any automated Billing write.
+- Refund lifecycle mapping now has a real event-name proof, but still needs enrichment-backed implementation before any automated Billing write.
+
+## Refund Webhook Proof Results - 2026-05-16
+
+Revolut emitted a refund-order webhook after the full refund proof.
+
+Captured refund webhook:
+
+- webhook.site request ID: `d6d383cf-8ea0-4ca1-ab9d-b4859ed7cd6b`
+- Received: `2026-05-16 14:35:54 UTC`
+- Body byte count: `77`
+- `Revolut-Request-Timestamp`: `1778938554035`
+- `Revolut-Signature`: `v1=a361810e16d0e225acb184404dd1fc301ce85c2a5538e730d23b9a9618de946a`
+
+Raw payload:
+
+```json
+{"event":"ORDER_COMPLETED","order_id":"6a0872b4-89b8-a82d-884b-703f6470c124"}
+```
+
+Verification:
+
+- Raw payload was saved to `/tmp/revolut-webhook-d6d38.json`.
+- Signature verification with the local webhook signing secret returned `signatureMatched: true`.
+- Archived-sample verification used `--skip-timestamp-tolerance` and returned `ok: true`.
+- The future live webhook endpoint must not skip timestamp tolerance.
+
+Mapping result:
+
+- The webhook event name is still `ORDER_COMPLETED`.
+- The `order_id` is the refund order ID, not the original paid order ID.
+- No `merchant_order_ext_ref` was present.
+- No refund payment ID or refund-specific field was present in the webhook body.
+- `revolut-webhook-map.mjs` now returns `mapped: false` and `enrichmentRequired: true` for this shape instead of producing a Billing update.
+
+Build impact:
+
+- A refund webhook cannot be routed directly to an application from the webhook body alone.
+- The live webhook endpoint must retrieve/enrich the Revolut order by `order_id`.
+- If the enriched order is `type = REFUND`, route through refund lifecycle logic using the original/related order, not the normal paid registration-fee path.
+- Do not treat every `ORDER_COMPLETED` event as `registration_fee_paid`; it depends on the enriched order type.
 
 ## Proof Questions
 
@@ -366,6 +406,7 @@ First live sandbox sequence, once Bugs has the sandbox Merchant API secret:
 9. Update the existing Billing row with `operator-billing.mjs` using provider/order/payment IDs only.
 10. Run one failed/declined sandbox payment if Revolut sandbox provides a suitable test card.
 11. Run a full refund only after the order reaches `completed`. Done on 2026-05-16 against order `6a0866ef-9b11-a041-bfa2-e973e15e564d`; original order retrieval returned `refundedAmount: 12000`.
+11a. Capture and verify the refund-order webhook. Done on 2026-05-16; Revolut sent `ORDER_COMPLETED` for refund order `6a0872b4-89b8-a82d-884b-703f6470c124` without `merchant_order_ext_ref`, and the mapper now returns `enrichmentRequired`.
 12. Record webhook requirements, but do not expose a public webhook endpoint until signature verification is wired into that endpoint.
 
 ## Proof Success Criteria
@@ -381,7 +422,7 @@ Minimum useful proof:
 - successful sandbox payment changes order/payment state as expected; done.
 - fresh hosted checkout returns to `payment-return.html` instead of a 404; done.
 - failed sandbox payment can be observed and mapped;
-- full refund path is observed; webhook/event mapping for refunds remains to do;
+- full refund path is observed; refund webhook event-name/field shape is observed, and enrichment-backed Billing implementation remains to do;
 - captured webhook signature verifies locally using the raw payload and Revolut headers; done for archived sample. Signature matched; timestamp was outside the 5-minute live replay window by the time it was verified.
 - verified webhook payload maps to the expected Billing status without writing to the Sheet; done.
 - IDs/statuses can be copied into the existing `Billing` sheet through `operator-billing.mjs`; dry-run done, live update not yet run.

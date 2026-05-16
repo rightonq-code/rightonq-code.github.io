@@ -2491,7 +2491,13 @@ Full refund proof follow-up:
 - Refund response summary exposed refund order ID `6a0872b4-89b8-a82d-884b-703f6470c124`, `type = REFUND`, `state = PROCESSING`, and embedded refund payment ID `6a0872b4-395a-a536-8ca5-0ab9c27056af` with state `COMPLETED`.
 - Immediate original-order retrieval returned `refundedAmount = 12000`, confirming the full `GBP 120.00` sandbox refund was associated with the paid order.
 - Original order payment-list still returned the original captured payment only, so refund status should not be inferred from original payment-list retrieval alone.
-- Build implication: store refund order ID, refund payment ID where present, refund amount/currency, refund reference, and original order ID; finish refund webhook capture before automating Billing refund updates.
+- Refund webhook capture found a real sandbox event for the refund order:
+  - webhook.site request ID `d6d383cf-8ea0-4ca1-ab9d-b4859ed7cd6b`;
+  - raw payload `{"event":"ORDER_COMPLETED","order_id":"6a0872b4-89b8-a82d-884b-703f6470c124"}`;
+  - no `merchant_order_ext_ref`, refund payment ID, or refund-specific body fields;
+  - signature verification matched using the local webhook signing secret.
+- `revolut-webhook-map.mjs` now treats recognised events with no `merchant_order_ext_ref` as `enrichmentRequired` rather than throwing or producing a Billing update.
+- Build implication: store refund order ID, refund payment ID where present, refund amount/currency, refund reference, and original order ID; refund webhooks must retrieve/enrich the order before automating Billing refund updates.
 - The webhook payload did not include `payment_id`, so payment ID must be enriched from order/payment retrieval if needed.
 - No live Billing row update has been made from the webhook proof.
 - Replace the previous "capture a real sandbox webhook" blocker with:

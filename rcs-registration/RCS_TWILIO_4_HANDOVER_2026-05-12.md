@@ -3305,11 +3305,27 @@ Build impact:
 - full registration-handling-fee refund is viable in Revolut sandbox;
 - store refund order ID, refund payment ID where present, refund amount/currency, refund reference, original order ID, and refund status;
 - do not infer refund state from the original order payment-list alone;
-- capture real refund webhook events before wiring automated Billing refund updates.
+- real refund webhook event captured: Revolut sent `ORDER_COMPLETED` for the refund order ID, without `merchant_order_ext_ref` or refund-specific body fields.
+
+Refund webhook proof:
+
+- webhook.site request ID: `d6d383cf-8ea0-4ca1-ab9d-b4859ed7cd6b`;
+- received: `2026-05-16 14:35:54 UTC`;
+- raw payload: `{"event":"ORDER_COMPLETED","order_id":"6a0872b4-89b8-a82d-884b-703f6470c124"}`;
+- `Revolut-Request-Timestamp`: `1778938554035`;
+- `Revolut-Signature`: `v1=a361810e16d0e225acb184404dd1fc301ce85c2a5538e730d23b9a9618de946a`;
+- local signature verification returned `signatureMatched = true` using the local webhook signing secret;
+- archived-sample verification used `--skip-timestamp-tolerance`; live endpoint must enforce timestamp tolerance.
+
+Mapper change:
+
+- `revolut-webhook-map.mjs` now treats recognised events with missing `merchant_order_ext_ref` as `mapped = false`, `enrichmentRequired = true`;
+- the self-test now includes a refund-style `ORDER_COMPLETED` payload with no application reference;
+- this prevents a refund-order `ORDER_COMPLETED` webhook from being misclassified as `registration_fee_paid`.
 
 Still to do before public payment gate:
 
 - wire a real order-create path that stores the created order in `Payment orders` before exposing checkout to customers;
 - build the automated webhook endpoint with raw-body signature/timestamp verification, dedupe, optional payment enrichment, and Billing update;
-- finish refund/refunded webhook event mapping;
+- implement enrichment-backed refund Billing updates from retrieved refund/original order data;
 - run failed/declined sandbox path.

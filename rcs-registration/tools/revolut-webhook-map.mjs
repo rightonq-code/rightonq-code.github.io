@@ -4,6 +4,7 @@ import fs from "node:fs";
 
 const SAMPLE_COMPLETED_PAYLOAD = "{\"event\":\"ORDER_COMPLETED\",\"order_id\":\"order_TEST\",\"merchant_order_ext_ref\":\"ROQ-RCS-TEST-REVOLUT-WEBHOOK\"}";
 const SAMPLE_DECLINED_PAYLOAD = "{\"event\":\"ORDER_PAYMENT_DECLINED\",\"order_id\":\"order_TEST\",\"merchant_order_ext_ref\":\"ROQ-RCS-TEST-REVOLUT-WEBHOOK\"}";
+const SAMPLE_REFUND_COMPLETED_PAYLOAD = "{\"event\":\"ORDER_COMPLETED\",\"order_id\":\"refund_order_TEST\"}";
 
 const BOOLEAN_FLAGS = {
   "self-test": "selfTest"
@@ -136,20 +137,40 @@ function shellQuote(value) {
   return "'" + stringValue.replace(/'/g, "'\"'\"'") + "'";
 }
 
+function getPayloadValue(payload, fieldName) {
+  const data = payload.data && typeof payload.data === "object" ? payload.data : {};
+  return payload[fieldName] || data[fieldName] || "";
+}
+
+function buildEnrichmentRequiredResult(payload, reason) {
+  const event = payload.event || "";
+  const orderId = getPayloadValue(payload, "order_id");
+  const applicationId = getPayloadValue(payload, "merchant_order_ext_ref");
+  return {
+    ok: true,
+    mapped: false,
+    enrichmentRequired: true,
+    event,
+    applicationId,
+    orderId,
+    reason,
+    nextAction: "Retrieve the Revolut order by order_id before applying any Billing update. If the order type is REFUND, route through the refund lifecycle using the original/related order, not as a paid registration-fee event."
+  };
+}
+
 function buildOperatorBillingArgs(payload) {
   const event = payload.event || "";
   const mapping = EVENT_MAP[event];
   if (!mapping) return null;
 
-  const data = payload.data && typeof payload.data === "object" ? payload.data : {};
-  const applicationId = payload.merchant_order_ext_ref || data.merchant_order_ext_ref || "";
-  const orderId = payload.order_id || data.order_id || "";
-  const paymentId = payload.payment_id || data.payment_id || "";
+  const applicationId = getPayloadValue(payload, "merchant_order_ext_ref");
+  const orderId = getPayloadValue(payload, "order_id");
+  const paymentId = getPayloadValue(payload, "payment_id");
   if (!applicationId) {
-    throw new Error("Webhook payload is missing merchant_order_ext_ref; cannot route to an application ID");
+    return buildEnrichmentRequiredResult(payload, "Webhook payload is missing merchant_order_ext_ref; cannot route directly to an application ID.");
   }
   if (!orderId) {
-    throw new Error("Webhook payload is missing order_id; cannot record Revolut order ID");
+    return buildEnrichmentRequiredResult(payload, "Webhook payload is missing order_id; cannot record a Revolut order ID.");
   }
 
   return {
@@ -206,6 +227,10 @@ function mapWebhookPayload(rawPayload, options = {}) {
     };
   }
 
+  if (operatorBillingArgs.mapped === false && operatorBillingArgs.enrichmentRequired) {
+    return operatorBillingArgs;
+  }
+
   if (!operatorBillingArgs.applicationId.startsWith("ROQ-RCS-")) {
     warnings.push("merchant_order_ext_ref does not look like a RightOnQ application ID; review before applying any billing update.");
   }
@@ -235,19 +260,25 @@ function runSelfTest() {
   const declined = mapWebhookPayload(SAMPLE_DECLINED_PAYLOAD, {
     requestTimestamp: String(Date.now())
   });
+  const refundCompleted = mapWebhookPayload(SAMPLE_REFUND_COMPLETED_PAYLOAD, {
+    requestTimestamp: String(Date.now())
+  });
   const passed = completed.mapped
     && completed.operatorBillingArgs.billingStatus === "registration_fee_paid"
     && completed.operatorBillingArgs.paymentStatus === "paid"
     && declined.mapped
     && declined.operatorBillingArgs.billingStatus === "registration_fee_failed"
-    && declined.operatorBillingArgs.paymentStatus === "declined";
+    && declined.operatorBillingArgs.paymentStatus === "declined"
+    && refundCompleted.mapped === false
+    && refundCompleted.enrichmentRequired === true;
 
   return {
     ok: passed,
     mode: "self_test",
     cases: {
       completed,
-      declined
+      declined,
+      refundCompleted
     },
     note: "Self-test uses fake sample payloads only. No network calls or Sheet updates are made."
   };
