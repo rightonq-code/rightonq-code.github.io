@@ -2577,6 +2577,8 @@ Active-checkout protection started:
   - dedicated webhook service account was created on 2026-05-17: `roq-rcs-revolut-webhook@rightonq-gog.iam.gserviceaccount.com`, display name / ID `roq-rcs-revolut-webhook`, status Enabled, no project roles, no keys;
   - Secret Manager API (`secretmanager.googleapis.com`) was enabled on 2026-05-17;
   - sandbox secrets were created as regional `europe-west2` secrets: `roq-rcs-revolut-webhook-signing-secret-sandbox` (version 2 Enabled, version 1 Destroyed) and `roq-rcs-revolut-merchant-api-secret-sandbox` (version 1 Enabled);
+  - both current `latest` secret values were verified through Secret Manager on 2026-05-17 without exposing values: webhook signing secret matched the known `ORDER_PAYMENT_FAILED` HMAC fixture, and Merchant API secret retrieved sandbox order `6a08b551-d18e-a506-9cfa-6a27983dd1de` with HTTP 200;
+  - Cloud Shell verification found that `gcloud secrets versions access ... --location=europe-west2` failed against the global endpoint in SDK `567.0.0`; the regional REST hostname `https://secretmanager.europe-west2.rep.googleapis.com/...` worked and should be used/considered if CLI routing fails for regional secrets;
   - sandbox Merchant API key should be treated as exposed because it was initially entered into the wrong secret before that wrong version was destroyed; rotate it before wiring the Merchant API secret into any runtime;
   - project remains otherwise bare: no Cloud Run service, Cloud Run Admin API not enabled, no IAM grants on the secrets, and no webhook deployment;
   - Firestore Native mode remains the dedupe/event store choice, but no deployed webhook has written to it yet;

@@ -4103,3 +4103,53 @@ Context for why this note exists:
 
 - During Slice 8AF, instructions around recovering and entering the sandbox webhook signing secret were too clever and caused avoidable frustration.
 - Future agents should keep the same high security bar, but teach the task in a human, linear way.
+
+## Slice 8AG - Sandbox Secret Values Verified
+
+Adam/the browser agent verified both regional sandbox Secret Manager secret values without exposing them. Codex recorded the result in the webhook design docs. This was a documentation update only from Codex; no secret value was captured in the repo or chat, and no secret/resource/IAM/deployment/webhook setting was changed by Codex.
+
+Verification results:
+
+- project: `RightOnQ-GOG` / `rightonq-gog`;
+- region: `europe-west2`;
+- webhook signing secret:
+  - secret: `roq-rcs-revolut-webhook-signing-secret-sandbox`;
+  - version used: `latest`;
+  - fixture body: known `ORDER_PAYMENT_FAILED` payload for order `6a08b551-d18e-a506-9cfa-6a27983dd1de`;
+  - timestamp: `1778955702535`;
+  - expected Revolut signature hex: `5837d22e50f9e17aa9e49bb066dc09900981be2c3d3b09afa7089e96d1f80b76`;
+  - result: HMAC-SHA256 over `v1.1778955702535.<exact raw body>` matched exactly; `signatureMatched = true`;
+- Merchant API secret:
+  - secret: `roq-rcs-revolut-merchant-api-secret-sandbox`;
+  - version used: `latest`;
+  - used as bearer token against `https://sandbox-merchant.revolut.com/api/orders/6a08b551-d18e-a506-9cfa-6a27983dd1de`;
+  - API version header: `Revolut-Api-Version: 2026-04-20`;
+  - result: HTTP 200;
+  - observed non-secret fields: order state `pending`, `payments_count = 1`, `payment_states = ["failed"]`.
+
+Secret-handling notes:
+
+- No secret values were printed, screenshotted, copied into chat, or written into the repo.
+- Values were held only in shell variables during verification and unset afterwards.
+- Temporary auth/header files were shredded; one leftover temp file from an initial attempt was confirmed empty.
+- Cloud Shell authorisation to act as Adam's identity was approved by Adam for this verification.
+
+Tooling note:
+
+- `gcloud secrets versions access ... --location=europe-west2` failed with `INVALID_ARGUMENT` through the global Secret Manager API path in Cloud Shell SDK `567.0.0`.
+- The regional REST endpoint `https://secretmanager.europe-west2.rep.googleapis.com/...` returned HTTP 200 and was used successfully.
+- Future scripts for regional secrets should use/consider the explicit regional hostname if gcloud routing fails.
+
+Important caveat remains:
+
+- The Merchant API secret value works, but the sandbox Merchant API key should still be treated as exposed because it was initially entered into the wrong secret before that wrong version was destroyed. Rotate it before wiring the Merchant API secret into any runtime.
+
+Still not done:
+
+- rotate the Revolut sandbox Merchant API key and add the rotated value to the Merchant API secret;
+- IAM grants for the webhook service account (`roles/secretmanager.secretAccessor` scoped at each regional secret, not project-wide);
+- Cloud Run Admin API enablement;
+- Cloud Run deployment;
+- Cloud Run secret reference wiring;
+- Revolut webhook URL change;
+- production/live secrets.
