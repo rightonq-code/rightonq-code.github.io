@@ -3295,7 +3295,7 @@ Full refund proof:
 - refund reference: `ROQ-RCS-TEST-RETURN-PAGE-20260516-001-REFUND-001`;
 - refund idempotency key: `refund-ROQ-RCS-TEST-RETURN-PAGE-20260516-001`;
 - refund order ID returned: `6a0872b4-89b8-a82d-884b-703f6470c124`;
-- initial refund response summary showed `type = REFUND` and `state = PROCESSING`; later direct retrieval of the refund order showed lowercase `type = refund` and `state = completed`;
+- initial refund response summary showed `type = REFUND` and `state = PROCESSING`; the authoritative later direct retrieval of the refund order showed lowercase `type = refund` and `state = completed`, so endpoint enrichment should normalise casing and treat lowercase `refund` as the observed sandbox retrieval shape;
 - embedded refund payment ID returned: `6a0872b4-395a-a536-8ca5-0ab9c27056af`, state `COMPLETED`;
 - immediate retrieval of the original order returned `refundedAmount = 12000`;
 - original order remained `state = completed`, and original payment-list retrieval still returned the captured card payment.
@@ -4026,7 +4026,7 @@ Important notes:
 
 - No secrets were created.
 - No secret values were entered.
-- No IAM roles were granted.
+- No IAM roles were granted during this Secret Manager API enablement slice. Later secret-level access grants were added in Slice 8AH.
 - Cloud Run, Firestore rules, and the Revolut webhook URL were not opened or modified.
 
 Still not done:
