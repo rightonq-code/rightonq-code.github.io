@@ -4280,13 +4280,56 @@ Environment and secret wiring recorded:
 Important IAM note:
 
 - The runtime service account already has `roles/secretmanager.secretAccessor` directly on both sandbox secrets.
-- It still needs Firestore data read/write access before deployment so `FirestoreDedupeStore.fromDefault()` can write `revolut_webhook_events`.
+- At this point it still needed Firestore data read/write access before deployment so `FirestoreDedupeStore.fromDefault()` could write `revolut_webhook_events`. This was completed later in Slice 8AK.
 - Recommended role to verify/apply next is `roles/datastore.user` / Cloud Datastore User at the narrowest practical scope available; do not grant Owner or Editor.
 - This Firestore role is the only currently planned IAM exception. Service account keys remain forbidden.
 
 Still not done:
 
-- Firestore data IAM grant for the webhook runtime service account;
+- Firestore data IAM grant for the webhook runtime service account; completed later in Slice 8AK.
+- Cloud Run deployment;
+- Cloud Run secret reference wiring;
+- deployed endpoint proof;
+- Revolut sandbox webhook URL change;
+- production/live secrets;
+- automatic Billing writes;
+- strict public payment gating based on webhook state.
+
+## Slice 8AK - Firestore Data IAM Grant Added
+
+Adam/the browser agent granted the webhook runtime service account Firestore data read/write access for the future Cloud Run dedupe/event store. Codex recorded the result in the deployment-prep docs. This was a documentation update only from Codex; no `gcloud` command, Cloud Run service, deployment, Secret Manager change, Firestore rules change, Revolut webhook URL change, Apps Script call, or Billing update was made by Codex.
+
+Grant recorded:
+
+- account used: `adam@rightonq.co.uk`;
+- project: `RightOnQ-GOG` / `rightonq-gog` / `872475523113`;
+- principal: `roq-rcs-revolut-webhook@rightonq-gog.iam.gserviceaccount.com`;
+- role: `roles/datastore.user` / Cloud Datastore User;
+- scope: project-level on `RightOnQ-GOG`;
+- rationale: the Firestore `(default)` database console exposed Security Rules only, not a database-level IAM panel for this server-side role. Project-level IAM was the narrowest practical console path for `roles/datastore.user`.
+
+Safety confirmations from the browser agent:
+
+- no service account keys created;
+- no Cloud Run services created or modified;
+- no Secret Manager secrets or versions changed;
+- no Firestore security rules changed;
+- no Revolut webhook URL changed;
+- no other IAM roles granted or revoked;
+- IAM table showed Adam's pre-existing access plus the webhook service account with only Cloud Datastore User.
+
+Current deploy-readiness state:
+
+- Cloud Run Admin API is enabled;
+- Firestore `(default)` Native database exists in `europe-west2`;
+- sandbox secrets exist and have been verified;
+- webhook runtime service account has secret-level access to both sandbox secrets;
+- webhook runtime service account has Firestore data access via `roles/datastore.user`;
+- Cloud Run service is still not deployed;
+- Revolut webhook URL is still unchanged.
+
+Still not done:
+
 - Cloud Run deployment;
 - Cloud Run secret reference wiring;
 - deployed endpoint proof;

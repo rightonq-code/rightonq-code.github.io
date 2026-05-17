@@ -66,19 +66,20 @@ The two Secret Manager secrets are regional secrets in `europe-west2`. In the Cl
 
 For the first sandbox proof, using Secret Manager version `latest` is acceptable because the current secret values have already been verified and no live payment key is involved. For production/live secrets, prefer pinned versions and a deliberate rotation plan.
 
-## IAM Prerequisites Still Needed
+## IAM State
 
 Already done:
 
 - the runtime service account has `roles/secretmanager.secretAccessor` directly on each sandbox secret;
 - no project-wide Secret Manager role was granted;
+- the runtime service account has project-level `roles/datastore.user` / Cloud Datastore User on `RightOnQ-GOG`, which was the narrowest practical console path for server-side Firestore data access;
 - no service account keys exist.
 
-Still needed before deployment:
+Notes:
 
-- grant the runtime service account Firestore data read/write access for the dedupe/event write path.
-
-Recommended role to verify/apply: `roles/datastore.user` / Cloud Datastore User. Google's Firestore IAM role documentation describes this role as providing read/write access to data in a Datastore/Firestore database. Grant the narrowest practical scope available in the console for the `(default)` Firestore database/project; do not grant Owner or Editor.
+- Firestore Security Rules are for mobile/web client access and are not the IAM mechanism for this server-side Cloud Run service account.
+- The console did not expose a database-level IAM panel for `roles/datastore.user`; project-level IAM was used.
+- Do not grant Owner, Editor, Datastore Owner, Firebase Admin, or service account keys.
 
 ## Cost Guardrails
 

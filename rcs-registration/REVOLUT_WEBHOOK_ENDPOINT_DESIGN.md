@@ -247,7 +247,7 @@ Recommended boundary:
 - Cloud Run state: Cloud Run Admin API enabled on 2026-05-17. No Cloud Run services exist yet and no deployment has been made. Console inspection confirmed `europe-west2` / London is available, Cloud Run functions / Functions Framework source deployment is available with Node.js 22 as the default runtime, and the runtime service account `roq-rcs-revolut-webhook@rightonq-gog.iam.gserviceaccount.com` is selectable. Deployment remains a separate explicit action.
 - Cloud Run deployment prep: repo runbook `rcs-registration/cloud-run/revolut-webhook/DEPLOYMENT_PREP.md` records the intended first sandbox deploy settings. Service name `roq-rcs-revolut-webhook`; region `europe-west2`; Node.js 22; entry point `revolutWebhook`; service account `roq-rcs-revolut-webhook@rightonq-gog.iam.gserviceaccount.com`; ingress `All`; authentication `Allow public access`; request-based billing; service min instances `0`; first sandbox max instances `2`; concurrency `10`; timeout `60 seconds`; secrets wired as environment variables. This is documentation only, not a deployment.
 - Secret Manager state: Secret Manager API (`secretmanager.googleapis.com`) enabled on 2026-05-17 in project `RightOnQ-GOG` / `rightonq-gog`. Two regional sandbox secrets now exist in `europe-west2` / London. `roq-rcs-revolut-webhook-signing-secret-sandbox` has version 2 Enabled and version 1 Destroyed; consumers should use version `latest`. `roq-rcs-revolut-merchant-api-secret-sandbox` has version 1 Enabled. Both current `latest` values were verified through Secret Manager on 2026-05-17: the webhook signing secret matched a known Revolut HMAC fixture, and the Merchant API secret retrieved known sandbox order `6a08b551-d18e-a506-9cfa-6a27983dd1de` with HTTP 200. The sandbox Merchant API key had briefly been entered into the wrong secret before that wrong version was destroyed; rotation was recommended as hygiene, but Adam explicitly chose not to rotate the sandbox key on 2026-05-17. This sandbox exception must not be carried into live/production secret handling.
-- Service account state: dedicated webhook service account created on 2026-05-17: `roq-rcs-revolut-webhook@rightonq-gog.iam.gserviceaccount.com`. Display name / ID `roq-rcs-revolut-webhook`; description `Runs the RightOnQ RCS Revolut webhook record-only Cloud Run endpoint`; unique ID `105980809530711130186`; status Enabled. It has no keys. On 2026-05-17 it was granted `roles/secretmanager.secretAccessor` directly on each regional sandbox secret only; no project-wide Secret Manager role was granted. The pre-existing `gog-keep-access@rightonq-gog.iam.gserviceaccount.com` account is for gog CLI / Google Keep domain-wide delegation and must not be reused for this webhook.
+- Service account state: dedicated webhook service account created on 2026-05-17: `roq-rcs-revolut-webhook@rightonq-gog.iam.gserviceaccount.com`. Display name / ID `roq-rcs-revolut-webhook`; description `Runs the RightOnQ RCS Revolut webhook record-only Cloud Run endpoint`; unique ID `105980809530711130186`; status Enabled. It has no keys. On 2026-05-17 it was granted `roles/secretmanager.secretAccessor` directly on each regional sandbox secret only; no project-wide Secret Manager role was granted. It was also granted project-level `roles/datastore.user` / Cloud Datastore User on `RightOnQ-GOG` on 2026-05-17 because the console exposed no database-level IAM panel for this server-side Firestore role. The pre-existing `gog-keep-access@rightonq-gog.iam.gserviceaccount.com` account is for gog CLI / Google Keep domain-wide delegation and must not be reused for this webhook.
 - Secret store: Secret Manager.
 - Initial endpoint mode: record-only. It may verify, dedupe, log, and later enrich; it must not update Apps Script Billing automatically.
 
@@ -261,7 +261,7 @@ Minimum intended permissions, subject to console/IAM verification:
 
 - read the Revolut webhook signing secret; done at secret-resource level for the sandbox secret;
 - read the Revolut Merchant API secret for enrichment; done at secret-resource level for the sandbox secret;
-- read/write Firestore documents in the dedupe/event collection; still pending before deployment. Recommended role to verify/apply is `roles/datastore.user` / Cloud Datastore User, which Google's Firestore IAM role documentation describes as data read/write access. Use the narrowest practical Firestore/project scope available; do not grant Owner or Editor.
+- read/write Firestore documents in the dedupe/event collection; done via project-level `roles/datastore.user` / Cloud Datastore User, which was the narrowest practical console path available for the server-side runtime service account. Do not grant Owner or Editor.
 - write Cloud Logging entries.
 
 Sandbox Secret Manager secrets:
@@ -285,7 +285,7 @@ Pre-deployment checklist:
 3. Use `europe-west2` / London for Cloud Run; the console confirmed it is available.
 4. Use Cloud Run functions / Functions Framework Node.js source deployment; the console confirmed Node.js 22 is available and currently default.
 5. Use runtime service account `roq-rcs-revolut-webhook@rightonq-gog.iam.gserviceaccount.com`; the console confirmed it is selectable.
-6. Grant the runtime service account Firestore data read/write access before deployment; recommended role to verify/apply is `roles/datastore.user`, not Owner or Editor.
+6. Firestore data read/write access is now granted through project-level `roles/datastore.user`; do not broaden it to Owner, Editor, Datastore Owner, or Firebase Admin.
 7. Keep service-level min instances at `0`; leave revision-level min instances blank unless a specific per-revision need appears.
 8. First sandbox deploy settings should use max instances `2`, concurrency `10`, and request timeout `60 seconds` to keep the public endpoint bounded while record-only proof is gathered.
 9. Use `Allow public access` / ingress `All` for the Revolut webhook endpoint because Revolut must be able to call it from outside Google IAM; the endpoint security gate remains HMAC signature verification, timestamp tolerance, dedupe, and record-only behaviour.
@@ -294,7 +294,7 @@ Pre-deployment checklist:
 
 Forbidden until explicitly approved:
 
-- creating service account keys or additional IAM grants other than the separately approved narrow Firestore data role for the webhook runtime service account;
+- creating service account keys or additional IAM grants;
 - deploying Cloud Run;
 - changing the Revolut webhook URL;
 - enabling automatic Apps Script Billing updates;

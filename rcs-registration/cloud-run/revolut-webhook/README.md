@@ -30,8 +30,8 @@ Expected result: `ok: true`.
 
 Deployment is intentionally out of scope for this source folder until Adam explicitly approves it. The Google Cloud boundary now exists: Firestore Native `(default)` is in `europe-west2`, the Cloud Run Admin API is enabled, the sandbox Secret Manager secrets exist, and the runtime service account has secret-level access to those two sandbox secrets. No Cloud Run service/function has been deployed, no deployed revision has written to Firestore, and no Revolut webhook URL has been changed.
 
-Deployment prep is tracked in `DEPLOYMENT_PREP.md`. Before the first deploy, the runtime service account still needs Firestore data read/write access for the `revolut_webhook_events` dedupe collection. Do not grant broad Owner/Editor roles and do not create service account keys.
+Deployment prep is tracked in `DEPLOYMENT_PREP.md`. The runtime service account now has the required sandbox secret access and project-level `roles/datastore.user` / Cloud Datastore User for Firestore dedupe writes. Do not grant broad Owner/Editor roles and do not create service account keys.
 
 The enrichment helper defaults to the Revolut sandbox Merchant API base URL for local proof work. Any future production deployment must explicitly configure the live Revolut Merchant API base URL and use separate live Secret Manager secrets.
 
-The next live-console slice should be the narrow Firestore IAM grant for `roq-rcs-revolut-webhook@rightonq-gog.iam.gserviceaccount.com`, followed by a separate explicit approval before any Cloud Run deployment.
+The next live-console slice should be a separate explicit approval before any Cloud Run deployment. The deploy itself must still remain record-only and must not change the Revolut webhook URL until the deployed endpoint is proven.
