@@ -245,7 +245,7 @@ Recommended boundary:
 - Budget state: `RightOnQ-GOG safety budget` created on 2026-05-17 under billing account `My Billing Account` / `01D966-E98801-B3C276`, scoped to project `RightOnQ-GOG` / `rightonq-gog`, all services, monthly specified amount `GBP 10.00`, actual-spend alerts at 50%, 90%, and 100%, with default email alerts to billing admins/users. This is an alert guardrail only; Google Cloud budgets do not cap or stop resource/API consumption.
 - Firestore state: created on 2026-05-17 in project `RightOnQ-GOG` / `rightonq-gog`. Database ID `(default)`, Standard edition, Firestore in Native mode, regional location `europe-west2` / London, restrictive security rules denying all reads/writes by default. The console did not show an explicit API-enable interstitial; Cloud Firestore API is now active for the project. No application code has written to this database yet.
 - Cloud Run state: available as a product page, but no services exist and the Cloud Run Services page warned that clicking "Create service" will enable the Cloud Run Admin API. Enabling/deploying Cloud Run is a separate explicit action.
-- Secret Manager state: Secret Manager API page showed an "Enable" button, so the API is not yet enabled. Enabling Secret Manager and creating secrets are separate explicit actions.
+- Secret Manager state: Secret Manager API (`secretmanager.googleapis.com`) enabled on 2026-05-17 in project `RightOnQ-GOG` / `rightonq-gog`. The API details page showed Status: Enabled and the action button changed from "Enable" to "Disable API". No secrets have been created and no secret values have been entered.
 - Service account state: dedicated webhook service account created on 2026-05-17: `roq-rcs-revolut-webhook@rightonq-gog.iam.gserviceaccount.com`. Display name / ID `roq-rcs-revolut-webhook`; description `Runs the RightOnQ RCS Revolut webhook record-only Cloud Run endpoint`; unique ID `105980809530711130186`; status Enabled. It has no project roles and no keys. The pre-existing `gog-keep-access@rightonq-gog.iam.gserviceaccount.com` account is for gog CLI / Google Keep domain-wide delegation and must not be reused for this webhook.
 - Secret store: Secret Manager.
 - Initial endpoint mode: record-only. It may verify, dedupe, log, and later enrich; it must not update Apps Script Billing automatically.
@@ -290,7 +290,6 @@ Pre-deployment checklist:
 Forbidden until explicitly approved:
 
 - enabling Cloud Run Admin API;
-- enabling Secret Manager API;
 - creating Secret Manager secrets;
 - creating service accounts or IAM grants;
 - deploying Cloud Run;
@@ -314,7 +313,6 @@ Forbidden until explicitly approved:
 
 - Confirm `europe-west2` / London in-console as the target region without starting a create/deploy flow where possible.
 - Enable Cloud Run Admin API / Cloud Run functions only as a separate explicit console step.
-- Enable Secret Manager API only as a separate explicit console step.
 - Confirm service account name and minimum IAM roles.
 - Confirm Secret Manager secret names before creating anything.
 - Whether Revolut retry behavior expects a `2xx` for enrichment-required events. Current design returns `202` to avoid retries while recording the need for internal enrichment.

@@ -3890,12 +3890,13 @@ Decisions recorded:
 - billing is now linked to `My Billing Account` / `01D966-E98801-B3C276` under `rightonq.co.uk`; Adam reported on 2026-05-17 that the Google Cloud account was activated to full billing while retaining the trial credit/time window;
 - Firestore database was created later on 2026-05-17; see Slice 8AC below for the current state.
 - dedicated webhook service account was created later on 2026-05-17; see Slice 8AD below for the current state.
-- project remains otherwise bare: no Cloud Run service, Cloud Run Admin API not enabled, Secret Manager API not enabled, no secrets, and no webhook deployment.
+- Secret Manager API was enabled later on 2026-05-17; see Slice 8AE below for the current state.
+- project remains otherwise bare: no Cloud Run service, Cloud Run Admin API not enabled, no secrets, and no webhook deployment.
 
 Next boundary work:
 
 - confirm billing/permissions;
-- enable/create Cloud Run Admin API, Secret Manager API, IAM grants, and secrets only as separate explicit steps;
+- enable/create Cloud Run Admin API, IAM grants, and secrets only as separate explicit steps;
 - confirm Secret Manager names and service account/IAM plan;
 - do not enable or create anything until Adam explicitly approves the console action.
 
@@ -3922,7 +3923,6 @@ Important caveat:
 Still not done:
 
 - Cloud Run Admin API enablement;
-- Secret Manager API enablement;
 - IAM grants;
 - secret creation;
 - Cloud Run deployment;
@@ -3941,7 +3941,6 @@ Current billing guardrails:
 Still not done:
 
 - Cloud Run Admin API enablement;
-- Secret Manager API enablement;
 - IAM grants;
 - secret creation;
 - Cloud Run deployment;
@@ -3974,7 +3973,6 @@ Important notes:
 Still not done:
 
 - Cloud Run Admin API enablement;
-- Secret Manager API enablement;
 - IAM grants;
 - secret creation;
 - Cloud Run deployment;
@@ -4006,8 +4004,35 @@ Important notes:
 Still not done:
 
 - Cloud Run Admin API enablement;
-- Secret Manager API enablement;
 - IAM grants for the webhook service account;
 - secret creation;
+- Cloud Run deployment;
+- Revolut webhook URL change.
+
+## Slice 8AE - Secret Manager API Enabled
+
+Adam/the browser agent enabled the Secret Manager API for the Revolut webhook project in Google Cloud. Codex recorded the result in the webhook design docs. This was a documentation update only from Codex; no `gcloud` command, secret creation, secret value entry, IAM grant, Cloud Run deployment, Revolut URL change, Apps Script call, or Billing update was made by Codex.
+
+Secret Manager state recorded:
+
+- project: `RightOnQ-GOG` / `rightonq-gog`;
+- service: `secretmanager.googleapis.com`;
+- status: Enabled;
+- UI evidence: API details page showed Status `Enabled`, and the action button changed from `Enable` to `Disable API`;
+- prompts: no consent dialog, billing prompt, terms acceptance, warning modal, or IAM/permission prompt appeared;
+- pricing panel showed GBP pricing information; informational only.
+
+Important notes:
+
+- No secrets were created.
+- No secret values were entered.
+- No IAM roles were granted.
+- Cloud Run, Firestore rules, and the Revolut webhook URL were not opened or modified.
+
+Still not done:
+
+- Cloud Run Admin API enablement;
+- IAM grants for the webhook service account;
+- sandbox secret creation;
 - Cloud Run deployment;
 - Revolut webhook URL change.
