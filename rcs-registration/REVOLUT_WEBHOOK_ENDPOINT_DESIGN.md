@@ -246,14 +246,14 @@ Recommended boundary:
 - Firestore state: created on 2026-05-17 in project `RightOnQ-GOG` / `rightonq-gog`. Database ID `(default)`, Standard edition, Firestore in Native mode, regional location `europe-west2` / London, restrictive security rules denying all reads/writes by default. The console did not show an explicit API-enable interstitial; Cloud Firestore API is now active for the project. No application code has written to this database yet.
 - Cloud Run state: available as a product page, but no services exist and the Cloud Run Services page warned that clicking "Create service" will enable the Cloud Run Admin API. Enabling/deploying Cloud Run is a separate explicit action.
 - Secret Manager state: Secret Manager API page showed an "Enable" button, so the API is not yet enabled. Enabling Secret Manager and creating secrets are separate explicit actions.
-- Service account state: only existing user-managed service account is `gog-keep-access@rightonq-gog.iam.gserviceaccount.com` for gog CLI / Google Keep domain-wide delegation. Do not reuse it for this webhook.
+- Service account state: dedicated webhook service account created on 2026-05-17: `roq-rcs-revolut-webhook@rightonq-gog.iam.gserviceaccount.com`. Display name / ID `roq-rcs-revolut-webhook`; description `Runs the RightOnQ RCS Revolut webhook record-only Cloud Run endpoint`; unique ID `105980809530711130186`; status Enabled. It has no project roles and no keys. The pre-existing `gog-keep-access@rightonq-gog.iam.gserviceaccount.com` account is for gog CLI / Google Keep domain-wide delegation and must not be reused for this webhook.
 - Secret store: Secret Manager.
 - Initial endpoint mode: record-only. It may verify, dedupe, log, and later enrich; it must not update Apps Script Billing automatically.
 
-Proposed service account:
+Runtime service account:
 
 ```text
-roq-rcs-revolut-webhook
+roq-rcs-revolut-webhook@rightonq-gog.iam.gserviceaccount.com
 ```
 
 Minimum intended permissions, subject to console/IAM verification:

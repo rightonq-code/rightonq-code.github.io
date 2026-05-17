@@ -3889,12 +3889,13 @@ Decisions recorded:
 - rationale: RightOnQ is UK-based, expected account/client base is mostly UK, and official docs list `europe-west2` / London for Cloud Run, Secret Manager, and Cloud Firestore;
 - billing is now linked to `My Billing Account` / `01D966-E98801-B3C276` under `rightonq.co.uk`; Adam reported on 2026-05-17 that the Google Cloud account was activated to full billing while retaining the trial credit/time window;
 - Firestore database was created later on 2026-05-17; see Slice 8AC below for the current state.
-- project remains otherwise bare: no Cloud Run service, Cloud Run Admin API not enabled, Secret Manager API not enabled, and no webhook-suitable service account.
+- dedicated webhook service account was created later on 2026-05-17; see Slice 8AD below for the current state.
+- project remains otherwise bare: no Cloud Run service, Cloud Run Admin API not enabled, Secret Manager API not enabled, no secrets, and no webhook deployment.
 
 Next boundary work:
 
 - confirm billing/permissions;
-- enable/create Cloud Run Admin API, Secret Manager API, service account/IAM, and secrets only as separate explicit steps;
+- enable/create Cloud Run Admin API, Secret Manager API, IAM grants, and secrets only as separate explicit steps;
 - confirm Secret Manager names and service account/IAM plan;
 - do not enable or create anything until Adam explicitly approves the console action.
 
@@ -3922,7 +3923,7 @@ Still not done:
 
 - Cloud Run Admin API enablement;
 - Secret Manager API enablement;
-- service account/IAM setup;
+- IAM grants;
 - secret creation;
 - Cloud Run deployment;
 - Revolut webhook URL change.
@@ -3941,7 +3942,7 @@ Still not done:
 
 - Cloud Run Admin API enablement;
 - Secret Manager API enablement;
-- service account/IAM setup;
+- IAM grants;
 - secret creation;
 - Cloud Run deployment;
 - Revolut webhook URL change.
@@ -3974,7 +3975,39 @@ Still not done:
 
 - Cloud Run Admin API enablement;
 - Secret Manager API enablement;
-- service account/IAM setup;
+- IAM grants;
+- secret creation;
+- Cloud Run deployment;
+- Revolut webhook URL change.
+
+## Slice 8AD - Webhook Service Account Created
+
+Adam created the dedicated service account for the Revolut webhook runtime in Google Cloud while Claude in Chrome guided and verified. Codex recorded the result in the webhook design docs. This was a documentation update only from Codex; no `gcloud` command, Cloud Run deployment, Secret Manager action, IAM grant, secret creation, Revolut URL change, Apps Script call, or Billing update was made by Codex.
+
+Service account state recorded:
+
+- project: `RightOnQ-GOG` / `rightonq-gog`;
+- service account exists: yes;
+- email: `roq-rcs-revolut-webhook@rightonq-gog.iam.gserviceaccount.com`;
+- display name: `roq-rcs-revolut-webhook`;
+- service account ID: `roq-rcs-revolut-webhook`;
+- description: `Runs the RightOnQ RCS Revolut webhook record-only Cloud Run endpoint`;
+- unique ID: `105980809530711130186`;
+- status: Enabled;
+- project roles granted: none observed; IAM page filtered for `roq-rcs-revolut-webhook` showed no rows;
+- keys created: none; Keys tab showed no rows;
+- no API-enable interstitial appeared during creation.
+
+Important notes:
+
+- The pre-existing `gog-keep-access@rightonq-gog.iam.gserviceaccount.com` service account remains unrelated and must not be reused for the webhook.
+- No Secret Manager, Cloud Run, Firestore rules, billing, budget, Revolut webhook URL, service-to-service binding, key, deployment, or payment setting was changed.
+
+Still not done:
+
+- Cloud Run Admin API enablement;
+- Secret Manager API enablement;
+- IAM grants for the webhook service account;
 - secret creation;
 - Cloud Run deployment;
 - Revolut webhook URL change.
