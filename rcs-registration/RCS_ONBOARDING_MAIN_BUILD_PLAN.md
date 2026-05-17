@@ -2580,10 +2580,11 @@ Active-checkout protection started:
   - both current `latest` secret values were verified through Secret Manager on 2026-05-17 without exposing values: webhook signing secret matched the known `ORDER_PAYMENT_FAILED` HMAC fixture, and Merchant API secret retrieved sandbox order `6a08b551-d18e-a506-9cfa-6a27983dd1de` with HTTP 200;
   - Cloud Shell verification found that `gcloud secrets versions access ... --location=europe-west2` failed against the global endpoint in SDK `567.0.0`; the regional REST hostname `https://secretmanager.europe-west2.rep.googleapis.com/...` worked and should be used/considered if CLI routing fails for regional secrets;
   - sandbox Merchant API key was initially entered into the wrong secret before that wrong version was destroyed; rotation was recommended as hygiene, but Adam explicitly chose not to rotate the sandbox key on 2026-05-17 after verification passed; this sandbox exception must not be carried into live/production secret handling;
-  - project remains otherwise bare: no Cloud Run service, Cloud Run Admin API not enabled, no IAM grants on the secrets, and no webhook deployment;
+  - runtime service account `roq-rcs-revolut-webhook@rightonq-gog.iam.gserviceaccount.com` was granted `roles/secretmanager.secretAccessor` directly on both regional sandbox secrets; the grants are secret-level/resource-level, not project-wide;
+  - project remains otherwise bare: no Cloud Run service, Cloud Run Admin API not enabled, and no webhook deployment;
   - Firestore Native mode remains the dedupe/event store choice, but no deployed webhook has written to it yet;
   - first deployed mode must be record-only;
-  - enabling Cloud Run Admin API, creating IAM grants, deploying Cloud Run, changing Revolut webhook URL, automatic Billing writes, and strict payment gating remain explicitly forbidden until approved.
+  - enabling Cloud Run Admin API, creating additional IAM grants, deploying Cloud Run, changing Revolut webhook URL, automatic Billing writes, and strict payment gating remain explicitly forbidden until approved.
 - Cloud webhook source observability tightened:
   - rejected-method and missing-raw-body cases now emit redacted record-only log entries;
   - local self-tests cover the new rejection logs and confirm no raw body or signature is logged;

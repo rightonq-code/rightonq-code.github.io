@@ -4074,7 +4074,36 @@ Important hygiene caveat:
 
 Still not done:
 
-- IAM grants for the webhook service account (`roles/secretmanager.secretAccessor` scoped at each regional secret, not project-wide);
+- Cloud Run Admin API enablement;
+- Cloud Run deployment;
+- Cloud Run secret reference wiring;
+- Revolut webhook URL change;
+- production/live secrets.
+
+## Slice 8AH - Secret Access IAM Grants Added
+
+Adam/the browser agent granted the webhook runtime service account least-privilege access to the two regional sandbox secrets. Codex recorded the result in the webhook design docs. This was a documentation update only from Codex; no `gcloud` command, secret value read, service account key, Cloud Run deployment, Revolut URL change, Apps Script call, or Billing update was made by Codex.
+
+IAM grants recorded:
+
+- principal: `roq-rcs-revolut-webhook@rightonq-gog.iam.gserviceaccount.com`;
+- role: `roles/secretmanager.secretAccessor` / `Secret Manager Secret Accessor`;
+- secret #1 resource: `projects/872475523113/locations/europe-west2/secrets/roq-rcs-revolut-webhook-signing-secret-sandbox`;
+- secret #2 resource: `projects/872475523113/locations/europe-west2/secrets/roq-rcs-revolut-merchant-api-secret-sandbox`;
+- scope: direct permissions on each individual regional secret resource;
+- not project-wide: confirmed by blank Inheritance column for both new entries;
+- confirmations observed: `Policy updated` for each secret.
+
+Important notes:
+
+- No broader role was granted.
+- No Owner, Editor, Secret Manager Admin, or project-wide Secret Manager role was granted.
+- No service account keys were created.
+- No secret versions were created, edited, disabled, or destroyed.
+- No Cloud Run, Firestore rules, Revolut webhook URL, or other settings were changed.
+
+Still not done:
+
 - Cloud Run Admin API enablement;
 - Cloud Run deployment;
 - Cloud Run secret reference wiring;
