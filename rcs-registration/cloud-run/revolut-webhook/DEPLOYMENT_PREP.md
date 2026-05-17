@@ -71,12 +71,12 @@ Set these runtime environment variables:
 
 | Variable | Source |
 | --- | --- |
-| `REVOLUT_WEBHOOK_SIGNING_SECRET` | Secret Manager secret `roq-rcs-revolut-webhook-signing-secret-sandbox`, version `latest` |
-| `REVOLUT_MERCHANT_API_SECRET` | Secret Manager secret `roq-rcs-revolut-merchant-api-secret-sandbox`, version `latest` |
+| `REVOLUT_WEBHOOK_SIGNING_SECRET` | Global Secret Manager secret `roq-rcs-revolut-webhook-signing-secret-sandbox-global`, version `latest` |
+| `REVOLUT_MERCHANT_API_SECRET` | Global Secret Manager secret `roq-rcs-revolut-merchant-api-secret-sandbox-global`, version `latest` |
 | `REVOLUT_MERCHANT_API_BASE_URL` | Plain value `https://sandbox-merchant.revolut.com/api` |
 | `REVOLUT_API_VERSION` | Plain value `2026-04-20` |
 
-The two Secret Manager secrets are regional secrets in `europe-west2`. In the Cloud Run console, set the Cloud Run region to `europe-west2` before opening the secret dropdown, otherwise the regional secrets may not appear.
+Cloud Run secret references must use the global Secret Manager namespace. Google Cloud Run documentation states that Cloud Run does not support regional secrets, and the console rejected the original `europe-west2` regional secret resource IDs during the first deploy attempt. The two original regional sandbox secrets remain intact and verified; the two `-global` secrets are automatically replicated copies created only so Cloud Run can wire them as environment variables.
 
 For the first sandbox proof, using Secret Manager version `latest` is acceptable because the current secret values have already been verified and no live payment key is involved. For production/live secrets, prefer pinned versions and a deliberate rotation plan.
 
@@ -84,7 +84,7 @@ For the first sandbox proof, using Secret Manager version `latest` is acceptable
 
 Already done:
 
-- the runtime service account has `roles/secretmanager.secretAccessor` directly on each sandbox secret;
+- the runtime service account has `roles/secretmanager.secretAccessor` directly on each regional sandbox secret and each Cloud Run global sandbox secret;
 - no project-wide Secret Manager role was granted;
 - the runtime service account has project-level `roles/datastore.user` / Cloud Datastore User on `RightOnQ-GOG`, which was the narrowest practical console path for server-side Firestore data access;
 - no service account keys exist.

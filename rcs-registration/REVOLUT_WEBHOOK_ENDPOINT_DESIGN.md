@@ -2,7 +2,7 @@
 
 Status: design plus local source skeleton. No endpoint has been deployed, no webhook URL has been changed in Revolut, and no live Billing write is enabled from webhooks.
 
-Last updated: 2026-05-16.
+Last updated: 2026-05-17.
 
 ## Decision
 
@@ -22,6 +22,7 @@ Official docs checked:
 - Cloud Run Node.js / HTTP functions: https://docs.cloud.google.com/run/docs/write-http-functions
 - Cloud Run Node.js runtime: https://docs.cloud.google.com/run/docs/runtimes/nodejs
 - Cloud Run environment variables and Secret Manager recommendation: https://docs.cloud.google.com/run/docs/configuring/services/environment-variables
+- Cloud Run Secret Manager references and regional-secret limitation: https://docs.cloud.google.com/run/docs/configuring/services/secrets
 - Cloud Run logging: https://docs.cloud.google.com/run/docs/logging
 - Cloud Run locations: https://cloud.google.com/run/docs/locations
 - Secret Manager locations: https://cloud.google.com/secret-manager/docs/locations
@@ -246,8 +247,8 @@ Recommended boundary:
 - Firestore state: created on 2026-05-17 in project `RightOnQ-GOG` / `rightonq-gog`. Database ID `(default)`, Standard edition, Firestore in Native mode, regional location `europe-west2` / London, restrictive security rules denying all reads/writes by default. The console did not show an explicit API-enable interstitial; Cloud Firestore API is now active for the project. No application code has written to this database yet.
 - Cloud Run state: Cloud Run Admin API enabled on 2026-05-17. No Cloud Run services exist yet and no deployment has been made. Console inspection confirmed `europe-west2` / London is available, Cloud Run functions / Functions Framework source deployment is available with Node.js 22 as the default runtime, and the runtime service account `roq-rcs-revolut-webhook@rightonq-gog.iam.gserviceaccount.com` is selectable. Deployment remains a separate explicit action.
 - Cloud Run deployment prep: repo runbook `rcs-registration/cloud-run/revolut-webhook/DEPLOYMENT_PREP.md` records the intended first sandbox deploy settings. Service name `roq-rcs-revolut-webhook`; region `europe-west2`; Node.js 22; deploy source root `rcs-registration`; entry point `revolutWebhook`; entry module `cloud-run/revolut-webhook/index.mjs`; service account `roq-rcs-revolut-webhook@rightonq-gog.iam.gserviceaccount.com`; ingress `All`; authentication `Allow public access`; request-based billing; service min instances `0`; first sandbox max instances `2`; concurrency `10`; timeout `60 seconds`; secrets wired as environment variables; `.gcloudignore` allowlists only the runtime package, webhook source, and three shared webhook tool modules. This is documentation only, not a deployment.
-- Secret Manager state: Secret Manager API (`secretmanager.googleapis.com`) enabled on 2026-05-17 in project `RightOnQ-GOG` / `rightonq-gog`. Two regional sandbox secrets now exist in `europe-west2` / London. `roq-rcs-revolut-webhook-signing-secret-sandbox` has version 2 Enabled and version 1 Destroyed; consumers should use version `latest`. `roq-rcs-revolut-merchant-api-secret-sandbox` has version 1 Enabled. Both current `latest` values were verified through Secret Manager on 2026-05-17: the webhook signing secret matched a known Revolut HMAC fixture, and the Merchant API secret retrieved known sandbox order `6a08b551-d18e-a506-9cfa-6a27983dd1de` with HTTP 200. The sandbox Merchant API key had briefly been entered into the wrong secret before that wrong version was destroyed; rotation was recommended as hygiene, but Adam explicitly chose not to rotate the sandbox key on 2026-05-17. This sandbox exception must not be carried into live/production secret handling.
-- Service account state: dedicated webhook service account created on 2026-05-17: `roq-rcs-revolut-webhook@rightonq-gog.iam.gserviceaccount.com`. Display name / ID `roq-rcs-revolut-webhook`; description `Runs the RightOnQ RCS Revolut webhook record-only Cloud Run endpoint`; unique ID `105980809530711130186`; status Enabled. It has no keys. On 2026-05-17 it was granted `roles/secretmanager.secretAccessor` directly on each regional sandbox secret only; no project-wide Secret Manager role was granted. It was also granted project-level `roles/datastore.user` / Cloud Datastore User on `RightOnQ-GOG` on 2026-05-17 because the console exposed no database-level IAM panel for this server-side Firestore role. The pre-existing `gog-keep-access@rightonq-gog.iam.gserviceaccount.com` account is for gog CLI / Google Keep domain-wide delegation and must not be reused for this webhook.
+- Secret Manager state: Secret Manager API (`secretmanager.googleapis.com`) enabled on 2026-05-17 in project `RightOnQ-GOG` / `rightonq-gog`. Two regional sandbox secrets exist in `europe-west2` / London. `roq-rcs-revolut-webhook-signing-secret-sandbox` has version 2 Enabled and version 1 Destroyed; `roq-rcs-revolut-merchant-api-secret-sandbox` has version 1 Enabled. Both current `latest` regional values were verified through Secret Manager on 2026-05-17: the webhook signing secret matched a known Revolut HMAC fixture, and the Merchant API secret retrieved known sandbox order `6a08b551-d18e-a506-9cfa-6a27983dd1de` with HTTP 200. Cloud Run later proved unable to wire those regional secrets directly: the console rejected regional resource IDs, and official Cloud Run docs state that Cloud Run does not support regional secrets. On 2026-05-17 Adam/Cloud Shell created global sandbox copies for Cloud Run: `roq-rcs-revolut-webhook-signing-secret-sandbox-global` and `roq-rcs-revolut-merchant-api-secret-sandbox-global`, both automatically replicated, both with version 1 Enabled. The original regional secrets remain intact and verified. The sandbox Merchant API key had briefly been entered into the wrong regional secret before that wrong version was destroyed; rotation was recommended as hygiene, but Adam explicitly chose not to rotate the sandbox key on 2026-05-17. This sandbox exception must not be carried into live/production secret handling.
+- Service account state: dedicated webhook service account created on 2026-05-17: `roq-rcs-revolut-webhook@rightonq-gog.iam.gserviceaccount.com`. Display name / ID `roq-rcs-revolut-webhook`; description `Runs the RightOnQ RCS Revolut webhook record-only Cloud Run endpoint`; unique ID `105980809530711130186`; status Enabled. It has no keys. On 2026-05-17 it was granted `roles/secretmanager.secretAccessor` directly on each regional sandbox secret and later directly on each Cloud Run global sandbox copy; no project-wide Secret Manager role was granted. It was also granted project-level `roles/datastore.user` / Cloud Datastore User on `RightOnQ-GOG` on 2026-05-17 because the console exposed no database-level IAM panel for this server-side Firestore role. The pre-existing `gog-keep-access@rightonq-gog.iam.gserviceaccount.com` account is for gog CLI / Google Keep domain-wide delegation and must not be reused for this webhook.
 - Secret store: Secret Manager.
 - Initial endpoint mode: record-only. It may verify, dedupe, log, and later enrich; it must not update Apps Script Billing automatically.
 
@@ -259,16 +260,21 @@ roq-rcs-revolut-webhook@rightonq-gog.iam.gserviceaccount.com
 
 Minimum intended permissions, subject to console/IAM verification:
 
-- read the Revolut webhook signing secret; done at secret-resource level for the sandbox secret;
-- read the Revolut Merchant API secret for enrichment; done at secret-resource level for the sandbox secret;
+- read the Revolut webhook signing secret; done at secret-resource level for the Cloud Run global sandbox secret;
+- read the Revolut Merchant API secret for enrichment; done at secret-resource level for the Cloud Run global sandbox secret;
 - read/write Firestore documents in the dedupe/event collection; done via project-level `roles/datastore.user` / Cloud Datastore User, which was the narrowest practical console path available for the server-side runtime service account. Do not grant Owner or Editor.
 - write Cloud Logging entries.
 
 Sandbox Secret Manager secrets:
 
 ```text
+Regional source/verification copies:
 roq-rcs-revolut-webhook-signing-secret-sandbox
 roq-rcs-revolut-merchant-api-secret-sandbox
+
+Cloud Run global environment-variable secrets:
+roq-rcs-revolut-webhook-signing-secret-sandbox-global
+roq-rcs-revolut-merchant-api-secret-sandbox-global
 ```
 
 Later production names should be separate, not reused:

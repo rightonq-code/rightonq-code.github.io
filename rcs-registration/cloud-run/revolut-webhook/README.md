@@ -29,9 +29,9 @@ npm --prefix rcs-registration/cloud-run/revolut-webhook run enrichment-self-test
 
 Expected result: `ok: true`.
 
-Deployment is intentionally out of scope for this source folder until Adam explicitly approves it. The Google Cloud boundary now exists: Firestore Native `(default)` is in `europe-west2`, the Cloud Run Admin API is enabled, the sandbox Secret Manager secrets exist, and the runtime service account has secret-level access to those two sandbox secrets. No Cloud Run service/function has been deployed, no deployed revision has written to Firestore, and no Revolut webhook URL has been changed.
+Deployment is intentionally out of scope for this source folder until Adam explicitly approves it. The Google Cloud boundary now exists: Firestore Native `(default)` is in `europe-west2`, the Cloud Run Admin API is enabled, the original regional sandbox Secret Manager secrets exist, Cloud Run-compatible `-global` sandbox copies exist, and the runtime service account has secret-level access to both global copies. No Cloud Run service/function has been deployed, no deployed revision has written to Firestore, and no Revolut webhook URL has been changed.
 
-Deployment prep is tracked in `DEPLOYMENT_PREP.md`. The runtime service account now has the required sandbox secret access and project-level `roles/datastore.user` / Cloud Datastore User for Firestore dedupe writes. Do not grant broad Owner/Editor roles and do not create service account keys.
+Deployment prep is tracked in `DEPLOYMENT_PREP.md`. The runtime service account now has the required Cloud Run global sandbox secret access and project-level `roles/datastore.user` / Cloud Datastore User for Firestore dedupe writes. Do not grant broad Owner/Editor roles and do not create service account keys.
 
 Important packaging note: deploy from source root `rcs-registration`, not from `rcs-registration/cloud-run/revolut-webhook` alone. The endpoint imports shared webhook verification/mapping modules from `rcs-registration/tools`, and the root `rcs-registration/package.json` points Functions Framework at `cloud-run/revolut-webhook/index.mjs`.
 

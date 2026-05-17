@@ -4208,7 +4208,7 @@ Deploy option findings for the future webhook service:
 - service-level autoscaling default minimum instances is `0`, which is the desired idle cost posture;
 - revision-level scaling has separate min/max fields and should be left blank unless a specific per-revision need appears;
 - Secret Manager secrets can be attached later through Containers -> Variables & Secrets -> Secrets exposed as environment variables -> Reference a secret;
-- regional secrets only appeared once the region matched `europe-west2`; when the form was left at default `europe-west1`, the secret dropdown showed no secrets;
+- this inspection initially suggested region matching might matter for secret visibility, but the later deploy attempt proved Cloud Run does not support regional secrets at all; use the `-global` sandbox copies recorded in Slice 8AN;
 - volume mounts are also available, but environment variables are the likely first fit for this webhook.
 
 Confusing defaults / decisions still needed:
@@ -4272,11 +4272,11 @@ Deployment-prep decisions recorded:
 
 Environment and secret wiring recorded:
 
-- `REVOLUT_WEBHOOK_SIGNING_SECRET` -> Secret Manager secret `roq-rcs-revolut-webhook-signing-secret-sandbox`, version `latest`;
-- `REVOLUT_MERCHANT_API_SECRET` -> Secret Manager secret `roq-rcs-revolut-merchant-api-secret-sandbox`, version `latest`;
+- `REVOLUT_WEBHOOK_SIGNING_SECRET` -> originally recorded as regional secret `roq-rcs-revolut-webhook-signing-secret-sandbox`, version `latest`; superseded by Slice 8AN and the current runbook, which use global secret `roq-rcs-revolut-webhook-signing-secret-sandbox-global`;
+- `REVOLUT_MERCHANT_API_SECRET` -> originally recorded as regional secret `roq-rcs-revolut-merchant-api-secret-sandbox`, version `latest`; superseded by Slice 8AN and the current runbook, which use global secret `roq-rcs-revolut-merchant-api-secret-sandbox-global`;
 - `REVOLUT_MERCHANT_API_BASE_URL` -> `https://sandbox-merchant.revolut.com/api`;
 - `REVOLUT_API_VERSION` -> `2026-04-20`;
-- both secrets are regional `europe-west2` secrets, so the Cloud Run console region must be set to `europe-west2` before the secret dropdown is expected to show them.
+- the regional-secret console assumption was later disproven; Cloud Run does not support regional secrets, so use the global sandbox copies.
 
 Packaging note:
 
@@ -4285,7 +4285,7 @@ Packaging note:
 
 Important IAM note:
 
-- The runtime service account already has `roles/secretmanager.secretAccessor` directly on both sandbox secrets.
+- The runtime service account had `roles/secretmanager.secretAccessor` directly on both regional sandbox secrets at this point; Slice 8AN later added the same role directly on both global sandbox copies used by Cloud Run.
 - At this point it still needed Firestore data read/write access before deployment so `FirestoreDedupeStore.fromDefault()` could write `revolut_webhook_events`. This was completed later in Slice 8AK.
 - Recommended role to verify/apply next is `roles/datastore.user` / Cloud Datastore User at the narrowest practical scope available; do not grant Owner or Editor.
 - This Firestore role is the only currently planned IAM exception. Service account keys remain forbidden.
@@ -4343,6 +4343,40 @@ Still not done:
 - production/live secrets;
 - automatic Billing writes;
 - strict public payment gating based on webhook state.
+
+## Slice 8AN - Cloud Run Global Sandbox Secrets Added
+
+During the first Cloud Run create-flow attempt, the console would not accept the existing `europe-west2` regional Secret Manager secrets as environment-variable secret refs. The form rejected full regional resource IDs such as `projects/872475523113/locations/europe-west2/secrets/...` with an unexpected-location error, and the global-format IDs did not exist. Official Cloud Run secrets documentation also states that Cloud Run does not support regional secrets.
+
+Adam/Cloud Shell therefore created two global sandbox Secret Manager copies for Cloud Run compatibility. Codex recorded the result in the deployment-prep docs. No Cloud Run service was deployed, no Revolut webhook URL was changed, no production/live secret was created, and the original regional secrets were not changed.
+
+Global sandbox secrets created:
+
+- `roq-rcs-revolut-webhook-signing-secret-sandbox-global`:
+  - replication: global / automatically replicated;
+  - version 1: Enabled;
+  - value copied from the verified latest regional signing secret without printing or exposing it.
+- `roq-rcs-revolut-merchant-api-secret-sandbox-global`:
+  - replication: global / automatically replicated;
+  - version 1: Enabled;
+  - value copied from the verified latest regional Merchant API secret without printing or exposing it.
+
+IAM grants confirmed:
+
+- principal: `roq-rcs-revolut-webhook@rightonq-gog.iam.gserviceaccount.com`;
+- role: `roles/secretmanager.secretAccessor` / Secret Manager Secret Accessor;
+- scope: direct binding on each global sandbox secret;
+- no project-wide Secret Manager role was granted.
+
+Original regional secrets remain present and unchanged:
+
+- `projects/872475523113/locations/europe-west2/secrets/roq-rcs-revolut-webhook-signing-secret-sandbox`;
+- `projects/872475523113/locations/europe-west2/secrets/roq-rcs-revolut-merchant-api-secret-sandbox`.
+
+Deployment-prep correction:
+
+- Cloud Run environment variables must now reference the `-global` sandbox secrets.
+- The original regional secrets remain useful as verified London-region source copies, but they are not directly wireable through Cloud Run secret references.
 
 ## Slice 8AL - Cloud Run Deploy Root Packaging Fix
 
