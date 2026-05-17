@@ -4033,6 +4033,51 @@ Still not done:
 
 - Cloud Run Admin API enablement;
 - IAM grants for the webhook service account;
-- sandbox secret creation;
 - Cloud Run deployment;
 - Revolut webhook URL change.
+
+## Slice 8AF - Sandbox Secrets Created
+
+Adam/the browser agent created the two regional sandbox Secret Manager secrets for the Revolut webhook. Codex recorded the result in the webhook design docs. This was a documentation update only from Codex; no `gcloud` command, secret value read, IAM grant, Cloud Run deployment, Revolut URL change, Apps Script call, or Billing update was made by Codex.
+
+Secret state recorded:
+
+- project: `RightOnQ-GOG` / `rightonq-gog`;
+- region: `europe-west2` / London;
+- replication: regional secrets, not automatically replicated;
+- `roq-rcs-revolut-webhook-signing-secret-sandbox`:
+  - resource: `projects/872475523113/locations/europe-west2/secrets/roq-rcs-revolut-webhook-signing-secret-sandbox`;
+  - purpose: Revolut sandbox webhook signing secret for HMAC-SHA256 verification;
+  - current state: version 2 Enabled, version 1 Destroyed;
+  - consumers should use version `latest`;
+- `roq-rcs-revolut-merchant-api-secret-sandbox`:
+  - resource: `projects/872475523113/locations/europe-west2/secrets/roq-rcs-revolut-merchant-api-secret-sandbox`;
+  - purpose: Revolut sandbox Merchant API secret for order enrichment/outbound Revolut calls;
+  - current state: version 1 Enabled.
+
+Defaults used on both secrets:
+
+- Google-managed encryption key;
+- no rotation period;
+- no Pub/Sub notification topics;
+- no expiry date;
+- no delayed destruction;
+- no labels, tags, or annotations.
+
+Important hygiene caveat:
+
+- During entry, the sandbox Merchant API `sk_...` value was inadvertently entered into both secrets.
+- The incorrect value existed as version 1 under `roq-rcs-revolut-webhook-signing-secret-sandbox`.
+- That incorrect version was disabled via "Disable all past versions" when version 2 was added, then permanently destroyed.
+- No secret value was included in this handover or recorded in the repo.
+- Treat the sandbox Merchant API key as exposed anyway: rotate it in Revolut Business sandbox, add the rotated value as a new version on `roq-rcs-revolut-merchant-api-secret-sandbox`, then disable/destroy version 1 if Adam wants a single-version-history posture.
+
+Still not done:
+
+- rotate the Revolut sandbox Merchant API key and add the rotated value to the Merchant API secret;
+- IAM grants for the webhook service account (`roles/secretmanager.secretAccessor` scoped at each regional secret, not project-wide);
+- Cloud Run Admin API enablement;
+- Cloud Run deployment;
+- Cloud Run secret reference wiring;
+- Revolut webhook URL change;
+- production/live secrets.

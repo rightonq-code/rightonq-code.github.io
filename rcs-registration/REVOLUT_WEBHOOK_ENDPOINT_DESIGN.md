@@ -245,7 +245,7 @@ Recommended boundary:
 - Budget state: `RightOnQ-GOG safety budget` created on 2026-05-17 under billing account `My Billing Account` / `01D966-E98801-B3C276`, scoped to project `RightOnQ-GOG` / `rightonq-gog`, all services, monthly specified amount `GBP 10.00`, actual-spend alerts at 50%, 90%, and 100%, with default email alerts to billing admins/users. This is an alert guardrail only; Google Cloud budgets do not cap or stop resource/API consumption.
 - Firestore state: created on 2026-05-17 in project `RightOnQ-GOG` / `rightonq-gog`. Database ID `(default)`, Standard edition, Firestore in Native mode, regional location `europe-west2` / London, restrictive security rules denying all reads/writes by default. The console did not show an explicit API-enable interstitial; Cloud Firestore API is now active for the project. No application code has written to this database yet.
 - Cloud Run state: available as a product page, but no services exist and the Cloud Run Services page warned that clicking "Create service" will enable the Cloud Run Admin API. Enabling/deploying Cloud Run is a separate explicit action.
-- Secret Manager state: Secret Manager API (`secretmanager.googleapis.com`) enabled on 2026-05-17 in project `RightOnQ-GOG` / `rightonq-gog`. The API details page showed Status: Enabled and the action button changed from "Enable" to "Disable API". No secrets have been created and no secret values have been entered.
+- Secret Manager state: Secret Manager API (`secretmanager.googleapis.com`) enabled on 2026-05-17 in project `RightOnQ-GOG` / `rightonq-gog`. Two regional sandbox secrets now exist in `europe-west2` / London. `roq-rcs-revolut-webhook-signing-secret-sandbox` has version 2 Enabled and version 1 Destroyed; consumers should use version `latest`. `roq-rcs-revolut-merchant-api-secret-sandbox` has version 1 Enabled, but the sandbox Merchant API key should be treated as exposed because it was initially entered into the wrong secret before that wrong version was destroyed. Rotate the sandbox Merchant API key before wiring it into Cloud Run.
 - Service account state: dedicated webhook service account created on 2026-05-17: `roq-rcs-revolut-webhook@rightonq-gog.iam.gserviceaccount.com`. Display name / ID `roq-rcs-revolut-webhook`; description `Runs the RightOnQ RCS Revolut webhook record-only Cloud Run endpoint`; unique ID `105980809530711130186`; status Enabled. It has no project roles and no keys. The pre-existing `gog-keep-access@rightonq-gog.iam.gserviceaccount.com` account is for gog CLI / Google Keep domain-wide delegation and must not be reused for this webhook.
 - Secret store: Secret Manager.
 - Initial endpoint mode: record-only. It may verify, dedupe, log, and later enrich; it must not update Apps Script Billing automatically.
@@ -263,7 +263,7 @@ Minimum intended permissions, subject to console/IAM verification:
 - read/write Firestore documents in the dedupe/event collection;
 - write Cloud Logging entries.
 
-Proposed Secret Manager names:
+Sandbox Secret Manager secrets:
 
 ```text
 roq-rcs-revolut-webhook-signing-secret-sandbox
@@ -282,16 +282,16 @@ Pre-deployment checklist:
 1. Keep the `RightOnQ-GOG safety budget` in place as an alert-only guardrail; do not treat it as a spending cap.
 2. Confirm billing/permissions are suitable for Cloud Run, Secret Manager, Firestore, and Cloud Logging.
 3. Confirm `europe-west2` / London as the target region for Cloud Run, Secret Manager, and logging.
-4. Confirm service account name and minimum IAM roles.
-5. Confirm Secret Manager secret names.
-6. Confirm the endpoint will start in record-only mode.
-7. Confirm Revolut sandbox webhook URL change will be a separate explicit action after deployment proof.
+4. Confirm minimum IAM roles for the existing runtime service account.
+5. Rotate the Revolut sandbox Merchant API key, then add the rotated value as a new version on `roq-rcs-revolut-merchant-api-secret-sandbox`.
+6. Grant only the runtime service account least-privilege access to the regional sandbox secrets.
+7. Confirm the endpoint will start in record-only mode.
+8. Confirm Revolut sandbox webhook URL change will be a separate explicit action after deployment proof.
 
 Forbidden until explicitly approved:
 
 - enabling Cloud Run Admin API;
-- creating Secret Manager secrets;
-- creating service accounts or IAM grants;
+- creating service account keys or IAM grants;
 - deploying Cloud Run;
 - changing the Revolut webhook URL;
 - enabling automatic Apps Script Billing updates;
@@ -313,8 +313,8 @@ Forbidden until explicitly approved:
 
 - Confirm `europe-west2` / London in-console as the target region without starting a create/deploy flow where possible.
 - Enable Cloud Run Admin API / Cloud Run functions only as a separate explicit console step.
-- Confirm service account name and minimum IAM roles.
-- Confirm Secret Manager secret names before creating anything.
+- Confirm minimum IAM roles for the existing runtime service account.
+- Rotate the Revolut sandbox Merchant API key before wiring the Merchant API secret into any runtime.
 - Whether Revolut retry behavior expects a `2xx` for enrichment-required events. Current design returns `202` to avoid retries while recording the need for internal enrichment.
 - How long to retain dedupe/event records.
 - Failed/declined sandbox paths are now captured: retryable `ORDER_PAYMENT_DECLINED` and terminal `ORDER_PAYMENT_FAILED`.

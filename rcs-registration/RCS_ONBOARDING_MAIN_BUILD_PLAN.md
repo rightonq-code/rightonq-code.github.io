@@ -2575,11 +2575,13 @@ Active-checkout protection started:
   - Firestore database was created on 2026-05-17: database ID `(default)`, Standard edition, Firestore in Native mode, regional location `europe-west2` / London, restrictive security rules denying all reads/writes by default;
   - Cloud Firestore API is now active for the project; the console showed no explicit API-enable interstitial during creation;
   - dedicated webhook service account was created on 2026-05-17: `roq-rcs-revolut-webhook@rightonq-gog.iam.gserviceaccount.com`, display name / ID `roq-rcs-revolut-webhook`, status Enabled, no project roles, no keys;
-  - Secret Manager API (`secretmanager.googleapis.com`) was enabled on 2026-05-17; no secrets have been created and no secret values entered;
-  - project remains otherwise bare: no Cloud Run service, Cloud Run Admin API not enabled, no secrets, and no webhook deployment;
+  - Secret Manager API (`secretmanager.googleapis.com`) was enabled on 2026-05-17;
+  - sandbox secrets were created as regional `europe-west2` secrets: `roq-rcs-revolut-webhook-signing-secret-sandbox` (version 2 Enabled, version 1 Destroyed) and `roq-rcs-revolut-merchant-api-secret-sandbox` (version 1 Enabled);
+  - sandbox Merchant API key should be treated as exposed because it was initially entered into the wrong secret before that wrong version was destroyed; rotate it before wiring the Merchant API secret into any runtime;
+  - project remains otherwise bare: no Cloud Run service, Cloud Run Admin API not enabled, no IAM grants on the secrets, and no webhook deployment;
   - Firestore Native mode remains the dedupe/event store choice, but no deployed webhook has written to it yet;
   - first deployed mode must be record-only;
-  - enabling Cloud Run Admin API, creating secrets/IAM grants, deploying Cloud Run, changing Revolut webhook URL, automatic Billing writes, and strict payment gating remain explicitly forbidden until approved.
+  - enabling Cloud Run Admin API, creating IAM grants, deploying Cloud Run, changing Revolut webhook URL, automatic Billing writes, and strict payment gating remain explicitly forbidden until approved.
 - Cloud webhook source observability tightened:
   - rejected-method and missing-raw-body cases now emit redacted record-only log entries;
   - local self-tests cover the new rejection logs and confirm no raw body or signature is logged;
