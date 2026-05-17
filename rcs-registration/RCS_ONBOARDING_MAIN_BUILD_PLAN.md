@@ -2554,14 +2554,14 @@ Active-checkout protection started:
   - requires `POST`, `req.rawBody`, and `REVOLUT_WEBHOOK_SIGNING_SECRET`;
   - returns only the public response body and logs redacted record-mode fields;
   - self-test passed with fake data;
-  - not deployed; no Revolut webhook URL changed; no Firestore database, Apps Script call, or Billing write exists yet.
+  - not deployed; no Revolut webhook URL changed; no Apps Script call or Billing write exists yet; Firestore database now exists but has not been written by this source.
 - Source-only dedupe primitives added:
   - `rcs-registration/cloud-run/revolut-webhook/dedupe.mjs`;
   - Firestore collection name `revolut_webhook_events`;
   - document ID is `sha256(revolut:{event}:{orderId})`, so it stays stable across unresolved/resolved application context;
   - `logicalDedupeKey` stores the richer `revolut:{event}:{orderId}:{applicationId-or-unresolved}` audit key;
   - in-memory self-test proves first create vs duplicate terminal detection;
-  - Firestore adapter source exists and the exported runtime handler now wires `FirestoreDedupeStore.fromDefault()`, but no live Google project/database has been enabled or deployed.
+  - Firestore adapter source exists and the exported runtime handler now wires `FirestoreDedupeStore.fromDefault()`; the live Firestore database now exists, but no Cloud Run deployment is connected to it yet.
 - Google Cloud boundary planning recorded:
   - correct-account read-only console check confirmed project `RightOnQ-GOG` / `rightonq-gog` / project number `872475523113` under organisation `rightonq.co.uk`;
   - earlier wrong-account browser check is superseded;
@@ -2572,10 +2572,12 @@ Active-checkout protection started:
   - billing is now linked to `My Billing Account` / `01D966-E98801-B3C276` under `rightonq.co.uk`; Adam reported on 2026-05-17 that the Google Cloud account was activated to full billing while retaining the trial credit/time window;
   - `RightOnQ-GOG safety budget` was created on 2026-05-17 for billing account `My Billing Account` / `01D966-E98801-B3C276`, scoped to `RightOnQ-GOG` / `rightonq-gog`, all services, monthly `GBP 10.00`, with actual-spend email alerts at 50%, 90%, and 100%;
   - budget is an alert-only guardrail and does not cap or stop Google Cloud resource/API consumption;
-  - project remains otherwise bare: no Firestore database, no Cloud Run service, Cloud Run Admin API not enabled, Secret Manager API not enabled, and no webhook-suitable service account;
-  - Firestore Native mode remains the dedupe/event store choice, but it is not currently enabled/created for this lane;
+  - Firestore database was created on 2026-05-17: database ID `(default)`, Standard edition, Firestore in Native mode, regional location `europe-west2` / London, restrictive security rules denying all reads/writes by default;
+  - Cloud Firestore API is now active for the project; the console showed no explicit API-enable interstitial during creation;
+  - project remains otherwise bare: no Cloud Run service, Cloud Run Admin API not enabled, Secret Manager API not enabled, and no webhook-suitable service account;
+  - Firestore Native mode remains the dedupe/event store choice, but no deployed webhook has written to it yet;
   - first deployed mode must be record-only;
-  - enabling APIs/Firestore/Secret Manager, creating secrets/service accounts/IAM, deploying Cloud Run, changing Revolut webhook URL, automatic Billing writes, and strict payment gating remain explicitly forbidden until approved.
+  - enabling Cloud Run Admin API/Secret Manager API, creating secrets/service accounts/IAM, deploying Cloud Run, changing Revolut webhook URL, automatic Billing writes, and strict payment gating remain explicitly forbidden until approved.
 - Cloud webhook source observability tightened:
   - rejected-method and missing-raw-body cases now emit redacted record-only log entries;
   - local self-tests cover the new rejection logs and confirm no raw body or signature is logged;

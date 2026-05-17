@@ -3888,13 +3888,13 @@ Decisions recorded:
 - proposed region: `europe-west2` / London;
 - rationale: RightOnQ is UK-based, expected account/client base is mostly UK, and official docs list `europe-west2` / London for Cloud Run, Secret Manager, and Cloud Firestore;
 - billing is now linked to `My Billing Account` / `01D966-E98801-B3C276` under `rightonq.co.uk`; Adam reported on 2026-05-17 that the Google Cloud account was activated to full billing while retaining the trial credit/time window;
-- project remains otherwise bare: no Firestore database, no Cloud Run service, Cloud Run Admin API not enabled, Secret Manager API not enabled, and no webhook-suitable service account;
-- Firestore Native remains the dedupe/event store choice, but it is not currently enabled/created for this lane.
+- Firestore database was created later on 2026-05-17; see Slice 8AC below for the current state.
+- project remains otherwise bare: no Cloud Run service, Cloud Run Admin API not enabled, Secret Manager API not enabled, and no webhook-suitable service account.
 
 Next boundary work:
 
 - confirm billing/permissions;
-- enable/create Firestore Native, Cloud Run Admin API, Secret Manager API, service account/IAM, and secrets only as separate explicit steps;
+- enable/create Cloud Run Admin API, Secret Manager API, service account/IAM, and secrets only as separate explicit steps;
 - confirm Secret Manager names and service account/IAM plan;
 - do not enable or create anything until Adam explicitly approves the console action.
 
@@ -3921,7 +3921,6 @@ Important caveat:
 Still not done:
 
 - Cloud Run Admin API enablement;
-- Firestore Native database creation;
 - Secret Manager API enablement;
 - service account/IAM setup;
 - secret creation;
@@ -3941,7 +3940,39 @@ Current billing guardrails:
 Still not done:
 
 - Cloud Run Admin API enablement;
-- Firestore Native database creation;
+- Secret Manager API enablement;
+- service account/IAM setup;
+- secret creation;
+- Cloud Run deployment;
+- Revolut webhook URL change.
+
+## Slice 8AC - Firestore Native Database Created
+
+Adam/the browser agent created the Firestore database for the Revolut webhook dedupe/event store in Google Cloud. Codex recorded the result in the webhook design docs. This was a documentation update only from Codex; no `gcloud` command, Cloud Run deployment, Secret Manager action, service account/IAM change, secret creation, Revolut URL change, Apps Script call, or Billing update was made by Codex.
+
+Firestore state recorded:
+
+- project: `RightOnQ-GOG` / `rightonq-gog`;
+- database created: yes;
+- database ID: `(default)`;
+- edition: Standard edition;
+- mode: Firestore in Native mode;
+- location type: Region;
+- region: `europe-west2` / London;
+- security rules: restrictive, denying all reads/writes by default;
+- API state: Cloud Firestore API is now active. The browser agent saw no explicit API-enable interstitial, so it was either already enabled or enabled silently during database creation;
+- no application code, Cloud Run service, or webhook endpoint has written to the database yet.
+
+Important notes:
+
+- Google's form defaulted toward Enterprise/MongoDB compatibility/Multi-region `nam5` United States; the browser agent changed it to Standard, Native mode, regional `europe-west2` / London before creation.
+- No Cloud Run service was created.
+- Secret Manager was not enabled or touched.
+- No service account, IAM grant, secret, deployment, Revolut webhook URL change, payment-method change, or new billing account was made.
+
+Still not done:
+
+- Cloud Run Admin API enablement;
 - Secret Manager API enablement;
 - service account/IAM setup;
 - secret creation;
