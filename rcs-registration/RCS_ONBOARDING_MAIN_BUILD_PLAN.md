@@ -2554,14 +2554,14 @@ Active-checkout protection started:
   - requires `POST`, `req.rawBody`, and `REVOLUT_WEBHOOK_SIGNING_SECRET`;
   - returns only the public response body and logs redacted record-mode fields;
   - self-test passed with fake data;
-  - not deployed; no Revolut webhook URL changed; no Apps Script call or Billing write exists yet; Firestore database now exists but has not been written by this source.
+  - originally local-only; later deployed as record-only Cloud Run service `roq-rcs-revolut-webhook`; no Revolut webhook URL changed; no Apps Script call or Billing write exists.
 - Source-only dedupe primitives added:
   - `rcs-registration/cloud-run/revolut-webhook/dedupe.mjs`;
   - Firestore collection name `revolut_webhook_events`;
   - document ID is `sha256(revolut:{event}:{orderId})`, so it stays stable across unresolved/resolved application context;
   - `logicalDedupeKey` stores the richer `revolut:{event}:{orderId}:{applicationId-or-unresolved}` audit key;
   - in-memory self-test proves first create vs duplicate terminal detection;
-  - Firestore adapter source exists and the exported runtime handler now wires `FirestoreDedupeStore.fromDefault()`; the live Firestore database now exists, but no Cloud Run deployment is connected to it yet.
+  - Firestore adapter source exists and the exported runtime handler wires `FirestoreDedupeStore.fromDefault()`; the deployed record-only Cloud Run proof wrote one mapped test document and duplicate proof did not create or update another.
 - Google Cloud boundary planning recorded:
   - correct-account read-only console check confirmed project `RightOnQ-GOG` / `rightonq-gog` / project number `872475523113` under organisation `rightonq.co.uk`;
   - earlier wrong-account browser check is superseded;

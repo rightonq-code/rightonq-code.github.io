@@ -4324,14 +4324,14 @@ Safety confirmations from the browser agent:
 - no other IAM roles granted or revoked;
 - IAM table showed Adam's pre-existing access plus the webhook service account with only Cloud Datastore User.
 
-Current deploy-readiness state:
+Deploy-readiness state at this slice (superseded by later deploy/proof slices):
 
 - Cloud Run Admin API is enabled;
 - Firestore `(default)` Native database exists in `europe-west2`;
 - sandbox secrets exist and have been verified;
 - webhook runtime service account has secret-level access to both sandbox secrets;
 - webhook runtime service account has Firestore data access via `roles/datastore.user`;
-- Cloud Run service is still not deployed;
+- before the later deployment/proof slices, no Cloud Run service existed at this point;
 - Revolut webhook URL is still unchanged.
 
 Still not done:

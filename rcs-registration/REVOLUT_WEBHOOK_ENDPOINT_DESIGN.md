@@ -1,6 +1,6 @@
 # Revolut Webhook Endpoint Design
 
-Status: design plus local source skeleton. No endpoint has been deployed, no webhook URL has been changed in Revolut, and no live Billing write is enabled from webhooks.
+Status: design plus deployed sandbox record-only Cloud Run endpoint. Endpoint proof passed on 2026-05-17; the Revolut webhook URL has not been changed in Revolut, and no live Billing write is enabled from webhooks.
 
 Last updated: 2026-05-17.
 
@@ -81,7 +81,7 @@ These files are the source of truth for the first endpoint implementation:
   - builds payload-stable receipt keys and Firestore document IDs.
   - stores application context in `logicalDedupeKey`, not in the document ID.
   - includes an in-memory test store and a Firestore adapter source.
-  - the source skeleton can log dedupe create/duplicate decisions, but it is not deployed and has not written to the live Firestore database yet.
+  - the deployed sandbox endpoint logs dedupe create/duplicate decisions; endpoint proof wrote exactly one record-only Firestore document and the duplicate proof did not create or update another document.
 - `cloud-run/revolut-webhook/enrich.mjs`
   - source-only Revolut order enrichment helper.
   - retrieves `/orders/{order_id}` through an injected fetch function.
@@ -284,7 +284,7 @@ roq-rcs-revolut-webhook-signing-secret-live
 roq-rcs-revolut-merchant-api-secret-live
 ```
 
-Pre-deployment checklist:
+Deployment/redeployment checklist:
 
 1. Keep the `RightOnQ-GOG safety budget` in place as an alert-only guardrail; do not treat it as a spending cap.
 2. Confirm billing/permissions are suitable for Cloud Run, Secret Manager, Firestore, and Cloud Logging.
@@ -294,36 +294,36 @@ Pre-deployment checklist:
 6. Use runtime service account `roq-rcs-revolut-webhook@rightonq-gog.iam.gserviceaccount.com`; the console confirmed it is selectable.
 7. Firestore data read/write access is now granted through project-level `roles/datastore.user`; do not broaden it to Owner, Editor, Datastore Owner, or Firebase Admin.
 8. Keep service-level min instances at `0`; leave revision-level min instances blank unless a specific per-revision need appears.
-9. First sandbox deploy settings should use max instances `2`, concurrency `10`, and request timeout `60 seconds` to keep the public endpoint bounded while record-only proof is gathered.
+9. First sandbox deploy settings use max instances `2`, concurrency `10`, and request timeout `60 seconds` to keep the public endpoint bounded; keep these unless a future approved redeploy deliberately changes them.
 10. Use `Allow public access` / ingress `All` for the Revolut webhook endpoint because Revolut must be able to call it from outside Google IAM; the endpoint security gate remains HMAC signature verification, timestamp tolerance, dedupe, and record-only behaviour.
 11. Confirm the endpoint will start in record-only mode.
-12. Confirm Revolut sandbox webhook URL change will be a separate explicit action after deployment proof.
+12. Revolut sandbox webhook URL change remains a separate explicit action after deployment proof.
 
 Forbidden until explicitly approved:
 
 - creating service account keys or additional IAM grants;
-- deploying Cloud Run;
+- redeploying or changing Cloud Run service configuration;
 - changing the Revolut webhook URL;
 - enabling automatic Apps Script Billing updates;
 - enabling strict public payment gating based on webhook state.
 
 ## First Implementation Plan
 
-1. Add a small Cloud Run function source folder. Done locally in `cloud-run/revolut-webhook`; not deployed.
+1. Add a small Cloud Run function source folder. Done in `cloud-run/revolut-webhook`; first sandbox record-only Cloud Run service deployed on 2026-05-17.
 2. Import `handleRevolutWebhook`. Done.
 3. Pass `req.rawBody`, `req.headers`, and signing secret from Secret Manager. Source skeleton reads `REVOLUT_WEBHOOK_SIGNING_SECRET`; deployment must wire it from Secret Manager.
 4. Return only `result.body` to Revolut. Done in source skeleton.
 5. Log/store only redacted `result.internal`. Source skeleton logs redacted record-mode fields only.
-6. Add Firestore dedupe in record-only mode. Source primitives, adapter, and exported runtime-handler wiring exist; deployment to a real Google project/database is still to do.
+6. Add Firestore dedupe in record-only mode. Source primitives, adapter, exported runtime-handler wiring, real Firestore IAM, deployment, and live endpoint proof are done for the sandbox record-only path.
 7. Add order enrichment using the Revolut Merchant API secret from Secret Manager. Source helper exists in `cloud-run/revolut-webhook/enrich.mjs` and is wired into the source-only record-mode handler for fresh non-duplicate `ORDER_COMPLETED` events.
 8. Use `lookupPaymentOrder` on the original/related order ID from refund-order enrichment to resolve application context when refund events arrive without `merchant_order_ext_ref`. Source helper now returns `ledgerLookupOrderId` for this purpose.
 9. Keep Billing updates disabled until the record-only path has been proven with sandbox webhooks.
 
 ## Remaining Confirmations
 
-- Confirm `europe-west2` / London in-console as the target region without starting a create/deploy flow where possible.
-- Confirm minimum IAM roles for the existing runtime service account.
-- Decide Cloud Run ingress/authentication explicitly before deployment.
+- Resolved on 2026-05-17: `europe-west2` / London was confirmed and used for the deployed Cloud Run service.
+- Resolved on 2026-05-17: runtime service account has direct secret access for the sandbox secrets and project-level Cloud Datastore User for Firestore.
+- Resolved on 2026-05-17: first sandbox service uses `All` ingress and `Allow public access`; endpoint security is the Revolut signature/timestamp/raw-body/dedupe boundary.
 - Do not carry the sandbox "no rotation" exception into production/live secrets.
 - Whether Revolut retry behavior expects a `2xx` for enrichment-required events. Current design returns `202` to avoid retries while recording the need for internal enrichment.
 - How long to retain dedupe/event records.
