@@ -4070,11 +4070,10 @@ Important hygiene caveat:
 - The incorrect value existed as version 1 under `roq-rcs-revolut-webhook-signing-secret-sandbox`.
 - That incorrect version was disabled via "Disable all past versions" when version 2 was added, then permanently destroyed.
 - No secret value was included in this handover or recorded in the repo.
-- Treat the sandbox Merchant API key as exposed anyway: rotate it in Revolut Business sandbox, add the rotated value as a new version on `roq-rcs-revolut-merchant-api-secret-sandbox`, then disable/destroy version 1 if Adam wants a single-version-history posture.
+- Treating the sandbox Merchant API key as exposed and rotating it was recommended as best hygiene at this point. Adam later explicitly chose not to rotate the sandbox key after verification passed; see Slice 8AG.
 
 Still not done:
 
-- rotate the Revolut sandbox Merchant API key and add the rotated value to the Merchant API secret;
 - IAM grants for the webhook service account (`roles/secretmanager.secretAccessor` scoped at each regional secret, not project-wide);
 - Cloud Run Admin API enablement;
 - Cloud Run deployment;
@@ -4140,13 +4139,15 @@ Tooling note:
 - The regional REST endpoint `https://secretmanager.europe-west2.rep.googleapis.com/...` returned HTTP 200 and was used successfully.
 - Future scripts for regional secrets should use/consider the explicit regional hostname if gcloud routing fails.
 
-Important caveat remains:
+Sandbox rotation decision:
 
-- The Merchant API secret value works, but the sandbox Merchant API key should still be treated as exposed because it was initially entered into the wrong secret before that wrong version was destroyed. Rotate it before wiring the Merchant API secret into any runtime.
+- The Merchant API secret value works.
+- The sandbox Merchant API key was initially entered into the wrong secret before that wrong version was destroyed.
+- Rotation was recommended as best hygiene, but Adam explicitly chose on 2026-05-17 not to rotate the sandbox key because the practical sandbox risk is low and the time/friction cost is not worth it.
+- This is accepted as a sandbox-only exception. Do not carry this posture into production/live secret handling.
 
 Still not done:
 
-- rotate the Revolut sandbox Merchant API key and add the rotated value to the Merchant API secret;
 - IAM grants for the webhook service account (`roles/secretmanager.secretAccessor` scoped at each regional secret, not project-wide);
 - Cloud Run Admin API enablement;
 - Cloud Run deployment;
