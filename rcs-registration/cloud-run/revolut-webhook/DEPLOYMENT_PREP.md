@@ -111,7 +111,9 @@ Stop before deploying if any of these happen:
 - account is not `adam@rightonq.co.uk`;
 - region cannot be set to `europe-west2`;
 - service account dropdown does not show `roq-rcs-revolut-webhook`;
-- either sandbox secret is missing after region is set to `europe-west2`;
+- either Cloud Run global sandbox secret is missing from the secret picker:
+  - `roq-rcs-revolut-webhook-signing-secret-sandbox-global`;
+  - `roq-rcs-revolut-merchant-api-secret-sandbox-global`;
 - console asks to create service account keys;
 - console asks for broad Owner/Editor permissions;
 - console tries to create production/live secrets;
