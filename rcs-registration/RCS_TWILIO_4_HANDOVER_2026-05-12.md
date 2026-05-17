@@ -4081,3 +4081,25 @@ Still not done:
 - Cloud Run secret reference wiring;
 - Revolut webhook URL change;
 - production/live secrets.
+
+## Successor Agent Note - Working With Adam On Secrets
+
+Adam explicitly asked that future agents handle secret/key steps with clearer teaching and less over-clever secrecy. Keep secret values out of chat, but do not make the workflow obscure.
+
+Rules for future secret/key work:
+
+- Never ask Adam to paste any secret value into chat.
+- Give one step at a time, then wait for Adam's result before the next step.
+- Explain the purpose in plain English before commands or clicks.
+- Say exactly which value goes where:
+  - `wsk_...` = Revolut webhook signing secret;
+  - `sk_...` = Revolut Merchant API secret.
+- For sandbox/local work, it is acceptable to show a value briefly on Adam's own screen if that is the practical way to get unstuck; include the cleanup step such as `clear`.
+- For production/live values, be stricter: direct entry into Secret Manager or provider UI, no chat, no repo, no logs.
+- Prefer simple, visible instructions over clipboard-only tricks unless Adam asks for the clipboard route.
+- If Adam becomes stuck or frustrated, slow down, reset to the exact screen he is on, and give the next single action only.
+
+Context for why this note exists:
+
+- During Slice 8AF, instructions around recovering and entering the sandbox webhook signing secret were too clever and caused avoidable frustration.
+- Future agents should keep the same high security bar, but teach the task in a human, linear way.
