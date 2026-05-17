@@ -55,6 +55,14 @@ Why public access is expected: Revolut is an external webhook sender and cannot 
 
 Why the source root is `rcs-registration`: the Cloud Run entry module imports shared verified webhook primitives from `rcs-registration/tools/`. Deploying only `rcs-registration/cloud-run/revolut-webhook/` would omit those shared modules and break the runtime import. The root `rcs-registration/package.json` points Functions Framework at `cloud-run/revolut-webhook/index.mjs` while keeping the shared `tools/` files inside the deployed source tree.
 
+The deploy root has a `.gcloudignore` allowlist so the upload is limited to:
+
+- `package.json`;
+- `cloud-run/revolut-webhook/**`;
+- `tools/revolut-webhook-handler.mjs`;
+- `tools/revolut-webhook-map.mjs`;
+- `tools/revolut-webhook-verify.mjs`.
+
 There is currently no committed `package-lock.json` for `rcs-registration`. That is acceptable for the first sandbox proof, but adding a lockfile before a long-lived production deploy would improve dependency reproducibility.
 
 ## Environment And Secrets
@@ -110,6 +118,7 @@ Stop before deploying if any of these happen:
 - console tries to change the Revolut webhook URL;
 - Cloud Run deploy summary differs from this runbook.
 - deploy source root is shown as `rcs-registration/cloud-run/revolut-webhook` instead of `rcs-registration`.
+- the deploy upload omits `tools/revolut-webhook-handler.mjs`, `tools/revolut-webhook-map.mjs`, or `tools/revolut-webhook-verify.mjs`.
 
 ## Proof After Deployment
 

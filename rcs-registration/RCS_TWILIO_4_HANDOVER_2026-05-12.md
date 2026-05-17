@@ -4382,3 +4382,45 @@ Dependency-lock note:
 - Absence of a lockfile is acceptable for the first sandbox proof, but adding one before a long-lived production deploy would improve dependency reproducibility.
 
 No console action, `gcloud` command, Cloud Run service, deployment, Secret Manager change, Firestore rule change, Revolut webhook URL change, Apps Script call, or Billing update was made in this slice.
+
+## Slice 8AM - Cloud Run Upload Ignore Added
+
+Claude Code's read-only review of commit `8dde8ec` found no deploy blockers, but flagged a Low hygiene issue: deploying source root `rcs-registration` without a `.gcloudignore` would upload unrelated docs, website pages, Apps Script code, and operator tools into the Cloud Run build context. Those files are not executed by the webhook, but shipping them would be unnecessary bloat.
+
+Codex added `rcs-registration/.gcloudignore` as an allowlist for the future Cloud Run upload. No console action, `gcloud` command, Cloud Run service, deployment, Secret Manager change, Firestore rule change, Revolut webhook URL change, Apps Script call, or Billing update was made in this slice.
+
+Allowlisted upload contents:
+
+- `.gcloudignore`;
+- `package.json`;
+- `cloud-run/revolut-webhook/**`;
+- `tools/revolut-webhook-handler.mjs`;
+- `tools/revolut-webhook-map.mjs`;
+- `tools/revolut-webhook-verify.mjs`.
+
+Explicitly excluded by default:
+
+- RCS handover/build/design/proof docs;
+- `index.html` and `payment-return.html`;
+- `google-apps-script/**`;
+- operator tools;
+- Revolut sandbox proof tools;
+- unrelated website/root files.
+
+Docs updated:
+
+- `rcs-registration/cloud-run/revolut-webhook/DEPLOYMENT_PREP.md`;
+- `rcs-registration/cloud-run/revolut-webhook/README.md`;
+- `rcs-registration/REVOLUT_WEBHOOK_ENDPOINT_DESIGN.md`;
+- `rcs-registration/RCS_ONBOARDING_MAIN_BUILD_PLAN.md`;
+- this handover.
+
+Still not done:
+
+- Cloud Run deployment;
+- Cloud Run secret reference wiring;
+- deployed endpoint proof;
+- Revolut sandbox webhook URL change;
+- production/live secrets;
+- automatic Billing writes;
+- strict public payment gating based on webhook state.

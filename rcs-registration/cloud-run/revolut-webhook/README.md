@@ -35,6 +35,8 @@ Deployment prep is tracked in `DEPLOYMENT_PREP.md`. The runtime service account 
 
 Important packaging note: deploy from source root `rcs-registration`, not from `rcs-registration/cloud-run/revolut-webhook` alone. The endpoint imports shared webhook verification/mapping modules from `rcs-registration/tools`, and the root `rcs-registration/package.json` points Functions Framework at `cloud-run/revolut-webhook/index.mjs`.
 
+The root `.gcloudignore` intentionally allowlists only the runtime package, `cloud-run/revolut-webhook/**`, and the three shared `tools/revolut-webhook-*.mjs` modules needed by the endpoint.
+
 The enrichment helper defaults to the Revolut sandbox Merchant API base URL for local proof work. Any future production deployment must explicitly configure the live Revolut Merchant API base URL and use separate live Secret Manager secrets.
 
 The next live-console slice should be a separate explicit approval before any Cloud Run deployment. The deploy itself must still remain record-only and must not change the Revolut webhook URL until the deployed endpoint is proven.
