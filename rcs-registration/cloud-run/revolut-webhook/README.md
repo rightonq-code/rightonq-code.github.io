@@ -21,6 +21,7 @@ Current behaviour:
 Local fake-data self-test:
 
 ```bash
+npm --prefix rcs-registration run self-test
 npm --prefix rcs-registration/cloud-run/revolut-webhook run self-test
 npm --prefix rcs-registration/cloud-run/revolut-webhook run dedupe-self-test
 npm --prefix rcs-registration/cloud-run/revolut-webhook run enrichment-self-test
@@ -31,6 +32,8 @@ Expected result: `ok: true`.
 Deployment is intentionally out of scope for this source folder until Adam explicitly approves it. The Google Cloud boundary now exists: Firestore Native `(default)` is in `europe-west2`, the Cloud Run Admin API is enabled, the sandbox Secret Manager secrets exist, and the runtime service account has secret-level access to those two sandbox secrets. No Cloud Run service/function has been deployed, no deployed revision has written to Firestore, and no Revolut webhook URL has been changed.
 
 Deployment prep is tracked in `DEPLOYMENT_PREP.md`. The runtime service account now has the required sandbox secret access and project-level `roles/datastore.user` / Cloud Datastore User for Firestore dedupe writes. Do not grant broad Owner/Editor roles and do not create service account keys.
+
+Important packaging note: deploy from source root `rcs-registration`, not from `rcs-registration/cloud-run/revolut-webhook` alone. The endpoint imports shared webhook verification/mapping modules from `rcs-registration/tools`, and the root `rcs-registration/package.json` points Functions Framework at `cloud-run/revolut-webhook/index.mjs`.
 
 The enrichment helper defaults to the Revolut sandbox Merchant API base URL for local proof work. Any future production deployment must explicitly configure the live Revolut Merchant API base URL and use separate live Secret Manager secrets.
 

@@ -4256,7 +4256,8 @@ Deployment-prep decisions recorded:
 - runtime shape: Cloud Run functions / Functions Framework source deployment;
 - runtime: Node.js 22;
 - entry point: `revolutWebhook`;
-- source folder: `rcs-registration/cloud-run/revolut-webhook`;
+- deploy source root: `rcs-registration`;
+- entry module: `cloud-run/revolut-webhook/index.mjs`;
 - runtime service account: `roq-rcs-revolut-webhook@rightonq-gog.iam.gserviceaccount.com`;
 - first sandbox ingress/auth posture: `All` ingress and `Allow public access`, because Revolut must call from outside Google IAM and the endpoint security boundary is HMAC signature verification, timestamp tolerance, raw-body verification, Firestore dedupe, and record-only behaviour;
 - request-based billing;
@@ -4276,6 +4277,11 @@ Environment and secret wiring recorded:
 - `REVOLUT_MERCHANT_API_BASE_URL` -> `https://sandbox-merchant.revolut.com/api`;
 - `REVOLUT_API_VERSION` -> `2026-04-20`;
 - both secrets are regional `europe-west2` secrets, so the Cloud Run console region must be set to `europe-west2` before the secret dropdown is expected to show them.
+
+Packaging note:
+
+- `rcs-registration/package.json` was added as the deploy-root package.
+- The Cloud Run source root must be `rcs-registration`, not `rcs-registration/cloud-run/revolut-webhook`, because the entry module imports shared webhook verification/mapping primitives from `rcs-registration/tools`.
 
 Important IAM note:
 
@@ -4337,3 +4343,42 @@ Still not done:
 - production/live secrets;
 - automatic Billing writes;
 - strict public payment gating based on webhook state.
+
+## Slice 8AL - Cloud Run Deploy Root Packaging Fix
+
+Codex caught and fixed a deployment-packaging issue before giving the Cloud Run deploy order. The Cloud Run entry module imports shared webhook verification/mapping primitives from `rcs-registration/tools/`, so deploying only `rcs-registration/cloud-run/revolut-webhook/` would omit those files and break runtime imports.
+
+Files changed:
+
+- `rcs-registration/package.json` added as the deploy-root package;
+- `rcs-registration/cloud-run/revolut-webhook/DEPLOYMENT_PREP.md` updated;
+- `rcs-registration/cloud-run/revolut-webhook/README.md` updated;
+- `rcs-registration/REVOLUT_WEBHOOK_ENDPOINT_DESIGN.md` updated;
+- `rcs-registration/RCS_ONBOARDING_MAIN_BUILD_PLAN.md` updated;
+- this handover updated.
+
+Packaging decision:
+
+- Future deploy source root must be `rcs-registration`.
+- Entry module remains `cloud-run/revolut-webhook/index.mjs`.
+- Entry point remains `revolutWebhook`.
+- Root `rcs-registration/package.json` sets `main` to `cloud-run/revolut-webhook/index.mjs` and includes the Cloud Run runtime dependencies.
+- Do not deploy with source root `rcs-registration/cloud-run/revolut-webhook`; that folder alone does not include `rcs-registration/tools`.
+
+Checks run:
+
+- `npm --prefix rcs-registration run self-test` -> `ok: true`;
+- `npm --prefix rcs-registration/cloud-run/revolut-webhook run self-test` -> `ok: true`;
+- `npm --prefix rcs-registration run dedupe-self-test` -> `ok: true`;
+- `npm --prefix rcs-registration run enrichment-self-test` -> `ok: true`;
+- `node --check` on `index.mjs`, `dedupe.mjs`, and `enrich.mjs` -> pass;
+- JSON parse check on both package files -> pass;
+- root import smoke test confirmed `revolutWebhook` export is available.
+
+Dependency-lock note:
+
+- Codex attempted to generate a root `package-lock.json` with `npm --prefix rcs-registration install --package-lock-only --ignore-scripts`, but local npm registry access hung without output.
+- The hung npm process was stopped and no partial `package-lock.json` was created.
+- Absence of a lockfile is acceptable for the first sandbox proof, but adding one before a long-lived production deploy would improve dependency reproducibility.
+
+No console action, `gcloud` command, Cloud Run service, deployment, Secret Manager change, Firestore rule change, Revolut webhook URL change, Apps Script call, or Billing update was made in this slice.

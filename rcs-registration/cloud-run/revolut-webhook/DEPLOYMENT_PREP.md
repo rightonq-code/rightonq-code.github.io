@@ -10,7 +10,8 @@ Status: planning/runbook only. Do not deploy from this file without a fresh expl
 - Runtime shape: Cloud Run functions / Functions Framework source deployment
 - Runtime: Node.js 22
 - Entry point / target: `revolutWebhook`
-- Source folder: `rcs-registration/cloud-run/revolut-webhook`
+- Deploy source root: `rcs-registration`
+- Entry module: `cloud-run/revolut-webhook/index.mjs`
 - Runtime service account: `roq-rcs-revolut-webhook@rightonq-gog.iam.gserviceaccount.com`
 
 ## Intended First Deploy Mode
@@ -36,6 +37,7 @@ Use these settings when the console deploy step is explicitly approved:
 | Deploy type | Function / inline source or source deployment |
 | Runtime | Node.js 22 |
 | Entry point | `revolutWebhook` |
+| Deploy source root | `rcs-registration` |
 | Service account | `roq-rcs-revolut-webhook@rightonq-gog.iam.gserviceaccount.com` |
 | Ingress | All |
 | Authentication | Allow public access |
@@ -50,6 +52,10 @@ Use these settings when the console deploy step is explicitly approved:
 | Startup CPU boost | Leave enabled |
 
 Why public access is expected: Revolut is an external webhook sender and cannot be expected to present Google IAM credentials. The security boundary for this endpoint is the Revolut HMAC signature, timestamp tolerance, method check, raw-body requirement, Firestore dedupe, and record-only behaviour. Cloud Run authentication should be revisited if Revolut later supports an authenticated delivery mechanism.
+
+Why the source root is `rcs-registration`: the Cloud Run entry module imports shared verified webhook primitives from `rcs-registration/tools/`. Deploying only `rcs-registration/cloud-run/revolut-webhook/` would omit those shared modules and break the runtime import. The root `rcs-registration/package.json` points Functions Framework at `cloud-run/revolut-webhook/index.mjs` while keeping the shared `tools/` files inside the deployed source tree.
+
+There is currently no committed `package-lock.json` for `rcs-registration`. That is acceptable for the first sandbox proof, but adding a lockfile before a long-lived production deploy would improve dependency reproducibility.
 
 ## Environment And Secrets
 
@@ -103,6 +109,7 @@ Stop before deploying if any of these happen:
 - console tries to create production/live secrets;
 - console tries to change the Revolut webhook URL;
 - Cloud Run deploy summary differs from this runbook.
+- deploy source root is shown as `rcs-registration/cloud-run/revolut-webhook` instead of `rcs-registration`.
 
 ## Proof After Deployment
 
