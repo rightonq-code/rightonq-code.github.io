@@ -2570,6 +2570,8 @@ Active-checkout protection started:
   - proposed target region is `europe-west2` / London, because official docs list London for Cloud Run, Secret Manager, and Cloud Firestore and the RightOnQ workflow is UK-first;
   - Secret Manager names proposed separately for sandbox and live Revolut secrets;
   - billing is now linked to `My Billing Account` / `01D966-E98801-B3C276` under `rightonq.co.uk`, but it is currently a Free trial account and full pay-as-you-go activation was not clicked;
+  - `RightOnQ-GOG safety budget` was created on 2026-05-17 for billing account `My Billing Account` / `01D966-E98801-B3C276`, scoped to `RightOnQ-GOG` / `rightonq-gog`, all services, monthly `GBP 10.00`, with actual-spend email alerts at 50%, 90%, and 100%;
+  - budget is an alert-only guardrail and does not cap or stop Google Cloud resource/API consumption;
   - project remains otherwise bare: no Firestore database, no Cloud Run service, Cloud Run Admin API not enabled, Secret Manager API not enabled, and no webhook-suitable service account;
   - Firestore Native mode remains the dedupe/event store choice, but it is not currently enabled/created for this lane;
   - first deployed mode must be record-only;

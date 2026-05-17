@@ -3898,3 +3898,34 @@ Next boundary work:
 - enable/create Firestore Native, Cloud Run Admin API, Secret Manager API, service account/IAM, and secrets only as separate explicit steps;
 - confirm Secret Manager names and service account/IAM plan;
 - do not enable or create anything until Adam explicitly approves the console action.
+
+## Slice 8AA - Google Cloud Budget Guardrail
+
+Codex recorded the completed Google Cloud budget guardrail after Adam/the browser agent created it in the Google Cloud console. This was a documentation update only from Codex; no `gcloud` command, API enablement, Firestore creation, Cloud Run deployment, Secret Manager action, service account/IAM change, Revolut URL change, Apps Script call, or Billing update was made by Codex.
+
+Budget state recorded:
+
+- budget created: yes;
+- budget name: `RightOnQ-GOG safety budget`;
+- billing account: `My Billing Account` / `01D966-E98801-B3C276`;
+- account status: Free trial account; full pay-as-you-go `Activate` banner was ignored and not clicked;
+- project scope: `RightOnQ-GOG` / `rightonq-gog`, all services;
+- monthly amount: `GBP 10.00`, specified amount, monthly period;
+- alert thresholds: 50%, 90%, and 100% of actual spend (`GBP 5`, `GBP 9`, `GBP 10`);
+- notifications: default email alerts to billing admins/users on; project owners off; Monitoring channels off; Pub/Sub off;
+- confirmation observed by the browser agent: toast said `RightOnQ-GOG safety budget has been created`, and the budget list showed `GBP 0.00/GBP 10.00`, no credits used.
+
+Important caveat:
+
+- Google Cloud budgets are alert guardrails only. They do not cap, stop, pause, or block resource/API consumption.
+
+Still not done:
+
+- full billing activation to pay-as-you-go;
+- Cloud Run Admin API enablement;
+- Firestore Native database creation;
+- Secret Manager API enablement;
+- service account/IAM setup;
+- secret creation;
+- Cloud Run deployment;
+- Revolut webhook URL change.

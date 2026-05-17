@@ -242,6 +242,7 @@ Recommended boundary:
 - Proposed region: `europe-west2` / London. Official docs list `europe-west2` for Cloud Run, Secret Manager, and Cloud Firestore, making it the natural UK-first choice for a UK-based RightOnQ workflow. Confirm availability in the console before any action.
 - Dedupe/event store: Firestore Native mode, collection `revolut_webhook_events`.
 - Billing state: linked on 2026-05-16 to billing account `My Billing Account` / `01D966-E98801-B3C276` under `rightonq.co.uk`. Current status is Free trial account with a visible credit/time-remaining banner. The full pay-as-you-go activation banner was not clicked; activation is a separate explicit action.
+- Budget state: `RightOnQ-GOG safety budget` created on 2026-05-17 under billing account `My Billing Account` / `01D966-E98801-B3C276`, scoped to project `RightOnQ-GOG` / `rightonq-gog`, all services, monthly specified amount `GBP 10.00`, actual-spend alerts at 50%, 90%, and 100%, with default email alerts to billing admins/users. This is an alert guardrail only; Google Cloud budgets do not cap or stop resource/API consumption.
 - Firestore state: not enabled/created. Firestore Databases showed no databases and a "Create a Firestore database" CTA on 2026-05-16. Enabling/creating Firestore Native mode is a separate explicit console action.
 - Cloud Run state: available as a product page, but no services exist and the Cloud Run Services page warned that clicking "Create service" will enable the Cloud Run Admin API. Enabling/deploying Cloud Run is a separate explicit action.
 - Secret Manager state: Secret Manager API page showed an "Enable" button, so the API is not yet enabled. Enabling Secret Manager and creating secrets are separate explicit actions.
@@ -279,13 +280,14 @@ roq-rcs-revolut-merchant-api-secret-live
 Pre-deployment checklist:
 
 1. Decide whether/when to activate the linked free-trial billing account to full pay-as-you-go; this is a separate explicit action.
-2. Confirm billing/permissions are suitable for Cloud Run, Secret Manager, Firestore, and Cloud Logging.
-3. Enable/create Firestore Native mode only after explicit approval.
-4. Confirm `europe-west2` / London as the target region for Cloud Run, Firestore, Secret Manager, and logging.
-5. Confirm service account name and minimum IAM roles.
-6. Confirm Secret Manager secret names.
-7. Confirm the endpoint will start in record-only mode.
-8. Confirm Revolut sandbox webhook URL change will be a separate explicit action after deployment proof.
+2. Keep the `RightOnQ-GOG safety budget` in place as an alert-only guardrail; do not treat it as a spending cap.
+3. Confirm billing/permissions are suitable for Cloud Run, Secret Manager, Firestore, and Cloud Logging.
+4. Enable/create Firestore Native mode only after explicit approval.
+5. Confirm `europe-west2` / London as the target region for Cloud Run, Firestore, Secret Manager, and logging.
+6. Confirm service account name and minimum IAM roles.
+7. Confirm Secret Manager secret names.
+8. Confirm the endpoint will start in record-only mode.
+9. Confirm Revolut sandbox webhook URL change will be a separate explicit action after deployment proof.
 
 Forbidden until explicitly approved:
 
