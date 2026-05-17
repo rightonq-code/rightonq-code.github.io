@@ -1,0 +1,116 @@
+# Revolut Webhook Cloud Run Deployment Prep
+
+Status: planning/runbook only. Do not deploy from this file without a fresh explicit approval.
+
+## Target
+
+- Project: `RightOnQ-GOG` / `rightonq-gog` / `872475523113`
+- Region: `europe-west2` / London
+- Service name: `roq-rcs-revolut-webhook`
+- Runtime shape: Cloud Run functions / Functions Framework source deployment
+- Runtime: Node.js 22
+- Entry point / target: `revolutWebhook`
+- Source folder: `rcs-registration/cloud-run/revolut-webhook`
+- Runtime service account: `roq-rcs-revolut-webhook@rightonq-gog.iam.gserviceaccount.com`
+
+## Intended First Deploy Mode
+
+The first deployment must stay record-only:
+
+- verify Revolut signatures and timestamps;
+- write dedupe/event records to Firestore;
+- enrich fresh non-duplicate `ORDER_COMPLETED` events through the sandbox Merchant API;
+- log redacted record-mode fields only;
+- do not call Apps Script;
+- do not update Billing;
+- do not enable the public payment gate;
+- do not change the Revolut webhook URL until the deployed endpoint is proven.
+
+## Cloud Run Settings
+
+Use these settings when the console deploy step is explicitly approved:
+
+| Setting | Value |
+| --- | --- |
+| Region | `europe-west2` / London |
+| Deploy type | Function / inline source or source deployment |
+| Runtime | Node.js 22 |
+| Entry point | `revolutWebhook` |
+| Service account | `roq-rcs-revolut-webhook@rightonq-gog.iam.gserviceaccount.com` |
+| Ingress | All |
+| Authentication | Allow public access |
+| Billing | Request-based |
+| Service minimum instances | `0` |
+| Service maximum instances | `2` for the first sandbox proof |
+| Revision min/max instances | Leave blank |
+| CPU | `1` |
+| Memory | `512 MiB` |
+| Concurrency | `10` for the first sandbox proof |
+| Request timeout | `60 seconds` |
+| Startup CPU boost | Leave enabled |
+
+Why public access is expected: Revolut is an external webhook sender and cannot be expected to present Google IAM credentials. The security boundary for this endpoint is the Revolut HMAC signature, timestamp tolerance, method check, raw-body requirement, Firestore dedupe, and record-only behaviour. Cloud Run authentication should be revisited if Revolut later supports an authenticated delivery mechanism.
+
+## Environment And Secrets
+
+Set these runtime environment variables:
+
+| Variable | Source |
+| --- | --- |
+| `REVOLUT_WEBHOOK_SIGNING_SECRET` | Secret Manager secret `roq-rcs-revolut-webhook-signing-secret-sandbox`, version `latest` |
+| `REVOLUT_MERCHANT_API_SECRET` | Secret Manager secret `roq-rcs-revolut-merchant-api-secret-sandbox`, version `latest` |
+| `REVOLUT_MERCHANT_API_BASE_URL` | Plain value `https://sandbox-merchant.revolut.com/api` |
+| `REVOLUT_API_VERSION` | Plain value `2026-04-20` |
+
+The two Secret Manager secrets are regional secrets in `europe-west2`. In the Cloud Run console, set the Cloud Run region to `europe-west2` before opening the secret dropdown, otherwise the regional secrets may not appear.
+
+For the first sandbox proof, using Secret Manager version `latest` is acceptable because the current secret values have already been verified and no live payment key is involved. For production/live secrets, prefer pinned versions and a deliberate rotation plan.
+
+## IAM Prerequisites Still Needed
+
+Already done:
+
+- the runtime service account has `roles/secretmanager.secretAccessor` directly on each sandbox secret;
+- no project-wide Secret Manager role was granted;
+- no service account keys exist.
+
+Still needed before deployment:
+
+- grant the runtime service account Firestore data read/write access for the dedupe/event write path.
+
+Recommended role to verify/apply: `roles/datastore.user` / Cloud Datastore User. Google's Firestore IAM role documentation describes this role as providing read/write access to data in a Datastore/Firestore database. Grant the narrowest practical scope available in the console for the `(default)` Firestore database/project; do not grant Owner or Editor.
+
+## Cost Guardrails
+
+- The `RightOnQ-GOG safety budget` is present at `GBP 10.00` per month with 50%, 90%, and 100% actual-spend alerts.
+- The budget is alert-only; it does not cap or stop spend.
+- Keep min instances at `0`.
+- Keep first sandbox max instances low (`2`) and concurrency modest (`10`).
+- Do not create production/live secrets or deploy a live endpoint in this slice.
+
+## Stop Conditions
+
+Stop before deploying if any of these happen:
+
+- project is not `RightOnQ-GOG` / `rightonq-gog`;
+- account is not `adam@rightonq.co.uk`;
+- region cannot be set to `europe-west2`;
+- service account dropdown does not show `roq-rcs-revolut-webhook`;
+- either sandbox secret is missing after region is set to `europe-west2`;
+- console asks to create service account keys;
+- console asks for broad Owner/Editor permissions;
+- console tries to create production/live secrets;
+- console tries to change the Revolut webhook URL;
+- Cloud Run deploy summary differs from this runbook.
+
+## Proof After Deployment
+
+After a deployment is explicitly approved and completed, prove only the deployed endpoint first:
+
+1. Confirm a `GET` or non-POST request returns `405 method_not_allowed`.
+2. Confirm a POST without raw body/signature cannot be accepted.
+3. Send one captured sandbox webhook body/signature/timestamp within tolerance, or use a fresh Revolut sandbox event.
+4. Confirm the HTTP response is small and public-safe.
+5. Confirm one Firestore document appears in `revolut_webhook_events`.
+6. Confirm a duplicate delivery does not trigger a second enrichment call or duplicate write.
+7. Only after that, consider changing the Revolut sandbox webhook URL.

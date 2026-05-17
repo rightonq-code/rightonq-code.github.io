@@ -1,6 +1,6 @@
 # RightOnQ RCS Revolut Webhook
 
-Status: source skeleton only. This has not been deployed and no Revolut webhook URL has been changed.
+Status: source skeleton plus deployment-prep runbook. This has not been deployed and no Revolut webhook URL has been changed.
 
 This folder is the first Cloud Run / Cloud Functions source shape for the future Revolut Merchant webhook endpoint.
 
@@ -28,8 +28,10 @@ npm --prefix rcs-registration/cloud-run/revolut-webhook run enrichment-self-test
 
 Expected result: `ok: true`.
 
-Deployment is intentionally out of scope for this slice. The source now expects the deployed runtime to use Firestore for dedupe, but no Firestore database has been enabled, no Secret Manager bindings have been configured, and no Cloud Run service/function has been deployed.
+Deployment is intentionally out of scope for this source folder until Adam explicitly approves it. The Google Cloud boundary now exists: Firestore Native `(default)` is in `europe-west2`, the Cloud Run Admin API is enabled, the sandbox Secret Manager secrets exist, and the runtime service account has secret-level access to those two sandbox secrets. No Cloud Run service/function has been deployed, no deployed revision has written to Firestore, and no Revolut webhook URL has been changed.
+
+Deployment prep is tracked in `DEPLOYMENT_PREP.md`. Before the first deploy, the runtime service account still needs Firestore data read/write access for the `revolut_webhook_events` dedupe collection. Do not grant broad Owner/Editor roles and do not create service account keys.
 
 The enrichment helper defaults to the Revolut sandbox Merchant API base URL for local proof work. Any future production deployment must explicitly configure the live Revolut Merchant API base URL and use separate live Secret Manager secrets.
 
-The next slice should be Google Cloud boundary verification: confirm the project, region, Firestore Native state, Secret Manager names, and IAM/service account plan before any console or `gcloud` action.
+The next live-console slice should be the narrow Firestore IAM grant for `roq-rcs-revolut-webhook@rightonq-gog.iam.gserviceaccount.com`, followed by a separate explicit approval before any Cloud Run deployment.

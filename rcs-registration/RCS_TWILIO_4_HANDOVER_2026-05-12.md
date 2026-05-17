@@ -3891,7 +3891,7 @@ Decisions recorded:
 - Firestore database was created later on 2026-05-17; see Slice 8AC below for the current state.
 - dedicated webhook service account was created later on 2026-05-17; see Slice 8AD below for the current state.
 - Secret Manager API was enabled later on 2026-05-17; see Slice 8AE below for the current state.
-- project remains otherwise bare: no Cloud Run service, Cloud Run Admin API not enabled, no secrets, and no webhook deployment.
+- project remained otherwise bare at this point in the diary: no Cloud Run service, Cloud Run Admin API not enabled, no secrets, and no webhook deployment. Superseded by later slices: billing/budget, Firestore, service account, Secret Manager, sandbox secrets, secret IAM, and Cloud Run Admin API are now in place; no Cloud Run service or webhook deployment exists yet.
 
 Next boundary work:
 
@@ -4235,3 +4235,62 @@ Still not done:
 - Cloud Run ingress/authentication decision;
 - Revolut webhook URL change;
 - production/live secrets.
+
+## Slice 8AJ - Cloud Run Deployment Prep Runbook
+
+Codex added a repo-only deployment-prep runbook for the future Revolut webhook Cloud Run service and reconciled the source README/current-state docs. No console action, `gcloud` command, API enablement, IAM grant, Cloud Run service, deployment, Secret Manager change, Firestore rule change, Revolut webhook URL change, Apps Script call, or Billing update was made in this slice.
+
+Files changed:
+
+- `rcs-registration/cloud-run/revolut-webhook/DEPLOYMENT_PREP.md` added;
+- `rcs-registration/cloud-run/revolut-webhook/README.md` updated;
+- `rcs-registration/REVOLUT_WEBHOOK_ENDPOINT_DESIGN.md` updated;
+- `rcs-registration/RCS_ONBOARDING_MAIN_BUILD_PLAN.md` updated;
+- this handover updated.
+
+Deployment-prep decisions recorded:
+
+- future service name: `roq-rcs-revolut-webhook`;
+- project: `RightOnQ-GOG` / `rightonq-gog` / `872475523113`;
+- region: `europe-west2` / London;
+- runtime shape: Cloud Run functions / Functions Framework source deployment;
+- runtime: Node.js 22;
+- entry point: `revolutWebhook`;
+- source folder: `rcs-registration/cloud-run/revolut-webhook`;
+- runtime service account: `roq-rcs-revolut-webhook@rightonq-gog.iam.gserviceaccount.com`;
+- first sandbox ingress/auth posture: `All` ingress and `Allow public access`, because Revolut must call from outside Google IAM and the endpoint security boundary is HMAC signature verification, timestamp tolerance, raw-body verification, Firestore dedupe, and record-only behaviour;
+- request-based billing;
+- service minimum instances: `0`;
+- first sandbox maximum instances: `2`;
+- revision-level scaling: leave blank;
+- CPU: `1`;
+- memory: `512 MiB`;
+- first sandbox concurrency: `10`;
+- request timeout: `60 seconds`;
+- startup CPU boost: leave enabled.
+
+Environment and secret wiring recorded:
+
+- `REVOLUT_WEBHOOK_SIGNING_SECRET` -> Secret Manager secret `roq-rcs-revolut-webhook-signing-secret-sandbox`, version `latest`;
+- `REVOLUT_MERCHANT_API_SECRET` -> Secret Manager secret `roq-rcs-revolut-merchant-api-secret-sandbox`, version `latest`;
+- `REVOLUT_MERCHANT_API_BASE_URL` -> `https://sandbox-merchant.revolut.com/api`;
+- `REVOLUT_API_VERSION` -> `2026-04-20`;
+- both secrets are regional `europe-west2` secrets, so the Cloud Run console region must be set to `europe-west2` before the secret dropdown is expected to show them.
+
+Important IAM note:
+
+- The runtime service account already has `roles/secretmanager.secretAccessor` directly on both sandbox secrets.
+- It still needs Firestore data read/write access before deployment so `FirestoreDedupeStore.fromDefault()` can write `revolut_webhook_events`.
+- Recommended role to verify/apply next is `roles/datastore.user` / Cloud Datastore User at the narrowest practical scope available; do not grant Owner or Editor.
+- This Firestore role is the only currently planned IAM exception. Service account keys remain forbidden.
+
+Still not done:
+
+- Firestore data IAM grant for the webhook runtime service account;
+- Cloud Run deployment;
+- Cloud Run secret reference wiring;
+- deployed endpoint proof;
+- Revolut sandbox webhook URL change;
+- production/live secrets;
+- automatic Billing writes;
+- strict public payment gating based on webhook state.
