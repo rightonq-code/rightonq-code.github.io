@@ -1,6 +1,6 @@
 # Revolut Webhook Cloud Run Deployment Runbook
 
-Status: first sandbox record-only Cloud Run service deployed on 2026-05-17. Do not change the Revolut webhook URL from this file without a fresh explicit approval and proof pass.
+Status: first sandbox record-only Cloud Run service deployed and endpoint proof passed on 2026-05-17. Do not change the Revolut webhook URL from this file without a fresh explicit approval.
 
 ## Target
 
@@ -22,6 +22,28 @@ Status: first sandbox record-only Cloud Run service deployed on 2026-05-17. Do n
 - Cloud Build ID: `bdb4a239-1585-440f-a61d-5805fa3df927`
 - Cloud Build trigger: created by the Cloud Run repository deploy flow
 - Revolut webhook URL: not changed
+
+## Endpoint Proof
+
+Completed on 2026-05-17:
+
+1. `GET /` returned `405 method_not_allowed`.
+2. Unsigned `POST /` returned `400 missing_revolut_signature_headers`.
+3. Signed sandbox proof request returned `HTTP 202` with body:
+   `{"ok":true,"accepted":true,"action":"verified_mapped_dry_run","dedupeRequired":true,"billingUpdateApplied":false}`
+4. Duplicate signed request for the same event returned the same public-safe `HTTP 202` body.
+5. Firestore collection `revolut_webhook_events` contains exactly one document for proof order `roq-rcs-cloudrun-proof-20260517200925`.
+6. Firestore proof document:
+   - document ID: `1e3762fc7aa304c4692a4e4260d6db91bdd481e4e119396fda47a0fcb31a36d2`;
+   - receipt key: `revolut:ORDER_PAYMENT_FAILED:roq-rcs-cloudrun-proof-20260517200925`;
+   - state: `mapped`;
+   - `signatureMatched`: `true`;
+   - `timestampAccepted`: `true`;
+   - `billingUpdateApplied`: `false`;
+   - `createTime` equals `updateTime`, confirming the duplicate did not modify the document.
+7. Cloud Run logs showed first request `dedupeDecision=create`, `dedupeRecorded=true`, `dedupeDuplicate=false`.
+8. Cloud Run logs showed duplicate request `dedupeDecision=duplicate_terminal`, `dedupeRecorded=false`, `dedupeDuplicate=true`.
+9. No secret values, signatures, raw bodies, Authorization headers, Billing writes, Apps Script calls, IAM changes, Cloud Run config changes, or Revolut webhook URL changes were observed.
 
 ## Deployed Mode
 
@@ -133,7 +155,7 @@ Stop before redeploying or changing service configuration if any of these happen
 
 ## Proof After Deployment
 
-The deployment has completed, but the endpoint still needs proof before any Revolut webhook URL change:
+Endpoint proof has passed. Keep these proof criteria for future redeploys or changes:
 
 1. Confirm a `GET` or non-POST request returns `405 method_not_allowed`.
 2. Confirm a POST without raw body/signature cannot be accepted.

@@ -1,6 +1,6 @@
 # RightOnQ RCS Revolut Webhook
 
-Status: source skeleton plus first sandbox record-only Cloud Run deployment. The Revolut webhook URL has not been changed.
+Status: source skeleton plus first sandbox record-only Cloud Run deployment, with endpoint proof passed. The Revolut webhook URL has not been changed.
 
 This folder is the first Cloud Run / Cloud Functions source shape for the future Revolut Merchant webhook endpoint.
 
@@ -29,7 +29,7 @@ npm --prefix rcs-registration/cloud-run/revolut-webhook run enrichment-self-test
 
 Expected result: `ok: true`.
 
-The first sandbox Cloud Run service now exists at `https://roq-rcs-revolut-webhook-872475523113.europe-west2.run.app`. It was deployed from the `rcs-registration-part-a-b-20260507` branch through Cloud Build, with latest revision `roq-rcs-revolut-webhook-00003-ss7` receiving 100% traffic. The Google Cloud boundary now exists: Firestore Native `(default)` is in `europe-west2`, the original regional sandbox Secret Manager secrets exist, Cloud Run-compatible `-global` sandbox copies exist, and the runtime service account has secret-level access to both global copies. No Revolut webhook URL has been changed.
+The first sandbox Cloud Run service now exists at `https://roq-rcs-revolut-webhook-872475523113.europe-west2.run.app`. It was deployed from the `rcs-registration-part-a-b-20260507` branch through Cloud Build, with latest revision `roq-rcs-revolut-webhook-00003-ss7` receiving 100% traffic. Live endpoint proof passed on 2026-05-17: unsigned traffic failed closed, a signed proof event returned `HTTP 202`, Firestore wrote exactly one dedupe document, and a duplicate signed delivery was logged as `duplicate_terminal` without a second write. The Google Cloud boundary now exists: Firestore Native `(default)` is in `europe-west2`, the original regional sandbox Secret Manager secrets exist, Cloud Run-compatible `-global` sandbox copies exist, and the runtime service account has secret-level access to both global copies. No Revolut webhook URL has been changed.
 
 Deployment prep is tracked in `DEPLOYMENT_PREP.md`. The runtime service account now has the required Cloud Run global sandbox secret access and project-level `roles/datastore.user` / Cloud Datastore User for Firestore dedupe writes. Do not grant broad Owner/Editor roles and do not create service account keys.
 
@@ -39,4 +39,4 @@ The root `.gcloudignore` intentionally allowlists only the runtime package, `clo
 
 The enrichment helper defaults to the Revolut sandbox Merchant API base URL for local proof work. Any future production deployment must explicitly configure the live Revolut Merchant API base URL and use separate live Secret Manager secrets.
 
-The next live-console slice should prove the deployed endpoint only. Do not change the Revolut webhook URL until the deployed endpoint has passed the record-only proof checks.
+The next live-console slice may consider whether to point the Revolut sandbox webhook URL at this service. Keep that as a separate explicit approval step.

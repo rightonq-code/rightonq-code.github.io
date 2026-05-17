@@ -4521,6 +4521,66 @@ Current state after Slice 8AO:
 
 - Cloud Run service `roq-rcs-revolut-webhook` is deployed at `https://roq-rcs-revolut-webhook-872475523113.europe-west2.run.app`;
 - latest repo-built revision `roq-rcs-revolut-webhook-00003-ss7` has 100% traffic;
-- deployed endpoint proof is still pending;
+- deployed endpoint proof passed in Slice 8AP;
 - Revolut sandbox webhook URL is still unchanged;
 - production/live secrets, automatic Billing writes, and strict public payment gating remain not done.
+
+## Slice 8AP - Deployed Endpoint Proof Passed
+
+Adam/Chrome agent proved the deployed Cloud Run endpoint without changing any configuration or Revolut webhook URL. Codex recorded the result in the deployment runbook and current-state docs.
+
+Public-surface checks:
+
+- `GET /` returned `HTTP 405` with `method_not_allowed`;
+- unsigned `POST /` returned `HTTP 400` with `missing_revolut_signature_headers`;
+- signed proof `POST /` returned `HTTP 202` with:
+  - `ok: true`;
+  - `accepted: true`;
+  - `action: verified_mapped_dry_run`;
+  - `dedupeRequired: true`;
+  - `billingUpdateApplied: false`.
+
+Signed proof event:
+
+- event: `ORDER_PAYMENT_FAILED`;
+- order ID: `roq-rcs-cloudrun-proof-20260517200925`;
+- application/reference: `ROQ-RCS-CLOUDRUN-PROOF`;
+- Firestore collection: `revolut_webhook_events`;
+- receipt key: `revolut:ORDER_PAYMENT_FAILED:roq-rcs-cloudrun-proof-20260517200925`;
+- document ID: `1e3762fc7aa304c4692a4e4260d6db91bdd481e4e119396fda47a0fcb31a36d2`.
+
+Firestore proof:
+
+- exactly one document found for the proof order ID;
+- document state: `mapped`;
+- `signatureMatched: true`;
+- `timestampAccepted: true`;
+- `billingUpdateApplied: false`;
+- `createTime` equals `updateTime` (`2026-05-17T20:09:30.696409Z`), confirming the duplicate proof did not modify the document.
+
+Cloud Run log proof:
+
+- first signed request:
+  - `dedupeDecision: create`;
+  - `dedupeRecorded: true`;
+  - `dedupeDuplicate: false`;
+  - `dedupeState: mapped`;
+  - `billingUpdateApplied: false`;
+  - `enrichmentAttempted: false`;
+  - `enrichmentSkippedReason: not_required`.
+- duplicate signed request:
+  - `dedupeDecision: duplicate_terminal`;
+  - `dedupeRecorded: false`;
+  - `dedupeDuplicate: true`;
+  - `dedupeState: mapped`;
+  - `billingUpdateApplied: false`;
+  - `enrichmentAttempted: false`;
+  - `enrichmentSkippedReason: not_required`.
+
+Safety confirmation:
+
+- no secret values, signatures, raw bodies, or Authorization headers appeared in logs;
+- no Firestore document was edited or deleted;
+- no Cloud Run configuration, IAM policy, Secret Manager resource, or Revolut webhook URL was changed;
+- automatic Billing writes remain disabled/not implemented;
+- Revolut sandbox webhook URL is still unchanged and remains a separate explicit approval step.
