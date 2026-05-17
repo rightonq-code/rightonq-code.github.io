@@ -244,7 +244,7 @@ Recommended boundary:
 - Billing state: linked on 2026-05-16 to billing account `My Billing Account` / `01D966-E98801-B3C276` under `rightonq.co.uk`. Adam reported on 2026-05-17 that the Google Cloud account was activated to full billing while retaining the trial credit/time window. Activation is complete; spend still needs to stay behind the budget and explicit approval controls below.
 - Budget state: `RightOnQ-GOG safety budget` created on 2026-05-17 under billing account `My Billing Account` / `01D966-E98801-B3C276`, scoped to project `RightOnQ-GOG` / `rightonq-gog`, all services, monthly specified amount `GBP 10.00`, actual-spend alerts at 50%, 90%, and 100%, with default email alerts to billing admins/users. This is an alert guardrail only; Google Cloud budgets do not cap or stop resource/API consumption.
 - Firestore state: created on 2026-05-17 in project `RightOnQ-GOG` / `rightonq-gog`. Database ID `(default)`, Standard edition, Firestore in Native mode, regional location `europe-west2` / London, restrictive security rules denying all reads/writes by default. The console did not show an explicit API-enable interstitial; Cloud Firestore API is now active for the project. No application code has written to this database yet.
-- Cloud Run state: available as a product page, but no services exist and the Cloud Run Services page warned that clicking "Create service" will enable the Cloud Run Admin API. Enabling/deploying Cloud Run is a separate explicit action.
+- Cloud Run state: Cloud Run Admin API enabled on 2026-05-17. No Cloud Run services exist yet and no deployment has been made. Console inspection confirmed `europe-west2` / London is available, Cloud Run functions / Functions Framework source deployment is available with Node.js 22 as the default runtime, and the runtime service account `roq-rcs-revolut-webhook@rightonq-gog.iam.gserviceaccount.com` is selectable. Deployment remains a separate explicit action.
 - Secret Manager state: Secret Manager API (`secretmanager.googleapis.com`) enabled on 2026-05-17 in project `RightOnQ-GOG` / `rightonq-gog`. Two regional sandbox secrets now exist in `europe-west2` / London. `roq-rcs-revolut-webhook-signing-secret-sandbox` has version 2 Enabled and version 1 Destroyed; consumers should use version `latest`. `roq-rcs-revolut-merchant-api-secret-sandbox` has version 1 Enabled. Both current `latest` values were verified through Secret Manager on 2026-05-17: the webhook signing secret matched a known Revolut HMAC fixture, and the Merchant API secret retrieved known sandbox order `6a08b551-d18e-a506-9cfa-6a27983dd1de` with HTTP 200. The sandbox Merchant API key had briefly been entered into the wrong secret before that wrong version was destroyed; rotation was recommended as hygiene, but Adam explicitly chose not to rotate the sandbox key on 2026-05-17. This sandbox exception must not be carried into live/production secret handling.
 - Service account state: dedicated webhook service account created on 2026-05-17: `roq-rcs-revolut-webhook@rightonq-gog.iam.gserviceaccount.com`. Display name / ID `roq-rcs-revolut-webhook`; description `Runs the RightOnQ RCS Revolut webhook record-only Cloud Run endpoint`; unique ID `105980809530711130186`; status Enabled. It has no keys. On 2026-05-17 it was granted `roles/secretmanager.secretAccessor` directly on each regional sandbox secret only; no project-wide Secret Manager role was granted. The pre-existing `gog-keep-access@rightonq-gog.iam.gserviceaccount.com` account is for gog CLI / Google Keep domain-wide delegation and must not be reused for this webhook.
 - Secret store: Secret Manager.
@@ -281,14 +281,16 @@ Pre-deployment checklist:
 
 1. Keep the `RightOnQ-GOG safety budget` in place as an alert-only guardrail; do not treat it as a spending cap.
 2. Confirm billing/permissions are suitable for Cloud Run, Secret Manager, Firestore, and Cloud Logging.
-3. Confirm `europe-west2` / London as the target region for Cloud Run, Secret Manager, and logging.
-4. Confirm minimum IAM roles for the existing runtime service account.
-5. Confirm the endpoint will start in record-only mode.
-6. Confirm Revolut sandbox webhook URL change will be a separate explicit action after deployment proof.
+3. Use `europe-west2` / London for Cloud Run; the console confirmed it is available.
+4. Use Cloud Run functions / Functions Framework Node.js source deployment; the console confirmed Node.js 22 is available and currently default.
+5. Use runtime service account `roq-rcs-revolut-webhook@rightonq-gog.iam.gserviceaccount.com`; the console confirmed it is selectable.
+6. Keep service-level min instances at `0`; leave revision-level min instances blank unless a specific per-revision need appears.
+7. Decide public access/authentication for the Revolut webhook endpoint before deployment; Revolut will need to reach it, but the endpoint must still verify signatures.
+8. Confirm the endpoint will start in record-only mode.
+9. Confirm Revolut sandbox webhook URL change will be a separate explicit action after deployment proof.
 
 Forbidden until explicitly approved:
 
-- enabling Cloud Run Admin API;
 - creating service account keys or additional IAM grants;
 - deploying Cloud Run;
 - changing the Revolut webhook URL;
@@ -310,8 +312,8 @@ Forbidden until explicitly approved:
 ## Remaining Confirmations
 
 - Confirm `europe-west2` / London in-console as the target region without starting a create/deploy flow where possible.
-- Enable Cloud Run Admin API / Cloud Run functions only as a separate explicit console step.
 - Confirm minimum IAM roles for the existing runtime service account.
+- Decide Cloud Run ingress/authentication explicitly before deployment.
 - Do not carry the sandbox "no rotation" exception into production/live secrets.
 - Whether Revolut retry behavior expects a `2xx` for enrichment-required events. Current design returns `202` to avoid retries while recording the need for internal enrichment.
 - How long to retain dedupe/event records.

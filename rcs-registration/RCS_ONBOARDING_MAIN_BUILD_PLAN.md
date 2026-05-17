@@ -2581,10 +2581,12 @@ Active-checkout protection started:
   - Cloud Shell verification found that `gcloud secrets versions access ... --location=europe-west2` failed against the global endpoint in SDK `567.0.0`; the regional REST hostname `https://secretmanager.europe-west2.rep.googleapis.com/...` worked and should be used/considered if CLI routing fails for regional secrets;
   - sandbox Merchant API key was initially entered into the wrong secret before that wrong version was destroyed; rotation was recommended as hygiene, but Adam explicitly chose not to rotate the sandbox key on 2026-05-17 after verification passed; this sandbox exception must not be carried into live/production secret handling;
   - runtime service account `roq-rcs-revolut-webhook@rightonq-gog.iam.gserviceaccount.com` was granted `roles/secretmanager.secretAccessor` directly on both regional sandbox secrets; the grants are secret-level/resource-level, not project-wide;
-  - project remains otherwise bare: no Cloud Run service, Cloud Run Admin API not enabled, and no webhook deployment;
+  - Cloud Run Admin API was enabled on 2026-05-17; no Cloud Run service was created and no webhook deployment exists;
+  - Cloud Run create-flow inspection confirmed `europe-west2` / London is available, Cloud Run functions / Functions Framework source deployment is available, Node.js 22 is the default runtime, and the webhook runtime service account is selectable;
+  - deployment defaults to override later: region default `europe-west1` / Belgium -> change to `europe-west2` / London; service account default compute service account -> change to `roq-rcs-revolut-webhook@rightonq-gog.iam.gserviceaccount.com`; service-level min instances stays `0`; revision-level min instances left blank; request timeout likely shorten from default 300s during deploy design;
   - Firestore Native mode remains the dedupe/event store choice, but no deployed webhook has written to it yet;
   - first deployed mode must be record-only;
-  - enabling Cloud Run Admin API, creating additional IAM grants, deploying Cloud Run, changing Revolut webhook URL, automatic Billing writes, and strict payment gating remain explicitly forbidden until approved.
+  - creating additional IAM grants, deploying Cloud Run, changing Revolut webhook URL, automatic Billing writes, and strict payment gating remain explicitly forbidden until approved.
 - Cloud webhook source observability tightened:
   - rejected-method and missing-raw-body cases now emit redacted record-only log entries;
   - local self-tests cover the new rejection logs and confirm no raw body or signature is logged;

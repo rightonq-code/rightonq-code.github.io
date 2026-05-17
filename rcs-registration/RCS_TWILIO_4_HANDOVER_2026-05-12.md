@@ -4177,9 +4177,61 @@ Sandbox rotation decision:
 
 Still not done:
 
-- IAM grants for the webhook service account (`roles/secretmanager.secretAccessor` scoped at each regional secret, not project-wide);
-- Cloud Run Admin API enablement;
 - Cloud Run deployment;
 - Cloud Run secret reference wiring;
+- Revolut webhook URL change;
+- production/live secrets.
+
+## Slice 8AI - Cloud Run Admin API Enabled And Deploy Options Inspected
+
+Adam/the browser agent enabled the Cloud Run Admin API and inspected the Cloud Run create/deploy flow without creating a service. Codex recorded the result in the webhook design docs. This was a documentation update only from Codex; no `gcloud` command, Cloud Run service, deployment, IAM change, Secret Manager change, Firestore rules change, Revolut URL change, Apps Script call, or Billing update was made by Codex.
+
+Cloud Run state recorded:
+
+- project: `RightOnQ-GOG` / `rightonq-gog`;
+- Cloud Run Admin API: enabled on 2026-05-17;
+- services list: 0 Cloud Run services;
+- service created: no;
+- deployment performed: no.
+
+Deploy option findings for the future webhook service:
+
+- future service name: `roq-rcs-revolut-webhook`;
+- required region: `europe-west2` / London;
+- `europe-west2` / London is available and shown as Low CO2 / Tier 2 pricing;
+- default region is `europe-west1` / Belgium, so future deploy must actively change it to `europe-west2`;
+- Cloud Run functions / Functions Framework source deployment is available through "Use an inline editor to create a function";
+- Node.js runtimes available include Node.js 24, Node.js 22, and Node.js 20 deprecated;
+- Node.js 22 is the default in function mode;
+- runtime service account `roq-rcs-revolut-webhook@rightonq-gog.iam.gserviceaccount.com` is selectable;
+- default service account is the default compute service account, so future deploy must actively switch it to the webhook runtime service account;
+- service-level autoscaling default minimum instances is `0`, which is the desired idle cost posture;
+- revision-level scaling has separate min/max fields and should be left blank unless a specific per-revision need appears;
+- Secret Manager secrets can be attached later through Containers -> Variables & Secrets -> Secrets exposed as environment variables -> Reference a secret;
+- regional secrets only appeared once the region matched `europe-west2`; when the form was left at default `europe-west1`, the secret dropdown showed no secrets;
+- volume mounts are also available, but environment variables are the likely first fit for this webhook.
+
+Confusing defaults / decisions still needed:
+
+- ingress defaults to `All`; likely necessary for Revolut webhooks, but must be explicitly reviewed;
+- authentication is a mandatory choice: `Allow public access` versus `Require authentication`; Revolut needs to call the endpoint, so this must be decided alongside signature-verification hardening;
+- startup CPU boost defaulted on and appears acceptable;
+- billing mode is request-based and appears suitable for a webhook;
+- default memory is 512 MiB and default CPU is 1 vCPU;
+- default concurrency is 80 requests per instance;
+- default request timeout is 300 seconds and likely should be shortened, for example to 30-60 seconds, before deployment.
+
+Important notes:
+
+- No Cloud Run service was created.
+- No source was uploaded or written in the console.
+- No repository was connected.
+- No Secret Manager setting, IAM grant, Firestore rule, Revolut webhook URL, or billing/budget setting was changed.
+
+Still not done:
+
+- Cloud Run deployment;
+- Cloud Run secret reference wiring;
+- Cloud Run ingress/authentication decision;
 - Revolut webhook URL change;
 - production/live secrets.
