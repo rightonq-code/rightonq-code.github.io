@@ -1,6 +1,6 @@
-# Revolut Webhook Cloud Run Deployment Prep
+# Revolut Webhook Cloud Run Deployment Runbook
 
-Status: planning/runbook only. Do not deploy from this file without a fresh explicit approval.
+Status: first sandbox record-only Cloud Run service deployed on 2026-05-17. Do not change the Revolut webhook URL from this file without a fresh explicit approval and proof pass.
 
 ## Target
 
@@ -14,9 +14,18 @@ Status: planning/runbook only. Do not deploy from this file without a fresh expl
 - Entry module: `cloud-run/revolut-webhook/index.mjs`
 - Runtime service account: `roq-rcs-revolut-webhook@rightonq-gog.iam.gserviceaccount.com`
 
-## Intended First Deploy Mode
+## Deployed Sandbox Service
 
-The first deployment must stay record-only:
+- Service URL: `https://roq-rcs-revolut-webhook-872475523113.europe-west2.run.app`
+- Latest revision: `roq-rcs-revolut-webhook-00003-ss7`
+- Traffic: latest built revision has 100% traffic
+- Cloud Build ID: `bdb4a239-1585-440f-a61d-5805fa3df927`
+- Cloud Build trigger: created by the Cloud Run repository deploy flow
+- Revolut webhook URL: not changed
+
+## Deployed Mode
+
+The deployed sandbox service must stay record-only:
 
 - verify Revolut signatures and timestamps;
 - write dedupe/event records to Firestore;
@@ -29,7 +38,7 @@ The first deployment must stay record-only:
 
 ## Cloud Run Settings
 
-Use these settings when the console deploy step is explicitly approved:
+The first sandbox deploy used these settings:
 
 | Setting | Value |
 | --- | --- |
@@ -105,7 +114,7 @@ Notes:
 
 ## Stop Conditions
 
-Stop before deploying if any of these happen:
+Stop before redeploying or changing service configuration if any of these happen:
 
 - project is not `RightOnQ-GOG` / `rightonq-gog`;
 - account is not `adam@rightonq.co.uk`;
@@ -118,13 +127,13 @@ Stop before deploying if any of these happen:
 - console asks for broad Owner/Editor permissions;
 - console tries to create production/live secrets;
 - console tries to change the Revolut webhook URL;
-- Cloud Run deploy summary differs from this runbook.
+- Cloud Run deploy/redeploy summary differs from this runbook.
 - deploy source root is shown as `rcs-registration/cloud-run/revolut-webhook` instead of `rcs-registration`.
 - the deploy upload omits `tools/revolut-webhook-handler.mjs`, `tools/revolut-webhook-map.mjs`, or `tools/revolut-webhook-verify.mjs`.
 
 ## Proof After Deployment
 
-After a deployment is explicitly approved and completed, prove only the deployed endpoint first:
+The deployment has completed, but the endpoint still needs proof before any Revolut webhook URL change:
 
 1. Confirm a `GET` or non-POST request returns `405 method_not_allowed`.
 2. Confirm a POST without raw body/signature cannot be accepted.

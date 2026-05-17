@@ -4336,8 +4336,61 @@ Current deploy-readiness state:
 
 Still not done:
 
-- Cloud Run deployment;
-- Cloud Run secret reference wiring;
+- deployed endpoint proof;
+- Revolut sandbox webhook URL change;
+- production/live secrets;
+- automatic Billing writes;
+- strict public payment gating based on webhook state.
+
+## Slice 8AO - First Cloud Run Sandbox Deploy Completed
+
+Adam/the browser agent completed the first Cloud Run deploy for the Revolut webhook source. Codex recorded the result in the deployment runbook and current-state docs. This was a record-only sandbox deployment; no Revolut webhook URL was changed and no Billing/App Script write path was enabled.
+
+Deployment result:
+
+- service: `roq-rcs-revolut-webhook`;
+- URL: `https://roq-rcs-revolut-webhook-872475523113.europe-west2.run.app`;
+- project: `RightOnQ-GOG` / `rightonq-gog`;
+- region: `europe-west2` / London;
+- Cloud Build ID: `bdb4a239-1585-440f-a61d-5805fa3df927`;
+- repo-built revision: `roq-rcs-revolut-webhook-00003-ss7`;
+- traffic: `roq-rcs-revolut-webhook-00003-ss7` has 100% traffic.
+
+Runtime/service settings verified:
+
+- source repo: `rightonq-code/rightonq-code.github.io`;
+- branch regex: `^rcs-registration-part-a-b-20260507$`;
+- build context: `/rcs-registration`;
+- build type: Google Cloud buildpacks;
+- function target: `revolutWebhook`;
+- runtime service account: `roq-rcs-revolut-webhook@rightonq-gog.iam.gserviceaccount.com`;
+- ingress: `All`;
+- authentication: allow unauthenticated/public access;
+- request-based billing;
+- service min instances: `0`;
+- service max instances: `2`;
+- revision min/max: left blank/default;
+- memory: `512 MiB`;
+- CPU: `1` / `1000m`;
+- concurrency: `10`;
+- timeout: `60 seconds`;
+- startup CPU boost: enabled.
+
+Runtime environment:
+
+- `REVOLUT_MERCHANT_API_BASE_URL` -> `https://sandbox-merchant.revolut.com/api`;
+- `REVOLUT_API_VERSION` -> `2026-04-20`;
+- `REVOLUT_WEBHOOK_SIGNING_SECRET` -> secret `roq-rcs-revolut-webhook-signing-secret-sandbox-global`, version `latest`;
+- `REVOLUT_MERCHANT_API_SECRET` -> secret `roq-rcs-revolut-merchant-api-secret-sandbox-global`, version `latest`.
+
+Warnings / notes:
+
+- the deploy flow created the expected Cloud Build trigger;
+- Software Supply Chain Insights showed a cosmetic `containeranalysis.occurrences.list` permission notice for the `cloudrun` project; this did not block build or service operation;
+- the revision header's "deployed by Default Compute service account" refers to the Cloud Build deployer, not the runtime identity; runtime service account was verified separately.
+
+Still not done:
+
 - deployed endpoint proof;
 - Revolut sandbox webhook URL change;
 - production/live secrets;
@@ -4449,7 +4502,7 @@ Docs updated:
 - `rcs-registration/RCS_ONBOARDING_MAIN_BUILD_PLAN.md`;
 - this handover.
 
-Still not done:
+Still not done at this slice:
 
 - Cloud Run deployment;
 - Cloud Run secret reference wiring;
@@ -4458,3 +4511,16 @@ Still not done:
 - production/live secrets;
 - automatic Billing writes;
 - strict public payment gating based on webhook state.
+
+Superseded by later slices:
+
+- Slice 8AN created the Cloud Run-compatible global sandbox secrets and wired direct secret access.
+- Slice 8AO completed the first record-only Cloud Run sandbox deployment.
+
+Current state after Slice 8AO:
+
+- Cloud Run service `roq-rcs-revolut-webhook` is deployed at `https://roq-rcs-revolut-webhook-872475523113.europe-west2.run.app`;
+- latest repo-built revision `roq-rcs-revolut-webhook-00003-ss7` has 100% traffic;
+- deployed endpoint proof is still pending;
+- Revolut sandbox webhook URL is still unchanged;
+- production/live secrets, automatic Billing writes, and strict public payment gating remain not done.
