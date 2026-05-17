@@ -2569,13 +2569,13 @@ Active-checkout protection started:
   - endpoint should use Cloud Run functions / Functions Framework Node.js source deployment;
   - proposed target region is `europe-west2` / London, because official docs list London for Cloud Run, Secret Manager, and Cloud Firestore and the RightOnQ workflow is UK-first;
   - Secret Manager names proposed separately for sandbox and live Revolut secrets;
-  - billing is now linked to `My Billing Account` / `01D966-E98801-B3C276` under `rightonq.co.uk`, but it is currently a Free trial account and full pay-as-you-go activation was not clicked;
+  - billing is now linked to `My Billing Account` / `01D966-E98801-B3C276` under `rightonq.co.uk`; Adam reported on 2026-05-17 that the Google Cloud account was activated to full billing while retaining the trial credit/time window;
   - `RightOnQ-GOG safety budget` was created on 2026-05-17 for billing account `My Billing Account` / `01D966-E98801-B3C276`, scoped to `RightOnQ-GOG` / `rightonq-gog`, all services, monthly `GBP 10.00`, with actual-spend email alerts at 50%, 90%, and 100%;
   - budget is an alert-only guardrail and does not cap or stop Google Cloud resource/API consumption;
   - project remains otherwise bare: no Firestore database, no Cloud Run service, Cloud Run Admin API not enabled, Secret Manager API not enabled, and no webhook-suitable service account;
   - Firestore Native mode remains the dedupe/event store choice, but it is not currently enabled/created for this lane;
   - first deployed mode must be record-only;
-  - activating billing to full pay-as-you-go, enabling APIs/Firestore/Secret Manager, creating secrets/service accounts/IAM, deploying Cloud Run, changing Revolut webhook URL, automatic Billing writes, and strict payment gating remain explicitly forbidden until approved.
+  - enabling APIs/Firestore/Secret Manager, creating secrets/service accounts/IAM, deploying Cloud Run, changing Revolut webhook URL, automatic Billing writes, and strict payment gating remain explicitly forbidden until approved.
 - Cloud webhook source observability tightened:
   - rejected-method and missing-raw-body cases now emit redacted record-only log entries;
   - local self-tests cover the new rejection logs and confirm no raw body or signature is logged;

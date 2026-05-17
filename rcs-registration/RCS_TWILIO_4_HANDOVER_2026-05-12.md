@@ -3887,13 +3887,12 @@ Decisions recorded:
 - avoid `Personal-GOG` / `personal-gog-490412` for this webhook unless Adam explicitly reverses this later;
 - proposed region: `europe-west2` / London;
 - rationale: RightOnQ is UK-based, expected account/client base is mostly UK, and official docs list `europe-west2` / London for Cloud Run, Secret Manager, and Cloud Firestore;
-- billing is now linked to `My Billing Account` / `01D966-E98801-B3C276` under `rightonq.co.uk`, but it is currently a Free trial account and full pay-as-you-go activation was not clicked;
+- billing is now linked to `My Billing Account` / `01D966-E98801-B3C276` under `rightonq.co.uk`; Adam reported on 2026-05-17 that the Google Cloud account was activated to full billing while retaining the trial credit/time window;
 - project remains otherwise bare: no Firestore database, no Cloud Run service, Cloud Run Admin API not enabled, Secret Manager API not enabled, and no webhook-suitable service account;
 - Firestore Native remains the dedupe/event store choice, but it is not currently enabled/created for this lane.
 
 Next boundary work:
 
-- decide whether/when to activate the linked free-trial billing account to full pay-as-you-go;
 - confirm billing/permissions;
 - enable/create Firestore Native, Cloud Run Admin API, Secret Manager API, service account/IAM, and secrets only as separate explicit steps;
 - confirm Secret Manager names and service account/IAM plan;
@@ -3908,7 +3907,7 @@ Budget state recorded:
 - budget created: yes;
 - budget name: `RightOnQ-GOG safety budget`;
 - billing account: `My Billing Account` / `01D966-E98801-B3C276`;
-- account status: Free trial account; full pay-as-you-go `Activate` banner was ignored and not clicked;
+- account status at budget creation: Free trial account. Adam later reported on 2026-05-17 that the Google Cloud account was activated to full billing while retaining the trial credit/time window;
 - project scope: `RightOnQ-GOG` / `rightonq-gog`, all services;
 - monthly amount: `GBP 10.00`, specified amount, monthly period;
 - alert thresholds: 50%, 90%, and 100% of actual spend (`GBP 5`, `GBP 9`, `GBP 10`);
@@ -3921,7 +3920,26 @@ Important caveat:
 
 Still not done:
 
-- full billing activation to pay-as-you-go;
+- Cloud Run Admin API enablement;
+- Firestore Native database creation;
+- Secret Manager API enablement;
+- service account/IAM setup;
+- secret creation;
+- Cloud Run deployment;
+- Revolut webhook URL change.
+
+## Slice 8AB - Google Cloud Billing Activation Reported
+
+Adam reported that Google Cloud billing activation was completed after the safety budget had been created, while the trial credit/time window remained available. Codex recorded that state in the webhook design docs. This was a documentation update only from Codex; no Google Cloud console action, `gcloud` command, API enablement, Firestore creation, Cloud Run deployment, Secret Manager action, service account/IAM change, Revolut URL change, Apps Script call, or Billing update was made by Codex.
+
+Current billing guardrails:
+
+- billing account: `My Billing Account` / `01D966-E98801-B3C276`;
+- budget: `RightOnQ-GOG safety budget`, `GBP 10.00` monthly, actual-spend alerts at 50%, 90%, and 100%;
+- caveat: the budget alerts by email but does not cap or stop spend.
+
+Still not done:
+
 - Cloud Run Admin API enablement;
 - Firestore Native database creation;
 - Secret Manager API enablement;
