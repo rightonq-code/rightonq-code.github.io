@@ -3662,13 +3662,13 @@ Proposed secret names:
 - `roq-rcs-revolut-merchant-api-secret-sandbox`;
 - future live secrets must use separate `...-live` names.
 
-Explicitly forbidden until approved:
+Explicitly forbidden in that planning slice unless separately approved:
 
 - enabling Firestore;
 - creating Secret Manager secrets;
 - creating service accounts or IAM grants;
 - deploying Cloud Run;
-- changing Revolut webhook URL;
+- changing the Revolut webhook URL;
 - enabling automatic Apps Script Billing writes;
 - enabling strict public payment gating from webhook state.
 
@@ -4517,12 +4517,12 @@ Superseded by later slices:
 - Slice 8AN created the Cloud Run-compatible global sandbox secrets and wired direct secret access.
 - Slice 8AO completed the first record-only Cloud Run sandbox deployment.
 
-Current state after Slice 8AO:
+Current state after Slice 8AO (before the later Slice 8AQ webhook switch):
 
 - Cloud Run service `roq-rcs-revolut-webhook` is deployed at `https://roq-rcs-revolut-webhook-872475523113.europe-west2.run.app`;
 - latest repo-built revision `roq-rcs-revolut-webhook-00003-ss7` has 100% traffic;
 - deployed endpoint proof passed in Slice 8AP;
-- Revolut sandbox webhook URL is still unchanged;
+- Revolut sandbox webhook URL was unchanged at this point;
 - production/live secrets, automatic Billing writes, and strict public payment gating remain not done.
 
 ## Slice 8AP - Deployed Endpoint Proof Passed
@@ -4583,4 +4583,65 @@ Safety confirmation:
 - no Firestore document was edited or deleted;
 - no Cloud Run configuration, IAM policy, Secret Manager resource, or Revolut webhook URL was changed;
 - automatic Billing writes remain disabled/not implemented;
-- Revolut sandbox webhook URL is still unchanged and remains a separate explicit approval step.
+- Revolut sandbox webhook URL was unchanged at this point and remained a separate explicit approval step until Slice 8AQ.
+
+## Slice 8AQ - Revolut Sandbox Webhook Pointed At Cloud Run And Real Delivery Proof Passed
+
+Adam approved the sandbox webhook URL switch after the deployed endpoint proof. The browser/Cloud Shell agent used the Revolut sandbox Merchant API, not the Revolut dashboard UI, because the dashboard Merchant API page showed keys/checkout customisation but no webhook-management surface.
+
+Webhook discovery and switch:
+
+- read-only `GET https://sandbox-merchant.revolut.com/api/webhooks` found exactly one sandbox Merchant webhook;
+- webhook ID: `e6f32548-ffef-4f77-92fa-a0d2ae0b7dea`;
+- old URL: `https://webhook.site/84da51c0-7f70-4475-830a-11a8d002a81f`;
+- new URL: `https://roq-rcs-revolut-webhook-872475523113.europe-west2.run.app`;
+- events preserved exactly:
+  - `ORDER_FAILED`;
+  - `ORDER_PAYMENT_FAILED`;
+  - `ORDER_COMPLETED`;
+  - `ORDER_PAYMENT_DECLINED`;
+  - `ORDER_CANCELLED`;
+  - `ORDER_AUTHORISED`.
+
+Safety confirmations from the switch:
+
+- sandbox Merchant API only;
+- no Business API certificate touched;
+- no live/production touched;
+- no signing secret printed or rotated;
+- no webhook created or deleted;
+- same webhook ID confirmed by post-update `GET /webhooks`;
+- no Google Cloud, Cloud Run, Firestore, Secret Manager, IAM, Apps Script, or Billing configuration changed during the webhook switch.
+
+Real sandbox delivery proof:
+
+- proof order ID: `6a0ae033-fef3-a25e-b781-b0c4011e158f`;
+- reference: `ROQ-RCS-CLOUDRUN-WEBHOOK-PROOF-20260518094729`;
+- Adam completed the sandbox checkout successfully;
+- Revolut delivered two real webhook POSTs to Cloud Run with user agent `Revolut-Octopus 1.0`:
+  - `ORDER_AUTHORISED` at `2026-05-18T09:50:55.652206Z`;
+  - `ORDER_COMPLETED` at `2026-05-18T09:50:56.153Z`.
+
+Cloud Run / Firestore proof:
+
+- both webhook requests returned `HTTP 202`;
+- both had `signatureMatched: true` and `timestampAccepted: true`;
+- both had `billingUpdateApplied: false`;
+- `ORDER_AUTHORISED` wrote Firestore document `93c88a300d0b59b81be64e3fd2381331f2b0ffe4caa5d693a9a5186c23563a5d` with state `mapped`;
+- `ORDER_COMPLETED` wrote Firestore document `f1fed301783d9799dff2122af8ff4e89e30c42fa9d3b8290bc876cb3da2abb85` with state `enrichment_required`;
+- exactly two Firestore documents match order `6a0ae033-fef3-a25e-b781-b0c4011e158f`, one per real webhook event received;
+- `ORDER_COMPLETED` enrichment succeeded:
+  - `enrichmentAttempted: true`;
+  - `enrichmentOk: true`;
+  - `enrichmentClassification: payment_order`;
+  - `enrichmentLedgerLookupOrderId: 6a0ae033-fef3-a25e-b781-b0c4011e158f`;
+  - `enrichedOrderType: payment`;
+  - `enrichedOrderState: completed`.
+
+Current state after Slice 8AQ:
+
+- Revolut sandbox Merchant webhook now points to the deployed Cloud Run endpoint;
+- Cloud Run webhook is receiving real Revolut sandbox events;
+- signature verification, timestamp tolerance, dedupe, enrichment, and Firestore record-only writes are proven end to end;
+- automatic Billing writes and Apps Script writes remain disabled/not implemented;
+- production/live secrets and production/live Revolut webhooks remain untouched.

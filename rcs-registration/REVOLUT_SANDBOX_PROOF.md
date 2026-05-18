@@ -689,3 +689,73 @@ Build impact:
 - The webhook payload does not include `payment_id`; payment ID must be enriched by order/payment retrieval if the Billing row requires it.
 - A live webhook endpoint must verify signature and timestamp before mapping; it must not use the CLI-only `--skip-timestamp-tolerance` behaviour.
 - A real endpoint also needs dedupe storage before writing Billing updates.
+
+## Cloud Run Sandbox Webhook Switch Proof - 2026-05-18
+
+Webhook switch:
+
+- Existing Revolut sandbox Merchant webhook ID: `e6f32548-ffef-4f77-92fa-a0d2ae0b7dea`
+- Old URL: `https://webhook.site/84da51c0-7f70-4475-830a-11a8d002a81f`
+- New URL: `https://roq-rcs-revolut-webhook-872475523113.europe-west2.run.app`
+- Events preserved exactly:
+  - `ORDER_FAILED`
+  - `ORDER_PAYMENT_FAILED`
+  - `ORDER_COMPLETED`
+  - `ORDER_PAYMENT_DECLINED`
+  - `ORDER_CANCELLED`
+  - `ORDER_AUTHORISED`
+- Post-update `GET /webhooks` confirmed exactly one webhook, same ID, new URL, same events.
+- No signing secret was printed or rotated; no webhook was created/deleted; no live/production or Business API setting was touched.
+
+Real sandbox checkout proof:
+
+- Order ID: `6a0ae033-fef3-a25e-b781-b0c4011e158f`
+- Reference: `ROQ-RCS-CLOUDRUN-WEBHOOK-PROOF-20260518094729`
+- Amount: `12000` / `GBP`
+- Adam completed the sandbox checkout successfully.
+
+Cloud Run deliveries:
+
+- Revolut delivered two real POSTs with user agent `Revolut-Octopus 1.0`.
+- `ORDER_AUTHORISED`:
+  - timestamp: `2026-05-18T09:50:55.652206Z`;
+  - HTTP `202`;
+  - `signatureMatched: true`;
+  - `timestampAccepted: true`;
+  - `dedupeDecision: create`;
+  - `dedupeRecorded: true`;
+  - `dedupeDuplicate: false`;
+  - `dedupeState: mapped`;
+  - Firestore document ID: `93c88a300d0b59b81be64e3fd2381331f2b0ffe4caa5d693a9a5186c23563a5d`;
+  - `billingUpdateApplied: false`.
+- `ORDER_COMPLETED`:
+  - timestamp: `2026-05-18T09:50:56.153Z`;
+  - HTTP `202`;
+  - `signatureMatched: true`;
+  - `timestampAccepted: true`;
+  - `dedupeDecision: create`;
+  - `dedupeRecorded: true`;
+  - `dedupeDuplicate: false`;
+  - `dedupeState: enrichment_required`;
+  - Firestore document ID: `f1fed301783d9799dff2122af8ff4e89e30c42fa9d3b8290bc876cb3da2abb85`;
+  - `enrichmentAttempted: true`;
+  - `enrichmentOk: true`;
+  - `enrichmentClassification: payment_order`;
+  - `enrichmentLedgerLookupOrderId: 6a0ae033-fef3-a25e-b781-b0c4011e158f`;
+  - `enrichedOrderType: payment`;
+  - `enrichedOrderState: completed`;
+  - `billingUpdateApplied: false`.
+
+Firestore verification:
+
+- Collection: `revolut_webhook_events`
+- Documents matching order ID `6a0ae033-fef3-a25e-b781-b0c4011e158f`: exactly `2`
+- One document exists per actual webhook event received:
+  - `ORDER_AUTHORISED` receipt key `revolut:ORDER_AUTHORISED:6a0ae033-fef3-a25e-b781-b0c4011e158f`;
+  - `ORDER_COMPLETED` receipt key `revolut:ORDER_COMPLETED:6a0ae033-fef3-a25e-b781-b0c4011e158f`.
+
+Safety result:
+
+- The full sandbox path is proven: Revolut checkout -> Revolut webhook delivery -> Cloud Run -> signature verification -> dedupe -> enrichment on `ORDER_COMPLETED` -> Firestore record-only write.
+- No Billing update or Apps Script write occurred.
+- No secret values, raw bodies, signatures, or Authorization headers appeared in logs.

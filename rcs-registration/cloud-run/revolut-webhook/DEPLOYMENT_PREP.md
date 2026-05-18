@@ -1,6 +1,6 @@
 # Revolut Webhook Cloud Run Deployment Runbook
 
-Status: first sandbox record-only Cloud Run service deployed and endpoint proof passed on 2026-05-17. Do not change the Revolut webhook URL from this file without a fresh explicit approval.
+Status: first sandbox record-only Cloud Run service deployed, endpoint proof passed on 2026-05-17, and Revolut sandbox Merchant webhook pointed at Cloud Run with real sandbox delivery proof passed on 2026-05-18. Do not enable Billing writes from this file without a fresh explicit approval.
 
 ## Target
 
@@ -21,7 +21,7 @@ Status: first sandbox record-only Cloud Run service deployed and endpoint proof 
 - Traffic: latest built revision has 100% traffic
 - Cloud Build ID: `bdb4a239-1585-440f-a61d-5805fa3df927`
 - Cloud Build trigger: created by the Cloud Run repository deploy flow
-- Revolut webhook URL: not changed
+- Revolut sandbox Merchant webhook URL: `https://roq-rcs-revolut-webhook-872475523113.europe-west2.run.app`
 
 ## Endpoint Proof
 
@@ -45,6 +45,38 @@ Completed on 2026-05-17:
 8. Cloud Run logs showed duplicate request `dedupeDecision=duplicate_terminal`, `dedupeRecorded=false`, `dedupeDuplicate=true`.
 9. No secret values, signatures, raw bodies, Authorization headers, Billing writes, Apps Script calls, IAM changes, Cloud Run config changes, or Revolut webhook URL changes were observed.
 
+## Revolut Sandbox Webhook Switch Proof
+
+Completed on 2026-05-18:
+
+1. Read-only `GET /webhooks` against the Revolut sandbox Merchant API found exactly one webhook:
+   - webhook ID: `e6f32548-ffef-4f77-92fa-a0d2ae0b7dea`;
+   - old URL: `https://webhook.site/84da51c0-7f70-4475-830a-11a8d002a81f`;
+   - events: `ORDER_FAILED`, `ORDER_PAYMENT_FAILED`, `ORDER_COMPLETED`, `ORDER_PAYMENT_DECLINED`, `ORDER_CANCELLED`, `ORDER_AUTHORISED`.
+2. The same webhook ID was patched to `https://roq-rcs-revolut-webhook-872475523113.europe-west2.run.app`, preserving all six events exactly.
+3. Post-update `GET /webhooks` confirmed exactly one webhook, same ID, new URL, same events.
+4. No signing secret, Merchant API secret, raw webhook body, signature, or Authorization header was printed.
+5. No webhook was created or deleted, no signing secret was rotated, and no live/production or Business API setting was touched.
+6. A fresh sandbox checkout order was created and paid:
+   - order ID: `6a0ae033-fef3-a25e-b781-b0c4011e158f`;
+   - reference: `ROQ-RCS-CLOUDRUN-WEBHOOK-PROOF-20260518094729`;
+   - amount: `12000` / `GBP`.
+7. Revolut delivered two real webhook POSTs to Cloud Run with user agent `Revolut-Octopus 1.0`:
+   - `ORDER_AUTHORISED` at `2026-05-18T09:50:55.652206Z`;
+   - `ORDER_COMPLETED` at `2026-05-18T09:50:56.153Z`.
+8. Both events returned `HTTP 202`, had `signatureMatched: true`, `timestampAccepted: true`, and `billingUpdateApplied: false`.
+9. Firestore collection `revolut_webhook_events` contains exactly two documents for the proof order, one per actual webhook event:
+   - `93c88a300d0b59b81be64e3fd2381331f2b0ffe4caa5d693a9a5186c23563a5d` for `ORDER_AUTHORISED`;
+   - `f1fed301783d9799dff2122af8ff4e89e30c42fa9d3b8290bc876cb3da2abb85` for `ORDER_COMPLETED`.
+10. The `ORDER_COMPLETED` webhook enriched successfully:
+    - `enrichmentAttempted: true`;
+    - `enrichmentOk: true`;
+    - `enrichmentClassification: payment_order`;
+    - `enrichmentLedgerLookupOrderId: 6a0ae033-fef3-a25e-b781-b0c4011e158f`;
+    - `enrichedOrderType: payment`;
+    - `enrichedOrderState: completed`.
+11. No Billing update or Apps Script write occurred.
+
 ## Deployed Mode
 
 The deployed sandbox service must stay record-only:
@@ -56,7 +88,7 @@ The deployed sandbox service must stay record-only:
 - do not call Apps Script;
 - do not update Billing;
 - do not enable the public payment gate;
-- do not change the Revolut webhook URL until the deployed endpoint is proven.
+- do not change the Revolut webhook URL again unless a future slice explicitly approves a webhook reconfiguration.
 
 ## Cloud Run Settings
 
@@ -148,14 +180,14 @@ Stop before redeploying or changing service configuration if any of these happen
 - console asks to create service account keys;
 - console asks for broad Owner/Editor permissions;
 - console tries to create production/live secrets;
-- console tries to change the Revolut webhook URL;
+- console tries to change the Revolut webhook URL during a Cloud Run redeploy/configuration task;
 - Cloud Run deploy/redeploy summary differs from this runbook.
 - deploy source root is shown as `rcs-registration/cloud-run/revolut-webhook` instead of `rcs-registration`.
 - the deploy upload omits `tools/revolut-webhook-handler.mjs`, `tools/revolut-webhook-map.mjs`, or `tools/revolut-webhook-verify.mjs`.
 
-## Proof After Deployment
+## Proof After Deployment Or Webhook Changes
 
-Endpoint proof has passed. Keep these proof criteria for future redeploys or changes:
+Endpoint proof and real Revolut sandbox delivery proof have passed. Keep these proof criteria for future redeploys or webhook changes:
 
 1. Confirm a `GET` or non-POST request returns `405 method_not_allowed`.
 2. Confirm a POST without raw body/signature cannot be accepted.
@@ -163,4 +195,4 @@ Endpoint proof has passed. Keep these proof criteria for future redeploys or cha
 4. Confirm the HTTP response is small and public-safe.
 5. Confirm one Firestore document appears in `revolut_webhook_events`.
 6. Confirm a duplicate delivery does not trigger a second enrichment call or duplicate write.
-7. Only after that, consider changing the Revolut sandbox webhook URL.
+7. If the Revolut sandbox webhook URL is changed again, confirm the webhook ID/events are preserved, then run a fresh real sandbox order proof.
