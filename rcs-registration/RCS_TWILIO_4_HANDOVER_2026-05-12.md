@@ -52,17 +52,20 @@ The handover diary is for agent continuity and local repo state. The main build 
 
 ## Legal Entity / Brand Naming
 
-Important correction from Bugs on Saturday 16 May 2026:
+Important correction from Bugs on Saturday 16 May 2026, tightened after Isa Bell/Twilio naming guidance on Monday 18 May 2026:
 
 - The operating UK limited company is `Continuity AI Ltd`.
+- Companies House lists the registered company name as `CONTINUITY AI LTD`, company number `17119848`, incorporated on 26 March 2026.
 - `RightOnQ` is the trading name / product brand of `Continuity AI Ltd`.
 - `RightOnQ` is going through trademark application.
 
 Implementation rule:
 
 - Use `Continuity AI Ltd` for legal entity / business-name fields.
-- Use `RightOnQ` for product, brand, trading name, customer-facing platform, and campaign language.
+- Use `RightOnQ` for product, brand, trading name, customer-facing platform, and campaign language, and in provider fields only where the flow explicitly offers a separate trading-name / brand / DBA-style field.
 - Do not use `RightOnQ` as the legal business name in Twilio, Revolut, Trust Hub, RC Bundle, privacy, terms, or billing/compliance records.
+- Do not enter `Continuity AI Ltd trading as RightOnQ` into a legal-business-name field unless that exact combined wording appears in the official registration record or the provider explicitly asks for a combined trading-as format.
+- Trust Hub parent Primary Business Compliance Profile legal name should be `Continuity AI Ltd`; end-client Secondary Compliance Profiles should use the end customer's own registered legal business name.
 
 Twilio-2 and Twilio-3 handover copies are currently untracked in the dirty checkout, but Twilio-3 says they were safely preserved on a separate docs/handover branch and merged via PR #2. Leave them alone unless Bugs explicitly asks.
 
@@ -1451,8 +1454,9 @@ Bugs received a comprehensive reply from Isa Bell at Twilio on Thursday 14 May 2
 Build-impacting points from Isa's reply:
 
 - RightOnQ's ISV model is correct:
-  - `Continuity AI Ltd`, trading as `RightOnQ`, keeps the approved Primary Compliance Profile on the parent account;
-  - each end-client UK limited company gets its own Secondary Compliance Profile when the registered brand/entity differs from `Continuity AI Ltd` or the `RightOnQ` brand;
+  - `Continuity AI Ltd` keeps the approved Primary Compliance Profile on the parent account as the legal business name;
+  - `RightOnQ` belongs only in a separate trading-name / product-brand field where that specific Twilio flow provides one;
+  - each end-client UK limited company gets its own Secondary Compliance Profile using the end client's own legal business name when that entity differs from the parent Primary Compliance Profile;
   - Twilio docs now use `Compliance Profile` where older docs may say `Customer Profile`.
 - UK long-code RC Bundle is separate from the Secondary Compliance Profile:
   - data overlaps;
@@ -1573,7 +1577,7 @@ RCS-Twilio-4 added that consolidation to `RCS_ONBOARDING_MAIN_BUILD_PLAN.md`.
 Key build additions:
 
 - confirmed the architecture remains:
-  - `Continuity AI Ltd`, trading as `RightOnQ`, parent Primary Compliance Profile;
+  - `Continuity AI Ltd` parent Primary Compliance Profile, with `RightOnQ` only in a separate brand/DBA-style field where Twilio exposes one;
   - one Secondary Compliance Profile per end-client company;
   - separate UK RC Bundle for UK long-code SMS fallback;
   - assign UK numbers to the approved end-business bundle/profile.
@@ -4645,3 +4649,27 @@ Current state after Slice 8AQ:
 - signature verification, timestamp tolerance, dedupe, enrichment, and Firestore record-only writes are proven end to end;
 - automatic Billing writes and Apps Script writes remain disabled/not implemented;
 - production/live secrets and production/live Revolut webhooks remain untouched.
+
+## Slice 8AR - Trust Hub Legal Name Clarification Recorded
+
+Adam pasted a further Isa Bell/Twilio naming clarification on 2026-05-18. The answer does not change the Trust Hub / Secondary Profile / UK RC Bundle architecture, but it tightens how names should be entered.
+
+Locked naming rule:
+
+- Parent Primary Business Compliance Profile legal-business-name field: `Continuity AI Ltd`.
+- Do not use `RightOnQ` as the legal business name.
+- Do not use `Continuity AI Ltd trading as RightOnQ` in a legal-business-name field unless the provider explicitly asks for a combined trading-as format or the official registration record uses that exact combined wording.
+- `RightOnQ` remains the trading name / product brand and should only be entered where the flow exposes a separate trading-name / brand / DBA-style field.
+- End-client Secondary Compliance Profiles use the end client's own registered legal business name.
+- UK RC Bundle and program-specific registration lanes keep using the legal entity required for the entity being registered, with `RightOnQ` only where a separate brand/DBA field exists.
+
+Verification notes:
+
+- Companies House public record lists `CONTINUITY AI LTD`, company number `17119848`, incorporated 26 March 2026.
+- Twilio public docs confirm Secondary Compliance Profiles are for brands/entities different from the business in the Primary Compliance Profile and require an approved Primary Compliance Profile first.
+- Twilio's Compliance Embeddable Toll-Free guide documents an optional `DoingBusinessAs` field for trade name / downstream business name where that flow exposes it.
+
+Docs updated in this slice:
+
+- `RCS_ONBOARDING_MAIN_BUILD_PLAN.md`;
+- this handover diary's Legal Entity / Brand Naming section and relevant Trust Hub current-state notes.

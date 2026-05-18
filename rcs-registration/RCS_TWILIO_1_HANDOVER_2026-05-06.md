@@ -800,7 +800,9 @@ Important official requirements identified:
 
 ### Trading Name
 
-The current helper is:
+Later correction from 2026-05-18: do not copy this example into legal-business-name fields. Use the exact registered legal name in legal-name fields, and use the public brand only where a separate trading-name / brand field exists.
+
+The current helper at the time was:
 
 `Use this if the public brand differs, e.g. Continuity AI Ltd trading as RightOnQ.`
 
