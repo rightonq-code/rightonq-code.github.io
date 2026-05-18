@@ -4673,3 +4673,40 @@ Docs updated in this slice:
 
 - `RCS_ONBOARDING_MAIN_BUILD_PLAN.md`;
 - this handover diary's Legal Entity / Brand Naming section and relevant Trust Hub current-state notes.
+
+## Slice 9A - Twilio Setup And Usage Tracking Source Added
+
+Codex started Slice 9 after the Revolut sandbox webhook proof and legal-name clarification were recorded. This is a source-only implementation slice: no Apps Script push, version creation, deployment update, live Sheet mutation, Twilio API call, provider registration change, or customer-facing change was made.
+
+Source changes:
+
+- `google-apps-script/Code.gs` now defines internal `Twilio setup` tracking headers.
+- New Part A submissions will queue a `Twilio setup` row in source once this Apps Script source is deployed.
+- Guarded operator snapshots include latest `twilioSetup` readback.
+- New guarded operator action: `updateTwilioSetup`.
+- Existing `UK RC bundles` headers now include Compliance Embeddable inquiry/registration/status/rejection/event fields, matching the documented UK RC Bundle lane.
+- Existing `Billing` headers now include usage-credit, top-up, last-payment, and billing-pause tracking fields.
+- New local wrapper: `tools/operator-twilio-setup.mjs`.
+- `tools/operator-billing.mjs` now accepts the new usage/top-up/pause fields.
+- `tools/README.md`, `google-apps-script/README.md`, and `RCS_ONBOARDING_MAIN_BUILD_PLAN.md` were updated to describe the new source-only tracking shape.
+
+Safety boundary:
+
+- This does not create Twilio subaccounts.
+- This does not call Twilio APIs.
+- This does not enable chargeable Twilio-backed usage.
+- This does not deploy Apps Script HEAD.
+- This does not store Twilio auth tokens, API keys, webhook secrets, raw message payloads, or customer message content.
+- Store IDs, statuses, URLs, and operator notes only.
+
+Local checks passed:
+
+- `node --check --input-type=commonjs < rcs-registration/google-apps-script/Code.gs`;
+- `node --check rcs-registration/tools/operator-twilio-setup.mjs`;
+- `node --check rcs-registration/tools/operator-billing.mjs`;
+- `operator-twilio-setup.mjs --dry-run`;
+- `operator-billing.mjs --dry-run` with usage/pause fields.
+
+Next gate:
+
+- If Adam approves, the next slice is a careful Apps Script deployment/update plan for this source-only Slice 9A work: push Apps Script HEAD, create a new API-only/operator version or deployment as appropriate, preserve the public v31 customer web app unless deliberately updating it, then run read-only/dummy-PIN and valid-PIN operator proofs.

@@ -68,6 +68,12 @@ Deployment:
 - Version `32` adds the `Payment orders` ledger plus guarded `checkActiveCheckout` and `recordPaymentOrder` operator actions for Revolut active-checkout protection. The public web app is still pinned to version `31`.
 - Version `35` adds guarded `lookupPaymentOrder` for read-only Payment orders lookup by Revolut order ID. It is deployed as a clean API-only operator deployment; the public web app remains pinned to version `31`.
 
+Pending source-only changes after version `35`:
+
+- Source HEAD adds the `Twilio setup` tab shape, `updateTwilioSetup` operator action, Compliance Embeddable tracking fields on `UK RC bundles`, and usage/top-up/pause fields on `Billing`.
+- These changes are not live until Adam approves an Apps Script push/version/deployment update.
+- Preserve the public web app version `31` unless deliberately updating the public customer deployment.
+
 ## Behaviour
 
 The static form posts the Part A JSON payload to the Web app URL.
@@ -90,11 +96,12 @@ The script:
 - supports guarded operator readback through `action = getOperatorSnapshot`,
 - supports guarded Trust Hub KYC updates through `action = updateTrustHubKyc`,
 - supports guarded UK RC Bundle updates through `action = updateUkRcBundle`,
+- supports guarded Twilio setup / provider submission / usage-pull tracking updates through `action = updateTwilioSetup`,
 - appends successful internal status changes to `Status events`,
 - redacts private application tokens and operator/create PINs from stored audit JSON,
 - appends customer communication drafts to `Communications` for manual send/review,
 - appends a RightOnQ operator checklist row to `Internal reviews` when Part A is received,
-- appends internal Trust Hub and UK RC Bundle tracking rows when Part A is received,
+- appends internal Trust Hub, UK RC Bundle, Twilio setup, and billing tracking rows when Part A is received,
 - stores `Trust Hub status` on the `Applications` control row,
 - sets review status to `New`,
 - sets US fee status to `Not yet agreed` if United States is selected,
@@ -137,6 +144,7 @@ Target state before public website integration:
   - `updateInternalReview`;
   - `updateTrustHubKyc`;
   - `updateUkRcBundle`;
+  - `updateTwilioSetup`;
   - Google-authenticated / RightOnQ-only access where practical.
 
 Local tooling is ready for the split:

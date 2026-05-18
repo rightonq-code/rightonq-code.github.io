@@ -41,6 +41,7 @@ The proof helper uses the authenticated operator API for creating the private te
 | `operator-review.mjs` | Update the internal review checklist and optionally mark Part A accepted. | `RCS_ONBOARDING_OPERATOR_PIN` |
 | `operator-trusthub-kyc.mjs` | Update the internal Trust Hub KYC tracking row and sync the application Trust Hub status. | `RCS_ONBOARDING_OPERATOR_PIN` |
 | `operator-rc-bundle.mjs` | Update the internal UK RC Bundle tracking row. | `RCS_ONBOARDING_OPERATOR_PIN` |
+| `operator-twilio-setup.mjs` | Update the internal Twilio setup, provider submission, usage-pull, and manual pause tracking row. | `RCS_ONBOARDING_OPERATOR_PIN` |
 | `operator-billing.mjs` | Update the internal billing/payment tracking row. | `RCS_ONBOARDING_OPERATOR_PIN` |
 | `operator-payment-order.mjs` | Check, append, or look up Revolut payment-order ledger snapshots for active-checkout protection. | `RCS_ONBOARDING_OPERATOR_PIN` |
 | `proof-public-part-a-submit.mjs` | Create a private test link, submit Part A through the public path, then prove Trust Hub KYC and UK RC Bundle tracking rows were created. | `RCS_ONBOARDING_CREATE_PIN` and `RCS_ONBOARDING_OPERATOR_PIN` |
@@ -48,6 +49,8 @@ The proof helper uses the authenticated operator API for creating the private te
 | `revolut-webhook-verify.mjs` | Verify Revolut webhook signatures/timestamp tolerance against captured sandbox payloads. | No RCS PIN; uses `REVOLUT_WEBHOOK_SIGNING_SECRET` for real samples |
 | `revolut-webhook-map.mjs` | Map a verified Revolut webhook payload into a proposed `operator-billing.mjs --dry-run` update. | No RCS PIN; performs no writes |
 | `revolut-webhook-handler.mjs` | Offline endpoint-core proof: verify headers/body, map payload, and return public/internal handler results without writes. | No RCS PIN; fake-data self-test only for now |
+
+Note: `operator-twilio-setup.mjs` and the expanded billing/RC Bundle fields depend on the post-version-35 Apps Script source. They are ready locally, but not live until the Apps Script operator deployment is deliberately updated.
 
 ## Safety Rules
 
@@ -117,7 +120,7 @@ RCS_ONBOARDING_OPERATOR_PIN="..." node rcs-registration/tools/operator-status.mj
   --application-id ROQ-RCS-...
 ```
 
-Expected live result: JSON containing application status, latest internal review, Trust Hub KYC row, UK RC Bundle row, recent status events, and queued communications.
+Expected live result: JSON containing application status, latest internal review, Trust Hub KYC row, UK RC Bundle row, recent status events, and queued communications. After the Slice 9 source is deployed, the snapshot also includes the latest `twilioSetup` row.
 
 ## Approve Part A After Internal Review
 
@@ -221,6 +224,37 @@ RCS_ONBOARDING_OPERATOR_PIN="..." node rcs-registration/tools/operator-rc-bundle
 ```
 
 Expected live result: JSON showing the latest `rcBundleStatus`, any stored RC Bundle SID, and fallback status.
+
+## Update Twilio Setup Tracking
+
+Dry run:
+
+```bash
+node rcs-registration/tools/operator-twilio-setup.mjs \
+  --application-id ROQ-RCS-... \
+  --twilio-subaccount-sid AC... \
+  --provider-submission-status provider_review \
+  --usage-pull-status not_started \
+  --manual-pause-flag no \
+  --internal-notes "Twilio subaccount prepared; usage pull not enabled yet." \
+  --dry-run
+```
+
+Live run:
+
+```bash
+RCS_ONBOARDING_OPERATOR_PIN="..." node rcs-registration/tools/operator-twilio-setup.mjs \
+  --application-id ROQ-RCS-... \
+  --twilio-subaccount-sid AC... \
+  --provider-submission-status provider_review \
+  --usage-pull-status not_started \
+  --manual-pause-flag no \
+  --internal-notes "Twilio subaccount prepared; usage pull not enabled yet."
+```
+
+Expected live result: JSON showing the stored Twilio subaccount SID, provider submission status, go-live status, and manual pause flag.
+
+Safety: store Twilio resource IDs, statuses, URLs, and operator notes only. Do not store Twilio auth tokens, API keys, webhook secrets, raw message payloads, or customer message content in this workflow.
 
 ## Update Billing Tracking
 

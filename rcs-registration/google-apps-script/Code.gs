@@ -8,6 +8,7 @@ const COMMUNICATIONS_SHEET_NAME = "Communications";
 const INTERNAL_REVIEWS_SHEET_NAME = "Internal reviews";
 const TRUST_HUB_KYC_SHEET_NAME = "Trust Hub KYC";
 const UK_RC_BUNDLES_SHEET_NAME = "UK RC bundles";
+const TWILIO_SETUP_SHEET_NAME = "Twilio setup";
 const BILLING_SHEET_NAME = "Billing";
 const PAYMENT_ORDERS_SHEET_NAME = "Payment orders";
 const PUBLIC_FORM_URL = "https://rightonq-code.github.io/rcs-registration/index.html";
@@ -144,6 +145,15 @@ const BILLING_HEADERS = [
   "Monthly billing starts at",
   "Next billing cycle date",
   "Usage/top-up status",
+  "Usage credit balance GBP",
+  "Top-up threshold GBP",
+  "Top-up amount GBP",
+  "Auto top-up status",
+  "Last top-up attempt at",
+  "Last top-up status",
+  "Last payment status",
+  "Billing pause flag",
+  "Billing pause reason",
   "Internal notes",
   "Last updated"
 ];
@@ -242,6 +252,14 @@ const UK_RC_BUNDLE_HEADERS = [
   "Created at",
   "Application ID",
   "Client ID",
+  "Compliance embeddable supported",
+  "Compliance embeddable inquiry ID",
+  "Compliance embeddable registration ID",
+  "Compliance embeddable status",
+  "Compliance embeddable rejection code",
+  "Compliance embeddable rejection reason",
+  "Compliance embeddable last event",
+  "Compliance embeddable last event at",
   "RC bundle SID",
   "RC bundle status",
   "RC bundle status updated at",
@@ -258,6 +276,40 @@ const UK_RC_BUNDLE_HEADERS = [
   "Supporting document SID",
   "Compliance owner",
   "Fallback required",
+  "Internal notes",
+  "Last updated"
+];
+const TWILIO_SETUP_HEADERS = [
+  "Created at",
+  "Application ID",
+  "Client ID",
+  "Twilio subaccount SID",
+  "Twilio subaccount friendly name",
+  "Twilio messaging service SID",
+  "RBM agent ID",
+  "RBM sender name",
+  "RBM logo URL",
+  "RBM banner URL",
+  "Provider submission reference",
+  "Provider submission status",
+  "Provider submitted at",
+  "Provider last checked at",
+  "Provider notes",
+  "Phone preview status",
+  "Phone preview sent at",
+  "Review video URL",
+  "Review video status",
+  "Registration pack status",
+  "Go-live status",
+  "Go-live date",
+  "Usage pull status",
+  "Usage last pulled at",
+  "Usage period start",
+  "Usage period end",
+  "Usage cost GBP",
+  "Usage reconciliation status",
+  "Manual pause flag",
+  "Manual pause reason",
   "Internal notes",
   "Last updated"
 ];
@@ -502,6 +554,12 @@ function doPost(event) {
       now: now
     });
 
+    queueTwilioSetup(spreadsheet, {
+      applicationId: applicationId,
+      applicationRecord: payload,
+      now: now
+    });
+
     queueBilling(spreadsheet, {
       applicationId: applicationId,
       applicationRecord: payload,
@@ -546,7 +604,8 @@ function isOperatorOnlyAction(action) {
     lookupPaymentOrder: true,
     updateInternalReview: true,
     updateTrustHubKyc: true,
-    updateUkRcBundle: true
+    updateUkRcBundle: true,
+    updateTwilioSetup: true
   };
   return Boolean(action && operatorActions[action]);
 }
@@ -598,6 +657,10 @@ function rcsOperatorAction(payload) {
     if (payload.action === "updateUkRcBundle") {
       requireOperatorPin(payload);
       return updateUkRcBundle(spreadsheet, payload);
+    }
+    if (payload.action === "updateTwilioSetup") {
+      requireOperatorPin(payload);
+      return updateTwilioSetup(spreadsheet, payload);
     }
 
     throw new Error("Unsupported operator action: " + payload.action);
@@ -865,6 +928,7 @@ function getOperatorSnapshot(spreadsheet, payload) {
     internalReview: findLatestRecordByApplicationId(spreadsheet, INTERNAL_REVIEWS_SHEET_NAME, applicationId, INTERNAL_REVIEW_HEADERS),
     trustHubKyc: findLatestRecordByApplicationId(spreadsheet, TRUST_HUB_KYC_SHEET_NAME, applicationId, TRUST_HUB_KYC_HEADERS),
     ukRcBundle: findLatestRecordByApplicationId(spreadsheet, UK_RC_BUNDLES_SHEET_NAME, applicationId, UK_RC_BUNDLE_HEADERS),
+    twilioSetup: findLatestRecordByApplicationId(spreadsheet, TWILIO_SETUP_SHEET_NAME, applicationId, TWILIO_SETUP_HEADERS),
     recentStatusEvents: findRecentRecordsByApplicationId(spreadsheet, STATUS_EVENTS_SHEET_NAME, applicationId, 5),
     queuedCommunications: findRecentRecordsByApplicationId(spreadsheet, COMMUNICATIONS_SHEET_NAME, applicationId, 5),
     generatedAt: new Date().toISOString()
@@ -1082,6 +1146,56 @@ function updateUkRcBundle(spreadsheet, payload) {
   };
 }
 
+function updateTwilioSetup(spreadsheet, payload) {
+  const now = new Date();
+  const applicationId = payload.applicationId;
+  if (!applicationId) throw new Error("Missing application ID");
+
+  const applicationRecord = findApplicationRecord(spreadsheet, { applicationId: applicationId });
+  if (!applicationRecord) throw new Error("Application ID not found");
+
+  const result = upsertTrackingRecord(
+    spreadsheet,
+    TWILIO_SETUP_SHEET_NAME,
+    TWILIO_SETUP_HEADERS,
+    buildTwilioSetupFieldMap(),
+    payload,
+    now
+  );
+
+  const statusPayload = {
+    applicationId: applicationId,
+    eventType: "twilio_setup_updated",
+    changedBy: firstValue(payload.changedBy, payload.operatorName, "RightOnQ"),
+    source: "twilio_setup"
+  };
+  if (Object.prototype.hasOwnProperty.call(payload, "twilioStatus")) {
+    statusPayload.twilioStatus = payload.twilioStatus;
+  }
+  if (Object.prototype.hasOwnProperty.call(payload, "providerSubmissionStatus")) {
+    statusPayload.providerStatus = payload.providerSubmissionStatus;
+  }
+  if (Object.prototype.hasOwnProperty.call(payload, "manualPauseFlag") && String(payload.manualPauseFlag || "").toLowerCase() === "yes") {
+    statusPayload.registrationStatus = "paused_operational";
+  }
+  const internalNotes = firstValue(payload.internalNotes, payload.providerNotes, applicationRecord["Internal notes"]);
+  if (internalNotes) statusPayload.internalNotes = internalNotes;
+
+  if (statusPayload.twilioStatus || statusPayload.providerStatus || statusPayload.registrationStatus || statusPayload.internalNotes) {
+    updateApplicationStatus(spreadsheet, statusPayload);
+  }
+
+  return {
+    ok: true,
+    applicationId: applicationId,
+    twilioSubaccountSid: result.record["Twilio subaccount SID"] || "",
+    providerSubmissionStatus: result.record["Provider submission status"] || "",
+    goLiveStatus: result.record["Go-live status"] || "",
+    manualPauseFlag: result.record["Manual pause flag"] || "",
+    updatedAt: now.toISOString()
+  };
+}
+
 function updateBilling(spreadsheet, payload) {
   const now = new Date();
   const applicationId = payload.applicationId;
@@ -1135,6 +1249,9 @@ function updateBilling(spreadsheet, payload) {
     paymentProvider: result.record["Payment provider"] || "",
     checkoutOrderId: result.record["Checkout/order ID"] || "",
     paymentStatus: result.record["Payment status"] || "",
+    usageTopUpStatus: result.record["Usage/top-up status"] || "",
+    usageCreditBalanceGbp: result.record["Usage credit balance GBP"] || "",
+    billingPauseFlag: result.record["Billing pause flag"] || "",
     updatedAt: now.toISOString()
   };
 }
@@ -1433,6 +1550,14 @@ function buildTrustHubKycFieldMap() {
 function buildUkRcBundleFieldMap() {
   return {
     clientId: "Client ID",
+    complianceEmbeddableSupported: "Compliance embeddable supported",
+    complianceEmbeddableInquiryId: "Compliance embeddable inquiry ID",
+    complianceEmbeddableRegistrationId: "Compliance embeddable registration ID",
+    complianceEmbeddableStatus: "Compliance embeddable status",
+    complianceEmbeddableRejectionCode: "Compliance embeddable rejection code",
+    complianceEmbeddableRejectionReason: "Compliance embeddable rejection reason",
+    complianceEmbeddableLastEvent: "Compliance embeddable last event",
+    complianceEmbeddableLastEventAt: "Compliance embeddable last event at",
     rcBundleSid: "RC bundle SID",
     rcBundleStatus: "RC bundle status",
     rcBundleRejectionReason: "RC bundle rejection reason",
@@ -1448,6 +1573,40 @@ function buildUkRcBundleFieldMap() {
     supportingDocumentSid: "Supporting document SID",
     complianceOwner: "Compliance owner",
     fallbackRequired: "Fallback required",
+    internalNotes: "Internal notes"
+  };
+}
+
+function buildTwilioSetupFieldMap() {
+  return {
+    clientId: "Client ID",
+    twilioSubaccountSid: "Twilio subaccount SID",
+    twilioSubaccountFriendlyName: "Twilio subaccount friendly name",
+    twilioMessagingServiceSid: "Twilio messaging service SID",
+    rbmAgentId: "RBM agent ID",
+    rbmSenderName: "RBM sender name",
+    rbmLogoUrl: "RBM logo URL",
+    rbmBannerUrl: "RBM banner URL",
+    providerSubmissionReference: "Provider submission reference",
+    providerSubmissionStatus: "Provider submission status",
+    providerSubmittedAt: "Provider submitted at",
+    providerLastCheckedAt: "Provider last checked at",
+    providerNotes: "Provider notes",
+    phonePreviewStatus: "Phone preview status",
+    phonePreviewSentAt: "Phone preview sent at",
+    reviewVideoUrl: "Review video URL",
+    reviewVideoStatus: "Review video status",
+    registrationPackStatus: "Registration pack status",
+    goLiveStatus: "Go-live status",
+    goLiveDate: "Go-live date",
+    usagePullStatus: "Usage pull status",
+    usageLastPulledAt: "Usage last pulled at",
+    usagePeriodStart: "Usage period start",
+    usagePeriodEnd: "Usage period end",
+    usageCostGbp: "Usage cost GBP",
+    usageReconciliationStatus: "Usage reconciliation status",
+    manualPauseFlag: "Manual pause flag",
+    manualPauseReason: "Manual pause reason",
     internalNotes: "Internal notes"
   };
 }
@@ -1475,6 +1634,15 @@ function buildBillingFieldMap() {
     monthlyBillingStartsAt: "Monthly billing starts at",
     nextBillingCycleDate: "Next billing cycle date",
     usageTopUpStatus: "Usage/top-up status",
+    usageCreditBalanceGbp: "Usage credit balance GBP",
+    topUpThresholdGbp: "Top-up threshold GBP",
+    topUpAmountGbp: "Top-up amount GBP",
+    autoTopUpStatus: "Auto top-up status",
+    lastTopUpAttemptAt: "Last top-up attempt at",
+    lastTopUpStatus: "Last top-up status",
+    lastPaymentStatus: "Last payment status",
+    billingPauseFlag: "Billing pause flag",
+    billingPauseReason: "Billing pause reason",
     internalNotes: "Internal notes"
   };
 }
@@ -1639,30 +1807,23 @@ function queueUkRcBundle(spreadsheet, options) {
   const record = options.applicationRecord || {};
   const markets = asList(record.regions);
   const hasUk = markets.indexOf("United Kingdom") !== -1;
-  const sheet = getOrCreateSheet(spreadsheet, UK_RC_BUNDLES_SHEET_NAME, UK_RC_BUNDLE_HEADERS);
-  sheet.appendRow([
-    now,
-    safeCell(options.applicationId),
-    safeCell(record.clientId),
-    "",
-    hasUk ? "not_started" : "not_required_unless_uk_long_code",
-    now,
-    "",
-    "",
-    "",
-    safeCell(record.legalBusinessName),
-    safeCell(record.companiesHouseNumber),
-    "uk_long_code",
-    "",
-    "",
-    "not_started",
-    "",
-    "",
-    "end_business",
-    hasUk ? "to_be_confirmed" : "not_required_unless_sms_fallback",
-    safeCell(buildUkRcBundleNotes(record, hasUk)),
-    now
-  ]);
+  appendTrackingRecord(spreadsheet, UK_RC_BUNDLES_SHEET_NAME, UK_RC_BUNDLE_HEADERS, {
+    "Created at": now,
+    "Application ID": options.applicationId,
+    "Client ID": record.clientId,
+    "Compliance embeddable supported": "access_not_confirmed",
+    "Compliance embeddable status": hasUk ? "not_started" : "not_required_unless_uk_long_code",
+    "RC bundle status": hasUk ? "not_started" : "not_required_unless_uk_long_code",
+    "RC bundle status updated at": now,
+    "End business legal name": record.legalBusinessName,
+    "Business registration number": record.companiesHouseNumber,
+    "Number type": "uk_long_code",
+    "Phone number assignment status": "not_started",
+    "Compliance owner": "end_business",
+    "Fallback required": hasUk ? "to_be_confirmed" : "not_required_unless_sms_fallback",
+    "Internal notes": buildUkRcBundleNotes(record, hasUk),
+    "Last updated": now
+  });
 }
 
 function buildUkRcBundleNotes(record, hasUk) {
@@ -1672,6 +1833,36 @@ function buildUkRcBundleNotes(record, hasUk) {
     "Assign UK long-code fallback numbers to the end-business bundle before use."
   ];
   if (record.usFeeStatus) notes.push("US fee status: " + record.usFeeStatus);
+  return notes.join(" | ");
+}
+
+function queueTwilioSetup(spreadsheet, options) {
+  const now = options.now || new Date();
+  const record = options.applicationRecord || {};
+  appendTrackingRecord(spreadsheet, TWILIO_SETUP_SHEET_NAME, TWILIO_SETUP_HEADERS, {
+    "Created at": now,
+    "Application ID": options.applicationId,
+    "Client ID": record.clientId,
+    "RBM sender name": firstValue(record.displayName, record.tradingName, record.legalBusinessName),
+    "Provider submission status": "not_started",
+    "Phone preview status": "not_started",
+    "Review video status": "not_started",
+    "Registration pack status": "not_started",
+    "Go-live status": "not_started",
+    "Usage pull status": "not_started",
+    "Usage reconciliation status": "not_started",
+    "Manual pause flag": "no",
+    "Internal notes": buildTwilioSetupNotes(record),
+    "Last updated": now
+  });
+}
+
+function buildTwilioSetupNotes(record) {
+  const notes = [
+    "Create one Twilio subaccount per client before live sending.",
+    "Do not enable chargeable Twilio-backed usage until Trust Hub/RCS approval and billing controls are ready.",
+    "Sender: " + firstValue(record.displayName, record.tradingName, record.legalBusinessName, "not supplied")
+  ];
   return notes.join(" | ");
 }
 
@@ -1701,6 +1892,15 @@ function queueBilling(spreadsheet, options) {
     monthlyBillingStartsAt: record.monthlyBillingStartsAt,
     nextBillingCycleDate: record.nextBillingCycleDate,
     usageTopUpStatus: firstValue(record.usageTopUpStatus, "not_started"),
+    usageCreditBalanceGbp: firstValue(record.usageCreditBalanceGbp, ""),
+    topUpThresholdGbp: firstValue(record.topUpThresholdGbp, ""),
+    topUpAmountGbp: firstValue(record.topUpAmountGbp, ""),
+    autoTopUpStatus: firstValue(record.autoTopUpStatus, "not_configured"),
+    lastTopUpAttemptAt: record.lastTopUpAttemptAt,
+    lastTopUpStatus: firstValue(record.lastTopUpStatus, ""),
+    lastPaymentStatus: firstValue(record.lastPaymentStatus, ""),
+    billingPauseFlag: firstValue(record.billingPauseFlag, "no"),
+    billingPauseReason: record.billingPauseReason,
     internalNotes: buildBillingNotes(record)
   };
 

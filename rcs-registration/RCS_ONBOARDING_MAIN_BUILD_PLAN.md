@@ -2843,6 +2843,8 @@ Step 2G update:
 
 Add internal Twilio compliance, runtime setup, and usage tracking fields.
 
+Status: source implementation added by Codex on Monday 18 May 2026; not yet pushed to Apps Script and not yet live in the Google Sheet.
+
 Output:
 
 - secondary compliance profile SID;
@@ -2859,6 +2861,42 @@ Output:
 - usage pull plan;
 - manual pause flag;
 - usage balance reconciliation fields.
+
+Implemented in source:
+
+- expanded `Billing` headers and `operator-billing.mjs` to cover:
+  - usage credit balance;
+  - top-up threshold / amount;
+  - auto top-up status;
+  - last top-up attempt/status;
+  - last payment status;
+  - billing pause flag/reason.
+- expanded `UK RC bundles` headers to cover Compliance Embeddable inquiry/registration/status/rejection/event fields.
+- added internal `Twilio setup` tracking with:
+  - Twilio subaccount SID/friendly name;
+  - Messaging Service SID;
+  - RBM agent/sender/assets;
+  - provider submission reference/status/check timestamps;
+  - phone preview, review video, registration pack, go-live status;
+  - usage pull/reconciliation fields;
+  - manual pause flag/reason.
+- `getOperatorSnapshot` now includes the latest `twilioSetup` row.
+- new guarded operator action: `updateTwilioSetup`.
+- new local wrapper: `tools/operator-twilio-setup.mjs`.
+
+Deployment boundary:
+
+- This slice is source-only until Adam explicitly approves an Apps Script push/version/deployment update.
+- It does not call Twilio APIs, create Twilio subaccounts, change provider registrations, or enable live usage.
+- It stores IDs, statuses, URLs, and operator notes only; no Twilio auth tokens, API secrets, raw message payloads, or customer message content.
+
+Local checks passed:
+
+- `node --check --input-type=commonjs < rcs-registration/google-apps-script/Code.gs`
+- `node --check rcs-registration/tools/operator-twilio-setup.mjs`
+- `node --check rcs-registration/tools/operator-billing.mjs`
+- `operator-twilio-setup.mjs --dry-run`
+- `operator-billing.mjs --dry-run` with usage/pause fields
 
 ### Slice 10 - Website Integration
 
