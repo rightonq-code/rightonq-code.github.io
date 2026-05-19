@@ -75,7 +75,7 @@ Deployment:
 - Version `41` preserves numeric `0` in Payment orders summaries, after the Slice 9C synthetic append proof exposed that `amountMinor: 0` rendered as blank in lookup output.
 - Version `42` preserves numeric `0` in the shared Sheet row-read helpers, after the version `41` lookup proved the lower-level row mapper still collapsed zero to blank before the Payment orders summary saw it.
 - Version `43` preserves numeric `0` in full operator snapshots and pairs with `operator-status.mjs` redaction of Twilio Account SIDs in terminal output.
-- Pending source-only changes after version `43` add `Opt-in proof URL(s)` to `Twilio setup` tracking and the local `operator-twilio-setup.mjs` wrapper. They are not live until Adam approves an Apps Script push/version/deployment update.
+- Version `44` adds `Opt-in proof URL(s)` to `Twilio setup` tracking and the local `operator-twilio-setup.mjs` wrapper.
 
 ## Behaviour
 
@@ -161,7 +161,7 @@ Authenticated operator API scaffold:
 - `rcsOperatorAction(payload)` is available in `Code.gs` as the intended Apps Script API entry point for operator-only actions.
 - The manifest includes `executionApi.access = DOMAIN`.
 - The Apps Script project is now linked to standard Google Cloud project `rightonq-gog`.
-- The current clean operator API executable deployment is `AKfycbzj0I9m_vld5Aw-zPQFsTZXslrmxlrDA6Ut0RtFnd6_fxXpVDc4qhhRuKVAA5EuhWG9` (version `43`, `Operator API executable (Slice 10B redacted status + zero snapshot)`).
+- The current clean operator API executable deployment is `AKfycbzj0I9m_vld5Aw-zPQFsTZXslrmxlrDA6Ut0RtFnd6_fxXpVDc4qhhRuKVAA5EuhWG9` (version `44`, `Operator API executable (Slice 10I opt-in proof URL tracking)`).
 - The previous clean operator API executable deployments have been archived after the v35 lookup proof passed:
   - `AKfycbwPbeT3Mxpmr_Q88WdSp0hRnDk96Pm93GDTsA1eOsJxmiaVpSS2xAg78ox848YsqCQU` (version `34`);
   - `AKfycbwSdO73nyxrOKVPQVQgkoGg29RwvYmJXWDYAgFqs5cdxyI4pJXFW3cZZSS1-6y3zlex` (version `33`, description `Operator API executable (Step 8H clean API-only)`).
@@ -189,7 +189,9 @@ Operator API proof:
 - Valid-PIN lookup against version `42` for synthetic superseded row `roq-rcs-v40-append-proof-202605191340` returned `amountMinor: 0`, confirming numeric zero survives Apps Script Sheet readback.
 - Read-only live Sheet audit after version `42` compared header rows for `Part A submissions`, `Applications`, `Part B approvals`, `Part B video approvals`, `Status events`, `Communications`, `Internal reviews`, `Trust Hub KYC`, `UK RC bundles`, `Twilio setup`, `Billing`, and `Payment orders` against the current source constants. All matched; low-exposure row-shape checks confirmed expected timestamp/application/status columns without reading private tokens or raw JSON bodies.
 - Version `43` was deployed through the Apps Script REST deployment update API, avoiding `clasp deploy -i`; `clasp deployments` confirmed the operator API at `@43` and public web app still at `@31`. Valid-PIN `operator-status.mjs` readback confirmed Twilio Account SID redaction in terminal output and `Amount minor: 0` in the full snapshot.
-- Source after version `43` includes a pending hosted asset/proof URL tracking field: `Twilio setup.Opt-in proof URL(s)`. Do not expect live operator readback to include it until a later approved operator API deployment.
+- Version `44` was deployed with `clasp redeploy` against the existing clean API-only operator deployment ID, avoiding `clasp deploy -i`; `clasp deployments` confirmed the operator API at `@44` and public web app still at `@31`.
+- Dummy-PIN proof against version `44` returned `Invalid onboarding operator PIN`.
+- Valid-PIN proof update/readback for `ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747` confirmed `RBM logo URL`, `RBM banner URL`, `Opt-in proof URL(s)`, and `Review video URL` read back from `Twilio setup`, while `Provider submission status`, `Go-live status`, and `Usage pull status` remained `not_started`.
 - Operator snapshot readback now preserves existing tracked Sheet column order, appends any missing headers, and reads rows by the live Sheet header row.
 - Local operator wrappers now call `https://script.googleapis.com/v1/scripts/{deploymentId}:run` directly with the PIN in the HTTPS request body, not in a command-line `clasp run --params` argument.
 - The direct `scripts.run` helper uses `devMode: false` and the clean API executable deployment ID from `.clasp.json`, so wrappers are pinned to the deployed operator API version rather than Apps Script HEAD.

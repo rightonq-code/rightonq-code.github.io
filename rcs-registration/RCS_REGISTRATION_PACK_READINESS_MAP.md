@@ -58,7 +58,7 @@ Local RightOnQ source checked:
 | Authorised representative contact details | Part A `authorizedRepName`, `authorizedRepEmail`, `authorizedRepTitle`; `primaryContactPhone` captured separately | Manual follow-up | Twilio RCS registration asks for authorised representative contact details. Confirm whether the primary phone is acceptable as the representative phone, and collect a distinct rep phone if Twilio asks for it. Secondary Compliance Profile readiness needs two reps. |
 | Message flow / opt-in description | Part A `consentRoute`, `optInDescription` | Ready | Wording still needs RightOnQ quality review before submission. |
 | Opt-out description | Part A `optOutDescription`; sample STOP message | Ready | Wording still needs RightOnQ quality review before submission. |
-| Opt-in proof images | Pending source field `Twilio setup` `Opt-in proof URL(s)` | Hard stop / tracked after next deployment | Twilio requires opt-in policy images hosted on a publicly accessible URL. Source now has a tracking field, but the public hosted file workflow and Apps Script deployment proof are still needed. |
+| Opt-in proof images | `Twilio setup` `Opt-in proof URL(s)` | Hard stop / tracked | Twilio requires opt-in policy images hosted on a publicly accessible URL. Tracking and readback are live in operator API version 44; the actual public hosted file workflow is still needed. |
 | Use-case description | Part A `useCaseDescription`, `messageTrigger`, `primaryUseCase` | Ready | Internal review should confirm the use case is specific and not vague. |
 | Example messages | Part A `exampleMessageOne`, `exampleMessageTwo`, `helpSampleMessage`, `stopSampleMessage` | Ready | Internal review should confirm examples match use case and opt-out expectations. |
 | Use-case review video URL | Part B video generator/story; `Twilio setup` `Review video URL` | Hard stop / tracked | A public hosted video URL is required before submission. Current system can generate a browser WebM, but hosting/storage workflow is not yet proved. |
@@ -128,8 +128,8 @@ The following must be true before sender-pool/phone-number movement:
 Build the hosted asset/proof URL workflow next, still without RCS Sender submission:
 
 1. Decide where approved logo, banner, opt-in proof image, and review video files are hosted.
-2. Add source/tooling to record those public URLs into `Twilio setup`.
-3. Prove readback on the existing proof application.
+2. Upload or publish approved proof files through that route.
+3. Replace placeholder proof URLs on the existing proof application with real approved hosted URLs.
 4. Keep `Provider submission status`, `Go-live status`, and `Usage pull status` at `not_started`.
 
 Do not combine this with callback configuration, sender-pool movement, compliance submission, RCS Sender submission, or message sending.

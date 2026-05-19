@@ -3194,7 +3194,7 @@ Recommended next slice:
 
 ### Slice 10I - Hosted Asset / Proof URL Tracking Source
 
-Status: source-only tracking change prepared on Tuesday 19 May 2026.
+Status: deployed and proof-read on Tuesday 19 May 2026.
 
 Purpose:
 
@@ -3211,18 +3211,32 @@ Source changes:
 
 Boundary:
 
-- source/docs only;
-- not live until an approved Apps Script push/version/deployment update;
-- no Sheet write;
+- Apps Script operator API deployment updated to version `44`;
+- public web app stayed on version `31`;
+- one proof Sheet update/readback was performed against the existing proof application only;
 - no Twilio API call;
 - no public asset upload;
 - no RCS Sender creation/submission;
 - no Trust Hub or compliance submission;
 - no callback configuration, sender-pool movement, phone-number movement, message send, customer-facing change, or chargeable usage.
 
+Proof:
+
+- `clasp deployments` confirmed operator deployment `AKfycbzj0I9m_vld5Aw-zPQFsTZXslrmxlrDA6Ut0RtFnd6_fxXpVDc4qhhRuKVAA5EuhWG9 @44`;
+- public web app remained `AKfycbyI81Ir2xvHLar0R0iFBBWyXa1Nj93T4_8Ni5_eX3XEYDA-AKQbVYbPHnTROLm8e4a6 @31`;
+- dummy-PIN proof still rejected with `Invalid onboarding operator PIN`;
+- valid-PIN proof update/readback on `ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747` showed:
+  - `RBM logo URL = https://example.com/rightonq-proof-logo.png`;
+  - `RBM banner URL = https://example.com/rightonq-proof-banner.png`;
+  - `Opt-in proof URL(s) = https://example.com/rightonq-proof-opt-in.png`;
+  - `Review video URL = https://example.com/rightonq-proof-review-video.webm`;
+  - `Provider submission status = not_started`;
+  - `Go-live status = not_started`;
+  - `Usage pull status = not_started`.
+
 Recommended next gate:
 
-- deploy/prove the source-only operator update, then perform one proof update/readback on the existing proof application using harmless public placeholder URLs or final approved hosted proof URLs.
+- choose and prove the actual hosting route for approved logo, banner, opt-in proof image, and review video files, then replace the placeholder URLs with real approved hosted proof URLs.
 
 ## Open Questions
 

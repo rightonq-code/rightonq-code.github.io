@@ -5219,7 +5219,7 @@ Recommended next slice:
 
 ## Slice 10I - Hosted Asset / Proof URL Tracking Source
 
-Adam approved the hosted asset/proof URL workflow plan. Codex prepared the source-only tracking half first.
+Adam approved the hosted asset/proof URL workflow plan. Codex prepared the tracking source, deployed it to the clean operator API deployment, and Adam ran the valid-PIN proof update/readback.
 
 Source changes:
 
@@ -5237,21 +5237,43 @@ Source changes:
 
 Boundary:
 
-- source/docs only;
-- no Apps Script push/version/deployment update yet;
-- no Sheet write;
+- Apps Script operator API deployment updated to version `44`;
+- public web app remained version `31`;
+- one proof Sheet update/readback was performed against the existing proof application only;
 - no Twilio API call;
 - no public asset upload;
 - no RCS Sender or compliance submission;
 - no callback configuration, sender-pool movement, phone-number movement, message send, customer-facing change, or chargeable usage.
 
-Current live state:
+Deployment proof:
 
-- operator API remains version `43`;
-- public web app remains version `31`;
-- the new `Opt-in proof URL(s)` field is not live until a later approved deployment.
+- `clasp push` pushed `Code.gs`/`appsscript.json`;
+- version `44` created with description `Operator API executable (Slice 10I opt-in proof URL tracking)`;
+- existing clean operator API deployment `AKfycbzj0I9m_vld5Aw-zPQFsTZXslrmxlrDA6Ut0RtFnd6_fxXpVDc4qhhRuKVAA5EuhWG9` was updated to `@44` with `clasp redeploy`, not `clasp deploy -i`;
+- `clasp deployments` confirmed:
+  - operator API `@44`;
+  - public web app still `@31`.
+
+Guard proof:
+
+- dummy-PIN `operator-status.mjs` proof returned `Invalid onboarding operator PIN`.
+
+Valid-PIN proof update/readback:
+
+- application: `ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747`;
+- `operator-twilio-setup.mjs` returned `ok: true`, `providerSubmissionStatus: not_started`, `goLiveStatus: not_started`, `manualPauseFlag: no`;
+- `operator-status.mjs` readback showed:
+  - `RBM logo URL`: `https://example.com/rightonq-proof-logo.png`;
+  - `RBM banner URL`: `https://example.com/rightonq-proof-banner.png`;
+  - `Opt-in proof URL(s)`: `https://example.com/rightonq-proof-opt-in.png`;
+  - `Review video URL`: `https://example.com/rightonq-proof-review-video.webm`;
+  - `Provider submission status`: `not_started`;
+  - `Go-live status`: `not_started`;
+  - `Usage pull status`: `not_started`;
+  - `Twilio subaccount SID`: redacted in terminal output.
 
 Recommended next gate:
 
-- deploy/prove this source-only operator update as a separate Apps Script gate;
-- then run one proof `operator-twilio-setup.mjs` update/readback against `ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747`, keeping `Provider submission status`, `Go-live status`, and `Usage pull status` at `not_started`.
+- choose and prove the actual hosting route for approved logo, banner, opt-in proof image, and review video files;
+- replace the placeholder `example.com` proof URLs with real approved hosted URLs only after that route is chosen;
+- keep `Provider submission status`, `Go-live status`, and `Usage pull status` at `not_started`.
