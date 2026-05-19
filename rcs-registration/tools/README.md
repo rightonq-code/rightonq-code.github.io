@@ -42,6 +42,7 @@ The proof helper uses the authenticated operator API for creating the private te
 | `operator-trusthub-kyc.mjs` | Update the internal Trust Hub KYC tracking row and sync the application Trust Hub status. | `RCS_ONBOARDING_OPERATOR_PIN` |
 | `operator-rc-bundle.mjs` | Update the internal UK RC Bundle tracking row. | `RCS_ONBOARDING_OPERATOR_PIN` |
 | `operator-twilio-setup.mjs` | Update the internal Twilio setup, provider submission, usage-pull, and manual pause tracking row. | `RCS_ONBOARDING_OPERATOR_PIN` |
+| `operator-twilio-subaccount-link.mjs` | Resolve a Twilio subaccount by friendly name and link it into the internal Twilio setup row with redacted terminal output. | `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, and `RCS_ONBOARDING_OPERATOR_PIN` |
 | `operator-billing.mjs` | Update the internal billing/payment tracking row. | `RCS_ONBOARDING_OPERATOR_PIN` |
 | `operator-payment-order.mjs` | Check, append, or look up Revolut payment-order ledger snapshots for active-checkout protection. | `RCS_ONBOARDING_OPERATOR_PIN` |
 | `twilio-account-inventory.mjs` | Read-only Twilio parent/subaccount/Messaging Service inventory preflight before provider-connected setup. | `TWILIO_ACCOUNT_SID` and `TWILIO_AUTH_TOKEN` |
@@ -257,6 +258,46 @@ RCS_ONBOARDING_OPERATOR_PIN="..." node rcs-registration/tools/operator-twilio-se
 Expected live result: JSON showing the stored Twilio subaccount SID, provider submission status, go-live status, and manual pause flag.
 
 Safety: store Twilio resource IDs, statuses, URLs, and operator notes only. Do not store Twilio auth tokens, API keys, webhook secrets, raw message payloads, or customer message content in this workflow.
+
+## Link Twilio Proof Subaccount Into Tracking
+
+This helper resolves the full Twilio subaccount SID by friendly name, writes it
+to the internal `Twilio setup` tracking row, and redacts Twilio Account SIDs from
+terminal output.
+
+Dry run:
+
+```bash
+node rcs-registration/tools/operator-twilio-subaccount-link.mjs \
+  --application-id ROQ-RCS-... \
+  --friendly-name "RightOnQ RCS proof customer - 2026-05-19" \
+  --twilio-status subaccount_created \
+  --provider-submission-status not_started \
+  --go-live-status not_started \
+  --usage-pull-status not_started \
+  --manual-pause-flag no \
+  --internal-notes "Twilio proof subaccount created and linked; no Messaging Service, RCS sender, phone number, message send, or chargeable usage." \
+  --dry-run
+```
+
+Live run, using the existing 1Password secret wrapper for Twilio credentials and
+an operator PIN environment variable for the Sheet update:
+
+```bash
+RCS_ONBOARDING_OPERATOR_PIN="..." \
+  ~/rightonq-infrastructure/scripts/run_with_secrets.sh \
+    node rcs-registration/tools/operator-twilio-subaccount-link.mjs \
+      --application-id ROQ-RCS-... \
+      --friendly-name "RightOnQ RCS proof customer - 2026-05-19" \
+      --twilio-status subaccount_created \
+      --provider-submission-status not_started \
+      --go-live-status not_started \
+      --usage-pull-status not_started \
+      --manual-pause-flag no \
+      --internal-notes "Twilio proof subaccount created and linked; no Messaging Service, RCS sender, phone number, message send, or chargeable usage."
+```
+
+Expected live result: JSON showing `linked: true` and the operator update result with any Twilio Account SIDs redacted in terminal output. The internal Sheet stores the real resolved SID.
 
 ## Twilio Account Inventory Preflight
 
