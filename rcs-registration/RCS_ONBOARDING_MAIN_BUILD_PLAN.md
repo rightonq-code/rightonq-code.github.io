@@ -2950,13 +2950,41 @@ Boundary:
 - no message send;
 - no chargeable usage.
 
-Live inventory result:
+Initial live inventory result:
 
 - parent Twilio account: `Continuity AI Ltd`, `active`, `Full`;
 - one visible active child subaccount: `test account`;
 - one parent Messaging Service: `RightOnQ`, use case `notifications`;
 - configured sender pool contains one GB phone number sender with `SMS` and `Voice` capabilities;
 - no alpha senders or short codes were present in the configured sender pool.
+
+### Slice 10B - Twilio Proof Subaccount Creation
+
+Status: completed on Tuesday 19 May 2026.
+
+Decision:
+
+- create a clearly named proof/customer subaccount instead of reusing the generic existing `test account`;
+- keep this as the smallest provider write: Twilio subaccount only, no Messaging Service, no sender/RCS sender, no phone number, no compliance submission, no message send.
+
+Implemented in source:
+
+- `tools/twilio-subaccount-create.mjs`
+
+Live result:
+
+- created subaccount `RightOnQ RCS proof customer - 2026-05-19`;
+- Twilio subaccount SID: recorded in the live operator proof output; redacted from GitHub docs because GitHub push protection flags full Twilio Account SIDs;
+- status `active`, type `Full`, owned by parent account `Continuity AI Ltd`;
+- independent read-only inventory confirmed two child subaccounts are now visible: `RightOnQ RCS proof customer - 2026-05-19` and `test account`;
+- parent Messaging Service `RightOnQ` and its sender pool remained unchanged.
+
+Boundary:
+
+- one duplicate-check `GET`;
+- one Twilio subaccount creation `POST`;
+- one read-only inventory verification;
+- no customer-facing change or chargeable usage.
 
 ## Open Questions
 

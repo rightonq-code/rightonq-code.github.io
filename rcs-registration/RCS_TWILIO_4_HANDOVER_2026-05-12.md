@@ -4867,3 +4867,53 @@ Current next gate:
 
 - decide the first write-capable Twilio setup step. Recommended next step is not RCS sender submission yet; first decide whether the existing `test account` subaccount is the right sandbox customer container or whether to create a clearly named RightOnQ RCS proof subaccount.
 - any subaccount creation or Messaging Service creation must be a separate explicit approval gate.
+
+## Slice 10B - Twilio Proof Subaccount Creation
+
+Adam approved Codex to choose the smarter setup path. Codex chose the cleaner isolation path: create a clearly named RightOnQ proof/customer subaccount rather than reusing the generic existing `test account`.
+
+New tool:
+
+- `rcs-registration/tools/twilio-subaccount-create.mjs`
+
+Safety boundary:
+
+- dry-run first;
+- live mode requires `--confirm-create`;
+- live mode performs one duplicate-check `GET` by friendly name before creation;
+- live creation performs one `POST` to Twilio's Accounts resource with `FriendlyName` only;
+- the tool never prints the Twilio auth token;
+- it does not create Messaging Services, sender pools, RCS senders, phone numbers, messages, compliance profiles, or Trust Hub resources.
+
+Dry-run proof:
+
+- `node --check rcs-registration/tools/twilio-subaccount-create.mjs` passed;
+- `node rcs-registration/tools/twilio-subaccount-create.mjs --friendly-name "RightOnQ RCS proof customer - 2026-05-19" --dry-run` returned the planned duplicate-check `GET` and create-subaccount `POST` and made no Twilio API call.
+
+Live provider write:
+
+- command: `~/rightonq-infrastructure/scripts/run_with_secrets.sh node rcs-registration/tools/twilio-subaccount-create.mjs --friendly-name "RightOnQ RCS proof customer - 2026-05-19" --confirm-create`;
+- wrapper loaded the required Twilio env vars without printing values;
+- Twilio created subaccount `RightOnQ RCS proof customer - 2026-05-19`;
+- subaccount SID: recorded in the live operator proof output; redacted from GitHub docs because GitHub push protection flags full Twilio Account SIDs;
+- status `active`, type `Full`;
+- owner: parent account `Continuity AI Ltd`;
+- created at `Tue, 19 May 2026 16:10:56 +0000`.
+
+Post-create read-only verification:
+
+- command: `~/rightonq-infrastructure/scripts/run_with_secrets.sh node rcs-registration/tools/twilio-account-inventory.mjs --include-senders`;
+- inventory showed parent account `Continuity AI Ltd`;
+- `visibleAccounts` now includes the parent plus two child subaccounts;
+- filtered `subaccounts` now includes:
+  - `RightOnQ RCS proof customer - 2026-05-19`, active;
+  - `test account`, active;
+- parent Messaging Service `RightOnQ` remained unchanged;
+- configured sender pool remained one GB phone number sender `+447915911817` with `SMS` and `Voice`;
+- alpha sender and short code pools remained empty.
+
+Current next gate:
+
+- record the new Twilio subaccount SID into the internal Twilio setup tracking row for the proof application, using `operator-twilio-setup.mjs` with Adam's operator PIN;
+- then decide whether the next provider-connected step is a subaccount-scoped Messaging Service inventory/create step or a Trust Hub/Compliance preflight;
+- any Messaging Service creation, phone number movement, RCS sender submission, compliance submission, or message send remains a separate explicit approval gate.

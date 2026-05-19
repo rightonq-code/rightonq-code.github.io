@@ -45,6 +45,7 @@ The proof helper uses the authenticated operator API for creating the private te
 | `operator-billing.mjs` | Update the internal billing/payment tracking row. | `RCS_ONBOARDING_OPERATOR_PIN` |
 | `operator-payment-order.mjs` | Check, append, or look up Revolut payment-order ledger snapshots for active-checkout protection. | `RCS_ONBOARDING_OPERATOR_PIN` |
 | `twilio-account-inventory.mjs` | Read-only Twilio parent/subaccount/Messaging Service inventory preflight before provider-connected setup. | `TWILIO_ACCOUNT_SID` and `TWILIO_AUTH_TOKEN` |
+| `twilio-subaccount-create.mjs` | Create one clearly named Twilio subaccount after a duplicate-name preflight. | `TWILIO_ACCOUNT_SID` and `TWILIO_AUTH_TOKEN` |
 | `proof-public-part-a-submit.mjs` | Create a private test link, submit Part A through the public path, then prove Trust Hub KYC and UK RC Bundle tracking rows were created. | `RCS_ONBOARDING_CREATE_PIN` and `RCS_ONBOARDING_OPERATOR_PIN` |
 | `revolut-sandbox-proof.mjs` | Prepare and test Revolut sandbox Hosted Checkout requests. | No RCS PIN; uses `REVOLUT_MERCHANT_API_SECRET` for live sandbox calls |
 | `revolut-webhook-verify.mjs` | Verify Revolut webhook signatures/timestamp tolerance against captured sandbox payloads. | No RCS PIN; uses `REVOLUT_WEBHOOK_SIGNING_SECRET` for real samples |
@@ -275,6 +276,29 @@ Live read-only run, using the existing 1Password secret wrapper:
 Expected live result: JSON showing the parent Twilio account summary, visible accounts, filtered subaccounts, Messaging Services, and sender-pool summary for the configured Messaging Service. The tool performs `GET` requests only and never prints the Twilio auth token.
 
 Safety: this is the first provider-connected preflight step only. It must not create subaccounts, Messaging Services, sender pools, RCS senders, compliance profiles, phone numbers, messages, or chargeable usage.
+
+## Create Twilio Proof Subaccount
+
+Dry run:
+
+```bash
+node rcs-registration/tools/twilio-subaccount-create.mjs \
+  --friendly-name "RightOnQ RCS proof customer - 2026-05-19" \
+  --dry-run
+```
+
+Live run, using the existing 1Password secret wrapper:
+
+```bash
+~/rightonq-infrastructure/scripts/run_with_secrets.sh \
+  node rcs-registration/tools/twilio-subaccount-create.mjs \
+    --friendly-name "RightOnQ RCS proof customer - 2026-05-19" \
+    --confirm-create
+```
+
+Expected live result: JSON showing either `created: true` with the new subaccount SID/status, or `created: false` if a visible account already has the same friendly name. The tool performs a duplicate-check `GET` before the create `POST` and never prints the Twilio auth token.
+
+Safety: this tool creates only a Twilio subaccount. It does not create Messaging Services, sender pools, RCS senders, phone numbers, messages, compliance profiles, or chargeable usage.
 
 ## Update Billing Tracking
 
