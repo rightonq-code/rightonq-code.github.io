@@ -4783,3 +4783,37 @@ Current next gate:
 - Dummy-PIN proof against the live version `42` operator API returned `Invalid onboarding operator PIN`.
 - Adam ran the valid-PIN lookup against version `42`; it returned `found: true`, `ok: true`, and `amountMinor: 0` for `roq-rcs-v40-append-proof-202605191340`, confirming numeric zero now survives shared Sheet readback.
 - Slice 9C is proved and ready to commit/push: header-aware append writes are live, zero-value readback is fixed, public web app remains version `31`, and no Revolut/Twilio/provider/customer-facing action was performed in this cleanup.
+
+## Slice 9D - Read-Only Tracking Sheet Header Audit
+
+Adam approved the next cleanup audit before any provider-connected Twilio setup. This was strictly read-only: Google Sheets `values.get` only, no Apps Script operator action, no Sheet write, no provider/API call, no customer-facing change, and no private token/raw JSON/body columns were read.
+
+Live Sheet checked: `1_C85rMaDWS0-VnXbtYQzRBS1trgN8kFf4hAnHfT3R-0`.
+
+Header rows compared against current `Code.gs` constants:
+
+- `Part A submissions`
+- `Applications`
+- `Part B approvals`
+- `Part B video approvals`
+- `Status events`
+- `Communications`
+- `Internal reviews`
+- `Trust Hub KYC`
+- `UK RC bundles`
+- `Twilio setup`
+- `Billing`
+- `Payment orders`
+
+Result:
+
+- all checked live header rows matched the current source header order;
+- low-exposure row-shape checks (`A:C` style ranges only) confirmed expected timestamp/application/status or ID columns on the remaining tracking tabs;
+- `Part B approvals` and `Part B video approvals` have the older Slice 5 test rows in the expected first columns;
+- `Status events`, `Communications`, `Internal reviews`, `Trust Hub KYC`, `UK RC bundles`, `Twilio setup`, `Billing`, and `Payment orders` all showed application IDs in the expected column positions;
+- no actionable header/readback issue remains from the prior header-drift concern.
+
+Current next gate:
+
+- safe to plan the next Twilio/provider-connected slice;
+- before any real Twilio API call, keep the usual explicit Adam approval gate and record what cost/provider/customer-facing effect the action may have.

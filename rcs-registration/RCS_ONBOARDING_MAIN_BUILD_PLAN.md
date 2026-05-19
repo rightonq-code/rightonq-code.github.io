@@ -2900,6 +2900,7 @@ Deployment state:
 - Version `40` proof passed: valid-PIN read-only snapshot returned `ok: true`, and a synthetic superseded Payment orders row (`roq-rcs-v40-append-proof-202605191340`) appended and looked up correctly without any Revolut/Twilio/provider call.
 - Version `42` proof passed: valid-PIN lookup for the same synthetic superseded row returned `amountMinor: 0`, confirming numeric zero survives shared Sheet readback.
 - `clasp deployments` confirmed the operator deployment at `@42` and public web app still at `@31`; dummy-PIN proof still returned `Invalid onboarding operator PIN`.
+- Read-only live Sheet audit after version `42` compared all tracked tab header rows with the source constants and checked low-exposure timestamp/application/status columns. `Part A submissions`, `Applications`, `Part B approvals`, `Part B video approvals`, `Status events`, `Communications`, `Internal reviews`, `Trust Hub KYC`, `UK RC bundles`, `Twilio setup`, `Billing`, and `Payment orders` all had the expected header order and row shape.
 - It does not call Twilio APIs, create Twilio subaccounts, change provider registrations, or enable live usage.
 - It stores IDs, statuses, URLs, and operator notes only; no Twilio auth tokens, API secrets, raw message payloads, or customer message content.
 
