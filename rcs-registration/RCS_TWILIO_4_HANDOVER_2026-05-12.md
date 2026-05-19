@@ -4818,9 +4818,9 @@ Current next gate:
 - safe to plan the next Twilio/provider-connected slice;
 - before any real Twilio API call, keep the usual explicit Adam approval gate and record what cost/provider/customer-facing effect the action may have.
 
-## Slice 10A - Twilio Provider Inventory Preflight Source
+## Slice 10A - Twilio Provider Inventory Preflight
 
-Codex prepared the first provider-connected preflight as source only. No Twilio API call was made in this slice.
+Codex prepared the first provider-connected preflight tool, then Adam approved the live read-only inventory run. No Twilio write, no message send, no compliance submission, no customer-facing change, and no chargeable usage was performed.
 
 New tool:
 
@@ -4847,8 +4847,23 @@ Dry-run proof:
 - `node --check rcs-registration/tools/twilio-account-inventory.mjs` passed;
 - `node rcs-registration/tools/twilio-account-inventory.mjs --dry-run --include-senders` returned a read-only request plan and made no Twilio API call.
 
+Live read-only proof:
+
+- command: `~/rightonq-infrastructure/scripts/run_with_secrets.sh node rcs-registration/tools/twilio-account-inventory.mjs --include-senders`;
+- the 1Password wrapper loaded the required Twilio env vars without printing values;
+- parent account: `Continuity AI Ltd`, status `active`, type `Full`;
+- visible child subaccount: `test account`, status `active`, type `Full`;
+- parent Messaging Service: `RightOnQ`, SID `MG06a4927275e7e6a7d88d5b822161066c`, use case `notifications`;
+- configured sender pool for that Messaging Service has one GB phone number sender `+447915911817` with `SMS` and `Voice` capability;
+- alpha sender pool: empty;
+- short code pool: empty.
+
+Follow-up source correction:
+
+- first live output used `subaccounts` for Twilio's `/Accounts` response, which included the parent account as well as the child account;
+- source was tightened so future output includes `visibleAccounts` and a filtered `subaccounts` list where `sid !== TWILIO_ACCOUNT_SID`.
+
 Current next gate:
 
-- if Adam approves the first live provider-connected preflight, run:
-  `~/rightonq-infrastructure/scripts/run_with_secrets.sh node rcs-registration/tools/twilio-account-inventory.mjs --include-senders`
-- expected effect: read-only Twilio inventory only; no cost, no customer-facing change, no provider mutation.
+- decide the first write-capable Twilio setup step. Recommended next step is not RCS sender submission yet; first decide whether the existing `test account` subaccount is the right sandbox customer container or whether to create a clearly named RightOnQ RCS proof subaccount.
+- any subaccount creation or Messaging Service creation must be a separate explicit approval gate.

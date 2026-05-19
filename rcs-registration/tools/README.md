@@ -272,7 +272,7 @@ Live read-only run, using the existing 1Password secret wrapper:
   node rcs-registration/tools/twilio-account-inventory.mjs --include-senders
 ```
 
-Expected live result: JSON showing the parent Twilio account summary, visible subaccounts, Messaging Services, and sender-pool summary for the configured Messaging Service. The tool performs `GET` requests only and never prints the Twilio auth token.
+Expected live result: JSON showing the parent Twilio account summary, visible accounts, filtered subaccounts, Messaging Services, and sender-pool summary for the configured Messaging Service. The tool performs `GET` requests only and never prints the Twilio auth token.
 
 Safety: this is the first provider-connected preflight step only. It must not create subaccounts, Messaging Services, sender pools, RCS senders, compliance profiles, phone numbers, messages, or chargeable usage.
 

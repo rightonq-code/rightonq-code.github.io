@@ -2928,7 +2928,7 @@ Output:
 
 ### Slice 10A - Twilio Provider Inventory Preflight
 
-Status: source-only tool prepared on Tuesday 19 May 2026. No Twilio API call has been made by this slice yet.
+Status: live read-only inventory completed on Tuesday 19 May 2026.
 
 Purpose:
 
@@ -2949,6 +2949,14 @@ Boundary:
 - no Trust Hub / RC Bundle mutation;
 - no message send;
 - no chargeable usage.
+
+Live inventory result:
+
+- parent Twilio account: `Continuity AI Ltd`, `active`, `Full`;
+- one visible active child subaccount: `test account`;
+- one parent Messaging Service: `RightOnQ`, use case `notifications`;
+- configured sender pool contains one GB phone number sender with `SMS` and `Voice` capabilities;
+- no alpha senders or short codes were present in the configured sender pool.
 
 ## Open Questions
 

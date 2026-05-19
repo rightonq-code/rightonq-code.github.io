@@ -214,8 +214,9 @@ async function main() {
   const authorization = basicAuth(realAccountSid, authToken);
 
   const parent = await twilioGet(plan[0].url.replace(accountSid, realAccountSid), authorization);
-  const subaccounts = await twilioGet(plan[1].url, authorization);
+  const accounts = await twilioGet(plan[1].url, authorization);
   const services = await twilioGet(plan[2].url, authorization);
+  const accountItems = Array.isArray(accounts.accounts) ? accounts.accounts : [];
   const serviceItems = Array.isArray(services.services) ? services.services : [];
 
   const result = {
@@ -223,7 +224,10 @@ async function main() {
     action: "twilioAccountInventory",
     readOnly: true,
     parentAccount: accountSummary(parent),
-    subaccounts: (subaccounts.accounts || []).map(accountSummary),
+    visibleAccounts: accountItems.map(accountSummary),
+    subaccounts: accountItems
+      .filter(account => account.sid && account.sid !== realAccountSid)
+      .map(accountSummary),
     messagingServices: serviceItems.map(serviceSummary),
     senderPools: []
   };
