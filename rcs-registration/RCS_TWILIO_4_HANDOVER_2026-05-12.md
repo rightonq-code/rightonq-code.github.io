@@ -5077,3 +5077,47 @@ Current next gate:
 - link Messaging Service SID `MG2a5be4e825e32a31340b5ddb2e50d3a7` into the internal Twilio setup tracking row using `operator-twilio-setup.mjs` and Adam's operator PIN;
 - keep `providerSubmissionStatus`, `goLiveStatus`, and `usagePullStatus` at `not_started`;
 - after that, decide whether the next slice is webhook/callback configuration, sender pool/phone-number movement, or RCS sender/compliance preflight. Do not bundle those together.
+
+## Slice 10F - Twilio Proof Messaging Service Tracking Link
+
+Adam ran the PIN-gated internal tracking update to link the newly created proof Messaging Service into the application row.
+
+Operator command:
+
+- `node rcs-registration/tools/operator-twilio-setup.mjs --application-id ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747 --twilio-messaging-service-sid MG2a5be4e825e32a31340b5ddb2e50d3a7 --twilio-status messaging_service_created --provider-submission-status not_started --go-live-status not_started --usage-pull-status not_started --manual-pause-flag no --internal-notes "..."`
+
+Operator result:
+
+- `ok: true`;
+- updated at `2026-05-19T17:22:38.607Z`;
+- `providerSubmissionStatus: not_started`;
+- `goLiveStatus: not_started`;
+- `manualPauseFlag: no`.
+
+Readback proof:
+
+- Adam ran `operator-status.mjs` for `ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747`;
+- `twilioSetup` now reads back:
+  - `Twilio messaging service SID`: `MG2a5be4e825e32a31340b5ddb2e50d3a7`;
+  - `Twilio status`: `messaging_service_created`;
+  - `Twilio subaccount friendly name`: `RightOnQ RCS proof customer - 2026-05-19`;
+  - `Twilio subaccount SID`: redacted in terminal output;
+  - `Provider submission status`: `not_started`;
+  - `Go-live status`: `not_started`;
+  - `Usage pull status`: `not_started`;
+  - `Manual pause flag`: `no`;
+- `Applications.twilioStatus` reads back `messaging_service_created`;
+- latest `Status events` row records `twilio_setup_updated` with `Twilio status: messaging_service_created`;
+- the full operator snapshot still preserves synthetic Payment orders `Amount minor: 0`.
+
+Source polish:
+
+- `operator-twilio-setup.mjs` was tightened after the successful update so future terminal output redacts full Twilio Account SIDs, matching `operator-status.mjs`.
+
+Current next gate:
+
+- choose the next provider-connected slice. Sensible options:
+  - configure Messaging Service callback URLs to RightOnQ-owned endpoints after deciding exact webhook routes;
+  - attach/move a sender/phone number only after a separate sender-pool plan;
+  - start RCS sender/compliance preflight only after Trust Hub/brand evidence fields are confirmed.
+- Do not bundle callback configuration, sender pool movement, RCS sender submission, or message sending together.

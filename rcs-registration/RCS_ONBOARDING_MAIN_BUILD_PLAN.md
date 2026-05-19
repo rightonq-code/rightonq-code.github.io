@@ -3078,6 +3078,36 @@ Boundary:
 - no sender pool / phone number movement;
 - no RCS sender, compliance submission, message send, customer-facing change, or chargeable usage.
 
+### Slice 10F - Twilio Proof Messaging Service Tracking Link
+
+Status: completed on Tuesday 19 May 2026.
+
+Purpose:
+
+- link the proof Messaging Service into the internal `Twilio setup` tracking row;
+- keep all provider submission, go-live, usage, sender, and compliance gates closed.
+
+Live result:
+
+- application `ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747` now stores Messaging Service SID `MG2a5be4e825e32a31340b5ddb2e50d3a7`;
+- `twilioStatus` reads back as `messaging_service_created`;
+- `Provider submission status`, `Go-live status`, and `Usage pull status` remain `not_started`;
+- `Manual pause flag` remains `no`;
+- `Twilio subaccount SID` is redacted in terminal readback;
+- status event history includes `twilio_setup_updated` for `messaging_service_created`.
+
+Source polish:
+
+- `tools/operator-twilio-setup.mjs` now redacts full Twilio Account SIDs from terminal output.
+
+Boundary:
+
+- one internal Apps Script operator update;
+- one valid-PIN operator snapshot readback;
+- no Twilio provider call in this tracking-link step;
+- no sender pool / phone number movement;
+- no RCS sender, compliance submission, message send, customer-facing change, or chargeable usage.
+
 ## Open Questions
 
 - Exact sales-page wording for `RightOnQ UK` and `RightOnQ Global`.
