@@ -145,6 +145,8 @@ const BILLING_HEADERS = [
   "Monthly billing starts at",
   "Next billing cycle date",
   "Usage/top-up status",
+  "Internal notes",
+  "Last updated",
   "Usage credit balance GBP",
   "Top-up threshold GBP",
   "Top-up amount GBP",
@@ -153,9 +155,7 @@ const BILLING_HEADERS = [
   "Last top-up status",
   "Last payment status",
   "Billing pause flag",
-  "Billing pause reason",
-  "Internal notes",
-  "Last updated"
+  "Billing pause reason"
 ];
 const PAYMENT_ORDER_HEADERS = [
   "Created at",
@@ -252,14 +252,6 @@ const UK_RC_BUNDLE_HEADERS = [
   "Created at",
   "Application ID",
   "Client ID",
-  "Compliance embeddable supported",
-  "Compliance embeddable inquiry ID",
-  "Compliance embeddable registration ID",
-  "Compliance embeddable status",
-  "Compliance embeddable rejection code",
-  "Compliance embeddable rejection reason",
-  "Compliance embeddable last event",
-  "Compliance embeddable last event at",
   "RC bundle SID",
   "RC bundle status",
   "RC bundle status updated at",
@@ -277,7 +269,15 @@ const UK_RC_BUNDLE_HEADERS = [
   "Compliance owner",
   "Fallback required",
   "Internal notes",
-  "Last updated"
+  "Last updated",
+  "Compliance embeddable supported",
+  "Compliance embeddable inquiry ID",
+  "Compliance embeddable registration ID",
+  "Compliance embeddable status",
+  "Compliance embeddable rejection code",
+  "Compliance embeddable rejection reason",
+  "Compliance embeddable last event",
+  "Compliance embeddable last event at"
 ];
 const TWILIO_SETUP_HEADERS = [
   "Created at",

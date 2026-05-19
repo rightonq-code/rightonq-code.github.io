@@ -4707,6 +4707,22 @@ Local checks passed:
 - `operator-twilio-setup.mjs --dry-run`;
 - `operator-billing.mjs --dry-run` with usage/pause fields.
 
-Next gate:
+Deployment/proof update on 2026-05-19:
 
-- If Adam approves, the next slice is a careful Apps Script deployment/update plan for this source-only Slice 9A work: push Apps Script HEAD, create a new API-only/operator version or deployment as appropriate, preserve the public v31 customer web app unless deliberately updating it, then run read-only/dummy-PIN and valid-PIN operator proofs.
+- Apps Script HEAD was pushed and version `36` was created/deployed to the existing clean API-only operator deployment through the Apps Script UI.
+- Deployment ID stayed `AKfycbzj0I9m_vld5Aw-zPQFsTZXslrmxlrDA6Ut0RtFnd6_fxXpVDc4qhhRuKVAA5EuhWG9`.
+- Public customer web app stayed pinned to version `31`; it was not edited or redeployed.
+- The first valid-PIN snapshot proof returned `ok: true` and included `twilioSetup: {}`, proving the Slice 9A API surface was live.
+- That same proof exposed a real header-order issue: `Billing` and `UK RC bundles` had gained new columns before historical columns, so existing row values read back under the wrong header names.
+- Codex corrected the header constants so the Slice 9A `Billing` and Compliance Embeddable fields append after historical columns.
+- Apps Script HEAD was pushed again, version `37` was created, and the same clean API-only operator deployment was updated through the Apps Script UI to version `37` with description `Operator API executable (Slice 9A append-only header correction)`.
+- `clasp deployments` confirmed:
+  - `AKfycbzj0I9m_vld5Aw-zPQFsTZXslrmxlrDA6Ut0RtFnd6_fxXpVDc4qhhRuKVAA5EuhWG9 @37`;
+  - public web app `AKfycbyI81Ir2xvHLar0R0iFBBWyXa1Nj93T4_8Ni5_eX3XEYDA-AKQbVYbPHnTROLm8e4a6 @31`.
+- Dummy-PIN proof against the live operator API returned `Invalid onboarding operator PIN`.
+- Adam ran the valid-PIN `operator-status.mjs` proof for `ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747`; it returned `ok: true`, `twilioSetup: {}`, corrected Billing readback, and corrected UK RC Bundle readback.
+
+Current next gate:
+
+- Do not run a live `updateTwilioSetup` write proof until Adam explicitly approves that separate Sheet-writing proof.
+- When approved, use a small non-provider write proof only: no Twilio API calls, no provider registration changes, no chargeable usage, and no customer-facing public web app change.

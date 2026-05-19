@@ -66,13 +66,9 @@ Deployment:
 - Version `24` fixes default billing fee fields for future billing updates.
 - Version `25` hardens public Part A submission by requiring an existing private application link/token, adds advisory/strict payment gate support, and rate-limits Adam MailApp notifications.
 - Version `32` adds the `Payment orders` ledger plus guarded `checkActiveCheckout` and `recordPaymentOrder` operator actions for Revolut active-checkout protection. The public web app is still pinned to version `31`.
-- Version `35` adds guarded `lookupPaymentOrder` for read-only Payment orders lookup by Revolut order ID. It is deployed as a clean API-only operator deployment; the public web app remains pinned to version `31`.
-
-Pending source-only changes after version `35`:
-
-- Source HEAD adds the `Twilio setup` tab shape, `updateTwilioSetup` operator action, Compliance Embeddable tracking fields on `UK RC bundles`, and usage/top-up/pause fields on `Billing`.
-- These changes are not live until Adam approves an Apps Script push/version/deployment update.
-- Preserve the public web app version `31` unless deliberately updating the public customer deployment.
+- Version `35` adds guarded `lookupPaymentOrder` for read-only Payment orders lookup by Revolut order ID. It was deployed as a clean API-only operator deployment; the public web app remains pinned to version `31`.
+- Version `36` deployed the Slice 9A `Twilio setup` tab shape, `updateTwilioSetup` operator action, Compliance Embeddable tracking fields on `UK RC bundles`, and usage/top-up/pause fields on `Billing`.
+- Version `37` keeps the Slice 9A fields live and corrects the expanded `Billing` and `UK RC bundles` header order to be append-only for existing Sheet rows.
 
 ## Behaviour
 
@@ -158,7 +154,7 @@ Authenticated operator API scaffold:
 - `rcsOperatorAction(payload)` is available in `Code.gs` as the intended Apps Script API entry point for operator-only actions.
 - The manifest includes `executionApi.access = DOMAIN`.
 - The Apps Script project is now linked to standard Google Cloud project `rightonq-gog`.
-- The current clean operator API executable deployment is `AKfycbzj0I9m_vld5Aw-zPQFsTZXslrmxlrDA6Ut0RtFnd6_fxXpVDc4qhhRuKVAA5EuhWG9` (version `35`, `Operator API executable (Step 8L lookup after push)`).
+- The current clean operator API executable deployment is `AKfycbzj0I9m_vld5Aw-zPQFsTZXslrmxlrDA6Ut0RtFnd6_fxXpVDc4qhhRuKVAA5EuhWG9` (version `37`, `Operator API executable (Slice 9A append-only header correction)`).
 - The previous clean operator API executable deployments have been archived after the v35 lookup proof passed:
   - `AKfycbwPbeT3Mxpmr_Q88WdSp0hRnDk96Pm93GDTsA1eOsJxmiaVpSS2xAg78ox848YsqCQU` (version `34`);
   - `AKfycbwSdO73nyxrOKVPQVQgkoGg29RwvYmJXWDYAgFqs5cdxyI4pJXFW3cZZSS1-6y3zlex` (version `33`, description `Operator API executable (Step 8H clean API-only)`).
@@ -178,7 +174,7 @@ Operator API proof:
 - A local-only derived copy, `/Users/macpro/Downloads/rightonq-gog-client-clasp-localhost.json`, adds `http://localhost` because this clasp version requires a literal localhost redirect URI.
 - The named login includes the Sheets scope needed by `SpreadsheetApp.openById`.
 - Direct `scripts.run` execution against the clean API deployment with a dummy PIN reaches Apps Script and correctly returns `Invalid onboarding operator PIN`.
-- Valid-PIN read-only snapshot for `ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747` returned `ok: true`.
+- Valid-PIN read-only snapshot for `ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747` returned `ok: true` on version `37`, included the new `twilioSetup` object, and confirmed `Billing` and `UK RC bundles` read back under the correct headers after the append-only header correction.
 - Operator snapshot readback now reconciles tracked Sheet headers to canonical order before reading Billing, Internal reviews, Trust Hub KYC, and UK RC Bundle rows.
 - Local operator wrappers now call `https://script.googleapis.com/v1/scripts/{deploymentId}:run` directly with the PIN in the HTTPS request body, not in a command-line `clasp run --params` argument.
 - The direct `scripts.run` helper uses `devMode: false` and the clean API executable deployment ID from `.clasp.json`, so wrappers are pinned to the deployed operator API version rather than Apps Script HEAD.
