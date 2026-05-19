@@ -5277,3 +5277,70 @@ Recommended next gate:
 - choose and prove the actual hosting route for approved logo, banner, opt-in proof image, and review video files;
 - replace the placeholder `example.com` proof URLs with real approved hosted URLs only after that route is chosen;
 - keep `Provider submission status`, `Go-live status`, and `Usage pull status` at `not_started`.
+
+## Slice 10J - Google Cloud Proof Asset Host Proved
+
+Adam approved Google Cloud as the hosted asset route. Codex first tried the direct public GCS route, then switched to a private-GCS plus public-Cloud-Run proxy after Google Cloud org policies blocked public bucket/object exposure.
+
+Google Cloud facts:
+
+- project: `rightonq-gog`;
+- bucket created: `gs://rightonq-rcs-proof-assets`;
+- bucket location: `europe-west2`;
+- bucket access: private, uniform bucket-level access enforced;
+- effective org policy `iam.allowedPolicyMemberDomains` allows only Workspace customer ID `C00jtmx91`, so bucket IAM grants to `allUsers` are blocked;
+- effective org policy `storage.uniformBucketLevelAccess` is enforced, so object ACL public grants are blocked;
+- `storage.publicAccessPrevention` is not enforced, but the two policies above still prevent direct public GCS access.
+
+Chosen route:
+
+- keep proof assets in the private GCS bucket;
+- serve approved public proof assets through dedicated Cloud Run service `roq-rcs-proof-assets`;
+- runtime service account: `roq-rcs-proof-assets@rightonq-gog.iam.gserviceaccount.com`;
+- service account has `roles/storage.objectViewer` on `gs://rightonq-rcs-proof-assets` only;
+- Cloud Run service uses `--no-invoker-iam-check`, matching the existing public Cloud Run pattern without adding an `allUsers` IAM binding;
+- service URL: `https://roq-rcs-proof-assets-872475523113.europe-west2.run.app`;
+- max scale: `2`;
+- min instances: `0`;
+- concurrency: `20`;
+- served prefix: `rcs-proof/`;
+- allowed methods: `GET`, `HEAD`;
+- no upload endpoint and no directory listing.
+
+Source added:
+
+- `cloud-run/proof-assets/package.json`;
+- `cloud-run/proof-assets/index.mjs`;
+- `cloud-run/proof-assets/README.md`.
+
+Build/deploy note:
+
+- the first source deploy failed before service creation because the default compute service account could not read the Cloud Run source-staging object;
+- bucket `gs://run-sources-rightonq-gog-europe-west2` was auto-created by Cloud Run source deploy;
+- `872475523113-compute@developer.gserviceaccount.com` was granted `roles/storage.objectViewer` on that source-staging bucket only;
+- retry deployed revision `roq-rcs-proof-assets-00001-8jq` with 100% traffic.
+
+Public proof:
+
+- placeholder object uploaded:
+  - `gs://rightonq-rcs-proof-assets/rcs-proof/ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747/placeholder.txt`;
+- public URL proved with unauthenticated `curl`:
+  - `https://roq-rcs-proof-assets-872475523113.europe-west2.run.app/rcs-proof/ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747/placeholder.txt`;
+- `GET` returned `HTTP/2 200` and the placeholder body;
+- `HEAD` returned `HTTP/2 200`;
+- `/private/placeholder.txt` returned `HTTP/2 404`.
+
+Boundary:
+
+- no Twilio API call;
+- no RCS Sender or compliance submission;
+- no callback configuration, sender-pool movement, phone-number movement, message send, customer-facing change, or chargeable usage;
+- placeholder only: no real logo/banner/opt-in proof/review video uploaded yet;
+- the previous `example.com` Twilio setup URLs have not yet been replaced.
+
+Recommended next gate:
+
+- upload real approved proof assets under `rcs-proof/ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747/`;
+- confirm each public Cloud Run URL opens without login;
+- then replace the placeholder `example.com` proof URLs on the proof application with the real approved hosted URLs;
+- keep `Provider submission status`, `Go-live status`, and `Usage pull status` at `not_started`.

@@ -1,6 +1,6 @@
 # RightOnQ RCS Registration Pack Readiness Map
 
-Status: source-only readiness map, created Tuesday 19 May 2026.
+Status: readiness map plus hosted proof-asset route, updated Tuesday 19 May 2026.
 
 Scope:
 
@@ -8,7 +8,7 @@ Scope:
 - Identify what is already captured, what is tracked internally, and what still needs manual follow-up or build work before any submission.
 - Keep RCS Sender submission, Trust Hub submission, callback configuration, sender-pool movement, phone-number movement, and message sending behind separate explicit gates.
 
-No live action was performed for this map: no Twilio API call, no Apps Script deployment, no Google Sheet write, no Trust Hub submission, no RCS Sender creation, no message send.
+No Twilio or Trust Hub action was performed for this map: no Twilio API call, no Google Sheet write, no Trust Hub submission, no RCS Sender creation, no message send. A Google Cloud proof-asset host was later deployed separately as `roq-rcs-proof-assets`; it serves approved public proof files from a private GCS bucket.
 
 ## Source Anchors
 
@@ -58,10 +58,10 @@ Local RightOnQ source checked:
 | Authorised representative contact details | Part A `authorizedRepName`, `authorizedRepEmail`, `authorizedRepTitle`; `primaryContactPhone` captured separately | Manual follow-up | Twilio RCS registration asks for authorised representative contact details. Confirm whether the primary phone is acceptable as the representative phone, and collect a distinct rep phone if Twilio asks for it. Secondary Compliance Profile readiness needs two reps. |
 | Message flow / opt-in description | Part A `consentRoute`, `optInDescription` | Ready | Wording still needs RightOnQ quality review before submission. |
 | Opt-out description | Part A `optOutDescription`; sample STOP message | Ready | Wording still needs RightOnQ quality review before submission. |
-| Opt-in proof images | `Twilio setup` `Opt-in proof URL(s)` | Hard stop / tracked | Twilio requires opt-in policy images hosted on a publicly accessible URL. Tracking and readback are live in operator API version 44; the actual public hosted file workflow is still needed. |
+| Opt-in proof images | `Twilio setup` `Opt-in proof URL(s)` | Hard stop / tracked | Twilio requires opt-in policy images hosted on a publicly accessible URL. Tracking and readback are live in operator API version 44. Public URL route is proved through Cloud Run `roq-rcs-proof-assets`; real approved files still need upload/readback. |
 | Use-case description | Part A `useCaseDescription`, `messageTrigger`, `primaryUseCase` | Ready | Internal review should confirm the use case is specific and not vague. |
 | Example messages | Part A `exampleMessageOne`, `exampleMessageTwo`, `helpSampleMessage`, `stopSampleMessage` | Ready | Internal review should confirm examples match use case and opt-out expectations. |
-| Use-case review video URL | Part B video generator/story; `Twilio setup` `Review video URL` | Hard stop / tracked | A public hosted video URL is required before submission. Current system can generate a browser WebM, but hosting/storage workflow is not yet proved. |
+| Use-case review video URL | Part B video generator/story; `Twilio setup` `Review video URL` | Hard stop / tracked | A public hosted video URL is required before submission. Current system can generate a browser WebM. Public URL route is proved through Cloud Run `roq-rcs-proof-assets`; real approved video still needs upload/readback. |
 | RCS launch countries | Part A `regions` | Ready for RCS launch planning | Do not confuse with Trust Hub operating regions. US fees and extra checks remain separate. |
 | Provider submission reference/status | `Twilio setup` `Provider submission reference`, `Provider submission status`, submitted/checked timestamps | Tracked | Keep `not_started` until explicit submission approval. |
 
@@ -125,10 +125,10 @@ The following must be true before sender-pool/phone-number movement:
 
 ## Recommended Next Slice
 
-Build the hosted asset/proof URL workflow next, still without RCS Sender submission:
+Use the proved hosted asset/proof URL workflow next, still without RCS Sender submission:
 
-1. Decide where approved logo, banner, opt-in proof image, and review video files are hosted.
-2. Upload or publish approved proof files through that route.
+1. Upload approved logo, banner, opt-in proof image, and review video files to private GCS under `rcs-proof/`.
+2. Publish them through the Cloud Run proof-assets URL route.
 3. Replace placeholder proof URLs on the existing proof application with real approved hosted URLs.
 4. Keep `Provider submission status`, `Go-live status`, and `Usage pull status` at `not_started`.
 

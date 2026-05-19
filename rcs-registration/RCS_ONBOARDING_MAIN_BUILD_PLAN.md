@@ -3238,6 +3238,66 @@ Recommended next gate:
 
 - choose and prove the actual hosting route for approved logo, banner, opt-in proof image, and review video files, then replace the placeholder URLs with real approved hosted proof URLs.
 
+### Slice 10J - Google Cloud Proof Asset Host Proved
+
+Status: deployed and proof-tested on Tuesday 19 May 2026.
+
+Purpose:
+
+- choose a durable Google Cloud hosted route for RCS proof assets;
+- avoid storing provider-review assets in the website repo;
+- produce stable public URLs for Twilio/RCS review without making a GCS bucket publicly listable.
+
+Direct public GCS finding:
+
+- bucket `gs://rightonq-rcs-proof-assets` was created in `europe-west2`;
+- direct public bucket IAM failed because effective org policy `iam.allowedPolicyMemberDomains` only permits Workspace customer ID `C00jtmx91`;
+- object-level public ACLs are also unavailable because effective org policy `storage.uniformBucketLevelAccess` is enforced;
+- `storage.publicAccessPrevention` is not enforced, but the two policies above still block direct public GCS publication;
+- signed URLs were rejected as the main route because RCS review may take weeks and signed URLs expire.
+
+Chosen architecture:
+
+- store proof files in private GCS bucket `rightonq-rcs-proof-assets`;
+- expose approved public objects through Cloud Run service `roq-rcs-proof-assets`;
+- service URL: `https://roq-rcs-proof-assets-872475523113.europe-west2.run.app`;
+- service account: `roq-rcs-proof-assets@rightonq-gog.iam.gserviceaccount.com`;
+- service account has bucket-scoped `roles/storage.objectViewer`;
+- service uses `--no-invoker-iam-check` rather than public `allUsers` IAM;
+- service max scale is `2`, min instances `0`, concurrency `20`;
+- public prefix is `rcs-proof/`;
+- methods are `GET` and `HEAD` only;
+- no upload endpoint and no directory listing.
+
+Source:
+
+- `cloud-run/proof-assets/package.json`;
+- `cloud-run/proof-assets/index.mjs`;
+- `cloud-run/proof-assets/README.md`.
+
+Proof:
+
+- local syntax/self-test passed for the proof-assets source;
+- Cloud Run revision `roq-rcs-proof-assets-00001-8jq` deployed with 100% traffic;
+- placeholder object uploaded to `gs://rightonq-rcs-proof-assets/rcs-proof/ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747/placeholder.txt`;
+- unauthenticated `GET` and `HEAD` passed against `https://roq-rcs-proof-assets-872475523113.europe-west2.run.app/rcs-proof/ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747/placeholder.txt`;
+- path outside the allowed prefix returned `404`.
+
+Boundary:
+
+- no Twilio API call;
+- no provider submission;
+- no customer-facing change;
+- no real customer/private evidence uploaded;
+- proof application still has placeholder `example.com` asset URLs until real approved files are uploaded and read back.
+
+Recommended next gate:
+
+- upload actual approved logo, banner, opt-in proof image, and review video files through this route;
+- confirm their public URLs;
+- update the proof application's `Twilio setup` URL fields with real hosted URLs;
+- keep `Provider submission status`, `Go-live status`, and `Usage pull status` at `not_started`.
+
 ## Open Questions
 
 - Exact sales-page wording for `RightOnQ UK` and `RightOnQ Global`.
