@@ -2889,7 +2889,9 @@ Deployment state:
 - Apps Script HEAD was pushed, version `36` was created, and the existing clean API-only operator deployment was updated through the Apps Script UI.
 - The first live snapshot proof showed `twilioSetup: {}` but also exposed that the expanded `Billing` and `UK RC bundles` headers had been inserted before historical columns, causing existing row values to read under the wrong new header names.
 - Version `37` corrects those expansions to be append-only after the historical columns.
-- The clean API-only operator deployment now serves version `37` with description `Operator API executable (Slice 9A append-only header correction)`.
+- Version `38` adds a safe return serializer for Apps Script Execution API responses.
+- Version `39` changes the shared Sheet header reconciler to append missing columns only and repairs the known `Applications` header drift from earlier header reordering.
+- The clean API-only operator deployment now serves version `39` with description `Operator API executable (Slice 9B append-only sheet reconciliation)`.
 - Deployment ID remains `AKfycbzj0I9m_vld5Aw-zPQFsTZXslrmxlrDA6Ut0RtFnd6_fxXpVDc4qhhRuKVAA5EuhWG9`.
 - Public customer web app deployment remains version `31` and was not touched.
 - It does not call Twilio APIs, create Twilio subaccounts, change provider registrations, or enable live usage.
@@ -2902,9 +2904,9 @@ Local checks passed:
 - `node --check rcs-registration/tools/operator-billing.mjs`
 - `operator-twilio-setup.mjs --dry-run`
 - `operator-billing.mjs --dry-run` with usage/pause fields
-- `clasp deployments` confirmed operator deployment `AKfycbzj0I9m_vld5Aw-zPQFsTZXslrmxlrDA6Ut0RtFnd6_fxXpVDc4qhhRuKVAA5EuhWG9 @37` and public web app `AKfycbyI81Ir2xvHLar0R0iFBBWyXa1Nj93T4_8Ni5_eX3XEYDA-AKQbVYbPHnTROLm8e4a6 @31`
+- `clasp deployments` confirmed operator deployment `AKfycbzj0I9m_vld5Aw-zPQFsTZXslrmxlrDA6Ut0RtFnd6_fxXpVDc4qhhRuKVAA5EuhWG9 @39` and public web app `AKfycbyI81Ir2xvHLar0R0iFBBWyXa1Nj93T4_8Ni5_eX3XEYDA-AKQbVYbPHnTROLm8e4a6 @31`
 - dummy-PIN proof returned `Invalid onboarding operator PIN`
-- valid-PIN `operator-status.mjs` snapshot returned `ok: true`, `twilioSetup: {}`, corrected Billing readback, and corrected UK RC Bundle readback for `ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747`
+- valid-PIN `operator-status.mjs` snapshot returned `ok: true`, populated `twilioSetup` with the Slice 9B tracking proof row, corrected Applications readback, corrected Billing readback, and corrected UK RC Bundle readback for `ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747`
 
 ### Slice 10 - Website Integration
 

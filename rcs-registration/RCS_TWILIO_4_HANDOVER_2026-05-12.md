@@ -4726,3 +4726,38 @@ Current next gate:
 
 - Do not run a live `updateTwilioSetup` write proof until Adam explicitly approves that separate Sheet-writing proof.
 - When approved, use a small non-provider write proof only: no Twilio API calls, no provider registration changes, no chargeable usage, and no customer-facing public web app change.
+
+## Slice 9B - Twilio Setup Tracking Proof And Header Reconciliation
+
+Adam approved a narrow Sheet-write proof for the new Twilio setup tracking path. No Twilio API call, provider registration change, chargeable usage, or customer-facing public web app change was made.
+
+Proof write:
+
+- Tool: `operator-twilio-setup.mjs`;
+- application ID: `ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747`;
+- `twilioStatus = tracking_proof`;
+- `providerSubmissionStatus = not_started`;
+- `phonePreviewStatus = not_started`;
+- `goLiveStatus = not_started`;
+- `usagePullStatus = not_started`;
+- `manualPauseFlag = no`;
+- internal note: `Slice 9B tracking proof only; no Twilio API call, provider setup, chargeable usage, or customer-facing change.`;
+- write result returned `ok: true`, `updatedAt = 2026-05-19T12:52:10.098Z`.
+
+Findings/fixes:
+
+- The first post-write snapshot hit an Apps Script Execution API unsupported-return-type error. Codex added a recursive operator API return serializer and deployed version `38`.
+- The v38 snapshot returned, proving the serializer, but exposed the same root header-order bug in the `Applications` control row: previous header reconciliation could rewrite headers without moving row cells.
+- Codex fixed the root reconciler so existing Sheet order is preserved and missing headers are appended only.
+- Codex added a bounded `Applications` repair for the known drift pattern where `Internal owner` had been inserted before `Created at` and date-like values appeared under the wrong headers.
+- Apps Script HEAD was pushed again, version `39` was created, and the existing clean API-only operator deployment was updated through the Apps Script UI to version `39` with description `Operator API executable (Slice 9B append-only sheet reconciliation)`.
+- `clasp deployments` confirmed:
+  - `AKfycbzj0I9m_vld5Aw-zPQFsTZXslrmxlrDA6Ut0RtFnd6_fxXpVDc4qhhRuKVAA5EuhWG9 @39`;
+  - public web app `AKfycbyI81Ir2xvHLar0R0iFBBWyXa1Nj93T4_8Ni5_eX3XEYDA-AKQbVYbPHnTROLm8e4a6 @31`.
+- Dummy-PIN proof against the live operator API returned `Invalid onboarding operator PIN`.
+- Adam ran the valid-PIN `operator-status.mjs` proof again. It returned `ok: true`; `twilioSetup` was populated with the proof row; `Applications` dates/internal-owner readback was corrected; `Billing` and `UK RC Bundle` remained correctly aligned.
+
+Current next gate:
+
+- Commit and push the v39 code/docs state.
+- After that, any real Twilio/provider-connected setup should be a separate approved slice.

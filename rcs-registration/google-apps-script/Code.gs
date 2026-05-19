@@ -47,11 +47,11 @@ const APPLICATION_HEADERS = [
   "Twilio status",
   "Trust Hub status",
   "Provider status",
-  "Internal owner",
   "Created at",
   "Updated at",
   "Last client action at",
   "Last internal action at",
+  "Internal owner",
   "Next action owner",
   "Next action note",
   "Internal notes"
@@ -620,47 +620,47 @@ function rcsOperatorAction(payload) {
 
     if (payload.action === "createApplicationDraft") {
       requireCreatePin(payload);
-      return createApplicationDraft(spreadsheet, payload);
+      return serialiseExecutionApiValue(createApplicationDraft(spreadsheet, payload));
     }
     if (payload.action === "getOperatorSnapshot") {
       requireOperatorPin(payload);
-      return getOperatorSnapshot(spreadsheet, payload);
+      return serialiseExecutionApiValue(getOperatorSnapshot(spreadsheet, payload));
     }
     if (payload.action === "updateApplicationStatus") {
       requireOperatorPin(payload);
-      return updateApplicationStatus(spreadsheet, payload);
+      return serialiseExecutionApiValue(updateApplicationStatus(spreadsheet, payload));
     }
     if (payload.action === "updateBilling") {
       requireOperatorPin(payload);
-      return updateBilling(spreadsheet, payload);
+      return serialiseExecutionApiValue(updateBilling(spreadsheet, payload));
     }
     if (payload.action === "checkActiveCheckout") {
       requireOperatorPin(payload);
-      return checkActiveCheckout(spreadsheet, payload);
+      return serialiseExecutionApiValue(checkActiveCheckout(spreadsheet, payload));
     }
     if (payload.action === "recordPaymentOrder") {
       requireOperatorPin(payload);
-      return recordPaymentOrder(spreadsheet, payload);
+      return serialiseExecutionApiValue(recordPaymentOrder(spreadsheet, payload));
     }
     if (payload.action === "lookupPaymentOrder") {
       requireOperatorPin(payload);
-      return lookupPaymentOrder(spreadsheet, payload);
+      return serialiseExecutionApiValue(lookupPaymentOrder(spreadsheet, payload));
     }
     if (payload.action === "updateInternalReview") {
       requireOperatorPin(payload);
-      return updateInternalReview(spreadsheet, payload);
+      return serialiseExecutionApiValue(updateInternalReview(spreadsheet, payload));
     }
     if (payload.action === "updateTrustHubKyc") {
       requireOperatorPin(payload);
-      return updateTrustHubKyc(spreadsheet, payload);
+      return serialiseExecutionApiValue(updateTrustHubKyc(spreadsheet, payload));
     }
     if (payload.action === "updateUkRcBundle") {
       requireOperatorPin(payload);
-      return updateUkRcBundle(spreadsheet, payload);
+      return serialiseExecutionApiValue(updateUkRcBundle(spreadsheet, payload));
     }
     if (payload.action === "updateTwilioSetup") {
       requireOperatorPin(payload);
-      return updateTwilioSetup(spreadsheet, payload);
+      return serialiseExecutionApiValue(updateTwilioSetup(spreadsheet, payload));
     }
 
     throw new Error("Unsupported operator action: " + payload.action);
@@ -2165,7 +2165,7 @@ function upsertApplicationRecord(spreadsheet, payload, options) {
 }
 
 function findApplicationRecord(spreadsheet, criteria) {
-  const sheet = spreadsheet.getSheetByName(APPLICATIONS_SHEET_NAME);
+  const sheet = getOrCreateSheet(spreadsheet, APPLICATIONS_SHEET_NAME, APPLICATION_HEADERS);
   if (!sheet) return null;
 
   const values = sheet.getDataRange().getValues();
@@ -2237,6 +2237,32 @@ function serialiseOperatorValue(value) {
   return value || "";
 }
 
+function serialiseExecutionApiValue(value) {
+  if (value === null || typeof value === "undefined") return "";
+  if (Object.prototype.toString.call(value) === "[object Date]") {
+    return isNaN(value.getTime()) ? "" : value.toISOString();
+  }
+  if (Array.isArray(value)) {
+    return value.map(function(item) {
+      return serialiseExecutionApiValue(item);
+    });
+  }
+  if (typeof value === "number") {
+    return isFinite(value) ? value : "";
+  }
+  if (typeof value === "string" || typeof value === "boolean") return value;
+  if (typeof value === "object") {
+    const output = {};
+    Object.keys(value).forEach(function(key) {
+      const safeKey = String(key);
+      if (!safeKey) return;
+      output[safeKey] = serialiseExecutionApiValue(value[key]);
+    });
+    return output;
+  }
+  return String(value);
+}
+
 function getOrCreateSheet(spreadsheet, name, headers) {
   let sheet = spreadsheet.getSheetByName(name);
   if (!sheet) sheet = spreadsheet.insertSheet(name);
@@ -2244,26 +2270,89 @@ function getOrCreateSheet(spreadsheet, name, headers) {
   if (sheet.getLastRow() === 0) {
     sheet.appendRow(headers);
   } else {
+    if (name === APPLICATIONS_SHEET_NAME) {
+      repairApplicationsHeaderDrift(sheet, headers);
+    }
     const currentHeaders = normaliseHeaders(sheet.getRange(1, 1, 1, Math.max(sheet.getLastColumn(), headers.length)).getValues()[0]);
-    const extraHeaders = currentHeaders.filter(function(header) {
-      return headers.indexOf(header) === -1;
+    const missingHeaders = headers.filter(function(header) {
+      return currentHeaders.indexOf(header) === -1;
     });
-    const desiredHeaders = headers.concat(extraHeaders);
-    const headerMismatch = desiredHeaders.length !== currentHeaders.length || desiredHeaders.some(function(header, index) {
-      return header !== currentHeaders[index];
-    });
-    if (headerMismatch) {
+    if (missingHeaders.length) {
+      const desiredHeaders = currentHeaders.concat(missingHeaders);
       if (sheet.getMaxColumns() < desiredHeaders.length) {
         sheet.insertColumnsAfter(sheet.getMaxColumns(), desiredHeaders.length - sheet.getMaxColumns());
       }
       sheet.getRange(1, 1, 1, desiredHeaders.length).setValues([desiredHeaders]);
-      if (sheet.getLastColumn() > desiredHeaders.length) {
-        sheet.getRange(1, desiredHeaders.length + 1, 1, sheet.getLastColumn() - desiredHeaders.length).clearContent();
-      }
     }
   }
 
   return sheet;
+}
+
+function repairApplicationsHeaderDrift(sheet, desiredHeaders) {
+  const values = sheet.getDataRange().getValues();
+  if (values.length < 1) return;
+
+  const currentHeaders = normaliseHeaders(values[0]);
+  const internalOwnerColumn = currentHeaders.indexOf("Internal owner");
+  const createdAtColumn = currentHeaders.indexOf("Created at");
+  const updatedAtColumn = currentHeaders.indexOf("Updated at");
+  const lastClientActionAtColumn = currentHeaders.indexOf("Last client action at");
+  const lastInternalActionAtColumn = currentHeaders.indexOf("Last internal action at");
+  if (internalOwnerColumn === -1 || createdAtColumn === -1 || updatedAtColumn === -1) return;
+  if (lastClientActionAtColumn === -1 || lastInternalActionAtColumn === -1) return;
+  if (internalOwnerColumn > createdAtColumn) return;
+
+  const driftedRowExists = values.slice(1).some(function(row) {
+    return looksLikeSheetTimestamp(row[internalOwnerColumn]) && looksLikeSheetTimestamp(row[createdAtColumn]);
+  });
+  if (!driftedRowExists) return;
+
+  const extraHeaders = currentHeaders.filter(function(header) {
+    return desiredHeaders.indexOf(header) === -1;
+  });
+  const repairedHeaders = desiredHeaders.concat(extraHeaders);
+  if (sheet.getMaxColumns() < repairedHeaders.length) {
+    sheet.insertColumnsAfter(sheet.getMaxColumns(), repairedHeaders.length - sheet.getMaxColumns());
+  }
+
+  const repairedValues = [repairedHeaders];
+  for (let rowIndex = 1; rowIndex < values.length; rowIndex += 1) {
+    const raw = rowToObject(values[rowIndex], currentHeaders);
+    const repairedRecord = {};
+    repairedHeaders.forEach(function(header) {
+      repairedRecord[header] = firstValue(raw[header], "");
+    });
+
+    if (looksLikeSheetTimestamp(raw["Internal owner"]) && looksLikeSheetTimestamp(raw["Created at"])) {
+      const oldCreatedAt = raw["Internal owner"];
+      const oldUpdatedAt = raw["Created at"];
+      const currentUpdatedAt = raw["Updated at"];
+      const currentLastClientActionAt = raw["Last client action at"];
+      const currentLastInternalActionAt = raw["Last internal action at"];
+
+      repairedRecord["Created at"] = oldCreatedAt;
+      if (looksLikeSheetTimestamp(currentLastInternalActionAt) && looksLikeSheetTimestamp(currentUpdatedAt)) {
+        repairedRecord["Updated at"] = currentUpdatedAt;
+        repairedRecord["Last client action at"] = looksLikeSheetTimestamp(currentLastClientActionAt) ? currentLastClientActionAt : oldUpdatedAt;
+        repairedRecord["Last internal action at"] = currentLastInternalActionAt;
+      } else {
+        repairedRecord["Updated at"] = oldUpdatedAt;
+        repairedRecord["Last client action at"] = currentUpdatedAt;
+        repairedRecord["Last internal action at"] = currentLastClientActionAt;
+      }
+      repairedRecord["Internal owner"] = "";
+    }
+
+    repairedValues.push(repairedHeaders.map(function(header) {
+      return safeCell(repairedRecord[header]);
+    }));
+  }
+
+  sheet.getRange(1, 1, repairedValues.length, repairedHeaders.length).setValues(repairedValues);
+  if (sheet.getLastColumn() > repairedHeaders.length) {
+    sheet.getRange(1, repairedHeaders.length + 1, sheet.getLastRow(), sheet.getLastColumn() - repairedHeaders.length).clearContent();
+  }
 }
 
 function rowToObject(row, headers) {
@@ -2445,6 +2534,14 @@ function serialiseDate(value) {
   if (!value) return "";
   if (Object.prototype.toString.call(value) === "[object Date]") return value.toISOString();
   return String(value);
+}
+
+function looksLikeSheetTimestamp(value) {
+  if (Object.prototype.toString.call(value) === "[object Date]" && !isNaN(value.getTime())) return true;
+  if (typeof value === "number") return value > 40000 && value < 70000;
+  if (typeof value !== "string") return false;
+  if (!value) return false;
+  return /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(value);
 }
 
 function finalValue(incoming, fallback) {
