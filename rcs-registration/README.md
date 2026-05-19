@@ -21,6 +21,7 @@ The main website should only link to this form when ready. This folder should st
 - `index.html` - single-file RCS registration form
 - `payment-return.html` - Revolut hosted-checkout return page; it confirms browser return only, while payment status remains verified by order/webhook records
 - `cloud-run/proof-assets/` - small public Cloud Run proxy for approved RCS proof assets stored in private GCS
+- `cloud-run/twilio-callback/` - dedicated record-only Twilio Messaging status callback receiver
 - `REVOLUT_WEBHOOK_ENDPOINT_DESIGN.md` - design-only plan for the future Revolut webhook host, dedupe store, enrichment flow, and no-live-Billing-write boundary
 - `RCS_REGISTRATION_PACK_READINESS_MAP.md` - source-only map of Twilio RCS Sender / Secondary Compliance Profile requirements against RightOnQ Part A and internal tracking fields
 - `RCS_TWILIO_1_HANDOVER_2026-05-06.md` - detailed handover notes from the first build session

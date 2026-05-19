@@ -3339,6 +3339,64 @@ Recommended next gate:
 
 - replace these hosted placeholder files with approved client assets and rerun public URL verification before any RCS Sender/compliance submission planning.
 
+### Slice 10L - Twilio Callback Receiver Record-Only Proof
+
+Status: deployed and proof-tested on Tuesday 19 May 2026.
+
+Purpose:
+
+- create the dedicated Twilio Messaging callback receiver outside the Revolut webhook;
+- validate Twilio signatures against form-encoded status callbacks;
+- prove conservative callback projection without changing Sheets, Messaging Service settings, or provider state.
+
+Source:
+
+- `cloud-run/twilio-callback/package.json`;
+- `cloud-run/twilio-callback/index.mjs`;
+- `cloud-run/twilio-callback/README.md`.
+
+Runtime:
+
+- Cloud Run service `roq-rcs-twilio-callback`;
+- URL `https://roq-rcs-twilio-callback-872475523113.europe-west2.run.app`;
+- revision `roq-rcs-twilio-callback-00001-c4c`;
+- service account `roq-rcs-twilio-callback@rightonq-gog.iam.gserviceaccount.com`;
+- secret `roq-rcs-twilio-auth-token-sandbox-global`, version `1`, accessed only by the callback service account;
+- public via `--no-invoker-iam-check`;
+- max scale `2`, min instances `0`, concurrency `20`.
+
+Projection:
+
+- `provider_message_id = MessageSid`;
+- `provider_event_id = EventSid` when present, otherwise `null`;
+- `status = MessageStatus`;
+- `channel_event = EventType`;
+- `channel = rcs` when `From` starts with `rcs:`;
+- `error_code = ErrorCode`;
+- `human_error = ChannelStatusMessage`;
+- read receipt signal is detected for `MessageStatus=read` or `EventType=READ`, but no read-state projection is written in this slice.
+
+Proof:
+
+- local `node --check` and `--self-test` passed;
+- unsigned POST returned `403`;
+- GET returned `405`;
+- signed delivered-style proof returned `200`, `accepted: true`, `channel: rcs`, `write_applied: false`;
+- signed `EventType=READ` proof without `MessageStatus` returned `200`, `read_receipt_signal: true`, `write_applied: false`.
+
+Boundary:
+
+- no Twilio Messaging Service callback URL configured;
+- no message send;
+- no Sheet/App Script write;
+- no Firestore event persistence yet;
+- no RCS Sender or compliance submission;
+- no sender-pool or phone-number movement.
+
+Recommended next gate:
+
+- add validated callback persistence/dedupe, still record-only, before configuring any Twilio Messaging Service callback URL.
+
 ## Open Questions
 
 - Exact sales-page wording for `RightOnQ UK` and `RightOnQ Global`.

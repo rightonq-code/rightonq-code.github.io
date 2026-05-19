@@ -91,8 +91,8 @@ Local RightOnQ source checked:
 | Messaging Service | `Twilio setup` `Twilio messaging service SID` | Ready for proof app | Proof Messaging Service exists and is linked. Sender pool is intentionally empty. |
 | RCS Sender in sender pool | Not yet created or attached | Hard stop | Do not create/attach until registration pack and compliance readiness are complete. |
 | SMS/MMS fallback sender | UK RC bundle / sender-pool planning | Hard stop | Phone-number movement and fallback sender decisions must be a separate slice. |
-| Callback URLs | Not configured on proof Messaging Service | Build gap | Configure only after RightOnQ Twilio callback receiver exists and is proved. |
-| Delivery/status callback parser | Planned outside this map | Build gap | Current Cloud Run webhook is Revolut-specific. Twilio callback receiver must be separate and form-encoded aware. |
+| Callback URLs | Not configured on proof Messaging Service | Build gap | Dedicated Twilio callback receiver is deployed and signature-proved, but the proof Messaging Service callback URL is intentionally not configured yet. Configure only after record-only persistence/dedupe is proved. |
+| Delivery/status callback parser | `cloud-run/twilio-callback` | Tracked | Dedicated form-encoded Twilio callback receiver is deployed and record-only. It validates signatures, tolerates extra fields, projects `MessageSid`/`MessageStatus`/`EventType`, and detects future read-receipt signals without writing read state. |
 
 ## Submission Gates
 
@@ -120,7 +120,7 @@ The following must be true before sender-pool/phone-number movement:
 - RCS Sender approval or provider-approved test state confirmed.
 - UK RC Bundle/fallback number readiness confirmed.
 - Fallback number ownership and assignment plan approved.
-- Callback receiver is ready if moving toward live traffic.
+- Callback receiver persistence/dedupe is ready if moving toward live traffic.
 - Billing/top-up/pause controls are ready if any chargeable traffic can occur.
 
 ## Recommended Next Slice
@@ -133,3 +133,5 @@ Use the proved hosted asset/proof URL workflow next, still without RCS Sender su
 4. Keep `Provider submission status`, `Go-live status`, and `Usage pull status` at `not_started`.
 
 Do not combine this with callback configuration, sender-pool movement, compliance submission, RCS Sender submission, or message sending.
+
+Callback note: `roq-rcs-twilio-callback` is deployed and signature-proved, but it is still record-only and non-persistent. Do not configure the proof Messaging Service callback URL until validated callback persistence/dedupe is added and proved.

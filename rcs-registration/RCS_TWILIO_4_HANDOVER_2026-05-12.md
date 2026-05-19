@@ -5389,3 +5389,94 @@ Recommended next gate:
 - replace the placeholder hosted files with approved client logo, banner, opt-in proof, and review video assets;
 - verify each public Cloud Run URL again after replacement;
 - only then move toward RCS Sender / compliance submission planning.
+
+## Slice 10L - Twilio Callback Receiver Record-Only Proof
+
+Adam approved the next slice: a dedicated Twilio Messaging callback receiver, record-only, separate from Revolut and separate from any Messaging Service callback configuration.
+
+Official Twilio anchors checked:
+
+- Twilio Security docs: incoming request validation uses the full request URL, sorted POST parameters, HMAC-SHA1 with the Auth Token, and the `X-Twilio-Signature` header.
+- Twilio Message resource docs: status callbacks are `POST` requests and include `MessageStatus` and `ErrorCode`; callback parameters vary by channel/event type and can gain new fields.
+- Twilio outbound message status tutorial/docs: callback handlers should accept form-encoded data and return `200` for accepted callbacks.
+
+Source added:
+
+- `cloud-run/twilio-callback/package.json`;
+- `cloud-run/twilio-callback/index.mjs`;
+- `cloud-run/twilio-callback/README.md`.
+
+Runtime created:
+
+- service: `roq-rcs-twilio-callback`;
+- region: `europe-west2`;
+- URL: `https://roq-rcs-twilio-callback-872475523113.europe-west2.run.app`;
+- revision: `roq-rcs-twilio-callback-00001-c4c`;
+- runtime service account: `roq-rcs-twilio-callback@rightonq-gog.iam.gserviceaccount.com`;
+- secret: `roq-rcs-twilio-auth-token-sandbox-global`, automatic replication, version `1`;
+- secret access grant: runtime service account has `roles/secretmanager.secretAccessor` on that secret only;
+- public access: `--no-invoker-iam-check`;
+- max scale: `2`;
+- min instances: `0`;
+- concurrency: `20`;
+- timeout: `60`.
+
+Implementation behaviour:
+
+- accepts `POST` only;
+- expects `application/x-www-form-urlencoded`;
+- validates `X-Twilio-Signature`;
+- preserves/tolerates extra fields in the parsed payload;
+- projects:
+  - `provider_message_id = MessageSid`;
+  - `provider_event_id = EventSid` when present, otherwise `null`;
+  - `status = MessageStatus`;
+  - `channel_event = EventType`;
+  - `channel = rcs` when `From` starts with `rcs:`;
+  - `error_code = ErrorCode`;
+  - `human_error = ChannelStatusMessage`;
+  - read receipt signal when `MessageStatus=read` or `EventType=READ`;
+- logs a redacted record-only summary;
+- performs no Sheet, Firestore, Twilio, or provider write.
+
+Proof:
+
+- local syntax check passed;
+- local self-test passed:
+  - valid sample signature accepted;
+  - tampered params rejected;
+  - `EventType=READ` read-receipt signal detected;
+  - extra form field preserved;
+- deployed Cloud Run service;
+- unsigned `POST /twilio/status` returned `HTTP/2 403` with `invalid_twilio_signature`;
+- `GET /twilio/status` returned `HTTP/2 405` with `Allow: POST`;
+- signed delivered-style proof `POST /twilio/status` returned `HTTP 200`:
+  - `accepted: true`;
+  - `provider_message_id: SMROQPROOF0001`;
+  - `provider_event_id: null`;
+  - `status: delivered`;
+  - `channel_event: DELIVERED`;
+  - `channel: rcs`;
+  - `write_applied: false`;
+- signed future read-style proof with `EventType=READ` and no `MessageStatus` returned `HTTP 200`:
+  - `provider_message_id: SMROQPROOFREAD0001`;
+  - `status: ""`;
+  - `channel_event: READ`;
+  - `channel: rcs`;
+  - `read_receipt_signal: true`;
+  - `write_applied: false`.
+
+Boundary:
+
+- no Twilio Messaging Service callback URL was configured;
+- no Twilio API call was made except local/GCP secret setup and Cloud Run deployment;
+- no message was sent;
+- no Sheet/App Script write;
+- no Firestore event persistence;
+- no RCS Sender or compliance submission;
+- no sender-pool or phone-number movement.
+
+Recommended next gate:
+
+- add persistence for validated callbacks, still record-only, probably Firestore first with dedupe/idempotency around `MessageSid + MessageStatus/EventType + timestamp-ish fields`;
+- only after persistence is proven should the proof Messaging Service callback URL be configured.
