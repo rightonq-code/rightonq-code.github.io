@@ -4759,5 +4759,5 @@ Findings/fixes:
 
 Current next gate:
 
-- Commit and push the v39 code/docs state.
-- After that, any real Twilio/provider-connected setup should be a separate approved slice.
+- Commit and push the post-v39 append-writer hardening: `appendTrackingRecord` now writes new rows by the live Sheet header row instead of assuming code constant order.
+- After that, deploy the hardening to the clean API-only operator deployment as a separate approved Apps Script UI update, then prove a bounded non-provider append path before any real Twilio/provider-connected setup.

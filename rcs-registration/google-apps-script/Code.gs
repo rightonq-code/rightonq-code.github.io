@@ -1430,7 +1430,8 @@ function isTruthy(value) {
 
 function appendTrackingRecord(spreadsheet, sheetName, headersList, record) {
   const sheet = getOrCreateSheet(spreadsheet, sheetName, headersList);
-  sheet.appendRow(headersList.map(function(header) {
+  const headers = normaliseHeaders(sheet.getRange(1, 1, 1, Math.max(sheet.getLastColumn(), headersList.length)).getValues()[0]);
+  sheet.appendRow(headers.map(function(header) {
     return safeCell(record[header]);
   }));
 }

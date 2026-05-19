@@ -50,7 +50,7 @@ The proof helper uses the authenticated operator API for creating the private te
 | `revolut-webhook-map.mjs` | Map a verified Revolut webhook payload into a proposed `operator-billing.mjs --dry-run` update. | No RCS PIN; performs no writes |
 | `revolut-webhook-handler.mjs` | Offline endpoint-core proof: verify headers/body, map payload, and return public/internal handler results without writes. | No RCS PIN; fake-data self-test only for now |
 
-Note: `operator-twilio-setup.mjs` and the expanded Billing/RC Bundle fields are live on the clean API executable deployment at version `39`. Version `39` keeps missing Sheet headers append-only, repairs the known `Applications` header drift, and proved the Slice 9B Twilio setup tracking row readback.
+Note: `operator-twilio-setup.mjs` and the expanded Billing/RC Bundle fields are live on the clean API executable deployment at version `39`. Version `39` keeps missing Sheet headers append-only, repairs the known `Applications` header drift, and proved the Slice 9B Twilio setup tracking row readback. Pending source after version `39` hardens append writers to write by the live Sheet header row before any provider-connected slice.
 
 ## Safety Rules
 

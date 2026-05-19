@@ -68,9 +68,10 @@ Deployment:
 - Version `32` adds the `Payment orders` ledger plus guarded `checkActiveCheckout` and `recordPaymentOrder` operator actions for Revolut active-checkout protection. The public web app is still pinned to version `31`.
 - Version `35` adds guarded `lookupPaymentOrder` for read-only Payment orders lookup by Revolut order ID. It was deployed as a clean API-only operator deployment; the public web app remains pinned to version `31`.
 - Version `36` deployed the Slice 9A `Twilio setup` tab shape, `updateTwilioSetup` operator action, Compliance Embeddable tracking fields on `UK RC bundles`, and usage/top-up/pause fields on `Billing`.
-- Version `37` keeps the Slice 9A fields live and corrects the expanded `Billing` and `UK RC bundles` header order to be append-only for existing Sheet rows.
+- Version `37` keeps the Slice 9A fields live and keeps the expanded `Billing` and `UK RC bundles` fields append-only after historical Sheet columns.
 - Version `38` adds a safe operator API return serializer so Sheet-derived values cannot break Apps Script Execution API responses.
 - Version `39` changes Sheet header reconciliation to append missing columns only and repairs the known `Applications` header drift exposed during the Slice 9B proof.
+- Pending source after version `39`: `appendTrackingRecord` now writes new rows using the live Sheet header row, so append-only Sheet order and code constant order cannot mis-column future tracking rows.
 
 ## Behaviour
 
@@ -177,7 +178,7 @@ Operator API proof:
 - The named login includes the Sheets scope needed by `SpreadsheetApp.openById`.
 - Direct `scripts.run` execution against the clean API deployment with a dummy PIN reaches Apps Script and correctly returns `Invalid onboarding operator PIN`.
 - Valid-PIN read-only snapshot for `ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747` returned `ok: true` on version `39`, included the populated `twilioSetup` proof row, and confirmed `Applications`, `Billing`, and `UK RC bundles` read back under the correct headers after append-only sheet reconciliation.
-- Operator snapshot readback now reconciles tracked Sheet headers to canonical order before reading Billing, Internal reviews, Trust Hub KYC, and UK RC Bundle rows.
+- Operator snapshot readback now preserves existing tracked Sheet column order, appends any missing headers, and reads rows by the live Sheet header row.
 - Local operator wrappers now call `https://script.googleapis.com/v1/scripts/{deploymentId}:run` directly with the PIN in the HTTPS request body, not in a command-line `clasp run --params` argument.
 - The direct `scripts.run` helper uses `devMode: false` and the clean API executable deployment ID from `.clasp.json`, so wrappers are pinned to the deployed operator API version rather than Apps Script HEAD.
 - `operator-status.mjs` proved the wrapper path by returning strict JSON with `ok: true` for `ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747`.
