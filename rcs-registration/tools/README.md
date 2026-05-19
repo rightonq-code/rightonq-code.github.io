@@ -44,6 +44,7 @@ The proof helper uses the authenticated operator API for creating the private te
 | `operator-twilio-setup.mjs` | Update the internal Twilio setup, provider submission, usage-pull, and manual pause tracking row. | `RCS_ONBOARDING_OPERATOR_PIN` |
 | `operator-billing.mjs` | Update the internal billing/payment tracking row. | `RCS_ONBOARDING_OPERATOR_PIN` |
 | `operator-payment-order.mjs` | Check, append, or look up Revolut payment-order ledger snapshots for active-checkout protection. | `RCS_ONBOARDING_OPERATOR_PIN` |
+| `twilio-account-inventory.mjs` | Read-only Twilio parent/subaccount/Messaging Service inventory preflight before provider-connected setup. | `TWILIO_ACCOUNT_SID` and `TWILIO_AUTH_TOKEN` |
 | `proof-public-part-a-submit.mjs` | Create a private test link, submit Part A through the public path, then prove Trust Hub KYC and UK RC Bundle tracking rows were created. | `RCS_ONBOARDING_CREATE_PIN` and `RCS_ONBOARDING_OPERATOR_PIN` |
 | `revolut-sandbox-proof.mjs` | Prepare and test Revolut sandbox Hosted Checkout requests. | No RCS PIN; uses `REVOLUT_MERCHANT_API_SECRET` for live sandbox calls |
 | `revolut-webhook-verify.mjs` | Verify Revolut webhook signatures/timestamp tolerance against captured sandbox payloads. | No RCS PIN; uses `REVOLUT_WEBHOOK_SIGNING_SECRET` for real samples |
@@ -255,6 +256,25 @@ RCS_ONBOARDING_OPERATOR_PIN="..." node rcs-registration/tools/operator-twilio-se
 Expected live result: JSON showing the stored Twilio subaccount SID, provider submission status, go-live status, and manual pause flag.
 
 Safety: store Twilio resource IDs, statuses, URLs, and operator notes only. Do not store Twilio auth tokens, API keys, webhook secrets, raw message payloads, or customer message content in this workflow.
+
+## Twilio Account Inventory Preflight
+
+Dry run:
+
+```bash
+node rcs-registration/tools/twilio-account-inventory.mjs --dry-run --include-senders
+```
+
+Live read-only run, using the existing 1Password secret wrapper:
+
+```bash
+~/rightonq-infrastructure/scripts/run_with_secrets.sh \
+  node rcs-registration/tools/twilio-account-inventory.mjs --include-senders
+```
+
+Expected live result: JSON showing the parent Twilio account summary, visible subaccounts, Messaging Services, and sender-pool summary for the configured Messaging Service. The tool performs `GET` requests only and never prints the Twilio auth token.
+
+Safety: this is the first provider-connected preflight step only. It must not create subaccounts, Messaging Services, sender pools, RCS senders, compliance profiles, phone numbers, messages, or chargeable usage.
 
 ## Update Billing Tracking
 

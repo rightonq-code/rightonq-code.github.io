@@ -2926,6 +2926,30 @@ Output:
 - clear expectations before payment/form;
 - read-only context file for website agents to understand this workflow.
 
+### Slice 10A - Twilio Provider Inventory Preflight
+
+Status: source-only tool prepared on Tuesday 19 May 2026. No Twilio API call has been made by this slice yet.
+
+Purpose:
+
+- run the first provider-connected step as read-only inventory, not creation;
+- confirm the Twilio parent account, existing subaccounts, existing Messaging Services, and configured sender pool before creating anything;
+- keep subaccount/runtime setup separate from Trust Hub / compliance profile work.
+
+Implemented in source:
+
+- `tools/twilio-account-inventory.mjs`
+
+Boundary:
+
+- `GET` requests only;
+- no subaccount creation;
+- no Messaging Service creation;
+- no sender/RCS sender/phone-number creation;
+- no Trust Hub / RC Bundle mutation;
+- no message send;
+- no chargeable usage.
+
 ## Open Questions
 
 - Exact sales-page wording for `RightOnQ UK` and `RightOnQ Global`.

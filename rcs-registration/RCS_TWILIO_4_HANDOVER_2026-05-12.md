@@ -4817,3 +4817,38 @@ Current next gate:
 
 - safe to plan the next Twilio/provider-connected slice;
 - before any real Twilio API call, keep the usual explicit Adam approval gate and record what cost/provider/customer-facing effect the action may have.
+
+## Slice 10A - Twilio Provider Inventory Preflight Source
+
+Codex prepared the first provider-connected preflight as source only. No Twilio API call was made in this slice.
+
+New tool:
+
+- `rcs-registration/tools/twilio-account-inventory.mjs`
+
+Purpose:
+
+- read the Twilio parent account summary;
+- list visible subaccounts;
+- list Messaging Services;
+- optionally list sender-pool resources for the configured/provided Messaging Service SID;
+- prove what already exists before creating subaccounts, Messaging Services, sender pools, RCS senders, phone numbers, or compliance resources.
+
+Safety boundary:
+
+- live mode performs `GET` requests only;
+- it requires `TWILIO_ACCOUNT_SID` and `TWILIO_AUTH_TOKEN`;
+- it can use `TWILIO_MESSAGING_SERVICE_SID` for sender-pool readback;
+- it never prints the Twilio auth token;
+- it prints Twilio SIDs, friendly names, statuses, URLs, and sender IDs only.
+
+Dry-run proof:
+
+- `node --check rcs-registration/tools/twilio-account-inventory.mjs` passed;
+- `node rcs-registration/tools/twilio-account-inventory.mjs --dry-run --include-senders` returned a read-only request plan and made no Twilio API call.
+
+Current next gate:
+
+- if Adam approves the first live provider-connected preflight, run:
+  `~/rightonq-infrastructure/scripts/run_with_secrets.sh node rcs-registration/tools/twilio-account-inventory.mjs --include-senders`
+- expected effect: read-only Twilio inventory only; no cost, no customer-facing change, no provider mutation.
