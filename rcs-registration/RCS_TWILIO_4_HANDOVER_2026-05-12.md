@@ -5121,3 +5121,57 @@ Current next gate:
   - attach/move a sender/phone number only after a separate sender-pool plan;
   - start RCS sender/compliance preflight only after Trust Hub/brand evidence fields are confirmed.
 - Do not bundle callback configuration, sender pool movement, RCS sender submission, or message sending together.
+
+## Slice 10G - RCS Sender / Compliance Preflight
+
+Adam approved the next-step plan after Claude Code's read-only sanity check recommended an RCS sender/compliance preflight before any callback, sender-pool, phone-number, or submission work.
+
+Boundary:
+
+- research and local source/doc review only;
+- no Twilio API call;
+- no Google Sheet write;
+- no Apps Script deployment;
+- no RCS Sender creation;
+- no Trust Hub or compliance submission;
+- no callback URL configuration;
+- no sender-pool / phone-number movement;
+- no message send, customer-facing change, or chargeable usage.
+
+Official Twilio docs checked:
+
+- `https://www.twilio.com/docs/rcs/onboarding`
+- `https://www.twilio.com/docs/trust-hub/profiles/secondary-compliance-profiles`
+- `https://www.twilio.com/docs/rcs/send-an-rcs-message`
+- `https://www.twilio.com/docs/messaging/services`
+
+Facts carried forward:
+
+- Branded RCS onboarding remains Console-led; Twilio says to allow four to six weeks or longer for setup, especially across multiple regions.
+- Twilio docs say RCS Senders cannot be created/onboarded programmatically at scale.
+- RCS public-profile fields include display name, description, logo, banner, accent colour, contact details, privacy policy URL, and terms URL.
+- RCS compliance registration needs authorised representative contact details, opt-in and opt-out descriptions, public hosted opt-in proof images, use-case description, and a public hosted video showing the use case in action.
+- Secondary Compliance Profiles are for a brand/entity different from the parent account business and require an approved primary business compliance profile first.
+- Secondary Compliance Profile setup asks for business details, operating regions, two authorised representatives, address, and supporting documents.
+- RCS senders belong in Messaging Service sender pools later; when an RCS Sender is in the pool, Messaging Services attempt RCS first and then SMS/MMS fallback when needed.
+
+RightOnQ model coverage:
+
+- Part A already captures most sender/compliance text: legal/trading/display name, sender description, logo/banner upload for preview, brand colour, website/contact/public links, privacy/terms URLs, use case, message examples, HELP/STOP-style samples, consent route, opt-in description, opt-out description, reviewer notes, and launch countries.
+- `Twilio setup` already tracks subaccount, Messaging Service, RBM agent ID, sender name, RBM logo URL, RBM banner URL, provider submission reference/status, review video URL/status, registration pack status, go-live status, usage status, and manual pause.
+- `Trust Hub KYC` already tracks primary/secondary profile SIDs, policy SID, business identity/type/industry/registration/regions, two representative end-user SIDs/statuses, evidence/evaluation/status-callback fields, and KYC notes.
+- `Internal reviews` already tracks legal/company, website/domain, public links, message purpose/examples, consent/opt-out, KYC/Trust Hub, SMS fallback/RC bundle, and phone-preview readiness.
+
+Gaps before any RCS sender/compliance submission:
+
+- Public asset URLs: Part A validates local logo/banner uploads and generates previews, but Twilio requires publicly accessible logo/banner URLs. The tracking fields exist (`RBM logo URL`, `RBM banner URL`), but the hosting/upload step is not proved yet.
+- Opt-in proof image URL: Part A captures consent route and opt-in wording, but not a public hosted proof-image URL.
+- Review video URL: the Part B video generator/story exists and `Review video URL` is tracked, but the actual public hosted video must be created before submission.
+- Second authorised representative: the state model supports rep 2, and the plan says Secondary Profile readiness should model two reps, but the current public Part A form captures only the first/primary authorised representative. Rep 2 remains a manual/follow-up prerequisite before Secondary Profile submission.
+- Business operating regions: Trust Hub operating regions are not the same thing as RCS recipient launch countries. The field exists in `Trust Hub KYC`, but do not infer it automatically from Step 7 launch regions.
+- Callback receiver: not a blocker for this preflight, but Twilio delivery/status callbacks should wait until the RightOnQ Twilio callback receiver exists and is proved in its own slice.
+
+Recommended next slice:
+
+- build a registration-pack readiness map: a source-only/read-only checklist mapping each Twilio RCS sender and Secondary Compliance Profile requirement to a captured Part A field, an internal tracking field, or a deliberate manual follow-up.
+- Do not submit RCS sender/compliance, configure callbacks, attach/move phone numbers, or send messages until that map is complete and Adam explicitly approves the next individual gate.
