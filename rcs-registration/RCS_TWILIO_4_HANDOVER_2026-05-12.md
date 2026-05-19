@@ -4759,5 +4759,10 @@ Findings/fixes:
 
 Current next gate:
 
-- Commit and push the post-v39 append-writer hardening: `appendTrackingRecord` now writes new rows by the live Sheet header row instead of assuming code constant order.
-- After that, deploy the hardening to the clean API-only operator deployment as a separate approved Apps Script UI update, then prove a bounded non-provider append path before any real Twilio/provider-connected setup.
+- Post-v39 append-writer hardening was committed and pushed as `ee12e66`: `appendTrackingRecord` now writes new rows by the live Sheet header row instead of assuming code constant order.
+- Apps Script HEAD was pushed again, version `40` was created, and the existing clean API-only operator deployment was updated through the Apps Script UI to version `40` with description `Operator API executable (Slice 9C header-aware append writes)`.
+- `clasp deployments` confirmed:
+  - `AKfycbzj0I9m_vld5Aw-zPQFsTZXslrmxlrDA6Ut0RtFnd6_fxXpVDc4qhhRuKVAA5EuhWG9 @40`;
+  - public web app `AKfycbyI81Ir2xvHLar0R0iFBBWyXa1Nj93T4_8Ni5_eX3XEYDA-AKQbVYbPHnTROLm8e4a6 @31`.
+- Dummy-PIN proof against the live version `40` operator API returned `Invalid onboarding operator PIN`.
+- Next proof gate: run a valid-PIN readback and, if Adam approves a bounded write, prove one non-provider append path before any real Twilio/provider-connected setup.

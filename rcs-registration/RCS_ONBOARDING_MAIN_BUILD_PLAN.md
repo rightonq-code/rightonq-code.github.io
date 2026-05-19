@@ -2891,8 +2891,8 @@ Deployment state:
 - Version `37` corrects those expansions to be append-only after the historical columns.
 - Version `38` adds a safe return serializer for Apps Script Execution API responses.
 - Version `39` changes the shared Sheet header reconciler to append missing columns only and repairs the known `Applications` header drift from earlier header reordering.
-- Pending source after version `39`: `appendTrackingRecord` writes new rows by the live Sheet header row, preventing future append rows from depending on code constant order.
-- The clean API-only operator deployment now serves version `39` with description `Operator API executable (Slice 9B append-only sheet reconciliation)`.
+- Version `40` changes `appendTrackingRecord` to write new rows by the live Sheet header row, preventing future append rows from depending on code constant order.
+- The clean API-only operator deployment now serves version `40` with description `Operator API executable (Slice 9C header-aware append writes)`.
 - Deployment ID remains `AKfycbzj0I9m_vld5Aw-zPQFsTZXslrmxlrDA6Ut0RtFnd6_fxXpVDc4qhhRuKVAA5EuhWG9`.
 - Public customer web app deployment remains version `31` and was not touched.
 - It does not call Twilio APIs, create Twilio subaccounts, change provider registrations, or enable live usage.
