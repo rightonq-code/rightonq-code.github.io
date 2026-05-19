@@ -72,6 +72,8 @@ Deployment:
 - Version `38` adds a safe operator API return serializer so Sheet-derived values cannot break Apps Script Execution API responses.
 - Version `39` changes Sheet header reconciliation to append missing columns only and repairs the known `Applications` header drift exposed during the Slice 9B proof.
 - Version `40` makes `appendTrackingRecord` write new rows using the live Sheet header row, so append-only Sheet order and code constant order cannot mis-column future tracking rows.
+- Version `41` preserves numeric `0` in Payment orders summaries, after the Slice 9C synthetic append proof exposed that `amountMinor: 0` rendered as blank in lookup output.
+- Version `42` preserves numeric `0` in the shared Sheet row-read helpers, after the version `41` lookup proved the lower-level row mapper still collapsed zero to blank before the Payment orders summary saw it.
 
 ## Behaviour
 
@@ -157,7 +159,7 @@ Authenticated operator API scaffold:
 - `rcsOperatorAction(payload)` is available in `Code.gs` as the intended Apps Script API entry point for operator-only actions.
 - The manifest includes `executionApi.access = DOMAIN`.
 - The Apps Script project is now linked to standard Google Cloud project `rightonq-gog`.
-- The current clean operator API executable deployment is `AKfycbzj0I9m_vld5Aw-zPQFsTZXslrmxlrDA6Ut0RtFnd6_fxXpVDc4qhhRuKVAA5EuhWG9` (version `40`, `Operator API executable (Slice 9C header-aware append writes)`).
+- The current clean operator API executable deployment is `AKfycbzj0I9m_vld5Aw-zPQFsTZXslrmxlrDA6Ut0RtFnd6_fxXpVDc4qhhRuKVAA5EuhWG9` (version `42`, `Operator API executable (Slice 9C preserve zero row readback)`).
 - The previous clean operator API executable deployments have been archived after the v35 lookup proof passed:
   - `AKfycbwPbeT3Mxpmr_Q88WdSp0hRnDk96Pm93GDTsA1eOsJxmiaVpSS2xAg78ox848YsqCQU` (version `34`);
   - `AKfycbwSdO73nyxrOKVPQVQgkoGg29RwvYmJXWDYAgFqs5cdxyI4pJXFW3cZZSS1-6y3zlex` (version `33`, description `Operator API executable (Step 8H clean API-only)`).
@@ -179,6 +181,10 @@ Operator API proof:
 - Direct `scripts.run` execution against the clean API deployment with a dummy PIN reaches Apps Script and correctly returns `Invalid onboarding operator PIN`.
 - Valid-PIN read-only snapshot for `ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747` returned `ok: true` on version `39`, included the populated `twilioSetup` proof row, and confirmed `Applications`, `Billing`, and `UK RC bundles` read back under the correct headers after append-only sheet reconciliation.
 - Dummy-PIN proof against version `40` returned `Invalid onboarding operator PIN`; public web app version `31` remained untouched.
+- Valid-PIN read-only snapshot against version `40` returned `ok: true`; the synthetic superseded Payment orders append proof then returned `ok: true` and lookup found the same `roq-rcs-v40-append-proof-202605191340` row, proving header-aware append/readback without provider calls.
+- Version `41` was deployed through the Apps Script UI after the zero-amount summary tightening; `clasp deployments` confirmed the operator API at `@41` and public web app still at `@31`, and dummy-PIN proof still returned `Invalid onboarding operator PIN`.
+- Valid-PIN lookup against version `41` still returned `amountMinor: ""`, proving the shared row mapper was collapsing numeric zero before `buildPaymentOrderSummary` saw it. Version `42` moves the zero-preservation fix into `rowToObject` and `readColumn`.
+- Valid-PIN lookup against version `42` for synthetic superseded row `roq-rcs-v40-append-proof-202605191340` returned `amountMinor: 0`, confirming numeric zero survives Apps Script Sheet readback.
 - Operator snapshot readback now preserves existing tracked Sheet column order, appends any missing headers, and reads rows by the live Sheet header row.
 - Local operator wrappers now call `https://script.googleapis.com/v1/scripts/{deploymentId}:run` directly with the PIN in the HTTPS request body, not in a command-line `clasp run --params` argument.
 - The direct `scripts.run` helper uses `devMode: false` and the clean API executable deployment ID from `.clasp.json`, so wrappers are pinned to the deployed operator API version rather than Apps Script HEAD.

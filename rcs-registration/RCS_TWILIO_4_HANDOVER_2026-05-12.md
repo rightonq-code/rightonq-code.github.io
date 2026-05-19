@@ -4765,4 +4765,21 @@ Current next gate:
   - `AKfycbzj0I9m_vld5Aw-zPQFsTZXslrmxlrDA6Ut0RtFnd6_fxXpVDc4qhhRuKVAA5EuhWG9 @40`;
   - public web app `AKfycbyI81Ir2xvHLar0R0iFBBWyXa1Nj93T4_8Ni5_eX3XEYDA-AKQbVYbPHnTROLm8e4a6 @31`.
 - Dummy-PIN proof against the live version `40` operator API returned `Invalid onboarding operator PIN`.
-- Next proof gate: run a valid-PIN readback and, if Adam approves a bounded write, prove one non-provider append path before any real Twilio/provider-connected setup.
+- Adam ran the valid-PIN `operator-status.mjs` proof against version `40`. It returned `ok: true`; `twilioSetup` stayed populated, Billing and UK RC Bundle remained aligned, and public web app version `31` remained untouched.
+- Adam then ran a bounded non-provider append proof using `operator-payment-order.mjs --record` with synthetic superseded order ID `roq-rcs-v40-append-proof-202605191340`.
+- The append returned `ok: true` and lookup returned `found: true` for the same synthetic row, proving the header-aware append/readback path without any Revolut API call, Twilio API call, provider setup, chargeable usage, or customer-facing change.
+- Note: the proof used `--amount-minor 0`; lookup correctly found the row, but source was then tightened so `buildPaymentOrderSummary` preserves numeric `0` instead of rendering it as blank.
+- Apps Script HEAD was pushed again, version `41` was created, and the existing clean API-only operator deployment was updated through the Apps Script UI to version `41` with description `Operator API executable (Slice 9C preserve zero payment amount)`.
+- `clasp deployments` confirmed:
+  - `AKfycbzj0I9m_vld5Aw-zPQFsTZXslrmxlrDA6Ut0RtFnd6_fxXpVDc4qhhRuKVAA5EuhWG9 @41`;
+  - public web app `AKfycbyI81Ir2xvHLar0R0iFBBWyXa1Nj93T4_8Ni5_eX3XEYDA-AKQbVYbPHnTROLm8e4a6 @31`.
+- Dummy-PIN proof against the live version `41` operator API returned `Invalid onboarding operator PIN`.
+- Adam ran the valid-PIN lookup against version `41`; the row was found but `amountMinor` still returned blank. Root cause: the shared Sheet row mapper (`rowToObject` / `readColumn`) still used `value || ""`, collapsing numeric zero before the Payment orders summary saw it.
+- Source was tightened again so `rowToObject` and `readColumn` preserve numeric `0`.
+- Apps Script HEAD was pushed again, version `42` was created, and the existing clean API-only operator deployment was updated through the Apps Script UI to version `42` with description `Operator API executable (Slice 9C preserve zero row readback)`.
+- `clasp deployments` confirmed:
+  - `AKfycbzj0I9m_vld5Aw-zPQFsTZXslrmxlrDA6Ut0RtFnd6_fxXpVDc4qhhRuKVAA5EuhWG9 @42`;
+  - public web app `AKfycbyI81Ir2xvHLar0R0iFBBWyXa1Nj93T4_8Ni5_eX3XEYDA-AKQbVYbPHnTROLm8e4a6 @31`.
+- Dummy-PIN proof against the live version `42` operator API returned `Invalid onboarding operator PIN`.
+- Adam ran the valid-PIN lookup against version `42`; it returned `found: true`, `ok: true`, and `amountMinor: 0` for `roq-rcs-v40-append-proof-202605191340`, confirming numeric zero now survives shared Sheet readback.
+- Slice 9C is proved and ready to commit/push: header-aware append writes are live, zero-value readback is fixed, public web app remains version `31`, and no Revolut/Twilio/provider/customer-facing action was performed in this cleanup.

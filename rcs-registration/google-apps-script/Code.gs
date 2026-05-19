@@ -1406,7 +1406,7 @@ function buildPaymentOrderSummary(record) {
     applicationId: record["Application ID"] || "",
     revolutOrderId: record["Revolut order ID"] || "",
     orderState: record["Order state"] || "",
-    amountMinor: record["Amount minor"] || "",
+    amountMinor: record["Amount minor"] === 0 ? 0 : record["Amount minor"] || "",
     currency: record["Currency"] || "",
     checkoutUrlPresent: Boolean(record["Checkout URL"]),
     checkoutUrl: record["Checkout URL"] || "",
@@ -2359,7 +2359,8 @@ function repairApplicationsHeaderDrift(sheet, desiredHeaders) {
 function rowToObject(row, headers) {
   const output = {};
   headers.forEach(function(header, index) {
-    output[header] = row[index] || "";
+    const value = row[index];
+    output[header] = value === 0 ? 0 : value || "";
   });
   return output;
 }
@@ -2528,7 +2529,7 @@ function firstValue() {
 function readColumn(row, headers, name) {
   const index = headers.indexOf(name);
   if (index === -1) return "";
-  return row[index] || "";
+  return row[index] === 0 ? 0 : row[index] || "";
 }
 
 function serialiseDate(value) {

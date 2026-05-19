@@ -2892,9 +2892,14 @@ Deployment state:
 - Version `38` adds a safe return serializer for Apps Script Execution API responses.
 - Version `39` changes the shared Sheet header reconciler to append missing columns only and repairs the known `Applications` header drift from earlier header reordering.
 - Version `40` changes `appendTrackingRecord` to write new rows by the live Sheet header row, preventing future append rows from depending on code constant order.
-- The clean API-only operator deployment now serves version `40` with description `Operator API executable (Slice 9C header-aware append writes)`.
+- Version `41` preserves numeric `0` in Payment orders summaries after the Slice 9C append proof exposed that zero rendered as blank in lookup output.
+- Version `42` moves zero preservation into the shared Sheet row-read helpers after the version `41` lookup proved numeric zero was still collapsed before Payment orders summary construction.
+- The clean API-only operator deployment now serves version `42` with description `Operator API executable (Slice 9C preserve zero row readback)`.
 - Deployment ID remains `AKfycbzj0I9m_vld5Aw-zPQFsTZXslrmxlrDA6Ut0RtFnd6_fxXpVDc4qhhRuKVAA5EuhWG9`.
 - Public customer web app deployment remains version `31` and was not touched.
+- Version `40` proof passed: valid-PIN read-only snapshot returned `ok: true`, and a synthetic superseded Payment orders row (`roq-rcs-v40-append-proof-202605191340`) appended and looked up correctly without any Revolut/Twilio/provider call.
+- Version `42` proof passed: valid-PIN lookup for the same synthetic superseded row returned `amountMinor: 0`, confirming numeric zero survives shared Sheet readback.
+- `clasp deployments` confirmed the operator deployment at `@42` and public web app still at `@31`; dummy-PIN proof still returned `Invalid onboarding operator PIN`.
 - It does not call Twilio APIs, create Twilio subaccounts, change provider registrations, or enable live usage.
 - It stores IDs, statuses, URLs, and operator notes only; no Twilio auth tokens, API secrets, raw message payloads, or customer message content.
 
