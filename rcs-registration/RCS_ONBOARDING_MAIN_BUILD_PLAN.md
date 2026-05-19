@@ -3192,6 +3192,38 @@ Recommended next slice:
 
 - hosted asset/proof URL workflow: decide where approved logo, banner, opt-in proof image, and review video files live; add a safe operator update/readback path for those URLs; keep `Provider submission status`, `Go-live status`, and `Usage pull status` at `not_started`.
 
+### Slice 10I - Hosted Asset / Proof URL Tracking Source
+
+Status: source-only tracking change prepared on Tuesday 19 May 2026.
+
+Purpose:
+
+- add the missing internal landing field for public hosted opt-in proof images;
+- reuse the existing `Twilio setup` URL fields for hosted logo, banner, and review video;
+- keep the change deployable separately before any real RCS Sender/compliance submission.
+
+Source changes:
+
+- `Twilio setup` gains `Opt-in proof URL(s)` as an append-only tracking header.
+- `buildTwilioSetupFieldMap()` maps `optInProofUrls` to `Opt-in proof URL(s)`.
+- `operator-twilio-setup.mjs` accepts `--opt-in-proof-urls`.
+- Tool docs now show hosted logo, banner, opt-in proof, and review video URL examples.
+
+Boundary:
+
+- source/docs only;
+- not live until an approved Apps Script push/version/deployment update;
+- no Sheet write;
+- no Twilio API call;
+- no public asset upload;
+- no RCS Sender creation/submission;
+- no Trust Hub or compliance submission;
+- no callback configuration, sender-pool movement, phone-number movement, message send, customer-facing change, or chargeable usage.
+
+Recommended next gate:
+
+- deploy/prove the source-only operator update, then perform one proof update/readback on the existing proof application using harmless public placeholder URLs or final approved hosted proof URLs.
+
 ## Open Questions
 
 - Exact sales-page wording for `RightOnQ UK` and `RightOnQ Global`.

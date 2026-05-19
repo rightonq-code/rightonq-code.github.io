@@ -5216,3 +5216,42 @@ Recommended next slice:
 - hosted asset/proof URL workflow: decide the hosting route for approved logo, banner, opt-in proof image, and review video files; add/update operator tracking so the public URLs can be recorded and read back on the proof application.
 - Keep `Provider submission status`, `Go-live status`, and `Usage pull status` at `not_started`.
 - Do not combine this with callback configuration, sender-pool movement, compliance submission, RCS Sender submission, or message sending.
+
+## Slice 10I - Hosted Asset / Proof URL Tracking Source
+
+Adam approved the hosted asset/proof URL workflow plan. Codex prepared the source-only tracking half first.
+
+Source changes:
+
+- `google-apps-script/Code.gs`
+  - `TWILIO_SETUP_HEADERS` now includes `Opt-in proof URL(s)` near the append-only end of the Twilio setup row shape.
+  - `buildTwilioSetupFieldMap()` maps `optInProofUrls` to `Opt-in proof URL(s)`.
+- `tools/operator-twilio-setup.mjs`
+  - accepts `--opt-in-proof-urls`;
+  - usage text includes the hosted opt-in proof URL flag.
+- `tools/README.md`
+  - Twilio setup examples now include hosted logo, banner, opt-in proof, and review video URLs;
+  - safety wording says to store public asset/proof URLs only, not private/signed URLs.
+- `google-apps-script/README.md`
+  - records that this is pending source after operator API version `43`.
+
+Boundary:
+
+- source/docs only;
+- no Apps Script push/version/deployment update yet;
+- no Sheet write;
+- no Twilio API call;
+- no public asset upload;
+- no RCS Sender or compliance submission;
+- no callback configuration, sender-pool movement, phone-number movement, message send, customer-facing change, or chargeable usage.
+
+Current live state:
+
+- operator API remains version `43`;
+- public web app remains version `31`;
+- the new `Opt-in proof URL(s)` field is not live until a later approved deployment.
+
+Recommended next gate:
+
+- deploy/prove this source-only operator update as a separate Apps Script gate;
+- then run one proof `operator-twilio-setup.mjs` update/readback against `ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747`, keeping `Provider submission status`, `Go-live status`, and `Usage pull status` at `not_started`.

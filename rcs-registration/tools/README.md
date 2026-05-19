@@ -41,7 +41,7 @@ The proof helper uses the authenticated operator API for creating the private te
 | `operator-review.mjs` | Update the internal review checklist and optionally mark Part A accepted. | `RCS_ONBOARDING_OPERATOR_PIN` |
 | `operator-trusthub-kyc.mjs` | Update the internal Trust Hub KYC tracking row and sync the application Trust Hub status. | `RCS_ONBOARDING_OPERATOR_PIN` |
 | `operator-rc-bundle.mjs` | Update the internal UK RC Bundle tracking row. | `RCS_ONBOARDING_OPERATOR_PIN` |
-| `operator-twilio-setup.mjs` | Update the internal Twilio setup, provider submission, usage-pull, and manual pause tracking row. | `RCS_ONBOARDING_OPERATOR_PIN` |
+| `operator-twilio-setup.mjs` | Update the internal Twilio setup, provider submission, hosted asset/proof URL, usage-pull, and manual pause tracking row. | `RCS_ONBOARDING_OPERATOR_PIN` |
 | `operator-twilio-subaccount-link.mjs` | Resolve a Twilio subaccount by friendly name and link it into the internal Twilio setup row with redacted terminal output. | `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, and `RCS_ONBOARDING_OPERATOR_PIN` |
 | `operator-billing.mjs` | Update the internal billing/payment tracking row. | `RCS_ONBOARDING_OPERATOR_PIN` |
 | `operator-payment-order.mjs` | Check, append, or look up Revolut payment-order ledger snapshots for active-checkout protection. | `RCS_ONBOARDING_OPERATOR_PIN` |
@@ -55,7 +55,7 @@ The proof helper uses the authenticated operator API for creating the private te
 | `revolut-webhook-map.mjs` | Map a verified Revolut webhook payload into a proposed `operator-billing.mjs --dry-run` update. | No RCS PIN; performs no writes |
 | `revolut-webhook-handler.mjs` | Offline endpoint-core proof: verify headers/body, map payload, and return public/internal handler results without writes. | No RCS PIN; fake-data self-test only for now |
 
-Note: `operator-twilio-setup.mjs` and the expanded Billing/RC Bundle fields are live on the clean API executable deployment at version `43`. Version `39` kept missing Sheet headers append-only, repaired the known `Applications` header drift, and proved the Slice 9B Twilio setup tracking row readback. Version `40` hardened append writers to write by the live Sheet header row before any provider-connected slice. Version `42` preserves numeric zero values through shared Sheet row readback. Version `43` preserves numeric zero values in full operator snapshots and `operator-status.mjs` redacts Twilio Account SIDs from terminal output.
+Note: `operator-twilio-setup.mjs` and the expanded Billing/RC Bundle fields are live on the clean API executable deployment at version `43`. Version `39` kept missing Sheet headers append-only, repaired the known `Applications` header drift, and proved the Slice 9B Twilio setup tracking row readback. Version `40` hardened append writers to write by the live Sheet header row before any provider-connected slice. Version `42` preserves numeric zero values through shared Sheet row readback. Version `43` preserves numeric zero values in full operator snapshots and `operator-status.mjs` redacts Twilio Account SIDs from terminal output. Pending source-only changes after version `43` add `Opt-in proof URL(s)` to Twilio setup tracking; this is not live until the operator API is deliberately pushed/versioned/deployed.
 
 ## Safety Rules
 
@@ -238,6 +238,10 @@ Dry run:
 node rcs-registration/tools/operator-twilio-setup.mjs \
   --application-id ROQ-RCS-... \
   --twilio-subaccount-sid AC... \
+  --rbm-logo-url https://example.com/logo.png \
+  --rbm-banner-url https://example.com/banner.png \
+  --opt-in-proof-urls https://example.com/opt-in-proof.png \
+  --review-video-url https://example.com/review-video.webm \
   --provider-submission-status provider_review \
   --usage-pull-status not_started \
   --manual-pause-flag no \
@@ -251,6 +255,10 @@ Live run:
 RCS_ONBOARDING_OPERATOR_PIN="..." node rcs-registration/tools/operator-twilio-setup.mjs \
   --application-id ROQ-RCS-... \
   --twilio-subaccount-sid AC... \
+  --rbm-logo-url https://example.com/logo.png \
+  --rbm-banner-url https://example.com/banner.png \
+  --opt-in-proof-urls https://example.com/opt-in-proof.png \
+  --review-video-url https://example.com/review-video.webm \
   --provider-submission-status provider_review \
   --usage-pull-status not_started \
   --manual-pause-flag no \
@@ -259,7 +267,7 @@ RCS_ONBOARDING_OPERATOR_PIN="..." node rcs-registration/tools/operator-twilio-se
 
 Expected live result: JSON showing the stored Twilio subaccount SID, provider submission status, go-live status, and manual pause flag.
 
-Safety: store Twilio resource IDs, statuses, URLs, and operator notes only. Do not store Twilio auth tokens, API keys, webhook secrets, raw message payloads, or customer message content in this workflow.
+Safety: store Twilio resource IDs, statuses, public asset/proof URLs, and operator notes only. Do not store Twilio auth tokens, API keys, webhook secrets, raw message payloads, customer message content, or private/signed URLs in this workflow.
 
 ## Link Twilio Proof Subaccount Into Tracking
 

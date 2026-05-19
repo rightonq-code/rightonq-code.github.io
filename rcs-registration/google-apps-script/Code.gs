@@ -310,6 +310,7 @@ const TWILIO_SETUP_HEADERS = [
   "Usage reconciliation status",
   "Manual pause flag",
   "Manual pause reason",
+  "Opt-in proof URL(s)",
   "Internal notes",
   "Last updated"
 ];
@@ -1608,6 +1609,7 @@ function buildTwilioSetupFieldMap() {
     usageReconciliationStatus: "Usage reconciliation status",
     manualPauseFlag: "Manual pause flag",
     manualPauseReason: "Manual pause reason",
+    optInProofUrls: "Opt-in proof URL(s)",
     internalNotes: "Internal notes"
   };
 }
