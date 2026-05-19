@@ -3156,6 +3156,42 @@ Recommended next slice:
 - registration-pack readiness map: source-only/read-only checklist that maps every Twilio RCS sender and Secondary Compliance Profile requirement to either a captured Part A field, an internal tracking field, or a deliberate manual follow-up.
 - Do not submit RCS sender/compliance, attach phone numbers, configure callbacks, or send messages until that map is complete.
 
+### Slice 10H - Registration Pack Readiness Map
+
+Status: source-only map completed on Tuesday 19 May 2026.
+
+New source:
+
+- `RCS_REGISTRATION_PACK_READINESS_MAP.md`
+
+Result:
+
+- Twilio RCS Sender public-profile requirements are mapped against Part A and `Twilio setup`.
+- Twilio RCS compliance requirements are mapped against Part A, Part B, and manual follow-ups.
+- Secondary Compliance Profile requirements are mapped against Part A and `Trust Hub KYC`.
+- Messaging Service / fallback readiness is mapped against the proof subaccount, proof Messaging Service, UK RC Bundle, and future callback route.
+
+Main hard stops before RCS Sender submission:
+
+- public hosted `RBM logo URL`;
+- public hosted `RBM banner URL`;
+- public hosted opt-in proof image URL or URLs;
+- public hosted `Review video URL`;
+- internal review of public links, use case, examples, consent, and opt-out wording;
+- client Part B name/logo and video approvals.
+
+Main hard stops before Secondary Compliance Profile submission:
+
+- approved parent primary business compliance profile confirmed;
+- end-client operating regions confirmed separately from RCS recipient countries;
+- second authorised representative collected;
+- secure path chosen for any exception-only ID/address evidence;
+- Trust Hub callback strategy confirmed or deliberately deferred.
+
+Recommended next slice:
+
+- hosted asset/proof URL workflow: decide where approved logo, banner, opt-in proof image, and review video files live; add a safe operator update/readback path for those URLs; keep `Provider submission status`, `Go-live status`, and `Usage pull status` at `not_started`.
+
 ## Open Questions
 
 - Exact sales-page wording for `RightOnQ UK` and `RightOnQ Global`.

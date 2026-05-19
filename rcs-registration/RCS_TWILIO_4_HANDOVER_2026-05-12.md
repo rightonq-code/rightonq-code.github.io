@@ -5175,3 +5175,44 @@ Recommended next slice:
 
 - build a registration-pack readiness map: a source-only/read-only checklist mapping each Twilio RCS sender and Secondary Compliance Profile requirement to a captured Part A field, an internal tracking field, or a deliberate manual follow-up.
 - Do not submit RCS sender/compliance, configure callbacks, attach/move phone numbers, or send messages until that map is complete and Adam explicitly approves the next individual gate.
+
+## Slice 10H - Registration Pack Readiness Map
+
+Adam approved the recommended readiness-map step. Codex added the map as source-only documentation.
+
+New file:
+
+- `rcs-registration/RCS_REGISTRATION_PACK_READINESS_MAP.md`
+
+Boundary:
+
+- source/docs only;
+- no Twilio API call;
+- no Apps Script deployment;
+- no Google Sheet write;
+- no Trust Hub or compliance submission;
+- no RCS Sender creation;
+- no callback configuration;
+- no sender-pool / phone-number movement;
+- no message send, customer-facing change, or chargeable usage.
+
+What the map covers:
+
+- RCS Sender public profile requirements;
+- RCS compliance registration requirements;
+- Secondary Compliance Profile / Trust Hub requirements;
+- Messaging Service and SMS/MMS fallback readiness;
+- hard gates before RCS Sender submission, Secondary Compliance Profile submission, and sender-pool/phone-number movement.
+
+Key findings:
+
+- The current Part A form captures most text/business/use-case material needed for RCS Sender registration.
+- The current tracking model already has the right internal landing fields for RBM sender name, logo URL, banner URL, provider status, review video URL, registration pack status, Trust Hub KYC state, and manual pause.
+- The actual blocking gaps are operational: public hosted logo/banner URLs, public hosted opt-in proof image URLs, public hosted review video URL, second authorised representative, end-client operating regions, and future callback receiver strategy.
+- The current Part A path validates logo/banner files and uses local previews, but does not host the actual assets at public URLs.
+
+Recommended next slice:
+
+- hosted asset/proof URL workflow: decide the hosting route for approved logo, banner, opt-in proof image, and review video files; add/update operator tracking so the public URLs can be recorded and read back on the proof application.
+- Keep `Provider submission status`, `Go-live status`, and `Usage pull status` at `not_started`.
+- Do not combine this with callback configuration, sender-pool movement, compliance submission, RCS Sender submission, or message sending.
