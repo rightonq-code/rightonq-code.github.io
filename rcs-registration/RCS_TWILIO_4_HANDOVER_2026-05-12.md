@@ -5020,3 +5020,60 @@ Current next gate:
 - create the first proof subaccount Messaging Service, if Adam approves a write;
 - recommended friendly name: `RightOnQ RCS proof messaging`;
 - keep the create step tiny: Messaging Service only, no sender pool, no phone number movement, no RCS sender submission, no compliance submission, no message send.
+
+## Slice 10E - Twilio Proof Messaging Service Creation
+
+Codex added a narrow Messaging Service creation helper and Adam approved continuing the provider setup. The proof subaccount inventory was empty before this step.
+
+New helper:
+
+- `rcs-registration/tools/twilio-subaccount-messaging-service-create.mjs`
+
+Safety boundary:
+
+- dry-run first;
+- live mode requires `--confirm-create`;
+- resolves the proof subaccount by friendly name using parent credentials;
+- uses the returned subaccount SID/auth token in memory for Messaging API calls;
+- checks existing Messaging Services in the subaccount before creating;
+- creates one Messaging Service only;
+- does not create sender pools, RCS senders, phone numbers, messages, compliance profiles, or Trust Hub resources;
+- redacts full Twilio Account SIDs and never prints auth tokens.
+
+Dry-run/source proof:
+
+- `node --check rcs-registration/tools/twilio-subaccount-messaging-service-create.mjs` passed;
+- dry-run showed:
+  - subaccount lookup `GET`;
+  - Messaging Services duplicate-check `GET`;
+  - create Messaging Service `POST` with `FriendlyName` and `Usecase`;
+- no Twilio API call was made during dry-run.
+
+Live provider write:
+
+- command: `~/rightonq-infrastructure/scripts/run_with_secrets.sh node rcs-registration/tools/twilio-subaccount-messaging-service-create.mjs --friendly-name "RightOnQ RCS proof customer - 2026-05-19" --messaging-service-friendly-name "RightOnQ RCS proof messaging" --usecase notifications --confirm-create`;
+- wrapper loaded Twilio env vars without printing values;
+- Messaging Service created:
+  - SID `MG2a5be4e825e32a31340b5ddb2e50d3a7`;
+  - friendly name `RightOnQ RCS proof messaging`;
+  - use case `notifications`;
+  - inbound request URL blank;
+  - status callback blank;
+  - area-code geomatch `true`;
+  - smart encoding `true`;
+  - created at `2026-05-19T16:48:56Z`.
+
+Post-create read-only verification:
+
+- command: `~/rightonq-infrastructure/scripts/run_with_secrets.sh node rcs-registration/tools/twilio-subaccount-messaging-inventory.mjs --friendly-name "RightOnQ RCS proof customer - 2026-05-19" --include-senders`;
+- inventory confirmed exactly one Messaging Service in the proof subaccount: `RightOnQ RCS proof messaging`;
+- sender pool for that service is empty:
+  - phone numbers: none;
+  - alpha senders: none;
+  - short codes: none.
+
+Current next gate:
+
+- link Messaging Service SID `MG2a5be4e825e32a31340b5ddb2e50d3a7` into the internal Twilio setup tracking row using `operator-twilio-setup.mjs` and Adam's operator PIN;
+- keep `providerSubmissionStatus`, `goLiveStatus`, and `usagePullStatus` at `not_started`;
+- after that, decide whether the next slice is webhook/callback configuration, sender pool/phone-number movement, or RCS sender/compliance preflight. Do not bundle those together.

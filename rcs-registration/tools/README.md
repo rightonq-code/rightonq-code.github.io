@@ -48,6 +48,7 @@ The proof helper uses the authenticated operator API for creating the private te
 | `twilio-account-inventory.mjs` | Read-only Twilio parent/subaccount/Messaging Service inventory preflight before provider-connected setup. | `TWILIO_ACCOUNT_SID` and `TWILIO_AUTH_TOKEN` |
 | `twilio-subaccount-create.mjs` | Create one clearly named Twilio subaccount after a duplicate-name preflight. | `TWILIO_ACCOUNT_SID` and `TWILIO_AUTH_TOKEN` |
 | `twilio-subaccount-messaging-inventory.mjs` | Read-only Messaging Service and sender-pool inventory inside a named Twilio subaccount. | `TWILIO_ACCOUNT_SID` and `TWILIO_AUTH_TOKEN` |
+| `twilio-subaccount-messaging-service-create.mjs` | Create one Messaging Service inside a named Twilio subaccount after a duplicate-name preflight. | `TWILIO_ACCOUNT_SID` and `TWILIO_AUTH_TOKEN` |
 | `proof-public-part-a-submit.mjs` | Create a private test link, submit Part A through the public path, then prove Trust Hub KYC and UK RC Bundle tracking rows were created. | `RCS_ONBOARDING_CREATE_PIN` and `RCS_ONBOARDING_OPERATOR_PIN` |
 | `revolut-sandbox-proof.mjs` | Prepare and test Revolut sandbox Hosted Checkout requests. | No RCS PIN; uses `REVOLUT_MERCHANT_API_SECRET` for live sandbox calls |
 | `revolut-webhook-verify.mjs` | Verify Revolut webhook signatures/timestamp tolerance against captured sandbox payloads. | No RCS PIN; uses `REVOLUT_WEBHOOK_SIGNING_SECRET` for real samples |
@@ -365,6 +366,33 @@ Live read-only run, using the existing 1Password secret wrapper:
 Expected live result: JSON showing the named subaccount summary, Messaging Services in that subaccount, and sender-pool summaries for those services. The tool resolves the subaccount by friendly name using parent credentials, then uses the resolved subaccount SID/auth token only in memory for Messaging API reads. It never prints auth tokens or full Twilio Account SIDs.
 
 Safety: this tool performs read-only `GET` requests only. It does not create Messaging Services, sender pools, RCS senders, phone numbers, messages, compliance profiles, or chargeable usage.
+
+## Create Twilio Subaccount Messaging Service
+
+Dry run:
+
+```bash
+node rcs-registration/tools/twilio-subaccount-messaging-service-create.mjs \
+  --friendly-name "RightOnQ RCS proof customer - 2026-05-19" \
+  --messaging-service-friendly-name "RightOnQ RCS proof messaging" \
+  --usecase notifications \
+  --dry-run
+```
+
+Live run, using the existing 1Password secret wrapper:
+
+```bash
+~/rightonq-infrastructure/scripts/run_with_secrets.sh \
+  node rcs-registration/tools/twilio-subaccount-messaging-service-create.mjs \
+    --friendly-name "RightOnQ RCS proof customer - 2026-05-19" \
+    --messaging-service-friendly-name "RightOnQ RCS proof messaging" \
+    --usecase notifications \
+    --confirm-create
+```
+
+Expected live result: JSON showing either `created: true` with the new Messaging Service SID/friendly name/use case, or `created: false` if a service with the same friendly name already exists in the subaccount. The tool resolves the subaccount by friendly name, checks existing Messaging Services, then creates one Messaging Service only.
+
+Safety: this tool creates only a Messaging Service. It does not create sender pools, RCS senders, phone numbers, messages, compliance profiles, or chargeable usage.
 
 ## Update Billing Tracking
 

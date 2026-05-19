@@ -3046,6 +3046,38 @@ Boundary:
 - no sender pool / phone number movement;
 - no RCS sender, compliance submission, message send, customer-facing change, or chargeable usage.
 
+### Slice 10E - Twilio Proof Messaging Service Creation
+
+Status: completed on Tuesday 19 May 2026.
+
+Purpose:
+
+- create the first Messaging Service inside the isolated proof subaccount;
+- keep the write intentionally narrow: Messaging Service only, no senders or outbound traffic.
+
+Implemented in source:
+
+- `tools/twilio-subaccount-messaging-service-create.mjs`
+
+Live result:
+
+- created Messaging Service `RightOnQ RCS proof messaging`;
+- Messaging Service SID: `MG2a5be4e825e32a31340b5ddb2e50d3a7`;
+- use case: `notifications`;
+- inbound request URL: blank;
+- status callback URL: blank;
+- independent read-only inventory confirmed exactly one Messaging Service in the proof subaccount;
+- sender pools are empty: no phone numbers, alpha senders, or short codes attached.
+
+Boundary:
+
+- one subaccount lookup `GET`;
+- one Messaging Services duplicate-check `GET`;
+- one Messaging Service creation `POST`;
+- one read-only inventory verification;
+- no sender pool / phone number movement;
+- no RCS sender, compliance submission, message send, customer-facing change, or chargeable usage.
+
 ## Open Questions
 
 - Exact sales-page wording for `RightOnQ UK` and `RightOnQ Global`.
