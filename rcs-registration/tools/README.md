@@ -11,7 +11,7 @@ Operator tools use the named clasp/OAuth login:
 - clasp user: `rightonq-gog`;
 - local OAuth credential source: `~/.clasprc.json`;
 - Apps Script project config: `rcs-registration/google-apps-script/.clasp.json`;
-- clean API executable deployment: `AKfycbzj0I9m_vld5Aw-zPQFsTZXslrmxlrDA6Ut0RtFnd6_fxXpVDc4qhhRuKVAA5EuhWG9` at Apps Script version `42`;
+- clean API executable deployment: `AKfycbzj0I9m_vld5Aw-zPQFsTZXslrmxlrDA6Ut0RtFnd6_fxXpVDc4qhhRuKVAA5EuhWG9` at Apps Script version `43`;
 - public customer web app deployment: `AKfycbyI81Ir2xvHLar0R0iFBBWyXa1Nj93T4_8Ni5_eX3XEYDA-AKQbVYbPHnTROLm8e4a6`.
 
 Operator wrappers call `scripts.run` against the clean API executable deployment ID in `.clasp.json` with `devMode: false`. They are pinned to the deployed operator API version rather than Apps Script HEAD.
@@ -53,7 +53,7 @@ The proof helper uses the authenticated operator API for creating the private te
 | `revolut-webhook-map.mjs` | Map a verified Revolut webhook payload into a proposed `operator-billing.mjs --dry-run` update. | No RCS PIN; performs no writes |
 | `revolut-webhook-handler.mjs` | Offline endpoint-core proof: verify headers/body, map payload, and return public/internal handler results without writes. | No RCS PIN; fake-data self-test only for now |
 
-Note: `operator-twilio-setup.mjs` and the expanded Billing/RC Bundle fields are live on the clean API executable deployment at version `42`. Version `39` kept missing Sheet headers append-only, repaired the known `Applications` header drift, and proved the Slice 9B Twilio setup tracking row readback. Version `40` hardened append writers to write by the live Sheet header row before any provider-connected slice. Version `42` preserves numeric zero values through shared Sheet row readback.
+Note: `operator-twilio-setup.mjs` and the expanded Billing/RC Bundle fields are live on the clean API executable deployment at version `43`. Version `39` kept missing Sheet headers append-only, repaired the known `Applications` header drift, and proved the Slice 9B Twilio setup tracking row readback. Version `40` hardened append writers to write by the live Sheet header row before any provider-connected slice. Version `42` preserves numeric zero values through shared Sheet row readback. Version `43` preserves numeric zero values in full operator snapshots and `operator-status.mjs` redacts Twilio Account SIDs from terminal output.
 
 ## Safety Rules
 
@@ -123,7 +123,7 @@ RCS_ONBOARDING_OPERATOR_PIN="..." node rcs-registration/tools/operator-status.mj
   --application-id ROQ-RCS-...
 ```
 
-Expected live result: JSON containing application status, latest internal review, Trust Hub KYC row, UK RC Bundle row, recent status events, and queued communications. After the Slice 9 source is deployed, the snapshot also includes the latest `twilioSetup` row.
+Expected live result: JSON containing application status, latest internal review, Trust Hub KYC row, UK RC Bundle row, recent status events, and queued communications. The snapshot also includes the latest `twilioSetup` row, and `operator-status.mjs` redacts full Twilio Account SIDs in terminal output.
 
 ## Approve Part A After Internal Review
 

@@ -4917,3 +4917,69 @@ Current next gate:
 - record the new Twilio subaccount SID into the internal Twilio setup tracking row for the proof application, using `operator-twilio-setup.mjs` with Adam's operator PIN;
 - then decide whether the next provider-connected step is a subaccount-scoped Messaging Service inventory/create step or a Trust Hub/Compliance preflight;
 - any Messaging Service creation, phone number movement, RCS sender submission, compliance submission, or message send remains a separate explicit approval gate.
+
+## Slice 10C - Twilio Proof Subaccount Tracking Link
+
+Codex added a safer internal-link helper so Adam did not need to paste the full Twilio Account SID into chat or terminal arguments.
+
+New helper:
+
+- `rcs-registration/tools/operator-twilio-subaccount-link.mjs`
+
+Purpose:
+
+- resolve the Twilio proof subaccount by friendly name;
+- update the internal `Twilio setup` row with the resolved real subaccount SID;
+- redact full Twilio Account SIDs from terminal output;
+- keep the internal Sheet as the place where provider IDs are stored.
+
+Dry-run/source proof:
+
+- `node --check rcs-registration/tools/operator-twilio-subaccount-link.mjs` passed;
+- dry-run showed one Twilio friendly-name lookup and one `updateTwilioSetup` payload;
+- no Twilio call and no Apps Script write were made during dry-run.
+
+Live link proof:
+
+- Adam ran the helper with `RCS_ONBOARDING_OPERATOR_PIN` and the existing 1Password Twilio secret wrapper;
+- wrapper loaded Twilio env vars without printing values;
+- helper returned `linked: true`;
+- terminal output redacted the resolved `twilioSubaccountSid`;
+- operator result returned `ok: true`, `providerSubmissionStatus: not_started`, `manualPauseFlag: no`, and updated timestamp `2026-05-19T16:34:35.727Z`.
+
+Readback proof:
+
+- Adam ran `operator-status.mjs` for `ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747`;
+- `twilioSetup` now reads back:
+  - `Twilio subaccount friendly name`: `RightOnQ RCS proof customer - 2026-05-19`;
+  - `Twilio subaccount SID`: redacted in terminal output;
+  - `Twilio status`: `subaccount_created`;
+  - `Provider submission status`: `not_started`;
+  - `Go-live status`: `not_started`;
+  - `Usage pull status`: `not_started`;
+  - `Manual pause flag`: `no`;
+- `Applications.twilioStatus` also reads back `subaccount_created`;
+- latest `Status events` row records `twilio_setup_updated` with `Twilio status: subaccount_created`;
+- no Messaging Service, RCS sender, phone number, message send, compliance submission, customer-facing change, or chargeable usage was performed.
+
+Small fixes made after readback:
+
+- `operator-status.mjs` now redacts full Twilio Account SIDs from terminal output;
+- `serialiseOperatorValue` in Apps Script now preserves numeric `0` values in full operator snapshots, matching the dedicated payment-order lookup behavior.
+
+Deployment proof:
+
+- Apps Script HEAD pushed;
+- version `43` created with description `Operator API executable (Slice 10B redacted status + zero snapshot)`;
+- existing clean API-only operator deployment `AKfycbzj0I9m_vld5Aw-zPQFsTZXslrmxlrDA6Ut0RtFnd6_fxXpVDc4qhhRuKVAA5EuhWG9` was updated to version `43` through the Apps Script REST deployment update API, avoiding `clasp deploy -i`;
+- `clasp deployments` confirmed operator API `@43` and public customer web app still `@31`;
+- dummy-PIN proof still rejected with `Invalid onboarding operator PIN`;
+- valid-PIN readback after v43 confirmed:
+  - Twilio Account SID redacted in terminal output;
+  - proof subaccount friendly name present;
+  - synthetic payment proof row now shows `Amount minor: 0` in the full snapshot.
+
+Current next gate:
+
+- choose the next provider-connected slice. Recommended next step is a subaccount-scoped inventory/create decision for Messaging Service setup, still with explicit approval before any Twilio write.
+- do not submit RCS sender, move phone numbers, send messages, or start compliance submission until those are separated into explicit, proved slices.

@@ -2235,6 +2235,9 @@ function serialiseOperatorValue(value) {
   if (Object.prototype.toString.call(value) === "[object Date]" && !isNaN(value.getTime())) {
     return value.toISOString();
   }
+  if (value === null || typeof value === "undefined") return "";
+  if (typeof value === "number") return isFinite(value) ? value : "";
+  if (typeof value === "boolean") return value;
   return value || "";
 }
 

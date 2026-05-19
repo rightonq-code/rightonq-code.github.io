@@ -63,6 +63,19 @@ function sanitisePayload(payload) {
   return copy;
 }
 
+function redactTwilioAccountSids(value) {
+  if (Array.isArray(value)) return value.map(redactTwilioAccountSids);
+  if (value && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, item]) => [key, redactTwilioAccountSids(item)])
+    );
+  }
+  if (typeof value === "string") {
+    return value.replace(/AC[0-9a-fA-F]{32}/g, "[twilio-account-sid-redacted]");
+  }
+  return value;
+}
+
 async function main() {
   const options = parseArgs(process.argv.slice(2));
   if (options.help) {
@@ -77,10 +90,10 @@ async function main() {
   }
 
   const result = await runOperatorAction(payload);
-  console.log(JSON.stringify(result, null, 2));
+  console.log(JSON.stringify(redactTwilioAccountSids(result), null, 2));
 }
 
 main().catch(function(error) {
-  console.error(error.message);
+  console.error(redactTwilioAccountSids(error.message));
   process.exit(1);
 });

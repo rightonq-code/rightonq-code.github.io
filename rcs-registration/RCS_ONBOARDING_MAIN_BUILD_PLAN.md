@@ -2986,6 +2986,36 @@ Boundary:
 - one read-only inventory verification;
 - no customer-facing change or chargeable usage.
 
+### Slice 10C - Twilio Proof Subaccount Tracking Link
+
+Status: completed on Tuesday 19 May 2026.
+
+Purpose:
+
+- link the live Twilio proof subaccount back into the internal `Twilio setup` tracking row;
+- keep provider setup frozen after the subaccount step: no Messaging Service, RCS sender, phone number, compliance submission, message send, or chargeable usage.
+
+Implemented in source:
+
+- `tools/operator-twilio-subaccount-link.mjs`
+- `tools/operator-status.mjs` now redacts Twilio Account SIDs from terminal output;
+- Apps Script operator snapshot serialisation now preserves numeric zero values.
+
+Live result:
+
+- `operator-twilio-subaccount-link.mjs` resolved `RightOnQ RCS proof customer - 2026-05-19` by friendly name and updated application `ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747`;
+- `twilioStatus` reads back as `subaccount_created`;
+- `Provider submission status`, `Go-live status`, and `Usage pull status` remain `not_started`;
+- `Manual pause flag` reads back as `no`;
+- `Twilio subaccount friendly name` reads back correctly;
+- terminal output redacts the full Twilio Account SID;
+- synthetic Payment orders proof row now reads back `Amount minor: 0` in the full operator snapshot.
+
+Deployment:
+
+- Apps Script operator API deployment updated to version `43` with description `Operator API executable (Slice 10B redacted status + zero snapshot)`;
+- public customer web app remained on version `31`.
+
 ## Open Questions
 
 - Exact sales-page wording for `RightOnQ UK` and `RightOnQ Global`.
