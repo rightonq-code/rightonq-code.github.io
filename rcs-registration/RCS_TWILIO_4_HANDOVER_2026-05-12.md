@@ -4983,3 +4983,40 @@ Current next gate:
 
 - choose the next provider-connected slice. Recommended next step is a subaccount-scoped inventory/create decision for Messaging Service setup, still with explicit approval before any Twilio write.
 - do not submit RCS sender, move phone numbers, send messages, or start compliance submission until those are separated into explicit, proved slices.
+
+## Slice 10D - Twilio Proof Subaccount Messaging Inventory
+
+Codex added a subaccount-scoped read-only Messaging inventory helper before creating any Messaging Service.
+
+New helper:
+
+- `rcs-registration/tools/twilio-subaccount-messaging-inventory.mjs`
+
+Reason for helper:
+
+- Twilio's subaccount docs say parent credentials can resolve/access v2010 subaccount resources, but subdomain resources such as `messaging.twilio.com` should be accessed with subaccount credentials;
+- the helper resolves `RightOnQ RCS proof customer - 2026-05-19` by friendly name using parent credentials, then uses the returned subaccount SID/auth token in memory for Messaging API reads;
+- it redacts full Twilio Account SIDs in terminal output and never prints auth tokens.
+
+Dry-run/source proof:
+
+- `node --check rcs-registration/tools/twilio-subaccount-messaging-inventory.mjs` passed;
+- dry-run showed a subaccount lookup `GET` plus a subaccount-authenticated Messaging Services `GET`;
+- no Twilio API call was made during dry-run.
+
+Live read-only proof:
+
+- command: `~/rightonq-infrastructure/scripts/run_with_secrets.sh node rcs-registration/tools/twilio-subaccount-messaging-inventory.mjs --friendly-name "RightOnQ RCS proof customer - 2026-05-19" --include-senders`;
+- wrapper loaded Twilio env vars without printing values;
+- result returned `ok: true`, `readOnly: true`;
+- subaccount `RightOnQ RCS proof customer - 2026-05-19` returned `active`, type `Full`;
+- full Twilio Account SIDs were redacted in terminal output;
+- `messagingServices: []`;
+- `senderPools: []`;
+- no Messaging Service, sender pool, phone number, RCS sender, compliance submission, message send, customer-facing change, or chargeable usage occurred.
+
+Current next gate:
+
+- create the first proof subaccount Messaging Service, if Adam approves a write;
+- recommended friendly name: `RightOnQ RCS proof messaging`;
+- keep the create step tiny: Messaging Service only, no sender pool, no phone number movement, no RCS sender submission, no compliance submission, no message send.

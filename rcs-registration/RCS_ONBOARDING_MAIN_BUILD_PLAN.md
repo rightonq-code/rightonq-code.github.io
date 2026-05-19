@@ -3016,6 +3016,36 @@ Deployment:
 - Apps Script operator API deployment updated to version `43` with description `Operator API executable (Slice 10B redacted status + zero snapshot)`;
 - public customer web app remained on version `31`.
 
+### Slice 10D - Twilio Proof Subaccount Messaging Inventory
+
+Status: live read-only inventory completed on Tuesday 19 May 2026.
+
+Purpose:
+
+- inspect Messaging Service state inside the new proof subaccount before creating any Messaging Service;
+- follow Twilio's subaccount rule: parent credentials resolve the subaccount, then the resolved subaccount credentials are used in memory for `messaging.twilio.com` reads;
+- keep this as a read-only provider preflight.
+
+Implemented in source:
+
+- `tools/twilio-subaccount-messaging-inventory.mjs`
+
+Live result:
+
+- subaccount `RightOnQ RCS proof customer - 2026-05-19` is active;
+- Messaging Services inside the subaccount: none;
+- sender pools inside the subaccount: none;
+- terminal output redacted full Twilio Account SIDs;
+- no Twilio resource was created, updated, deleted, or used to send a message.
+
+Boundary:
+
+- one subaccount lookup `GET`;
+- one subaccount-authenticated Messaging Services `GET`;
+- no Messaging Service creation;
+- no sender pool / phone number movement;
+- no RCS sender, compliance submission, message send, customer-facing change, or chargeable usage.
+
 ## Open Questions
 
 - Exact sales-page wording for `RightOnQ UK` and `RightOnQ Global`.
