@@ -3298,6 +3298,47 @@ Recommended next gate:
 - update the proof application's `Twilio setup` URL fields with real hosted URLs;
 - keep `Provider submission status`, `Go-live status`, and `Usage pull status` at `not_started`.
 
+### Slice 10K - Cloud Run Proof Asset URLs Written Back
+
+Status: proof-tested and read back on Tuesday 19 May 2026.
+
+Purpose:
+
+- prove the full hosted asset URL workflow end to end;
+- replace `example.com` placeholder URLs on the proof application with real RightOnQ-hosted Cloud Run URLs;
+- keep all provider and go-live statuses stopped.
+
+Proof assets:
+
+- four valid placeholder files were created locally under `/private/tmp/roq-rcs-proof-assets`;
+- the files were uploaded to private GCS under `rcs-proof/ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747/`;
+- content types were set to `image/png` for logo/banner/opt-in and `video/webm` for review video;
+- public Cloud Run `HEAD` checks returned `HTTP/2 200` for all four hosted URLs.
+
+Readback:
+
+- `RBM logo URL = https://roq-rcs-proof-assets-872475523113.europe-west2.run.app/rcs-proof/ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747/rightonq-proof-logo.png`;
+- `RBM banner URL = https://roq-rcs-proof-assets-872475523113.europe-west2.run.app/rcs-proof/ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747/rightonq-proof-banner.png`;
+- `Opt-in proof URL(s) = https://roq-rcs-proof-assets-872475523113.europe-west2.run.app/rcs-proof/ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747/rightonq-proof-opt-in.png`;
+- `Review video URL = https://roq-rcs-proof-assets-872475523113.europe-west2.run.app/rcs-proof/ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747/rightonq-proof-review-video.webm`;
+- `Review video status = placeholder_hosted_url_proof`;
+- `Registration pack status = hosted_url_proof_only`;
+- `Provider submission status = not_started`;
+- `Go-live status = not_started`;
+- `Usage pull status = not_started`.
+
+Boundary:
+
+- no Twilio API call;
+- no provider submission;
+- no customer-facing change;
+- no real customer/private evidence uploaded;
+- hosted files are placeholder proof assets only and must be replaced before any provider submission.
+
+Recommended next gate:
+
+- replace these hosted placeholder files with approved client assets and rerun public URL verification before any RCS Sender/compliance submission planning.
+
 ## Open Questions
 
 - Exact sales-page wording for `RightOnQ UK` and `RightOnQ Global`.

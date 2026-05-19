@@ -127,9 +127,9 @@ The following must be true before sender-pool/phone-number movement:
 
 Use the proved hosted asset/proof URL workflow next, still without RCS Sender submission:
 
-1. Upload approved logo, banner, opt-in proof image, and review video files to private GCS under `rcs-proof/`.
-2. Publish them through the Cloud Run proof-assets URL route.
-3. Replace placeholder proof URLs on the existing proof application with real approved hosted URLs.
+1. Replace the current placeholder hosted proof files with approved client logo, banner, opt-in proof image, and review video files under the same `rcs-proof/` object paths.
+2. Reconfirm each Cloud Run proof-assets URL opens without login.
+3. Keep `Review video status` and `Registration pack status` out of submission-ready states until the real approved files are uploaded.
 4. Keep `Provider submission status`, `Go-live status`, and `Usage pull status` at `not_started`.
 
 Do not combine this with callback configuration, sender-pool movement, compliance submission, RCS Sender submission, or message sending.

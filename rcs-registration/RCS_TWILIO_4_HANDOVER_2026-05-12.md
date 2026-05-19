@@ -5344,3 +5344,48 @@ Recommended next gate:
 - confirm each public Cloud Run URL opens without login;
 - then replace the placeholder `example.com` proof URLs on the proof application with the real approved hosted URLs;
 - keep `Provider submission status`, `Go-live status`, and `Usage pull status` at `not_started`.
+
+## Slice 10K - Cloud Run Proof Asset URLs Written Back
+
+Codex created four valid placeholder proof assets, uploaded them to the private GCS bucket, proved their public Cloud Run URLs, and Adam ran the valid-PIN operator update/readback. These are still placeholder hosted assets only, not provider-submission-ready customer assets.
+
+Uploaded objects:
+
+- `gs://rightonq-rcs-proof-assets/rcs-proof/ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747/rightonq-proof-logo.png`;
+- `gs://rightonq-rcs-proof-assets/rcs-proof/ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747/rightonq-proof-banner.png`;
+- `gs://rightonq-rcs-proof-assets/rcs-proof/ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747/rightonq-proof-opt-in.png`;
+- `gs://rightonq-rcs-proof-assets/rcs-proof/ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747/rightonq-proof-review-video.webm`.
+
+Public URL proof:
+
+- logo URL returned `HTTP/2 200`, `Content-Type: image/png`;
+- banner URL returned `HTTP/2 200`, `Content-Type: image/png`;
+- opt-in proof URL returned `HTTP/2 200`, `Content-Type: image/png`;
+- review video URL returned `HTTP/2 200`, `Content-Type: video/webm`.
+
+Operator update/readback:
+
+- `operator-twilio-setup.mjs` returned `ok: true`, `providerSubmissionStatus: not_started`, `goLiveStatus: not_started`, `manualPauseFlag: no`;
+- `operator-status.mjs` readback showed:
+  - `RBM logo URL`: `https://roq-rcs-proof-assets-872475523113.europe-west2.run.app/rcs-proof/ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747/rightonq-proof-logo.png`;
+  - `RBM banner URL`: `https://roq-rcs-proof-assets-872475523113.europe-west2.run.app/rcs-proof/ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747/rightonq-proof-banner.png`;
+  - `Opt-in proof URL(s)`: `https://roq-rcs-proof-assets-872475523113.europe-west2.run.app/rcs-proof/ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747/rightonq-proof-opt-in.png`;
+  - `Review video URL`: `https://roq-rcs-proof-assets-872475523113.europe-west2.run.app/rcs-proof/ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747/rightonq-proof-review-video.webm`;
+  - `Review video status`: `placeholder_hosted_url_proof`;
+  - `Registration pack status`: `hosted_url_proof_only`;
+  - `Provider submission status`: `not_started`;
+  - `Go-live status`: `not_started`;
+  - `Usage pull status`: `not_started`.
+
+Boundary:
+
+- no Twilio API call;
+- no RCS Sender or compliance submission;
+- no callback configuration, sender-pool movement, phone-number movement, message send, customer-facing change, or chargeable usage;
+- the hosted files are valid placeholder proof assets only and must be replaced with approved client assets before any provider submission.
+
+Recommended next gate:
+
+- replace the placeholder hosted files with approved client logo, banner, opt-in proof, and review video assets;
+- verify each public Cloud Run URL again after replacement;
+- only then move toward RCS Sender / compliance submission planning.
