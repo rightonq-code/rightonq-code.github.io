@@ -24,6 +24,7 @@ The main website should only link to this form when ready. This folder should st
 - `cloud-run/twilio-callback/` - dedicated record-only Twilio Messaging status callback receiver
 - `REVOLUT_WEBHOOK_ENDPOINT_DESIGN.md` - design-only plan for the future Revolut webhook host, dedupe store, enrichment flow, and no-live-Billing-write boundary
 - `RCS_REGISTRATION_PACK_READINESS_MAP.md` - source-only map of Twilio RCS Sender / Secondary Compliance Profile requirements against RightOnQ Part A and internal tracking fields
+- `RCS_PROVIDER_SUBMISSION_PREFLIGHT_CHECKLIST.md` - operator guardrail for final proof-pack review before moving provider submission out of `not_started`
 - `RCS_ONBOARDING_ARCHITECTURE_BLUEPRINT.md` - short architecture scaffold for the whole onboarding lane, including current progress, proof-video focus, callback boundary, and product activation handover
 - `RCS_ONBOARDING_ACTIVATION_HANDOVER_CONTRACT.md` - design guardrail for the narrow packet handed from onboarding into the main RightOnQ product after approval
 - `RCS_ONBOARDING_PRODUCT_BRIDGE_FOR_PROFESSOR.md` - builder-facing note explaining the onboarding/product boundary and questions for Professor/build team review

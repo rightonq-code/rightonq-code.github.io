@@ -3450,6 +3450,31 @@ Boundary:
 - no callback configuration;
 - no Twilio API call.
 
+### Slice 11C - Provider Submission Preflight Checklist
+
+Date: 2026-05-20
+
+Purpose:
+
+- add a compact operator guardrail before any RCS Sender / provider submission action;
+- make final pack approval separate from video approval;
+- keep `Provider submission status`, `Go-live status`, and `Usage pull status` at `not_started` until explicit submission approval.
+
+Changes:
+
+- Added `RCS_PROVIDER_SUBMISSION_PREFLIGHT_CHECKLIST.md`.
+- Linked it from `README.md`.
+- Checklist covers business/legal review, message use case, approved public proof assets, Part B approval, Trust Hub/compliance readiness, Messaging Service/fallback readiness, callback ownership, billing/pause/usage controls, and the final operator decision.
+
+Boundary:
+
+- documentation only;
+- no Apps Script deployment;
+- no operator action;
+- no provider submission;
+- no Twilio/Google/Trust Hub call;
+- no status mutation.
+
 ## Open Questions
 
 - Exact sales-page wording for `RightOnQ UK` and `RightOnQ Global`.
