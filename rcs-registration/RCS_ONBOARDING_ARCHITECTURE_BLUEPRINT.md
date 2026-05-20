@@ -193,6 +193,8 @@ Preferred proof order:
 
 The existing public form contains a canvas/MediaRecorder video generator. It now labels the output as a draft registration proof video and shows permission route, primary/secondary messages, HELP, and STOP handling. It remains a preparation tool until RightOnQ reviews it, hosts the final file, gets client approval, and stores the approved public URL.
 
+Detailed workflow guardrail: `RCS_PROOF_VIDEO_WORKFLOW.md`.
+
 ## Callback Boundary
 
 The standalone Twilio callback receiver was useful and safe, but it is not the next central path.

@@ -3411,7 +3411,7 @@ Purpose:
 Changes:
 
 - Part B generator copy now says `Draft proof video generator`.
-- The generated file name now ends `rcs-proof-video-draft.webm`.
+- The generated file name now ends `rcs-proof-video-draft.webm` or `rcs-proof-video-draft.mp4`, matching the browser-supported recording MIME type.
 - Output status says RightOnQ must review, host, and get client approval before provider submission.
 - The visible checklist now covers sender identity, permission route, primary/secondary messages, HELP, and STOP/opt-out handling.
 - Canvas scenes now label the video as a registration proof/review draft rather than a live product demo.

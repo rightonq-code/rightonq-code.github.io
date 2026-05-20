@@ -125,7 +125,7 @@ The following must be true before sender-pool/phone-number movement:
 
 ## Recommended Next Slice
 
-Use the proved hosted asset/proof URL workflow next, still without RCS Sender submission:
+Use the proved hosted asset/proof URL workflow next, with `RCS_PROOF_VIDEO_WORKFLOW.md` as the video-specific guardrail, still without RCS Sender submission:
 
 1. Replace the current placeholder hosted proof files with approved client logo, banner, opt-in proof image, and review video files under the same `rcs-proof/` object paths.
 2. Reconfirm each Cloud Run proof-assets URL opens without login.

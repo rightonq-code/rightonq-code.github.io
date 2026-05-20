@@ -5228,6 +5228,8 @@
         "video/webm",
         "video/mp4"
       ].find(type => MediaRecorder.isTypeSupported(type));
+      const outputMimeType = mimeType || "video/webm";
+      const outputExtension = outputMimeType.includes("mp4") ? "mp4" : "webm";
       let recorder;
       try {
         recorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
@@ -5245,9 +5247,9 @@
       };
 
       recorder.onstop = () => {
-        const blob = new Blob(chunks, { type: "video/webm" });
+        const blob = new Blob(chunks, { type: outputMimeType });
         const url = URL.createObjectURL(blob);
-        const filename = `${slugify(data.displayName || data.legalBusinessName || "rcs-sender")}-rcs-proof-video-draft.webm`;
+        const filename = `${slugify(data.displayName || data.legalBusinessName || "rcs-sender")}-rcs-proof-video-draft.${outputExtension}`;
         generatedVideo.src = url;
         videoOutput.classList.add("show");
         videoStatus.textContent = `${filename} ready as a draft. RightOnQ must review, host, and get client approval before provider submission.`;

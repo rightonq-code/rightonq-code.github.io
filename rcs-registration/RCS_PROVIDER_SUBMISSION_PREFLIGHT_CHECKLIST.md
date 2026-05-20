@@ -93,6 +93,8 @@ Must not proceed if:
 
 ## Preflight 4: Part B Client Approval
 
+Use `RCS_PROOF_VIDEO_WORKFLOW.md` as the video-specific preparation, hosting, review, and approval workflow.
+
 Required:
 
 - sender name/logo phone preview approval recorded;
@@ -211,4 +213,3 @@ Read with:
 - `RCS_ONBOARDING_ARCHITECTURE_BLUEPRINT.md`
 - `RCS_ONBOARDING_ACTIVATION_HANDOVER_CONTRACT.md`
 - `RCS_ONBOARDING_MAIN_BUILD_PLAN.md`
-
