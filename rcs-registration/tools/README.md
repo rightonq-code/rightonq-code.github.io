@@ -50,6 +50,7 @@ The proof helper uses the authenticated operator API for creating the private te
 | `final-pack-preflight.mjs` | Combined final-pack gate that runs proof-pack, proof-video, and public asset URL checks from one saved operator snapshot. | No PIN; public URL fetches unless skipped |
 | `proof-pack-preflight.mjs` | Offline proof-pack checker for a saved `operator-status.mjs` JSON snapshot before provider submission. | No PIN; local JSON only |
 | `proof-video-preflight.mjs` | Offline proof-video readiness checker for review-video URL/status and client approval state in a saved operator snapshot. | No PIN; local JSON only |
+| `proof-asset-manifest-plan.mjs` | Offline local proof-asset manifest and candidate-file checker before upload/tracking. | No PIN; local files only |
 | `proof-asset-url-preflight.mjs` | Read-only public URL/content check for logo, banner, opt-in proof, and review video assets in a saved operator snapshot. | No PIN; public URL fetches only |
 | `twilio-account-inventory.mjs` | Read-only Twilio parent/subaccount/Messaging Service inventory preflight before provider-connected setup. | `TWILIO_ACCOUNT_SID` and `TWILIO_AUTH_TOKEN` |
 | `twilio-subaccount-create.mjs` | Create one clearly named Twilio subaccount after a duplicate-name preflight. | `TWILIO_ACCOUNT_SID` and `TWILIO_AUTH_TOKEN` |
@@ -692,6 +693,43 @@ asset URLs were publicly reachable. The current placeholder banner is
 current Twilio submission export profile. Before real provider submission,
 prepare and host the approved `1140x448` Twilio derivative and store that exact
 submitted `RBM banner URL`.
+
+## Local Proof Asset Manifest Plan
+
+Before uploading approved proof files, generate the expected object paths and
+check any local candidate files:
+
+```bash
+node rcs-registration/tools/proof-asset-manifest-plan.mjs \
+  --application-id ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747
+```
+
+With local candidate files:
+
+```bash
+node rcs-registration/tools/proof-asset-manifest-plan.mjs \
+  --application-id ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747 \
+  --asset-dir /path/to/approved-proof-assets
+```
+
+Expected local filenames:
+
+- `rightonq-proof-logo.png` or `.jpg` / `.jpeg` - `224x224`, max `50 KB`;
+- `rightonq-proof-banner-master.png` or `.jpg` / `.jpeg` - `1440x448`, max `200 KB`;
+- `rightonq-proof-banner.png` or `.jpg` / `.jpeg` - Twilio submission export, `1140x448`, max `200 KB`;
+- `rightonq-proof-opt-in.png` or `.jpg` / `.jpeg` - public opt-in proof image;
+- `rightonq-proof-review-video.webm` or `.mp4` - public review/use-case video.
+
+Self-test:
+
+```bash
+node rcs-registration/tools/proof-asset-manifest-plan.mjs --self-test
+```
+
+Safety: this is an offline planner. It does not upload files, write Sheets, call
+Apps Script, call Twilio, call Google Cloud APIs, or mutate state. Use it before
+the upload/update slice so the `1140x448` Twilio banner export is not confused
+with the `1440x448` reusable master.
 
 ## Public Part B Guard Proof
 

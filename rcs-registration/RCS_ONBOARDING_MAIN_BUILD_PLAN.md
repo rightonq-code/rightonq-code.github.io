@@ -3993,6 +3993,47 @@ Boundary:
 - no Twilio/Google/Trust Hub/Revolut call;
 - no status mutation.
 
+### Slice 11S - Local Proof Asset Manifest Planner
+
+Date: 2026-05-20
+
+Purpose:
+
+- begin the approved proof-pack asset slice without uploading or mutating anything;
+- make the required local asset set explicit before replacing hosted placeholders;
+- keep the `1440x448` reusable banner master separate from the `1140x448` Twilio sender submission export.
+
+Implementation:
+
+- Added `tools/proof-asset-manifest-plan.mjs`.
+- The planner can run with only `--application-id` to print the planned object paths, public URLs, and Twilio setup tracking-preview URLs.
+- With `--asset-dir`, it checks local candidate files using the expected naming convention:
+  - `rightonq-proof-logo.*` - `224x224`, max `50 KB`;
+  - `rightonq-proof-banner-master.*` - `1440x448`, max `200 KB`;
+  - `rightonq-proof-banner.*` - Twilio submission export, `1140x448`, max `200 KB`;
+  - `rightonq-proof-opt-in.*` - opt-in proof image;
+  - `rightonq-proof-review-video.*` - review/use-case video.
+- It emits the planned GCS object names under `rcs-proof/<application-id>/`, the Cloud Run public URLs, and the operator tracking fields that will later be written after upload.
+- It blocks upload readiness when required local files are missing, oversized, or have the wrong dimensions.
+
+Verification:
+
+- `node --check rcs-registration/tools/proof-asset-manifest-plan.mjs`
+- `node rcs-registration/tools/proof-asset-manifest-plan.mjs --self-test`
+- `node rcs-registration/tools/proof-asset-manifest-plan.mjs --application-id ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747`
+- `git diff --check -- rcs-registration`
+
+Boundary:
+
+- local/offline manifest planning only;
+- no upload;
+- no Apps Script deployment;
+- no operator action;
+- no Google Sheets read/write;
+- no provider submission;
+- no Twilio/Google/Trust Hub/Revolut/Google Cloud API call;
+- no status mutation.
+
 ## Open Questions
 
 - Exact sales-page wording for `RightOnQ UK` and `RightOnQ Global`.
