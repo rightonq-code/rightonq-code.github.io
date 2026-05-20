@@ -733,6 +733,8 @@ function submitNameLogoApproval(spreadsheet, payload) {
   if (!applicationId) throw new Error("Missing application ID");
 
   validateApplicationTokenForSubmission(spreadsheet, applicationId, payload.privateApplicationToken);
+  const applicationRecord = findApplicationRecord(spreadsheet, { applicationId: applicationId });
+  validateNameLogoApprovalWindow(applicationRecord);
 
   const decision = payload.decision || deriveNameLogoDecision(payload);
   const issueCategories = asList(payload.issueCategories);
@@ -802,6 +804,8 @@ function submitVideoApproval(spreadsheet, payload) {
   if (!applicationId) throw new Error("Missing application ID");
 
   validateApplicationTokenForSubmission(spreadsheet, applicationId, payload.privateApplicationToken);
+  const applicationRecord = findApplicationRecord(spreadsheet, { applicationId: applicationId });
+  validateVideoApprovalWindow(applicationRecord);
 
   const decision = payload.decision === "changes_requested" ? "changes_requested" : "approve";
   const approved = decision === "approve";
@@ -855,6 +859,34 @@ function submitVideoApproval(spreadsheet, payload) {
     partBStatus: partBStatus,
     receivedAt: now.toISOString()
   };
+}
+
+function validateNameLogoApprovalWindow(applicationRecord) {
+  if (!applicationRecord) throw new Error("This application link could not be verified. Please ask RightOnQ for a fresh link.");
+
+  const registrationStatus = String(applicationRecord["Registration status"] || "");
+  const partAStatus = String(applicationRecord["Part A status"] || "");
+  const partBStatus = String(applicationRecord["Part B status"] || "");
+  const partAReady = partAStatus === "part_a_accepted" || registrationStatus === "part_a_accepted";
+  const allowedPartBStatuses = ["", "part_b_in_progress", "name_logo_changes_requested"];
+
+  if (!partAReady) {
+    throw new Error("Part B name/logo approval is not open yet. RightOnQ must accept Part A first.");
+  }
+  if (allowedPartBStatuses.indexOf(partBStatus) === -1) {
+    throw new Error("Part B name/logo approval is not open for this application status. Please ask RightOnQ for the next step.");
+  }
+}
+
+function validateVideoApprovalWindow(applicationRecord) {
+  if (!applicationRecord) throw new Error("This application link could not be verified. Please ask RightOnQ for a fresh link.");
+
+  const partBStatus = String(applicationRecord["Part B status"] || "");
+  const allowedPartBStatuses = ["name_logo_approved", "video_changes_requested"];
+
+  if (allowedPartBStatuses.indexOf(partBStatus) === -1) {
+    throw new Error("Part B video approval is not open yet. Name/logo approval must be recorded before the review video can be approved.");
+  }
 }
 
 function updateApplicationStatus(spreadsheet, payload) {

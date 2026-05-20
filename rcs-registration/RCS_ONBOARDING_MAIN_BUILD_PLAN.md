@@ -3576,6 +3576,33 @@ Boundary:
 - no Twilio/Google/Trust Hub/Revolut call;
 - no status mutation.
 
+### Slice 11H - Public Part B Order Source Guard
+
+Date: 2026-05-20
+
+Purpose:
+
+- make the public Part B source enforce the intended order, not just the operator preflight;
+- stop name/logo approval before Part A has been accepted;
+- stop review-video approval before name/logo approval has been recorded.
+
+Changes:
+
+- `google-apps-script/Code.gs` now validates the application control row before accepting `submitNameLogoApproval`.
+- Name/logo approval is allowed only after Part A acceptance, or after a prior name/logo changes-requested state.
+- `submitVideoApproval` now requires `Part B status` to be `name_logo_approved` or `video_changes_requested`.
+- The source guard complements `tools/proof-pack-preflight.mjs`, which blocks provider submission unless `partBStatus` is `video_approved` or later.
+
+Boundary:
+
+- source change only;
+- no Apps Script deployment in this slice;
+- no operator action;
+- no Google Sheets read/write;
+- no provider submission;
+- no Twilio/Google/Trust Hub/Revolut call;
+- no status mutation.
+
 ## Open Questions
 
 - Exact sales-page wording for `RightOnQ UK` and `RightOnQ Global`.
