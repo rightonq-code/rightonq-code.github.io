@@ -128,12 +128,14 @@ Required:
 - operating regions confirmed separately from RCS launch countries;
 - authorised representative 1 checked;
 - authorised representative 2 collected or explicitly deferred by approved policy;
-- A-ID route decided if Twilio requests extra evidence.
+- A-ID route decided if Twilio requests extra evidence;
+- Compliance Embeddable account/program support confirmed before any embedded evidence flow is offered to a customer.
 
 Must not proceed if:
 
 - raw passport, driving licence, government ID, proof-of-address, or identity documents are in the static form, Google Sheet, GitHub, chat, or normal notes;
 - A-ID evidence is required but no secure Twilio-managed or approved secure-admin route exists;
+- RCS sender onboarding is being treated as Compliance Embeddable-supported without explicit Twilio account/use-case confirmation;
 - Trust Hub / Secondary Compliance requirement is unresolved for the planned submission.
 
 ## Preflight 6: Messaging Service And Fallback Readiness

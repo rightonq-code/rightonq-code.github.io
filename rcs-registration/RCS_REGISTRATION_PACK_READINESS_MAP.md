@@ -79,7 +79,7 @@ Local RightOnQ source checked:
 | Operating regions | `Trust Hub KYC` `Business regions of operation` | Manual follow-up | Not the same as Part A RCS destination countries. Must collect/confirm separately. |
 | Two authorised representatives | `Trust Hub KYC` has rep 1 and rep 2 SID/status fields | Hard stop / manual follow-up | Public Part A currently captures only one authorised representative. Rep 2 details must be collected before Secondary Profile submission. |
 | Physical address | Part A registered address fields; `Trust Hub KYC` `Address SID`, `Address validation status` | Tracked | Address text exists in Part A; Twilio Address SID creation/assignment remains a later provider step. |
-| Supporting documents / A-ID evidence | `Trust Hub KYC` `Supporting document SID`, evidence fields | Manual follow-up / exception lane | ID/address evidence is exception-only and must not be part of normal Part A. If Twilio requests it, open a separate A-ID step that routes the client into a secure Twilio-managed or approved secure-admin flow. Store only Twilio IDs, status, timestamps, and rejection notes. |
+| Supporting documents / A-ID evidence | `Trust Hub KYC` `Supporting document SID`, evidence fields | Manual follow-up / exception lane | ID/address evidence is exception-only and must not be part of normal Part A. If Twilio requests it, open a separate A-ID step. Use Compliance Embeddable where the underlying compliance program is supported and account access is enabled; otherwise use another approved secure-admin/Twilio-managed route. RCS sender onboarding itself is not publicly confirmed as Compliance Embeddable-supported. Store only Twilio IDs, inquiry/registration IDs, document SIDs, status, timestamps, and rejection/failure notes; do not store raw uploaded files. |
 | Status callback notification | `Trust Hub KYC` `Trust Hub status callback configured` | Build gap | Callback receiver and callback URL configuration are not proved yet. |
 | Evaluation/submission status | `Trust Hub KYC` evaluation and status fields | Tracked | Keep not-submitted until explicit compliance gate. |
 
@@ -112,7 +112,7 @@ The following must be true before Secondary Compliance Profile submission:
 - Correct parent legal name is `Continuity AI Ltd`; RightOnQ used only as brand/trading name where fields allow it.
 - End-client legal name, website, business type, industry, CRN, address, and operating regions confirmed.
 - Two authorised representative contact records collected.
-- Secure A-ID path chosen for any exception-only ID/address evidence requested by Twilio.
+- Secure A-ID path chosen for any exception-only ID/address evidence requested by Twilio; Compliance Embeddable is used only for supported/enabled compliance programs, not assumed for RCS sender onboarding itself.
 - Trust Hub status callback strategy confirmed or deliberately deferred.
 
 The following must be true before sender-pool/phone-number movement:

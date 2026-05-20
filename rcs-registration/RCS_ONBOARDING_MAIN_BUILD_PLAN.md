@@ -182,12 +182,18 @@ Compliance Embeddable design boundary from Isa/Twilio follow-up:
 
 - UK long-code Regulatory Compliance Bundles are explicitly within Compliance Embeddable scope.
 - Follow-up confirmation on Saturday 16 May 2026: this is supported at product-scope level, but not self-serve/default on every account. RightOnQ must complete the Compliance Embeddable access/registration step before building a live UX around it.
+- Later Isa Bell / Twilio Digital Sales clarification confirmed the architecture pattern is right for supported programs: Twilio collects sensitive evidence in the white-label embedded flow, RightOnQ keeps the customer experience inside its app, and RightOnQ persists only Twilio references/statuses.
+- Important caveat: RCS sender onboarding itself is not publicly confirmed as a Compliance Embeddable-supported flow. Treat RCS sender review as its own provider-review lane unless Twilio confirms account/use-case support.
 - The published ISV pattern also assumes an approved primary business compliance profile with business identity set to ISV/Reseller. This should be the legal `Continuity AI Ltd` profile, with `RightOnQ` supplied only where the flow has a separate trading-name / brand / DBA-style field.
 - Generic Trust Hub Secondary Compliance Profile support through Compliance Embeddable is not clearly confirmed by public docs; public docs explicitly list Secondary Customer Profiles for Voice Trust, which is narrower.
 - Therefore, treat UK RC Bundle evidence/resubmission as the likely embeddable/self-service lane, but keep Secondary Compliance Profile creation/resubmission RightOnQ/API/Console-managed unless Twilio confirms account/use-case enablement.
 - Compliance Embeddable is white-label and does not require the end client to have a Twilio login.
 - Compliance Embeddable session tokens are ephemeral; persist `inquiry_id` and `registration_id`, not the session token.
 - Twilio's Compliance Embeddable FAQ says data for this product is stored in the US; keep that visible for privacy review.
+- Twilio's published initialize endpoint and field-map example are publicly verifiable for Toll-Free Verification; exact initialize endpoint and request body for UK RC Bundle / generic Secondary Profile embeddable flows are not publicly confirmed in the docs. Treat those as account/program-specific until Twilio provides them.
+- Client-side events documented for the embeddable pattern are `onReady`, `onInquirySubmitted`, `onComplete`, `onCancel`, and `onError`; use `onInquirySubmitted` as the stronger submission hook because `onComplete` can depend on the user clicking the final exit/done button.
+- Supporting Document APIs expose metadata/status such as SIDs, mime type, status, failure reason, attributes, and timestamps; do not design around retrieving raw uploaded file contents.
+- Locked-down environments may need to allowlist `withpersona.com`.
 
 The field-authority principle is:
 
@@ -3930,6 +3936,56 @@ Implementation:
 Boundary:
 
 - docs/tooling clarification only;
+- no Apps Script deployment;
+- no operator action;
+- no Google Sheets read/write;
+- no provider submission;
+- no Twilio/Google/Trust Hub/Revolut call;
+- no status mutation.
+
+### Slice 11R - Compliance Embeddable And A-ID Clarification
+
+Date: 2026-05-20
+
+Source:
+
+- Isa Bell / Twilio Digital Sales reply received 2026-05-20, covering Compliance Embeddable, RCS sender onboarding, UK long-code Regulatory Compliance Bundles, Secondary Compliance Profiles, prefill, client events, resume, status callbacks, and document-storage boundaries.
+
+Provider clarification:
+
+- The Twilio-managed evidence handoff pattern is valid for supported compliance programs:
+  - Twilio collects sensitive evidence inside a white-label embedded flow;
+  - RightOnQ can keep the customer experience inside its own app;
+  - RightOnQ should persist only Twilio references, statuses, timestamps, and rejection/failure reasons.
+- Do not assume RCS sender onboarding itself is Compliance Embeddable-supported. Public docs do not currently list RCS sender onboarding as an Embeddable-supported program.
+- Publicly documented Compliance Embeddable support includes Regulatory Compliance Bundles for Long Codes and Secondary Customer Profiles for Voice Trust, but generic Secondary Compliance Profile support outside Voice Trust is not explicitly confirmed in the public FAQ.
+- Access is account/program-specific and gated by prior registration/enablement.
+- The only public initialize endpoint Isa could validate from docs is for Toll-Free Verification; UK long-code RC Bundle or generic Secondary Profile initialize endpoints/field schemas are not publicly confirmed in the docs.
+- Prefill is a documented product capability, but exact RC Bundle / Secondary Profile field maps should be treated as program-specific until Twilio provides them.
+- Compliance Embeddable can be embedded inside a RightOnQ-branded A-ID page where the program supports it:
+  - Twilio branding need not be visible;
+  - `ThemeSetId` can apply Twilio-configured theme styling;
+  - theme setup is not self-service;
+  - form copy/order cannot be rewritten;
+  - UI is English-only;
+  - Compliance Embeddable data is stored in the US.
+- Client-side events: `onReady`, `onInquirySubmitted`, `onComplete`, `onCancel`, `onError`. Use `onInquirySubmitted` as the better submission hook when RightOnQ needs to know the inquiry was submitted.
+- Users can resume incomplete/rejected inquiries using the same inquiry ID and a fresh session token. Do not persist session tokens as durable identifiers.
+- For Regulatory Compliance Bundles, status callbacks include `AccountSID`, `BundleSID`, `Status`, and `FailureReason`.
+- Public docs expose Supporting Document metadata/status fields, but do not expose a public API for retrieving raw uploaded file contents. Continue designing RightOnQ as references/status-only.
+- Locked-down environments may need to allowlist `withpersona.com`.
+
+Implementation stance:
+
+- Normal Part A stays business/use-case/asset capture only; no passport, driving licence, government ID, proof-of-address, or raw document uploads.
+- A-ID remains an exception-only step opened only if Twilio/Trust Hub asks for extra evidence.
+- For RCS sender submission, keep the path separate from Compliance Embeddable unless Twilio confirms RCS support for RightOnQ's account/use case.
+- For UK long-code RC Bundle collection, design toward Compliance Embeddable if/when access is enabled.
+- For Secondary Compliance Profile, keep RightOnQ/API/Console-managed until Twilio confirms generic SCP embeddable support for this account/use case.
+
+Boundary:
+
+- docs/source-of-truth clarification only;
 - no Apps Script deployment;
 - no operator action;
 - no Google Sheets read/write;

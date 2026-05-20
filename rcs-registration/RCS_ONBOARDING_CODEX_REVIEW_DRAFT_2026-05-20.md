@@ -227,10 +227,12 @@ The static public form and Google Sheet path must not collect or store raw passp
 
 If Twilio/Trust Hub requires identity or supporting evidence:
 
-- prefer Twilio-managed embeddable / Compliance Embeddable where possible;
+- prefer Twilio-managed embeddable / Compliance Embeddable only where the underlying compliance program is supported and account access is enabled;
 - otherwise use a separate secure admin/manual route;
 - store only provider IDs, inquiry IDs, document SIDs, statuses, timestamps, rejection codes, and notes;
 - keep raw documents out of GitHub, chat, normal logs, and Google Sheets.
+
+Latest Isa Bell / Twilio clarification: the Twilio-managed evidence handoff pattern is right for supported compliance programs, but RCS sender onboarding itself is not publicly confirmed as a Compliance Embeddable-supported flow. Treat RCS sender review, UK long-code Regulatory Compliance Bundle, and Secondary Compliance Profile as separate lanes until Twilio confirms account/use-case support for a shared embedded route.
 
 ## Questions for Codex / Professor / build reviewers
 

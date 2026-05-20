@@ -240,7 +240,7 @@ Potential future build, if Twilio flow supports it:
 - A secure evidence gateway that sends the client into Twilio/Trust Hub/Compliance Embeddable or another approved secure upload flow.
 - RightOnQ stores the resulting inquiry/document/verification IDs and status callbacks, not the document content.
 
-This could become a strong onboarding feature, but it should be built as a compliance-safe evidence handoff, not as a general file-upload box.
+This could become a strong onboarding feature, but it should be built as a compliance-safe evidence handoff, not as a general file-upload box. The latest Isa Bell / Twilio clarification keeps the boundary tight: Compliance Embeddable is the right pattern for supported/enabled compliance programs, but RCS sender onboarding itself is not publicly confirmed as an Embeddable-supported flow. Treat RCS sender review, UK long-code RC Bundle, and Secondary Compliance Profile as separate lanes unless Twilio confirms they share the same embedded route for RightOnQ's account/use case.
 
 ## What We Should Do Next
 

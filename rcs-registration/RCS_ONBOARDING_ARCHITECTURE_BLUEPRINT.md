@@ -231,11 +231,11 @@ It must not collect or store raw passport, driving licence, government ID, or pr
 
 If Twilio requires extra identity or address evidence, the desired build is a separate A-ID secure evidence handoff:
 
-- Twilio-managed flow where possible;
+- Twilio-managed or Compliance Embeddable flow where the underlying compliance program is supported and account access is enabled;
 - secure-admin route if needed;
 - RightOnQ stores only inquiry IDs, document SIDs, status fields, timestamps, and rejection/exception reasons.
 
-A-ID is not part of normal Part A. It should open only when Twilio/Trust Hub requests extra evidence, then return the applicant to the normal onboarding path once accepted or resolved.
+A-ID is not part of normal Part A. It should open only when Twilio/Trust Hub requests extra evidence, then return the applicant to the normal onboarding path once accepted or resolved. Do not assume RCS sender onboarding itself is Compliance Embeddable-supported; keep RCS sender review separate unless Twilio confirms support for RightOnQ's account/use case. For supported embeddable flows, persist inquiry/registration/document references and statuses only, not session tokens or raw document contents.
 
 ## Product Activation Handover
 
