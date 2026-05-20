@@ -3525,6 +3525,31 @@ Boundary:
 - no Twilio/Google/Trust Hub/Revolut call;
 - no status mutation.
 
+### Slice 11F - Part A Acceptance CLI Guardrail
+
+Date: 2026-05-20
+
+Purpose:
+
+- align the live internal-review mutation tool with the offline preflight checker;
+- stop copy-paste operator commands from moving Part A to `part_a_accepted` before the acceptance gate has deliberately passed;
+- keep ordinary internal review row updates available without extra friction.
+
+Changes:
+
+- `tools/operator-review.mjs` now rejects `--part-a-accepted` unless `--confirm-part-a-acceptance` is supplied.
+- The same path also requires `--review-status accepted`, so Part A cannot be accepted while the review row is still marked pending or changes-needed.
+- `tools/README.md` examples now include the explicit confirmation flag and explain the preflight-first workflow.
+
+Boundary:
+
+- no Apps Script deployment;
+- no operator action;
+- no Google Sheets read/write;
+- no provider submission;
+- no Twilio/Google/Trust Hub/Revolut call;
+- no status mutation.
+
 ## Open Questions
 
 - Exact sales-page wording for `RightOnQ UK` and `RightOnQ Global`.

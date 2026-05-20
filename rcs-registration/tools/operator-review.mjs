@@ -23,6 +23,7 @@ const FIELD_ALIASES = {
 
 const BOOLEAN_FLAGS = {
   "part-a-accepted": "partAAccepted",
+  "confirm-part-a-acceptance": "confirmPartAAcceptance",
   "dry-run": "dryRun"
 };
 
@@ -35,6 +36,7 @@ function usage() {
     "  --application-id                 Required application ID",
     "  --review-status                 pending_review, accepted, changes_needed, etc.",
     "  --part-a-accepted               Also moves Part A to part_a_accepted",
+    "  --confirm-part-a-acceptance     Required with --part-a-accepted after internal-review preflight has passed",
     "  --legal-company-check passed    Updates checklist fields",
     "  --website-domain-check passed",
     "  --public-links-check passed",
@@ -50,6 +52,7 @@ function usage() {
     "Safety:",
     "  The operator PIN is read from RCS_ONBOARDING_OPERATOR_PIN.",
     "  The PIN is never printed and should not be passed as a command argument.",
+    "  Run internal-review-preflight.mjs before using --part-a-accepted.",
     "  Use --dry-run to print the payload without sending it."
   ].join("\n");
 }
@@ -82,8 +85,27 @@ function parseArgs(argv) {
   return options;
 }
 
+function normaliseStatus(value) {
+  return String(value || "").trim().toLowerCase();
+}
+
+function validatePartAAcceptanceGate(options) {
+  if (!options.partAAccepted) return;
+
+  if (!options.confirmPartAAcceptance) {
+    throw new Error(
+      "Refusing Part A acceptance without --confirm-part-a-acceptance. Run internal-review-preflight.mjs first, confirm the acceptance gate has passed, then retry with the explicit confirmation flag."
+    );
+  }
+
+  if (normaliseStatus(options.reviewStatus) !== "accepted") {
+    throw new Error("Refusing Part A acceptance unless --review-status accepted is supplied.");
+  }
+}
+
 function buildPayload(options) {
   if (!options.applicationId) throw new Error("Missing --application-id");
+  validatePartAAcceptanceGate(options);
 
   const operatorPin = process.env.RCS_ONBOARDING_OPERATOR_PIN;
   if (!options.dryRun && !operatorPin) {

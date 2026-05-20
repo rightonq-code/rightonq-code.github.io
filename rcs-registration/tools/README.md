@@ -148,6 +148,8 @@ node rcs-registration/tools/internal-review-preflight.mjs --self-test
 
 Safety: this tool is local/offline only. It does not call Apps Script, Google Sheets, Twilio, Revolut, Google Cloud, or any provider API. It treats legal/company, website/domain, public links, message purpose/examples, consent/opt-out, and phone-preview readiness as Part A acceptance gates. It treats KYC/Trust Hub and SMS fallback/RC bundle as explicit pending lanes that may continue after Part A acceptance, as long as they are not blocked or ambiguous.
 
+The live `operator-review.mjs --part-a-accepted` path is guarded too: it refuses Part A acceptance unless `--confirm-part-a-acceptance` and `--review-status accepted` are both supplied after this preflight has passed.
+
 ## Approve Part A After Internal Review
 
 Dry run:
@@ -157,6 +159,7 @@ node rcs-registration/tools/operator-review.mjs \
   --application-id ROQ-RCS-... \
   --review-status accepted \
   --part-a-accepted \
+  --confirm-part-a-acceptance \
   --legal-company-check passed \
   --website-domain-check passed \
   --public-links-check passed \
@@ -177,6 +180,7 @@ RCS_ONBOARDING_OPERATOR_PIN="..." node rcs-registration/tools/operator-review.mj
   --application-id ROQ-RCS-... \
   --review-status accepted \
   --part-a-accepted \
+  --confirm-part-a-acceptance \
   --legal-company-check passed \
   --website-domain-check passed \
   --public-links-check passed \
