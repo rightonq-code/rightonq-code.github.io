@@ -3864,6 +3864,43 @@ Boundary:
 - no Twilio/Google/Trust Hub/Revolut call;
 - no status mutation.
 
+### Slice 11P - Internal Review Command Planner
+
+Date: 2026-05-20
+
+Purpose:
+
+- bridge the gap between the offline internal-review preflight and the guarded live `operator-review.mjs` mutation;
+- make the current Part A acceptance blockers and warnings visible in one command-plan artifact;
+- print future dry-run/live command templates without moving the proof app forward.
+
+Implementation:
+
+- Added `tools/internal-review-command-plan.mjs`.
+- The planner reads a saved `operator-status.mjs` JSON snapshot and imports the same `assessInternalReview` gate used by `internal-review-preflight.mjs`.
+- If blockers remain, it prints the blocker list and a dry-run command only; it deliberately withholds the live command template.
+- If the hard gate has no blockers, it prints:
+  - the dry-run `operator-review.mjs` command;
+  - a PIN-prompting live command template;
+  - safety notes requiring actual evidence review and explicit RightOnQ approval.
+- The planner keeps KYC/Trust Hub and SMS fallback/RC bundle as explicit tracked lanes, not as raw-document collection in the static app.
+
+Verification:
+
+- `node --check rcs-registration/tools/internal-review-command-plan.mjs`
+- `node rcs-registration/tools/internal-review-command-plan.mjs --self-test`
+- `node rcs-registration/tools/internal-review-command-plan.mjs --snapshot-file /tmp/roq-rcs-current-operator-snapshot.json`
+
+Boundary:
+
+- offline snapshot planning only;
+- no Apps Script deployment;
+- no operator action;
+- no Google Sheets read/write;
+- no provider submission;
+- no Twilio/Google/Trust Hub/Revolut call;
+- no status mutation.
+
 ## Open Questions
 
 - Exact sales-page wording for `RightOnQ UK` and `RightOnQ Global`.

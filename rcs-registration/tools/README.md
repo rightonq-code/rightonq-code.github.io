@@ -39,6 +39,7 @@ The proof helper uses the authenticated operator API for creating the private te
 | `operator-create-application.mjs` | Create a private application record/link from a qualified CRM or outreach handoff. | `RCS_ONBOARDING_CREATE_PIN` |
 | `operator-status.mjs` | Read the guarded operator snapshot for one application. | `RCS_ONBOARDING_OPERATOR_PIN` |
 | `internal-review-preflight.mjs` | Offline Internal reviews checker for a saved `operator-status.mjs` JSON snapshot before Part A acceptance. | No PIN; local JSON only |
+| `internal-review-command-plan.mjs` | Offline command planner that turns a saved internal-review snapshot into blocker guidance plus dry-run/live `operator-review.mjs` templates. | No PIN; local JSON only |
 | `operator-review.mjs` | Update the internal review checklist and optionally mark Part A accepted. | `RCS_ONBOARDING_OPERATOR_PIN` |
 | `operator-trusthub-kyc.mjs` | Update the internal Trust Hub KYC tracking row and sync the application Trust Hub status. | `RCS_ONBOARDING_OPERATOR_PIN` |
 | `operator-rc-bundle.mjs` | Update the internal UK RC Bundle tracking row. | `RCS_ONBOARDING_OPERATOR_PIN` |
@@ -153,6 +154,25 @@ node rcs-registration/tools/internal-review-preflight.mjs --self-test
 Safety: this tool is local/offline only. It does not call Apps Script, Google Sheets, Twilio, Revolut, Google Cloud, or any provider API. It treats legal/company, website/domain, public links, message purpose/examples, consent/opt-out, and phone-preview readiness as Part A acceptance gates. It treats KYC/Trust Hub and SMS fallback/RC bundle as explicit pending lanes that may continue after Part A acceptance, as long as they are not blocked or ambiguous.
 
 The live `operator-review.mjs --part-a-accepted` path is guarded too: it refuses Part A acceptance unless `--confirm-part-a-acceptance` and `--review-status accepted` are both supplied after this preflight has passed.
+
+## Plan Internal Review Command
+
+Offline command plan from the same saved `operator-status.mjs` snapshot:
+
+```bash
+node rcs-registration/tools/internal-review-command-plan.mjs \
+  --snapshot-file /tmp/roq-rcs-current-operator-snapshot.json
+```
+
+Expected result: JSON showing the same internal-review hard gate, all current blockers/warnings, a dry-run `operator-review.mjs` command, and a live command template only when the hard gate has no blockers.
+
+Self-test:
+
+```bash
+node rcs-registration/tools/internal-review-command-plan.mjs --self-test
+```
+
+Safety: this tool is local/offline only. It does not call Apps Script, Google Sheets, Twilio, Revolut, Google Cloud, or any provider API. It is a planning bridge, not an approval decision: do not run the live template unless the underlying internal review evidence has actually been checked and RightOnQ explicitly approves Part A acceptance.
 
 ## Approve Part A After Internal Review
 
