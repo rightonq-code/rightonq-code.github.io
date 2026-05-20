@@ -3606,6 +3606,34 @@ Boundary:
 - no Twilio/Google/Trust Hub/Revolut call;
 - no status mutation.
 
+### Slice 11I - Public Part B Guard Proof Helper
+
+Date: 2026-05-20
+
+Purpose:
+
+- add a repeatable local proof helper for the live public Part B order guards;
+- avoid hand-built curl payloads and private-token leakage;
+- keep the default mode dry-run so the helper is not accidentally used as a public mutation tool.
+
+Changes:
+
+- Added `tools/proof-public-part-b-guards.mjs`.
+- The helper defaults to dry-run unless `--confirm-live-proof` is supplied.
+- Live proof creates one synthetic draft application through the operator API, extracts the private token without printing it, then calls public name/logo and video approval endpoints expecting both to reject as out-of-order.
+- It treats any accepted public Part B approval as a failed proof.
+- Linked the helper from `tools/README.md`.
+
+Boundary:
+
+- source/tooling only in this slice;
+- no Apps Script deployment;
+- no live proof run yet;
+- no Google Sheets read/write in this slice;
+- no provider submission;
+- no Twilio/Google/Trust Hub/Revolut call;
+- no status mutation.
+
 ## Open Questions
 
 - Exact sales-page wording for `RightOnQ UK` and `RightOnQ Global`.

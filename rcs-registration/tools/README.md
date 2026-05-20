@@ -52,6 +52,7 @@ The proof helper uses the authenticated operator API for creating the private te
 | `twilio-subaccount-messaging-inventory.mjs` | Read-only Messaging Service and sender-pool inventory inside a named Twilio subaccount. | `TWILIO_ACCOUNT_SID` and `TWILIO_AUTH_TOKEN` |
 | `twilio-subaccount-messaging-service-create.mjs` | Create one Messaging Service inside a named Twilio subaccount after a duplicate-name preflight. | `TWILIO_ACCOUNT_SID` and `TWILIO_AUTH_TOKEN` |
 | `proof-public-part-a-submit.mjs` | Create a private test link, submit Part A through the public path, then prove Trust Hub KYC and UK RC Bundle tracking rows were created. | `RCS_ONBOARDING_CREATE_PIN` and `RCS_ONBOARDING_OPERATOR_PIN` |
+| `proof-public-part-b-guards.mjs` | Create a synthetic draft application, then prove public Part B approval endpoints reject out-of-order calls. | `RCS_ONBOARDING_CREATE_PIN` and `RCS_ONBOARDING_OPERATOR_PIN` for live proof |
 | `revolut-sandbox-proof.mjs` | Prepare and test Revolut sandbox Hosted Checkout requests. | No RCS PIN; uses `REVOLUT_MERCHANT_API_SECRET` for live sandbox calls |
 | `revolut-webhook-verify.mjs` | Verify Revolut webhook signatures/timestamp tolerance against captured sandbox payloads. | No RCS PIN; uses `REVOLUT_WEBHOOK_SIGNING_SECRET` for real samples |
 | `revolut-webhook-map.mjs` | Map a verified Revolut webhook payload into a proposed `operator-billing.mjs --dry-run` update. | No RCS PIN; performs no writes |
@@ -554,6 +555,30 @@ provider submission action needs separate explicit RightOnQ approval.
 The checker blocks provider submission unless `partBStatus` is `video_approved`
 or later. `name_logo_approved` is not enough because the review/proof video still
 needs client approval.
+
+## Public Part B Guard Proof
+
+Dry run:
+
+```bash
+node rcs-registration/tools/proof-public-part-b-guards.mjs --dry-run
+```
+
+Live proof:
+
+```bash
+RCS_ONBOARDING_CREATE_PIN="..." RCS_ONBOARDING_OPERATOR_PIN="..." \
+  node rcs-registration/tools/proof-public-part-b-guards.mjs \
+    --confirm-live-proof
+```
+
+Expected live result: JSON showing one synthetic draft application was created,
+then public name/logo and video approval attempts were both rejected before any
+Part B approval rows could be written.
+
+Safety: live proof creates one synthetic draft application. A successful public
+Part B approval is treated as a failed proof. Private application tokens and PINs
+are never printed.
 
 ## Revolut Sandbox Proof
 
