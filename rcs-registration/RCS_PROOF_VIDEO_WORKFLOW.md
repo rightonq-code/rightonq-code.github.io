@@ -203,6 +203,8 @@ node rcs-registration/tools/proof-pack-preflight.mjs \
 
 Do not submit only because the video is approved. The proof pack also needs final RightOnQ approval.
 
+The offline checker blocks provider submission before `video_approved`. A name/logo approval is necessary, but it only means RightOnQ can prepare the review video; it is not final proof-pack readiness.
+
 ## Acceptance Checklist
 
 The proof-video workflow is ready for first real submission only when:

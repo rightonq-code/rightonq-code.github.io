@@ -516,8 +516,8 @@ the original-order record before writing any Billing update.
 
 This checker reads a saved operator snapshot JSON file and reports whether the
 proof pack has missing URLs, placeholder-looking proof assets, premature provider
-status movement, or missing approval signals. It performs no Apps Script, Twilio,
-Revolut, Google Cloud, or provider calls.
+status movement, missing Part B video approval, or missing approval signals. It
+performs no Apps Script, Twilio, Revolut, Google Cloud, or provider calls.
 
 Save a snapshot first:
 
@@ -550,6 +550,10 @@ node rcs-registration/tools/proof-pack-preflight.mjs --self-test
 Expected result: JSON with `blockers`, `warnings`, and
 `readyForProviderSubmission`. Even a clean result is still only a preflight; the
 provider submission action needs separate explicit RightOnQ approval.
+
+The checker blocks provider submission unless `partBStatus` is `video_approved`
+or later. `name_logo_approved` is not enough because the review/proof video still
+needs client approval.
 
 ## Revolut Sandbox Proof
 

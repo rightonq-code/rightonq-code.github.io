@@ -31,6 +31,13 @@ const REVIEWED_PACK_STATUSES = new Set([
   "final_approved"
 ]);
 
+const PART_B_VIDEO_APPROVED_STATUSES = new Set([
+  "video_approved",
+  "provider_review",
+  "approved",
+  "live"
+]);
+
 function usage() {
   return [
     "Usage:",
@@ -210,6 +217,19 @@ function assessProofPack(snapshot) {
     add(warnings, "part_a_not_accepted", "Application Part A status is '" + partAStatus + "'; final proof pack normally follows accepted Part A.", "partAStatus");
   }
 
+  const partBStatus = valueFrom(application, "Part B status", "partBStatus") || application.registrationStatus || "";
+  if (!partBStatus) {
+    add(blockers, "missing_part_b_status", "Application Part B status is missing; client name/logo and review-video approval must be recorded before provider submission.", "partBStatus");
+  } else if (partBStatus === "name_logo_approved") {
+    add(blockers, "video_not_approved_by_client", "Part B status is name_logo_approved; review-video client approval is still required before provider submission.", "partBStatus");
+  } else if (partBStatus === "video_changes_requested") {
+    add(blockers, "video_changes_unresolved", "Part B status is video_changes_requested; resolve client video changes before provider submission.", "partBStatus");
+  } else if (partBStatus === "name_logo_changes_requested") {
+    add(blockers, "name_logo_changes_unresolved", "Part B status is name_logo_changes_requested; resolve name/logo changes before review-video work continues.", "partBStatus");
+  } else if (!PART_B_VIDEO_APPROVED_STATUSES.has(partBStatus)) {
+    add(blockers, "part_b_not_video_approved", "Part B status is '" + partBStatus + "'; expected video_approved or later before provider submission.", "partBStatus");
+  }
+
   const reviewStatus = valueFrom(internalReview, "Review status", "reviewStatus");
   if (reviewStatus && reviewStatus !== "accepted") {
     add(warnings, "internal_review_not_accepted", "Internal review status is '" + reviewStatus + "'.", "Review status");
@@ -262,7 +282,9 @@ function makeReadySnapshot() {
       legalBusinessName: "Example Ltd",
       tradingName: "Example",
       primaryContactEmail: "owner@example.com",
-      partAStatus: "part_a_accepted"
+      partAStatus: "part_a_accepted",
+      partBStatus: "video_approved",
+      registrationStatus: "video_approved"
     },
     internalReview: {
       "Review status": "accepted"
@@ -288,6 +310,8 @@ function makeDraftSnapshot() {
   snapshot.applicationId = "ROQ-RCS-TEST-DRAFT";
   snapshot.application.applicationId = "ROQ-RCS-TEST-DRAFT";
   snapshot.application.partAStatus = "part_a_submitted";
+  snapshot.application.partBStatus = "name_logo_approved";
+  snapshot.application.registrationStatus = "name_logo_approved";
   snapshot.internalReview["Review status"] = "pending_review";
   snapshot.twilioSetup["Application ID"] = "ROQ-RCS-TEST-DRAFT";
   snapshot.twilioSetup["RBM logo URL"] = "https://example.com/rightonq-proof-logo.png";
@@ -305,6 +329,8 @@ function makeUnsafeSnapshot() {
   snapshot.twilioSetup["Go-live status"] = "ready";
   snapshot.twilioSetup["Usage pull status"] = "";
   snapshot.twilioSetup["Manual pause flag"] = "yes";
+  snapshot.application.partBStatus = "video_changes_requested";
+  snapshot.application.registrationStatus = "video_changes_requested";
   delete snapshot.twilioSetup["Review video URL"];
   return snapshot;
 }
@@ -319,15 +345,17 @@ function runSelfTest() {
   assert(ready.readyForProviderSubmission === true, "ready snapshot should have no warnings");
 
   const draft = assessProofPack(makeDraftSnapshot());
-  assert(draft.ok === true, "draft snapshot should have warnings but no blockers");
+  assert(draft.ok === false, "draft snapshot should have a Part B blocker");
   assert(draft.readyForProviderSubmission === false, "draft snapshot should not be ready for submission");
   assert(draft.warnings.some(item => item.code === "placeholder_logo_url"), "draft snapshot should flag placeholder logo");
   assert(draft.warnings.some(item => item.code === "video_not_approved"), "draft snapshot should flag video not approved");
+  assert(draft.blockers.some(item => item.code === "video_not_approved_by_client"), "draft snapshot should flag missing client video approval");
 
   const unsafe = assessProofPack(makeUnsafeSnapshot());
   assert(unsafe.ok === false, "unsafe snapshot should have blockers");
   assert(unsafe.blockers.some(item => item.code === "premature_providerSubmissionStatus"), "unsafe snapshot should flag provider status");
   assert(unsafe.blockers.some(item => item.code === "missing_reviewVideo_url"), "unsafe snapshot should flag missing review video URL");
+  assert(unsafe.blockers.some(item => item.code === "video_changes_unresolved"), "unsafe snapshot should flag unresolved video changes");
 
   return {
     ok: true,

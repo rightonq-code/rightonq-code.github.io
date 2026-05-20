@@ -3550,6 +3550,32 @@ Boundary:
 - no Twilio/Google/Trust Hub/Revolut call;
 - no status mutation.
 
+### Slice 11G - Proof Pack Part B Gate
+
+Date: 2026-05-20
+
+Purpose:
+
+- close the gap where the proof-pack preflight could pass without explicit Part B video approval;
+- keep name/logo approval separate from review-video approval;
+- make provider submission impossible to treat as ready while Part B is only at `name_logo_approved` or any changes-requested state.
+
+Changes:
+
+- `tools/proof-pack-preflight.mjs` now blocks provider-submission readiness unless `partBStatus` is `video_approved` or later.
+- It gives specific blockers for `name_logo_approved`, `video_changes_requested`, and `name_logo_changes_requested`.
+- The proof-pack checker self-tests now cover the Part B gate.
+- `tools/README.md`, `RCS_PROVIDER_SUBMISSION_PREFLIGHT_CHECKLIST.md`, and `RCS_PROOF_VIDEO_WORKFLOW.md` now record that name/logo approval alone is not proof-pack readiness.
+
+Boundary:
+
+- no Apps Script deployment;
+- no operator action;
+- no Google Sheets read/write;
+- no provider submission;
+- no Twilio/Google/Trust Hub/Revolut call;
+- no status mutation.
+
 ## Open Questions
 
 - Exact sales-page wording for `RightOnQ UK` and `RightOnQ Global`.
