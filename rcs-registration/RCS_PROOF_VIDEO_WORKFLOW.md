@@ -191,6 +191,14 @@ Before provider submission, run the full preflight checklist:
 
 - `RCS_PROVIDER_SUBMISSION_PREFLIGHT_CHECKLIST.md`
 
+Use the offline snapshot checker as a mechanical guardrail:
+
+```sh
+node rcs-registration/tools/proof-pack-preflight.mjs \
+  --snapshot-file /tmp/roq-rcs-operator-snapshot.json \
+  --strict
+```
+
 Do not submit only because the video is approved. The proof pack also needs final RightOnQ approval.
 
 ## Acceptance Checklist

@@ -178,6 +178,14 @@ Must not proceed if:
 
 ## Final Operator Decision
 
+Before the final decision, run the offline snapshot checker if an operator snapshot has been saved:
+
+```sh
+node rcs-registration/tools/proof-pack-preflight.mjs \
+  --snapshot-file /tmp/roq-rcs-operator-snapshot.json \
+  --strict
+```
+
 Only after all applicable sections pass may RightOnQ prepare the provider-submission action.
 
 The next action should be explicit, for example:

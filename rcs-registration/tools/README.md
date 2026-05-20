@@ -45,6 +45,7 @@ The proof helper uses the authenticated operator API for creating the private te
 | `operator-twilio-subaccount-link.mjs` | Resolve a Twilio subaccount by friendly name and link it into the internal Twilio setup row with redacted terminal output. | `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, and `RCS_ONBOARDING_OPERATOR_PIN` |
 | `operator-billing.mjs` | Update the internal billing/payment tracking row. | `RCS_ONBOARDING_OPERATOR_PIN` |
 | `operator-payment-order.mjs` | Check, append, or look up Revolut payment-order ledger snapshots for active-checkout protection. | `RCS_ONBOARDING_OPERATOR_PIN` |
+| `proof-pack-preflight.mjs` | Offline proof-pack checker for a saved `operator-status.mjs` JSON snapshot before provider submission. | No PIN; local JSON only |
 | `twilio-account-inventory.mjs` | Read-only Twilio parent/subaccount/Messaging Service inventory preflight before provider-connected setup. | `TWILIO_ACCOUNT_SID` and `TWILIO_AUTH_TOKEN` |
 | `twilio-subaccount-create.mjs` | Create one clearly named Twilio subaccount after a duplicate-name preflight. | `TWILIO_ACCOUNT_SID` and `TWILIO_AUTH_TOKEN` |
 | `twilio-subaccount-messaging-inventory.mjs` | Read-only Messaging Service and sender-pool inventory inside a named Twilio subaccount. | `TWILIO_ACCOUNT_SID` and `TWILIO_AUTH_TOKEN` |
@@ -486,6 +487,45 @@ latest provider IDs for readability, but checkout creation guards must read the
 `Payment orders` ledger, not the single Billing checkout/order cell.
 Refund webhook enrichment should also resolve application context from this ledger or
 the original-order record before writing any Billing update.
+
+## Offline Proof Pack Preflight
+
+This checker reads a saved operator snapshot JSON file and reports whether the
+proof pack has missing URLs, placeholder-looking proof assets, premature provider
+status movement, or missing approval signals. It performs no Apps Script, Twilio,
+Revolut, Google Cloud, or provider calls.
+
+Save a snapshot first:
+
+```bash
+RCS_ONBOARDING_OPERATOR_PIN="..." node rcs-registration/tools/operator-status.mjs \
+  --application-id ROQ-RCS-... > /tmp/roq-rcs-operator-snapshot.json
+```
+
+Run the offline check:
+
+```bash
+node rcs-registration/tools/proof-pack-preflight.mjs \
+  --snapshot-file /tmp/roq-rcs-operator-snapshot.json
+```
+
+Use `--strict` if warnings should also fail the command:
+
+```bash
+node rcs-registration/tools/proof-pack-preflight.mjs \
+  --snapshot-file /tmp/roq-rcs-operator-snapshot.json \
+  --strict
+```
+
+Local self-test:
+
+```bash
+node rcs-registration/tools/proof-pack-preflight.mjs --self-test
+```
+
+Expected result: JSON with `blockers`, `warnings`, and
+`readyForProviderSubmission`. Even a clean result is still only a preflight; the
+provider submission action needs separate explicit RightOnQ approval.
 
 ## Revolut Sandbox Proof
 
