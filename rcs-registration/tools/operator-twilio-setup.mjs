@@ -40,8 +40,27 @@ const FIELD_ALIASES = {
 };
 
 const BOOLEAN_FLAGS = {
-  "dry-run": "dryRun"
+  "dry-run": "dryRun",
+  "confirm-provider-state-change": "confirmProviderStateChange"
 };
+
+const PROVIDER_GATE_FIELDS = [
+  {
+    fieldName: "providerSubmissionStatus",
+    cliName: "--provider-submission-status",
+    safeValue: "not_started"
+  },
+  {
+    fieldName: "goLiveStatus",
+    cliName: "--go-live-status",
+    safeValue: "not_started"
+  },
+  {
+    fieldName: "usagePullStatus",
+    cliName: "--usage-pull-status",
+    safeValue: "not_started"
+  }
+];
 
 function usage() {
   return [
@@ -68,6 +87,8 @@ function usage() {
     "Safety:",
     "  The operator PIN is read from RCS_ONBOARDING_OPERATOR_PIN.",
     "  Store Twilio IDs, status values, URLs, and notes only; do not store credentials, auth tokens, or raw message payloads.",
+    "  Provider submission, go-live, and usage-pull statuses must stay not_started unless a separate approval gate has passed.",
+    "  Use --confirm-provider-state-change only after explicit approval to move one of those statuses beyond not_started.",
     "  Use --dry-run to print the payload without sending it."
   ].join("\n");
 }
@@ -98,8 +119,35 @@ function parseArgs(argv) {
   return options;
 }
 
+function normaliseStatus(value) {
+  return String(value || "").trim().toLowerCase();
+}
+
+function validateProviderGates(options) {
+  const attemptedChanges = PROVIDER_GATE_FIELDS.filter(function(gate) {
+    if (options[gate.fieldName] === undefined) return false;
+    return normaliseStatus(options[gate.fieldName]) !== gate.safeValue;
+  });
+
+  if (attemptedChanges.length === 0) return;
+  if (options.confirmProviderStateChange) return;
+
+  const fields = attemptedChanges
+    .map(function(gate) {
+      return gate.cliName + " " + options[gate.fieldName];
+    })
+    .join(", ");
+
+  throw new Error(
+    "Refusing provider lifecycle state change without --confirm-provider-state-change: " +
+      fields +
+      ". Run the proof-pack/submission approval gate first, then retry with the explicit confirmation flag."
+  );
+}
+
 function buildPayload(options) {
   if (!options.applicationId) throw new Error("Missing --application-id");
+  validateProviderGates(options);
 
   const operatorPin = process.env.RCS_ONBOARDING_OPERATOR_PIN;
   if (!options.dryRun && !operatorPin) {

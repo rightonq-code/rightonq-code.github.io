@@ -26,6 +26,8 @@ Usage pull status
 
 No one should move these because a tool example, proof asset, subaccount, Messaging Service, callback receiver, or draft video exists.
 
+The generic Twilio setup tracking helper enforces this boundary: `tools/operator-twilio-setup.mjs` refuses to move any of these three fields beyond `not_started` unless the operator supplies `--confirm-provider-state-change` after the checklist has passed and the provider-submission action has been explicitly approved.
+
 ## Preflight 1: Business And Legal Review
 
 Required:

@@ -268,7 +268,7 @@ RCS_ONBOARDING_OPERATOR_PIN="..." node rcs-registration/tools/operator-twilio-se
 
 Expected live result: JSON showing the stored Twilio subaccount SID, provider submission status, go-live status, and manual pause flag.
 
-Safety: store Twilio resource IDs, statuses, public asset/proof URLs, and operator notes only. Keep `--provider-submission-status not_started` until a separate explicit submission approval gate has passed. Do not store Twilio auth tokens, API keys, webhook secrets, raw message payloads, customer message content, or private/signed URLs in this workflow.
+Safety: store Twilio resource IDs, statuses, public asset/proof URLs, and operator notes only. Keep `--provider-submission-status not_started`, `--go-live-status not_started`, and `--usage-pull-status not_started` until a separate explicit submission approval gate has passed. The tool refuses later lifecycle values for those three fields unless `--confirm-provider-state-change` is present. Do not store Twilio auth tokens, API keys, webhook secrets, raw message payloads, customer message content, or private/signed URLs in this workflow.
 
 ## Link Twilio Proof Subaccount Into Tracking
 

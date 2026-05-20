@@ -51,6 +51,8 @@ Go-live status
 Usage pull status
 ```
 
+`tools/operator-twilio-setup.mjs` now enforces this in the CLI: it will reject a move beyond `not_started` for these three statuses unless the operator adds `--confirm-provider-state-change` after the final submission gate has passed.
+
 ## Required Story Beats
 
 The proof video should show, at minimum:

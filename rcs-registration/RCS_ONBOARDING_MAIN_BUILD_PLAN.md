@@ -3475,6 +3475,29 @@ Boundary:
 - no Twilio/Google/Trust Hub call;
 - no status mutation.
 
+### Slice 11D - Provider Lifecycle CLI Guardrail
+
+Date: 2026-05-20
+
+Purpose:
+
+- turn the provider-submission boundary from documentation-only into a local tool guardrail;
+- stop copy-paste operator commands from moving `Provider submission status`, `Go-live status`, or `Usage pull status` beyond `not_started` before the explicit submission gate;
+- keep routine proof-pack, asset URL, and Twilio setup tracking updates simple.
+
+Changes:
+
+- `tools/operator-twilio-setup.mjs` now rejects non-`not_started` values for `--provider-submission-status`, `--go-live-status`, and `--usage-pull-status` unless `--confirm-provider-state-change` is supplied.
+- `tools/README.md`, `RCS_PROVIDER_SUBMISSION_PREFLIGHT_CHECKLIST.md`, and `RCS_PROOF_VIDEO_WORKFLOW.md` now record the tool-level guardrail.
+
+Boundary:
+
+- no Apps Script deployment;
+- no operator action;
+- no provider submission;
+- no Twilio/Google/Trust Hub call;
+- no status mutation.
+
 ## Open Questions
 
 - Exact sales-page wording for `RightOnQ UK` and `RightOnQ Global`.
