@@ -188,6 +188,14 @@ node rcs-registration/tools/proof-pack-preflight.mjs \
   --strict
 ```
 
+Run the proof-video checker against the same saved snapshot:
+
+```sh
+node rcs-registration/tools/proof-video-preflight.mjs \
+  --snapshot-file /tmp/roq-rcs-operator-snapshot.json \
+  --strict
+```
+
 Then run the public proof asset URL checker against the same saved snapshot:
 
 ```sh

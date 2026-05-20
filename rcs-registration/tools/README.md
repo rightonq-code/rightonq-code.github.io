@@ -47,6 +47,7 @@ The proof helper uses the authenticated operator API for creating the private te
 | `operator-billing.mjs` | Update the internal billing/payment tracking row. | `RCS_ONBOARDING_OPERATOR_PIN` |
 | `operator-payment-order.mjs` | Check, append, or look up Revolut payment-order ledger snapshots for active-checkout protection. | `RCS_ONBOARDING_OPERATOR_PIN` |
 | `proof-pack-preflight.mjs` | Offline proof-pack checker for a saved `operator-status.mjs` JSON snapshot before provider submission. | No PIN; local JSON only |
+| `proof-video-preflight.mjs` | Offline proof-video readiness checker for review-video URL/status and client approval state in a saved operator snapshot. | No PIN; local JSON only |
 | `proof-asset-url-preflight.mjs` | Read-only public URL/content check for logo, banner, opt-in proof, and review video assets in a saved operator snapshot. | No PIN; public URL fetches only |
 | `twilio-account-inventory.mjs` | Read-only Twilio parent/subaccount/Messaging Service inventory preflight before provider-connected setup. | `TWILIO_ACCOUNT_SID` and `TWILIO_AUTH_TOKEN` |
 | `twilio-subaccount-create.mjs` | Create one clearly named Twilio subaccount after a duplicate-name preflight. | `TWILIO_ACCOUNT_SID` and `TWILIO_AUTH_TOKEN` |
@@ -560,6 +561,39 @@ provider submission action needs separate explicit RightOnQ approval.
 The checker blocks provider submission unless `partBStatus` is `video_approved`
 or later. `name_logo_approved` is not enough because the review/proof video still
 needs client approval.
+
+## Offline Proof Video Preflight
+
+This checker reads a saved operator snapshot and reports whether the review video
+is still draft/placeholder material or has reached the client-approved state
+needed for final pack review.
+
+```bash
+node rcs-registration/tools/proof-video-preflight.mjs \
+  --snapshot-file /tmp/roq-rcs-operator-snapshot.json
+```
+
+Use `--strict` if warnings should also fail the command:
+
+```bash
+node rcs-registration/tools/proof-video-preflight.mjs \
+  --snapshot-file /tmp/roq-rcs-operator-snapshot.json \
+  --strict
+```
+
+Local self-test:
+
+```bash
+node rcs-registration/tools/proof-video-preflight.mjs --self-test
+```
+
+Expected result: JSON with `blockers`, `warnings`, and
+`videoReadyForFinalPackReview`. It does not fetch the video URL; use
+`proof-asset-url-preflight.mjs` for public URL/content checks.
+
+Latest proof against `ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747`: the checker
+correctly returned `ok: false` because the hosted review-video URL/status still
+look placeholder-only and the application has not reached `video_approved`.
 
 ## Public Proof Asset URL Preflight
 

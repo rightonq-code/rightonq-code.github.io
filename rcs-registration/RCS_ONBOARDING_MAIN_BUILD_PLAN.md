@@ -3747,6 +3747,46 @@ Boundary:
 - no Twilio/Google/Trust Hub/Revolut API call;
 - no status mutation.
 
+### Slice 11M - Proof Video Readiness Preflight
+
+Date: 2026-05-20
+
+Purpose:
+
+- make the review-video lane mechanically checkable before final pack review;
+- distinguish draft/placeholder hosted video evidence from client-approved video evidence;
+- keep proof-video readiness separate from public URL/content checks and separate from provider submission approval.
+
+Changes:
+
+- Added `tools/proof-video-preflight.mjs`.
+- The tool reads a saved `operator-status.mjs` JSON snapshot and performs no network or provider calls.
+- It blocks when the review-video URL is missing, non-HTTPS, or placeholder/proof-only.
+- It blocks when `Review video status` is missing, placeholder/proof-only, or not one of the approved equivalents.
+- It blocks when the application `partBStatus` has not reached `video_approved` or later, and gives specific handling for name/logo-only and video-changes states.
+- It warns when the registration pack is not yet reviewed and when no recent video-approval event/communication is visible in the snapshot window.
+- `tools/README.md`, `RCS_PROOF_VIDEO_WORKFLOW.md`, and `RCS_PROVIDER_SUBMISSION_PREFLIGHT_CHECKLIST.md` now include the checker in the final-pack workflow.
+
+Proof run:
+
+- `node rcs-registration/tools/proof-video-preflight.mjs --self-test`
+  - Result: `ok: true`, with ready/draft/changes cases passing.
+- `node rcs-registration/tools/proof-video-preflight.mjs --snapshot-file /tmp/roq-rcs-current-operator-snapshot.json`
+  - Result: `ok: false`, `videoReadyForFinalPackReview: false`, `blockers: 3`, `warnings: 2`.
+  - Blockers: placeholder review-video URL, placeholder review-video status, and `partBStatus` not yet `video_approved`.
+  - Warnings: placeholder registration-pack status and no recent video approval signal in the snapshot window.
+
+Boundary:
+
+- local offline checker only;
+- no Apps Script deployment;
+- no operator action;
+- no Google Sheets read/write;
+- no public URL fetch;
+- no provider submission;
+- no Twilio/Google/Trust Hub/Revolut call;
+- no status mutation.
+
 ## Open Questions
 
 - Exact sales-page wording for `RightOnQ UK` and `RightOnQ Global`.

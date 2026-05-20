@@ -201,6 +201,15 @@ node rcs-registration/tools/proof-pack-preflight.mjs \
   --strict
 ```
 
+Use the proof-video checker to confirm the video is no longer draft/placeholder
+material and has reached the client-approved state:
+
+```sh
+node rcs-registration/tools/proof-video-preflight.mjs \
+  --snapshot-file /tmp/roq-rcs-operator-snapshot.json \
+  --strict
+```
+
 Use the public proof asset URL checker to confirm the hosted asset URLs are
 reachable and mechanically plausible:
 
