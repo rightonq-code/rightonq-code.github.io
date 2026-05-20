@@ -120,7 +120,7 @@ The onboarding lane has already proved:
 The onboarding lane has not yet completed:
 
 - real approved client logo/banner upload;
-- final logo/banner dimension check against current Twilio/Google requirements before generating approved files;
+- final logo/banner dimension check against current Twilio/Google requirements before generating approved files; current known issue: Google/RBM docs use a 1440 x 448 banner master while Twilio RCS onboarding docs show 1140 x 448, so store the exact submitted asset URL and do not assume one uncontested number;
 - real opt-in proof image upload;
 - real review/proof video creation;
 - client Part B approval of name/logo/video;
@@ -227,11 +227,13 @@ It must not collect or store raw passport, driving licence, government ID, or pr
 - normal operator notes;
 - public proof-asset storage.
 
-If Twilio requires extra identity or address evidence, the desired build is a secure evidence handoff:
+If Twilio requires extra identity or address evidence, the desired build is a separate A-ID secure evidence handoff:
 
 - Twilio-managed flow where possible;
 - secure-admin route if needed;
 - RightOnQ stores only inquiry IDs, document SIDs, status fields, timestamps, and rejection/exception reasons.
+
+A-ID is not part of normal Part A. It should open only when Twilio/Trust Hub requests extra evidence, then return the applicant to the normal onboarding path once accepted or resolved.
 
 ## Product Activation Handover
 
@@ -327,7 +329,7 @@ Collect/confirm:
 
 - second authorised representative;
 - operating regions;
-- secure evidence route decision;
+- secure A-ID evidence route decision;
 - Secondary Compliance Profile creation strategy.
 
 ### Slice E: Submission Preparation

@@ -111,7 +111,7 @@ Current source reading:
 
 Important local implication:
 
-`RCS_REGISTRATION_PACK_READINESS_MAP.md` and `index.html` still contain older `1440 x 448` banner wording/validation in places. The current Twilio source says `1140 x 448`. That should be corrected before real client asset collection.
+There is a live source discrepancy, not a simple local typo. Google/RBM documentation uses a 1440 x 448 banner/hero image. Twilio RCS onboarding documentation currently shows 1140 x 448. The local form should keep collecting a 1440 x 448 Google/RBM master banner unless Twilio confirms otherwise, and the submission pack should track the exact derivative/URL actually submitted through Twilio.
 
 ## User-provided Twilio evidence
 
@@ -127,13 +127,15 @@ This supports the correction above:
 
 ### 1. Fix source-of-truth asset requirements
 
-Update local docs and form validation/copy so the banner requirement matches current Twilio guidance:
+Update local docs and form validation/copy so the banner requirement shows the current source conflict:
 
 ```text
-1140 x 448 px, max 200 KB, public URL
+Google/RBM master: 1440 x 448 px, max 200 KB
+Twilio RCS onboarding doc: 1140 x 448 px, max 200 KB
+Action: keep master asset, prepare Twilio derivative only if confirmed/needed
 ```
 
-Check for stale `1440 x 448` references in:
+Check for unqualified `1440 x 448` or `1140 x 448` references in:
 
 - `/Users/macpro/rightonq-code.github.io/rcs-registration/index.html`
 - `/Users/macpro/rightonq-code.github.io/rcs-registration/RCS_REGISTRATION_PACK_READINESS_MAP.md`
@@ -238,7 +240,7 @@ Please answer these in a strict read-only review first:
 2. Should production Twilio/RCS delivery and status callbacks terminate in `rightonq-system` rather than this onboarding repo?
 3. Is the callback receiver correctly parked as proof/staging, or should it be removed from the onboarding path entirely?
 4. Are the Twilio/Google video requirements accurately represented in the local docs and form?
-5. Is `1140 x 448` now the correct banner requirement everywhere, and are any stale `1440 x 448` assumptions still present?
+5. Is the Google/RBM `1440 x 448` master plus possible Twilio `1140 x 448` derivative model correct, or should the source form collect a different master asset?
 6. Does the existing browser video generator produce something that can become a submission-quality review video, or should the submission video be produced separately and only tracked/hosted by the onboarding lane?
 7. What exact Part B statuses should exist between `video_ready_for_review`, `video_approved`, and `provider_submission_ready`?
 8. What is the minimal activation handover contract `rightonq-system` needs on day one after approval?
@@ -270,10 +272,9 @@ Do not resume callback persistence work yet.
 
 First, perform a narrow cleanup and alignment slice:
 
-1. Correct stale banner-dimension assumptions.
+1. Correct stale or overconfident banner-dimension assumptions.
 2. Make the proof-video requirement explicit and consistent.
 3. Update the readiness map so the next path is proof pack/video, not callback persistence.
 4. Keep provider submission, compliance submission, callback configuration, phone movement, sender-pool movement, and message sending behind separate explicit gates.
 
 After that, build the real proof-video/proof-pack workflow.
-

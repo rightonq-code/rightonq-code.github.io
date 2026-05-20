@@ -43,7 +43,7 @@ Local RightOnQ source checked:
 | Sender display name | Part A `displayName`; `Twilio setup` `RBM sender name` | Ready | Collected and seeded into tracking. Client approves name/logo in Part B before submission. |
 | Sender description | Part A `senderDescription` | Ready | Max 100 characters in the current form. Needs RightOnQ review for clarity before submission. |
 | Logo image | Part A `logoUpload` validates PNG/JPEG, 224 x 224 px, max 50 KB | Build gap | Twilio requires a publicly accessible URL. Current form validates metadata and local preview only. Must host approved asset and store `RBM logo URL`. |
-| Banner image | Part A `bannerUpload` validates PNG/JPEG, 1440 x 448 px, max 200 KB | Build gap | Twilio requires a publicly accessible URL. Current form validates metadata and local preview only. Must host approved asset and store `RBM banner URL`. |
+| Banner image | Part A `bannerUpload` validates PNG/JPEG, 1440 x 448 px Google/RBM master, max 200 KB | Build gap | Twilio requires a publicly accessible URL. Google/RBM public docs use 1440 x 448, while Twilio RCS onboarding docs currently show 1140 x 448. Keep the 1440 x 448 master in Part A, prepare a Twilio-specific derivative if Twilio confirms it, host the approved submission asset, and store the exact submitted `RBM banner URL`. |
 | Brand/accent colour | Part A `brandColour` | Ready | Captured as hex. |
 | Customer-facing email | Part A `customerEmail` | Ready | Needs internal review that it belongs to the brand where possible. |
 | Customer-facing phone | Part A `customerPhone` | Ready | Needs internal review that it is reachable and brand-appropriate. |
@@ -79,7 +79,7 @@ Local RightOnQ source checked:
 | Operating regions | `Trust Hub KYC` `Business regions of operation` | Manual follow-up | Not the same as Part A RCS destination countries. Must collect/confirm separately. |
 | Two authorised representatives | `Trust Hub KYC` has rep 1 and rep 2 SID/status fields | Hard stop / manual follow-up | Public Part A currently captures only one authorised representative. Rep 2 details must be collected before Secondary Profile submission. |
 | Physical address | Part A registered address fields; `Trust Hub KYC` `Address SID`, `Address validation status` | Tracked | Address text exists in Part A; Twilio Address SID creation/assignment remains a later provider step. |
-| Supporting documents | `Trust Hub KYC` `Supporting document SID`, evidence fields | Manual follow-up | ID/address evidence is exception-only and must not be stored in the static form or Sheet path. Use secure/Twilio-managed route if required. |
+| Supporting documents / A-ID evidence | `Trust Hub KYC` `Supporting document SID`, evidence fields | Manual follow-up / exception lane | ID/address evidence is exception-only and must not be part of normal Part A. If Twilio requests it, open a separate A-ID step that routes the client into a secure Twilio-managed or approved secure-admin flow. Store only Twilio IDs, status, timestamps, and rejection notes. |
 | Status callback notification | `Trust Hub KYC` `Trust Hub status callback configured` | Build gap | Callback receiver and callback URL configuration are not proved yet. |
 | Evaluation/submission status | `Trust Hub KYC` evaluation and status fields | Tracked | Keep not-submitted until explicit compliance gate. |
 
@@ -112,7 +112,7 @@ The following must be true before Secondary Compliance Profile submission:
 - Correct parent legal name is `Continuity AI Ltd`; RightOnQ used only as brand/trading name where fields allow it.
 - End-client legal name, website, business type, industry, CRN, address, and operating regions confirmed.
 - Two authorised representative contact records collected.
-- Secure path chosen for any exception-only ID/address evidence.
+- Secure A-ID path chosen for any exception-only ID/address evidence requested by Twilio.
 - Trust Hub status callback strategy confirmed or deliberately deferred.
 
 The following must be true before sender-pool/phone-number movement:
@@ -132,6 +132,6 @@ Use the proved hosted asset/proof URL workflow next, still without RCS Sender su
 3. Keep `Review video status` and `Registration pack status` out of submission-ready states until the real approved files are uploaded.
 4. Keep `Provider submission status`, `Go-live status`, and `Usage pull status` at `not_started`.
 
-Do not combine this with callback configuration, sender-pool movement, compliance submission, RCS Sender submission, or message sending.
+Do not combine this with callback configuration, A-ID implementation, sender-pool movement, compliance submission, RCS Sender submission, or message sending.
 
-Callback note: `roq-rcs-twilio-callback` is deployed and signature-proved, but it is still record-only and non-persistent. Do not configure the proof Messaging Service callback URL until validated callback persistence/dedupe is added and proved.
+Callback note: `roq-rcs-twilio-callback` is deployed and signature-proved, but it is parked as proof/staging infrastructure. Do not configure the proof Messaging Service callback URL until the product/onboarding callback ownership decision is confirmed and the relevant persistence/dedupe path is proved.
