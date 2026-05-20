@@ -6,8 +6,9 @@ import { pathToFileURL } from "node:url";
 const IMAGE_CONTENT_TYPES = new Set(["image/png", "image/jpeg", "image/jpg"]);
 
 const BANNER_PROFILES = {
-  twilio: { width: 1140, height: 448, label: "Twilio current RCS onboarding" },
-  google: { width: 1440, height: 448, label: "Google RBM agent information" }
+  twilio: { width: 1440, height: 448, label: "Twilio Help/Console RCS sender profile" },
+  google: { width: 1440, height: 448, label: "Google RBM agent information" },
+  "twilio-onboarding-doc": { width: 1140, height: 448, label: "Twilio RCS onboarding page discrepancy" }
 };
 
 const ASSET_FIELDS = [
@@ -46,7 +47,7 @@ function usage() {
     "",
     "Options:",
     "  --snapshot-file PATH       JSON output from operator-status.mjs",
-    "  --banner-profile PROFILE   twilio, google, or either (default: twilio)",
+    "  --banner-profile PROFILE   twilio, google, twilio-onboarding-doc, or either (default: twilio)",
     "  --self-test                Run offline fake-fetch checks",
     "",
     "Safety:",
@@ -77,8 +78,8 @@ function parseArgs(argv) {
     if (token === "--banner-profile") {
       const value = argv[index + 1];
       if (!value || value.startsWith("--")) throw new Error("Missing value for --banner-profile");
-      if (!["twilio", "google", "either"].includes(value)) {
-        throw new Error("--banner-profile must be twilio, google, or either");
+      if (!["twilio", "google", "twilio-onboarding-doc", "either"].includes(value)) {
+        throw new Error("--banner-profile must be twilio, google, twilio-onboarding-doc, or either");
       }
       options.bannerProfile = value;
       index += 1;
@@ -224,7 +225,9 @@ function parseImageDimensions(buffer) {
 }
 
 function expectedBannerDimensions(profile) {
-  if (profile === "either") return [BANNER_PROFILES.twilio, BANNER_PROFILES.google];
+  if (profile === "either") {
+    return [BANNER_PROFILES.twilio, BANNER_PROFILES.google, BANNER_PROFILES["twilio-onboarding-doc"]];
+  }
   return [BANNER_PROFILES[profile]];
 }
 
@@ -319,10 +322,13 @@ function validateImageField(field, meta, bannerProfile, blockers, warnings, info
     }
     const twilio = BANNER_PROFILES.twilio;
     const google = BANNER_PROFILES.google;
+    const twilioOnboardingDoc = BANNER_PROFILES["twilio-onboarding-doc"];
     if (dimensions.width === twilio.width && dimensions.height === twilio.height) {
-      add(info, "banner_profile_twilio", "Banner matches Twilio current RCS onboarding dimensions.", field.label, url);
+      add(info, "banner_profile_twilio", "Banner matches Twilio Help/Console and Google RBM dimensions.", field.label, url);
     } else if (dimensions.width === google.width && dimensions.height === google.height) {
       add(info, "banner_profile_google", "Banner matches Google RBM agent dimensions.", field.label, url);
+    } else if (dimensions.width === twilioOnboardingDoc.width && dimensions.height === twilioOnboardingDoc.height) {
+      add(info, "banner_profile_twilio_onboarding_doc", "Banner matches the Twilio RCS onboarding page discrepancy dimensions.", field.label, url);
     }
     return;
   }
@@ -415,7 +421,7 @@ async function runSelfTest() {
       headers: { "content-type": "image/png", "content-length": String(40 * 1024) }
     },
     [baseUrl + "/banner.png"]: {
-      body: makePng(1140, 448),
+      body: makePng(1440, 448),
       headers: { "content-type": "image/png", "content-length": String(150 * 1024) }
     },
     [baseUrl + "/opt-in.png"]: {

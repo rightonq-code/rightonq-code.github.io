@@ -573,10 +573,11 @@ node rcs-registration/tools/proof-asset-url-preflight.mjs \
   --snapshot-file /tmp/roq-rcs-operator-snapshot.json
 ```
 
-Default banner profile is `twilio`, using the current Twilio RCS onboarding
-constraint of `1140x448`. Use `--banner-profile google` to check Google's
-current RBM `1440x448` agent-banner size, or `--banner-profile either` when
-comparing provider requirements before final asset selection.
+Default banner profile is `twilio`, using the `1440x448` size shown by Twilio
+Help, Twilio Console evidence, and Google's current RBM agent-banner guidance.
+Use `--banner-profile twilio-onboarding-doc` to check the `1140x448` size still
+shown by Twilio's RCS onboarding page, or `--banner-profile either` when
+comparing the documented discrepancy.
 
 ```bash
 node rcs-registration/tools/proof-asset-url-preflight.mjs \
@@ -596,10 +597,10 @@ result is not provider-submission approval; run the full proof-pack preflight an
 record explicit RightOnQ approval before any submission action.
 
 Latest proof against `ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747`: all four hosted
-asset URLs were publicly reachable. The current banner is `1440x448`, so the
-default `twilio` profile blocks it while `--banner-profile either` passes and
-identifies it as the Google RBM banner profile. Keep this explicit until the
-final Twilio submission asset size is confirmed.
+asset URLs were publicly reachable. The current banner is `1440x448`, so it now
+passes the default `twilio` profile and the `google` profile. It fails only under
+`--banner-profile twilio-onboarding-doc`, which preserves the single Twilio
+onboarding-page `1140x448` discrepancy for comparison.
 
 ## Public Part B Guard Proof
 

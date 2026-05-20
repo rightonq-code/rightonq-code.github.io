@@ -81,10 +81,10 @@ Required:
 
 Known banner issue:
 
-- Google/RBM docs use a 1440 x 448 banner/hero master.
-- Twilio RCS onboarding docs show 1140 x 448.
+- Twilio Help, Twilio Console evidence, and Google/RBM docs use a 1440 x 448 banner/hero master.
+- Twilio's RCS onboarding page still shows 1140 x 448 in one table.
+- Use the 1440 x 448 derivative for the normal submission preflight unless Twilio explicitly requests otherwise.
 - Store the exact asset URL submitted to Twilio.
-- Do not assume one uncontested banner number until Twilio confirms.
 
 Must not proceed if:
 
