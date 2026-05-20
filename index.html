@@ -235,6 +235,26 @@
     opacity: 0;
     animation: fadeUp 0.7s ease forwards 0.6s;
   }
+
+  .hero-sub strong {
+    color: var(--white);
+    font-weight: 500;
+  }
+
+  .hero-proof-line {
+    margin-top: 18px;
+    font-size: 15px;
+    color: var(--grey);
+    line-height: 1.6;
+    max-width: 620px;
+    opacity: 0;
+    animation: fadeUp 0.7s ease forwards 0.7s;
+  }
+
+  .hero-proof-line strong {
+    color: var(--blue-light);
+    font-weight: 500;
+  }
   .tm-mark {
     font-size: 0.48em;
     font-weight: 500;
@@ -596,12 +616,15 @@
     border-bottom: 1px solid rgba(255,255,255,0.06);
   }
   .steps {
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 44px minmax(0, 1fr) 44px minmax(0, 1fr);
     align-items: flex-start;
     gap: 0;
+    max-width: 980px;
+    margin: 0 auto;
   }
   .step {
-    flex: 0 0 auto;
+    min-width: 0;
     padding-right: 24px;
   }
   .step:last-child { padding-right: 0; }
@@ -624,6 +647,7 @@
     color: var(--grey);
     font-size: 15px;
     line-height: 1.7;
+    max-width: 280px;
   }
   .step-connector {
     width: 44px;
@@ -1091,7 +1115,7 @@
     .proof-strip { padding: 0; }
     .section-inner { padding: 0 24px; }
     .how-section, .use-cases, .features-section, .pricing-section { padding: 70px 0; }
-    .steps { flex-direction: column; gap: 40px; }
+    .steps { grid-template-columns: 1fr; gap: 40px; }
     .step { padding-right: 0; }
     .step-connector { display: none; }
     .case-cards { grid-template-columns: 1fr; }
@@ -1908,7 +1932,7 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 6px rgba(47,
 
   .scenario-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 18px;
   }
 
@@ -1920,6 +1944,7 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 6px rgba(47,
     min-height: 250px;
     display: flex;
     flex-direction: column;
+    min-width: 0;
   }
 
   .scenario-icon {
@@ -1954,7 +1979,7 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 6px rgba(47,
   }
   .scenario-card h3.scenario-title-compact {
     font-size: 17px;
-    white-space: nowrap;
+    text-wrap: balance;
   }
 
   .scenario-card p {
@@ -2041,7 +2066,24 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 6px rgba(47,
     .comparison-grid {
       grid-template-columns: 1fr;
     }
-    .scenario-grid { grid-template-columns: repeat(2, 1fr); }
+    .scenario-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .steps {
+      grid-template-columns: 1fr;
+      gap: 24px;
+      max-width: 640px;
+    }
+    .step {
+      padding: 24px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px;
+    }
+    .step p {
+      max-width: none;
+    }
+    .step-connector {
+      display: none;
+    }
   }
 
   @media (max-width: 768px) {
@@ -2138,8 +2180,13 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 6px rgba(47,
   <div class="hero-grid">
     <div class="hero-copy">
       <div class="hero-tag">Branded RCS messaging for UK businesses</div>
-      <h1>For brands with an audience worth <em>reaching.</em></h1>
-      <p class="hero-sub">RightOnQ<span class="tm-mark">TM</span> software helps businesses prepare, send and track their branded RCS messages in the same place customers receive text messages, with SMS fallback, reply buttons and premium time-zone scheduling when audiences are abroad.</p>
+      <h1>Verified phone messages with images, buttons and <em>SMS fallback.</em></h1>
+      <p class="hero-sub">RightOnQ<span class="tm-mark">TM</span> helps UK businesses send branded RCS messages that arrive in the phone's normal messaging app: verified sender, rich cards, one-tap replies and tracking in one place.</p>
+      <p class="hero-proof-line"><strong>Best fit:</strong> premium, specialist and service-led businesses where a plain text message feels too thin for the customer moment.</p>
+      <div class="hero-actions">
+        <a href="#what-is-rcs" class="btn-primary">See what RCS looks like</a>
+        <a href="#contact" class="btn-secondary">Ask for a quick example</a>
+      </div>
       <div class="hero-kicker">
         <span>Verified sender identity</span>
         <span>SMS fallback for reach</span>
