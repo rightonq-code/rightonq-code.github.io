@@ -3828,6 +3828,42 @@ Boundary:
 - no status mutation.
 - Public proof asset URL fetches are read-only and may be skipped.
 
+### Slice 11O - Part A Acceptance Gate Checkpoint
+
+Date: 2026-05-20
+
+Purpose:
+
+- try the next lifecycle gate without forcing the proof app forward;
+- confirm that the internal-review preflight blocks Part A acceptance while required review checks remain pending;
+- keep a dry-run acceptance command shape ready for when the review evidence is genuinely passed.
+
+Proof run:
+
+- `node rcs-registration/tools/internal-review-preflight.mjs --snapshot-file /tmp/roq-rcs-current-operator-snapshot.json`
+  - Result: `ok: false`, `readyForPartAAcceptance: false`, `blockers: 6`, `warnings: 3`.
+  - Blockers: Legal/company, Website/domain, Public links, Message purpose/examples, Consent/opt-out, and Phone preview readiness are still pending/not ready.
+  - Warnings: KYC/Trust Hub and SMS fallback/RC bundle remain tracked pending lanes; Billing row still says `registration_fee_pending` while active checkout says `already_paid`.
+- `node rcs-registration/tools/internal-review-preflight.mjs --self-test`
+  - Result: `ok: true`.
+- `node rcs-registration/tools/operator-review.mjs ... --part-a-accepted --confirm-part-a-acceptance ... --dry-run`
+  - Result: printed the redacted `updateInternalReview` payload shape for the future accepted path.
+
+Decision:
+
+- Do not run the live Part A acceptance mutation yet.
+- The proof app should move forward only after the hard internal-review checks are actually passed and phone-preview readiness is set to ready.
+
+Boundary:
+
+- offline preflight and dry-run only;
+- no Apps Script deployment;
+- no operator action;
+- no Google Sheets read/write;
+- no provider submission;
+- no Twilio/Google/Trust Hub/Revolut call;
+- no status mutation.
+
 ## Open Questions
 
 - Exact sales-page wording for `RightOnQ UK` and `RightOnQ Global`.
