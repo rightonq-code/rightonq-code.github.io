@@ -27,6 +27,7 @@ The main website should only link to this form when ready. This folder should st
 - `RCS_PROVIDER_SUBMISSION_PREFLIGHT_CHECKLIST.md` - operator guardrail for final proof-pack review before moving provider submission out of `not_started`
 - `RCS_ONBOARDING_ARCHITECTURE_BLUEPRINT.md` - short architecture scaffold for the whole onboarding lane, including current progress, proof-video focus, callback boundary, and product activation handover
 - `RCS_ONBOARDING_ACTIVATION_HANDOVER_CONTRACT.md` - design guardrail for the narrow packet handed from onboarding into the main RightOnQ product after approval
+- `RCS_REPO_TRANSFER_CHECKLIST.md` - SECURITY-2 / BUGS guardrail for pausing RCS safely before a GitHub ownership transfer
 - `RCS_ONBOARDING_PRODUCT_BRIDGE_FOR_PROFESSOR.md` - builder-facing note explaining the onboarding/product boundary and questions for Professor/build team review
 - `RCS_ONBOARDING_CODEX_REVIEW_DRAFT_2026-05-20.md` - read-only second-pair review brief covering the current scaffold, parked work, proof-video correction, and questions for Codex/Professor/build reviewers
 - `RCS_TWILIO_1_HANDOVER_2026-05-06.md` - detailed handover notes from the first build session
