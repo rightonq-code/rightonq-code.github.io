@@ -111,7 +111,7 @@ Current source reading:
 
 Important local implication:
 
-There is a live source discrepancy, not a simple local typo. Google/RBM documentation uses a 1440 x 448 banner/hero image. Twilio RCS onboarding documentation currently shows 1140 x 448. The local form should keep collecting a 1440 x 448 Google/RBM master banner unless Twilio confirms otherwise, and the submission pack should track the exact derivative/URL actually submitted through Twilio.
+There is a live source discrepancy, not a simple local typo. Google/RBM documentation uses a 1440 x 448 banner/hero image. Twilio RCS onboarding documentation currently shows 1140 x 448. Isa Bell / Twilio Digital Sales later confirmed on 2026-05-20 that RightOnQ should keep a 1440 x 448 master internally and export a 1140 x 448 file for the actual Twilio sender-profile submission. The local form should keep collecting the 1440 x 448 master, and the submission pack should track the exact 1140 x 448 derivative/URL submitted through Twilio.
 
 ## User-provided Twilio evidence
 
@@ -132,7 +132,7 @@ Update local docs and form validation/copy so the banner requirement shows the c
 ```text
 Google/RBM master: 1440 x 448 px, max 200 KB
 Twilio RCS onboarding doc: 1140 x 448 px, max 200 KB
-Action: keep master asset, prepare Twilio derivative only if confirmed/needed
+Action: keep master asset, prepare 1140 x 448 Twilio submission derivative
 ```
 
 Check for unqualified `1440 x 448` or `1140 x 448` references in:

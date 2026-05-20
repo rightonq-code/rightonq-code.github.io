@@ -22,6 +22,7 @@ Official references checked on 2026-05-20:
 
 - Twilio RCS onboarding: `https://www.twilio.com/docs/rcs/onboarding`
 - Google RCS launch approval: `https://developers.google.com/business-communications/rcs-business-messaging/guides/launch/launch-approval`
+- Twilio Digital Sales clarification from Isa Bell on 2026-05-20: current public docs require a public review-video URL showing use case and opt-out capability, but do not publish a strict file type, max duration, or live/test-sender capture requirement.
 
 Local source files:
 
@@ -78,6 +79,11 @@ The proof video should show, at minimum:
 7. Review context:
    - video uses representative registration data;
    - no real recipient/customer data is shown.
+
+The strongest pack is a short screen recording or accurate representative mock
+that matches the submitted brand, opt-in flow, use case, and STOP/unsubscribe
+route. Do not treat a live or test RCS sender capture as a documented hard
+requirement unless Twilio later asks for it on a specific application.
 
 ## Inputs Needed Before Final Video
 

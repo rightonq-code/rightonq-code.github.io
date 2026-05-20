@@ -6,9 +6,9 @@ import { pathToFileURL } from "node:url";
 const IMAGE_CONTENT_TYPES = new Set(["image/png", "image/jpeg", "image/jpg"]);
 
 const BANNER_PROFILES = {
-  twilio: { width: 1440, height: 448, label: "Twilio Help/Console RCS sender profile" },
-  google: { width: 1440, height: 448, label: "Google RBM agent information" },
-  "twilio-onboarding-doc": { width: 1140, height: 448, label: "Twilio RCS onboarding page discrepancy" }
+  twilio: { width: 1140, height: 448, label: "Twilio sender submission export" },
+  google: { width: 1440, height: 448, label: "Google/RBM master asset" },
+  "twilio-onboarding-doc": { width: 1140, height: 448, label: "Twilio RCS onboarding page" }
 };
 
 const ASSET_FIELDS = [
@@ -320,15 +320,12 @@ function validateImageField(field, meta, bannerProfile, blockers, warnings, info
       add(blockers, "invalid_banner_dimensions", "RBM banner URL is " + dimensions.width + "x" + dimensions.height + "; expected " + describeDimensions(expected) + ".", field.label, url);
       return;
     }
-    const twilio = BANNER_PROFILES.twilio;
     const google = BANNER_PROFILES.google;
-    const twilioOnboardingDoc = BANNER_PROFILES["twilio-onboarding-doc"];
+    const twilio = BANNER_PROFILES.twilio;
     if (dimensions.width === twilio.width && dimensions.height === twilio.height) {
-      add(info, "banner_profile_twilio", "Banner matches Twilio Help/Console and Google RBM dimensions.", field.label, url);
+      add(info, "banner_profile_twilio", "Banner matches the Twilio sender submission export dimensions.", field.label, url);
     } else if (dimensions.width === google.width && dimensions.height === google.height) {
-      add(info, "banner_profile_google", "Banner matches Google RBM agent dimensions.", field.label, url);
-    } else if (dimensions.width === twilioOnboardingDoc.width && dimensions.height === twilioOnboardingDoc.height) {
-      add(info, "banner_profile_twilio_onboarding_doc", "Banner matches the Twilio RCS onboarding page discrepancy dimensions.", field.label, url);
+      add(info, "banner_profile_google", "Banner matches Google/RBM master asset dimensions.", field.label, url);
     }
     return;
   }
@@ -421,7 +418,7 @@ async function runSelfTest() {
       headers: { "content-type": "image/png", "content-length": String(40 * 1024) }
     },
     [baseUrl + "/banner.png"]: {
-      body: makePng(1440, 448),
+      body: makePng(1140, 448),
       headers: { "content-type": "image/png", "content-length": String(150 * 1024) }
     },
     [baseUrl + "/opt-in.png"]: {
@@ -440,6 +437,28 @@ async function runSelfTest() {
   });
   assert(ready.ok === true, "ready snapshot should pass");
   assert(ready.summary.assets === 4, "ready snapshot should check four assets");
+
+  fixtures[baseUrl + "/banner.png"] = {
+    body: makePng(1440, 448),
+    headers: { "content-type": "image/png", "content-length": String(150 * 1024) }
+  };
+  const google = await assessAssetUrls(makeReadySnapshot(baseUrl), {
+    fetcher: fakeFetcher(fixtures),
+    bannerProfile: "google"
+  });
+  assert(google.ok === true, "google/master banner snapshot should pass google profile");
+
+  const twilioOnboardingDoc = await assessAssetUrls(makeReadySnapshot(baseUrl), {
+    fetcher: fakeFetcher({
+      ...fixtures,
+      [baseUrl + "/banner.png"]: {
+        body: makePng(1140, 448),
+        headers: { "content-type": "image/png", "content-length": String(150 * 1024) }
+      }
+    }),
+    bannerProfile: "twilio-onboarding-doc"
+  });
+  assert(twilioOnboardingDoc.ok === true, "twilio-onboarding-doc alias should pass 1140x448");
 
   const badSnapshot = makeReadySnapshot(baseUrl);
   badSnapshot.twilioSetup["RBM logo URL"] = baseUrl + "/opt-in.png";

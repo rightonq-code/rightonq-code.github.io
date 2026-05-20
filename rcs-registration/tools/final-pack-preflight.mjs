@@ -16,7 +16,7 @@ function usage() {
     "",
     "Options:",
     "  --snapshot-file PATH       JSON output from operator-status.mjs",
-    "  --banner-profile PROFILE   Passed to proof-asset-url-preflight.mjs (default: twilio)",
+    "  --banner-profile PROFILE   Passed to proof-asset-url-preflight.mjs (default: twilio = 1140x448 submission export)",
     "  --skip-asset-url-check     Do not fetch public asset URLs; run local snapshot checks only",
     "  --strict                   Exit non-zero for warnings as well as blockers",
     "  --self-test                Run offline fake-snapshot checks",

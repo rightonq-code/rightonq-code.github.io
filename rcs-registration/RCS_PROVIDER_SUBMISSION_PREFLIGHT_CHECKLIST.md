@@ -79,12 +79,18 @@ Required:
 - draft video files replaced by approved review video;
 - exact asset dimensions/derivatives recorded where Twilio/Google differ.
 
-Known banner issue:
+Banner asset standard:
 
-- Twilio Help, Twilio Console evidence, and Google/RBM docs use a 1440 x 448 banner/hero master.
-- Twilio's RCS onboarding page still shows 1140 x 448 in one table.
-- Use the 1440 x 448 derivative for the normal submission preflight unless Twilio explicitly requests otherwise.
-- Store the exact asset URL submitted to Twilio.
+- Keep a reusable 1440 x 448 Google/RBM master asset internally.
+- Export a 1140 x 448 derivative for the actual Twilio sender-profile submission.
+- Host the approved Twilio submission derivative and store that exact asset URL in `RBM banner URL`.
+- If both derivatives are retained in the client pack, label them clearly so the Twilio submission file is not confused with the master.
+
+Provider clarification:
+
+- Isa Bell / Twilio Digital Sales confirmed this operational split on 2026-05-20.
+- The same reply confirmed that current public docs require the review video to be publicly hosted and show the use case plus opt-out capability, but do not publish a strict file type, max duration, or live/test-sender capture requirement.
+- Standardise opt-in descriptions, opt-out descriptions, opt-in policy image URL, and review video URL together; do not treat the video as the whole compliance proof.
 
 Must not proceed if:
 

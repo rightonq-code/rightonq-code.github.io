@@ -120,7 +120,7 @@ The onboarding lane has already proved:
 The onboarding lane has not yet completed:
 
 - real approved client logo/banner upload;
-- final logo/banner dimension check against current Twilio/Google requirements before generating approved files; current known issue: Google/RBM docs use a 1440 x 448 banner master while Twilio RCS onboarding docs show 1140 x 448, so store the exact submitted asset URL and do not assume one uncontested number;
+- final logo/banner dimension check before generating approved files; current operating standard from Twilio Digital Sales on 2026-05-20 is 1440 x 448 as the reusable Google/RBM master asset and 1140 x 448 as the Twilio sender-profile submission export, so store the exact submitted Twilio asset URL and retain the master separately;
 - real opt-in proof image upload;
 - real review/proof video creation;
 - client Part B approval of name/logo/video;

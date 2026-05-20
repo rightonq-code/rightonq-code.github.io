@@ -3713,8 +3713,8 @@ Changes:
 - Added `tools/proof-asset-url-preflight.mjs`.
 - The tool reads a saved `operator-status.mjs` JSON snapshot and fetches only the public proof asset URLs in `Twilio setup`.
 - It checks HTTPS, HTTP reachability, PNG/JPEG content types, logo dimensions `224x224`, logo max `50kB`, banner max `200kB`, and video content type.
-- It now defaults to the `1440x448` banner size shown by Twilio Help, Twilio Console evidence, and Google's current RBM agent-banner guidance.
-- It also supports `--banner-profile twilio-onboarding-doc` for the `1140x448` size still shown by Twilio's RCS onboarding page, and `--banner-profile either` for comparison.
+- It originally defaulted to the `1440x448` banner size shown by Google/RBM guidance and the available console evidence at the time.
+- It also supports `--banner-profile twilio-onboarding-doc` for the `1140x448` size shown by Twilio's RCS onboarding page, and `--banner-profile either` for comparison.
 - `tools/README.md`, `RCS_PROVIDER_SUBMISSION_PREFLIGHT_CHECKLIST.md`, and `RCS_PROOF_VIDEO_WORKFLOW.md` now include the verifier in the final-pack workflow.
 
 Proof run:
@@ -3730,12 +3730,11 @@ Proof run:
   - Result: `ok: true`, `assets: 4`, `blockers: 0`.
   - The checker identified the current hosted banner as matching Google's current `1440x448` RBM agent-banner dimensions.
 
-Correction:
+Superseded correction:
 
-- Follow-up check found Twilio Help and Twilio Console evidence align with Google at `1440x448`; only Twilio's onboarding page still shows `1140x448`.
-- The checker default was corrected so `twilio` means the normal `1440x448` submission profile, while `twilio-onboarding-doc` preserves the `1140x448` discrepancy as an explicit comparison profile.
-- Corrected default proof against `/tmp/roq-rcs-current-operator-snapshot.json` returned `ok: true`, `assets: 4`, `blockers: 0`.
-- `--banner-profile twilio-onboarding-doc` intentionally returned `ok: false`, `blockers: 1`, proving the discrepancy check remains available.
+- A follow-up check initially interpreted the available Twilio Help/Console evidence as aligning with Google at `1440x448`, while treating Twilio's onboarding-page `1140x448` value as a comparison profile.
+- Under that now-superseded interpretation, corrected default proof against `/tmp/roq-rcs-current-operator-snapshot.json` returned `ok: true`, `assets: 4`, `blockers: 0`, while `--banner-profile twilio-onboarding-doc` returned `ok: false`, `blockers: 1`.
+- This interpretation was later superseded by the Slice 11Q Twilio Digital Sales clarification: keep `1440x448` as the reusable master, but use `1140x448` for the actual Twilio sender-profile submission export.
 
 Boundary:
 
@@ -3894,6 +3893,43 @@ Verification:
 Boundary:
 
 - offline snapshot planning only;
+- no Apps Script deployment;
+- no operator action;
+- no Google Sheets read/write;
+- no provider submission;
+- no Twilio/Google/Trust Hub/Revolut call;
+- no status mutation.
+
+### Slice 11Q - Twilio Banner And Video Clarification
+
+Date: 2026-05-20
+
+Source:
+
+- Isa Bell / Twilio Digital Sales reply received 2026-05-20.
+
+Provider clarification:
+
+- Logo remains `224 x 224 px`, JPG/JPEG/PNG, max `50 KB`, public URL.
+- For banner/hero assets, Twilio confirmed the docs mismatch is real:
+  - keep a `1440 x 448 px` master asset internally for reusable client packs and Google/RBM alignment;
+  - export a `1140 x 448 px` file for the actual Twilio sender-profile submission;
+  - if only one Twilio-ready file is prepared for the application itself, use `1140 x 448`.
+- The use-case/review video must be publicly hosted and show the sender in action plus opt-out capability.
+- Twilio's public docs do not publish a strict video file type, max duration, or requirement that the recording be captured from a live/test RCS sender.
+- The proof pack should standardise opt-in description, opt-out description, opt-in policy image URL, and review video URL together; the video is not the whole compliance proof.
+
+Implementation:
+
+- `tools/proof-asset-url-preflight.mjs` now treats `--banner-profile twilio` as the `1140x448` Twilio sender submission export.
+- `--banner-profile google` remains the `1440x448` Google/RBM master check.
+- `--banner-profile twilio-onboarding-doc` remains as a backward-compatible alias for the `1140x448` Twilio onboarding-doc size.
+- `--banner-profile either` continues to support packs that intentionally retain both derivatives.
+- `tools/README.md`, `RCS_REGISTRATION_PACK_READINESS_MAP.md`, `RCS_PROVIDER_SUBMISSION_PREFLIGHT_CHECKLIST.md`, `RCS_ONBOARDING_ARCHITECTURE_BLUEPRINT.md`, and `RCS_PROOF_VIDEO_WORKFLOW.md` now record this clarification.
+
+Boundary:
+
+- docs/tooling clarification only;
 - no Apps Script deployment;
 - no operator action;
 - no Google Sheets read/write;
