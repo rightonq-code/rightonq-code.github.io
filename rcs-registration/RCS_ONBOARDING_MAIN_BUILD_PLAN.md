@@ -3395,7 +3395,35 @@ Boundary:
 
 Recommended next gate:
 
-- add validated callback persistence/dedupe, still record-only, before configuring any Twilio Messaging Service callback URL.
+- keep the Twilio callback receiver parked as proof/staging until product/onboarding callback ownership is confirmed;
+- return the main onboarding path to proof pack, review video, Part B approval, and hosted URL readiness.
+
+### Slice 11A - Proof Video Generator Refocus
+
+Date: 2026-05-20
+
+Purpose:
+
+- refocus the next build on the RCS proof pack and review video;
+- avoid drifting into callback persistence or provider submission;
+- make the existing browser-generated video output honest as a draft, not a finished submission asset.
+
+Changes:
+
+- Part B generator copy now says `Draft proof video generator`.
+- The generated file name now ends `rcs-proof-video-draft.webm`.
+- Output status says RightOnQ must review, host, and get client approval before provider submission.
+- The visible checklist now covers sender identity, permission route, primary/secondary messages, HELP, and STOP/opt-out handling.
+- Canvas scenes now label the video as a registration proof/review draft rather than a live product demo.
+
+Boundary:
+
+- no Twilio API call;
+- no provider submission;
+- no callback configuration;
+- no A-ID implementation;
+- no message send;
+- no public hosted file replacement.
 
 ## Open Questions
 

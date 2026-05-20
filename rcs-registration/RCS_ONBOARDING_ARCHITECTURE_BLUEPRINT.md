@@ -191,7 +191,7 @@ Preferred proof order:
 2. otherwise a high-quality representative video generated from approved registration data;
 3. browser-generated draft video only as a preparation tool until accepted as submission-quality.
 
-The existing public form already contains a canvas/MediaRecorder video generator. That is useful, but it should now be treated as the starting point for the proof-video workflow, not as a finished submission pipeline.
+The existing public form contains a canvas/MediaRecorder video generator. It now labels the output as a draft registration proof video and shows permission route, primary/secondary messages, HELP, and STOP handling. It remains a preparation tool until RightOnQ reviews it, hosts the final file, gets client approval, and stores the approved public URL.
 
 ## Callback Boundary
 

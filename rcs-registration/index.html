@@ -3035,27 +3035,28 @@
             <div class="video-studio" aria-labelledby="videoStudioTitle" hidden>
               <div class="video-studio-head">
                 <div>
-                  <h3 id="videoStudioTitle">Branded review video generator</h3>
-                  <p>Creates a short client-specific demo showing opt-in, sender identity, sample RCS messages, HELP, and STOP opt-out handling.</p>
+                  <h3 id="videoStudioTitle">Draft proof video generator</h3>
+                  <p>Creates a representative registration-review video draft showing opt-in, sender identity, sample RCS messages, HELP, and STOP opt-out handling.</p>
                 </div>
-                <button type="button" class="btn secondary" id="recordVideoButton">Generate video</button>
+                <button type="button" class="btn secondary" id="recordVideoButton">Generate draft video</button>
               </div>
               <div class="video-stage">
                 <div class="video-canvas-wrap">
                   <canvas id="demoCanvas" width="1280" height="720" aria-label="RCS demo video preview"></canvas>
                 </div>
                 <ul class="video-checklist">
-                  <li>Uses the uploaded logo and banner preview where available.</li>
-                  <li>Uses the client display name, colour, website, and sample message text.</li>
-                  <li>Shows consent capture and STOP unsubscribe handling.</li>
-                  <li>Exports a browser-generated WebM file ready for hosting.</li>
+                  <li>Shows the declared sender name, logo/banner, brand colour and use case.</li>
+                  <li>Shows the permission route before any branded message is sent.</li>
+                  <li>Shows primary and secondary message examples with expected actions.</li>
+                  <li>Shows HELP and STOP/opt-out handling for reviewer evidence.</li>
+                  <li>Exports a draft WebM for RightOnQ review, hosting and client approval before submission.</li>
                 </ul>
               </div>
               <div class="video-output" id="videoOutput">
                 <video id="generatedVideo" controls></video>
                 <p class="video-status" id="videoStatus">Video ready.</p>
               </div>
-              <p class="video-status" id="recordingStatus">Complete the form, then generate the registration demo video.</p>
+              <p class="video-status" id="recordingStatus">Complete the form, then generate the draft registration proof video.</p>
             </div>
             <div class="completion-panel" id="completionPanel" aria-live="polite">
               <h3 id="completionTitle">Thank you. Part A has been received by RightOnQ.</h3>
@@ -3346,7 +3347,7 @@
         storyboard: [
           ["Part A accepted", "The submitted details have been checked, so RightOnQ can prepare the phone logo preview and the RCS application video."],
           ["Name and logo approval", "The phone number/s you provided will first receive an RBM Tester invitation asking you to join the test. Once you accept, a second message arrives — this time from your own branded sender, showing your logo and sender name on your phone. That message will tell you to come back to Part B, section B2 to approve, request a change, or leave a note. The test sender can only send messages, not receive them, so please don't reply — approval only counts on this form."],
-          ["Video prepared", "Using your approved logo and sender profile, RightOnQ prepares the review video that goes to Google and the mobile carriers as part of your registration. It's a detailed step — they need to see exactly how your branded messages will behave in the wild. We film it in our own mini studio using real phones sending and receiving your messages, and showing how recipients opt in and opt out. The finished video runs under a minute, and it's all done for you — nothing for you to film or set up."],
+          ["Video prepared", "Using your approved logo and sender profile, RightOnQ prepares the review video that goes to Google and the mobile carriers as part of your registration. The video shows the declared use case, how people opt in, what the branded messages look like, and how recipients can use HELP and STOP. The finished video is prepared for review and hosting by RightOnQ. Nothing for you to film or set up."],
           ["Video sent to you for review", "Once the video is produced, it's hosted at an unlisted URL. Before we submit anything, we send that link to you first. Have a watch, check your logo, your sender name, the message examples, and the opt-in and opt-out steps. If anything's off — even something small — tell us and we'll stop and fix it before submission. Better to catch it now than after it's in the registration pack."],
           ["You give the go-ahead", "This is your final check before submission. Logo, video, sender profile — all confirmed by you. Once you approve, we move to step 6. If anything's still off, tell us now."],
           ["Submit registration", "With your branding and video approved, RightOnQ submits the full registration pack to Google and the mobile carriers on your behalf. From here it's in their hands — we'll keep you posted on progress and flag anything they come back with."]
@@ -5215,7 +5216,7 @@
 
       recording = true;
       recordVideoButton.disabled = true;
-      recordingStatus.textContent = "Generating branded demo video...";
+      recordingStatus.textContent = "Generating draft registration proof video...";
       videoOutput.classList.remove("show");
 
       const data = collectData();
@@ -5246,12 +5247,12 @@
       recorder.onstop = () => {
         const blob = new Blob(chunks, { type: "video/webm" });
         const url = URL.createObjectURL(blob);
-        const filename = `${slugify(data.displayName || data.legalBusinessName || "rcs-sender")}-rcs-demo-video.webm`;
+        const filename = `${slugify(data.displayName || data.legalBusinessName || "rcs-sender")}-rcs-proof-video-draft.webm`;
         generatedVideo.src = url;
         videoOutput.classList.add("show");
-        videoStatus.textContent = `${filename} ready. Upload it to a public or unlisted hosting URL before submission.`;
+        videoStatus.textContent = `${filename} ready as a draft. RightOnQ must review, host, and get client approval before provider submission.`;
         downloadBlob(blob, filename);
-        recordingStatus.textContent = "Demo video generated from this client registration pack.";
+        recordingStatus.textContent = "Draft proof video generated from this client registration pack.";
         recordVideoButton.disabled = false;
         recording = false;
       };
@@ -5345,10 +5346,10 @@
     function drawVideoTitle(ctx, brand, useCase, progress) {
       ctx.fillStyle = "#f6f9fc";
       ctx.font = "700 32px Syne, Arial, sans-serif";
-      ctx.fillText(`${brand} RCS registration demo`, 56, 62);
+      ctx.fillText(`${brand} RCS registration proof video`, 56, 62);
       ctx.fillStyle = "#b8c5d6";
       ctx.font = "500 18px DM Sans, Arial, sans-serif";
-      ctx.fillText(`Representative RCS review video - ${useCase}`, 58, 94);
+      ctx.fillText(`Representative review draft - ${useCase}`, 58, 94);
       ctx.fillStyle = "rgba(255,255,255,0.16)";
       roundRect(ctx, 56, 112, 420, 8, 6, true);
       ctx.fillStyle = "#37bf7e";
@@ -5407,7 +5408,7 @@
       drawPhoneShell(ctx, 830, 136, 340, 510);
       drawPhoneHeader(ctx, 850, 164, 300, brand, assets.logo, colour);
       drawPhoneEmpty(ctx, "Opt-in captured", "The customer has clearly agreed to receive messages.", colour);
-      drawSceneLabel(ctx, "1. Customer opt-in flow", 850, 586);
+      drawSceneLabel(ctx, "1. Permission route before messaging", 850, 586);
     }
 
     function drawMessageScene(ctx, data, assets, sceneProgress, colour, accent, secondMessage) {
@@ -5422,7 +5423,7 @@
       drawChatBubble(ctx, 584, 232, 286, message, colour, accent, sceneProgress);
       drawSuggestedChip(ctx, 584, 488, "Visit website", sceneProgress > 0.36);
       drawSuggestedChip(ctx, 714, 488, "HELP", sceneProgress > 0.52);
-      drawSceneLabel(ctx, secondMessage ? "3. Secondary example message" : "2. Branded RCS sample message", 584, 590);
+      drawSceneLabel(ctx, secondMessage ? "3. Secondary use-case message" : "2. Primary branded RCS message", 584, 590);
 
       drawBrowserWindow(ctx, 965, 168, 250, 388, data.customerWebsite || data.businessWebsite || "https://example.com");
       ctx.fillStyle = colour;
@@ -5457,7 +5458,7 @@
       drawCheckLine(ctx, "Customer can opt out", 990, 282);
       drawCheckLine(ctx, "STOP response shown", 990, 326);
       drawCheckLine(ctx, "No real customer data", 990, 370);
-      drawCheckLine(ctx, "For registration review URL", 990, 414);
+      drawCheckLine(ctx, "For hosted review URL", 990, 414);
     }
 
     function drawClosingScene(ctx, data, assets, sceneProgress, colour, accent) {
@@ -5467,10 +5468,10 @@
       drawLogo(ctx, assets.logo, 224, 210, 96, colour, brand);
       ctx.fillStyle = "#0d1b2c";
       ctx.font = "800 46px Syne, Arial, sans-serif";
-      ctx.fillText(`${brand} RCS demo pack`, 348, 242);
+      ctx.fillText(`${brand} RCS proof pack`, 348, 242);
       ctx.fillStyle = "#52667e";
       ctx.font = "500 22px DM Sans, Arial, sans-serif";
-      wrapText(ctx, "Representative video generated from the client registration information for RightOnQ-assisted RCS sender submission.", 348, 284, 620, 32);
+      wrapText(ctx, "Representative draft generated from the client registration information for RightOnQ-assisted RCS sender review.", 348, 284, 620, 32);
       drawCheckLine(ctx, "Opt-in flow shown", 348, 386);
       drawCheckLine(ctx, "Primary and secondary message examples shown", 348, 430);
       drawCheckLine(ctx, "STOP opt-out capability shown", 348, 474);
@@ -5481,7 +5482,7 @@
       ctx.globalAlpha = 1;
       ctx.fillStyle = accent;
       ctx.font = "800 18px DM Sans, Arial, sans-serif";
-      ctx.fillText("Ready for hosted URL", 824, 440);
+      ctx.fillText("Draft for review", 846, 440);
     }
 
     function drawBrowserWindow(ctx, x, y, width, height, url) {
@@ -6133,7 +6134,7 @@
       document.getElementById("bannerPreview").innerHTML = "";
       generatedVideo.removeAttribute("src");
       videoOutput.classList.remove("show");
-      recordingStatus.textContent = "Complete the form, then generate the registration demo video.";
+      recordingStatus.textContent = "Complete the form, then generate the draft registration proof video.";
       autosaveStatus.textContent = "Autosave ready.";
       document.querySelectorAll(".file-feedback").forEach(node => { node.textContent = ""; });
       document.querySelectorAll(".invalid").forEach(node => node.classList.remove("invalid"));
