@@ -1,0 +1,4105 @@
+# RightOnQ RCS Onboarding Main Build Plan
+
+Created: Thursday 14 May 2026
+Creator: RCS-Twilio-4
+Project: RightOnQ RCS client onboarding, registration, billing, and launch workflow
+Repo: `/Users/macpro/rightonq-code.github.io`
+Primary app file today: `/Users/macpro/rightonq-code.github.io/rcs-registration/index.html`
+
+## Purpose
+
+This is the durable product build document for the RightOnQ RCS onboarding system.
+
+Every successor agent working on the RCS onboarding/product flow should read and update this file as well as their own handover diary. The handover diary records agent-to-agent operational state. This file records the product plan, decisions, workflow, schemas, statuses, and implementation slices.
+
+Keep this file practical and current. When the plan changes, update it here so future agents are not forced to reconstruct the product direction from chat history.
+
+## Current Product View
+
+The RCS registration form is not a standalone public form. It is one screen inside a wider client onboarding system.
+
+### Legal Entity / Brand Naming
+
+Important correction from Bugs on Saturday 16 May 2026, tightened after Isa Bell/Twilio naming guidance on Monday 18 May 2026:
+
+- The operating UK limited company is `Continuity AI Ltd`.
+- Companies House lists the registered company name as `CONTINUITY AI LTD`, company number `17119848`, incorporated on 26 March 2026.
+- `RightOnQ` is the trading name / product brand of `Continuity AI Ltd`.
+- `RightOnQ` is going through trademark application; expected timing from Bugs is roughly 8-10 weeks from 16 May 2026 if no objection is raised.
+
+Implementation rule:
+
+- Use the exact registered legal name, `Continuity AI Ltd`, where the legal business/entity name is required.
+- Use `RightOnQ` where the customer-facing product, brand, platform, or trading name is required, and in provider fields only where the flow explicitly offers a separate trading-name / brand / DBA-style field.
+- Do not treat `RightOnQ` as the legal business name in Twilio, Revolut, Trust Hub, RC Bundle, privacy, terms, or billing/compliance records.
+- Do not enter `Continuity AI Ltd trading as RightOnQ` into a legal-business-name field unless that exact combined wording appears in the official registration record or the provider explicitly asks for a combined trading-as format.
+- Trust Hub parent Primary Business Compliance Profile legal name should be `Continuity AI Ltd`; end-client Secondary Compliance Profiles should use the end customer's own registered legal business name.
+
+The client is becoming a RightOnQ customer. The journey needs to cover:
+
+- commercial acceptance;
+- payment setup;
+- Twilio Trust Hub / client KYC readiness;
+- Twilio subaccount/runtime setup;
+- RCS registration data capture;
+- RightOnQ internal checks;
+- phone name/logo preview;
+- client approval;
+- review video preparation and approval;
+- provider/carrier submission;
+- approved/live status;
+- Twilio usage monitoring;
+- prepaid credit/top-up control;
+- ongoing RightOnQ service.
+
+The product should feel smooth and clear for clients, but it must also protect RightOnQ from operational and financial risk.
+
+Expected early volume is low, likely a few clients per week rather than dozens per day. Therefore, the first build can use manual internal controls where sensible, as long as the source of truth is structured and the customer experience is calm and professional.
+
+## Current Preferred Commercial/Billing Direction
+
+### Revolut-First Preference
+
+Bugs prefers to use Revolut as much as practical because RightOnQ already banks with Revolut and keeping payment movement under one operational hood has advantages.
+
+The current preferred direction is:
+
+- Use Revolut-first for the pilot if sandbox testing confirms the flow.
+- Treat Stripe Billing as the benchmark/fallback, not the automatic first choice.
+- Use GoCardless later only if larger UK B2B clients strongly prefer Direct Debit.
+
+### Revolut Role
+
+Revolut should ideally handle:
+
+- initial onboarding checkout/payment;
+- payment method saving where supported;
+- `£100 + VAT` registration handling fee payment;
+- later post-approval monthly subscription payment;
+- later prepaid usage credit/top-up payment;
+- merchant-initiated top-up orders/charges where supported;
+- reporting and reconciliation exports;
+- webhook events back into RightOnQ's source of truth.
+
+### RightOnQ-Owned Billing Logic
+
+RightOnQ must still own the service and credit-control logic.
+
+RightOnQ should maintain:
+
+- customer/application ledger;
+- prepaid usage credit balance;
+- usage deductions;
+- auto top-up threshold;
+- payment failure state;
+- service pause/suspension rules;
+- manual override;
+- internal notes and audit trail.
+
+Do not rely on Revolut alone as the full SaaS billing brain until its sandbox and operational fit are proven.
+
+### Current Commercial Model Decision
+
+Bugs decided the customer journey should be simple and platform-led:
+
+- no standalone "application only" product for now;
+- every client pays a `£100 + VAT` RCS registration handling fee before RightOnQ starts the registration work;
+- RightOnQ only accepts registered businesses / companies for this flow, not sole traders or unregistered businesses;
+- the customer must confirm they are applying on behalf of a registered business and entering the arrangement for business purposes;
+- the fee confirms the business is serious and covers application review, preparation, provider/compliance handling, administration, submission support, phone preview work, and registration follow-up;
+- monthly platform fees start only once the RCS sender is approved and ready to use;
+- if the RCS sender application is not approved for reasons outside the client's control, the `£100 + VAT` handling fee is refunded in full;
+- the handling fee is not refundable once RightOnQ has started the registration handling work, except where the application cannot proceed for reasons outside the customer's control;
+- the handling fee is not refundable if the application cannot proceed or is rejected because the business provided inaccurate information, failed required checks, did not complete requested actions, withdrew, or has business/compliance history that prevents approval.
+
+Platform packages:
+
+- `RightOnQ UK`: `£25/month + VAT`, plus messaging costs;
+- `RightOnQ Global`: `£49/month + VAT`, plus messaging costs.
+
+Customer-facing pricing principle:
+
+- keep this simple;
+- do not charge monthly subscription fees during the 4-6 week registration wait;
+- do not offer a low-commitment registration-only path that attracts unsuitable clients.
+
+Important risk rule:
+
+- No client should get live Twilio-backed usage with unlimited postpaid exposure.
+- Pause/suspend sending if top-up fails or prepaid usage credit is exhausted.
+
+## Twilio Direction
+
+Use one Twilio subaccount per customer/tenant.
+
+Benefits:
+
+- usage separation;
+- credentials separation;
+- reporting clarity;
+- smaller operational blast radius;
+- cleaner future automation.
+
+Important caveat:
+
+- Twilio subaccounts do not make the customer financially responsible to Twilio.
+- Subaccount usage is still billed to the parent Twilio account.
+- RightOnQ carries the Twilio exposure unless the internal ledger/top-up controls protect it.
+
+RightOnQ should pull/query Twilio usage per subaccount and reconcile it against each client's prepaid balance and invoices/payments.
+
+### Trust Hub / Secondary Compliance Profile Direction
+
+Important discovery on Thursday 14 May 2026:
+
+- Twilio subaccounts and Trust Hub compliance profiles are related but separate resource graphs.
+- Subaccounts are runtime/account containers under Twilio `Accounts`.
+- Trust Hub stores KYC/compliance profiles under `trusthub.twilio.com/v1`.
+- For a RightOnQ-managed client such as `ABC Ltd`, the expected model is:
+  - `Continuity AI Ltd` is the legal name on the approved parent Primary Business Compliance Profile;
+  - `RightOnQ` is used only in a separate trading-name / brand / DBA-style field where the specific Twilio flow offers one;
+  - each end-client gets its own Secondary Compliance Profile / Secondary Customer Profile using that end-client's own registered legal business name;
+  - phone numbers and other channel resources are linked to that compliance profile by assignment resources.
+- Treat this as a third onboarding track beside commercial/payment and RCS sender registration.
+
+Updated design assumption after Isa Bell/Twilio follow-up:
+
+- Because Secondary Compliance Profile creation is part of the default RightOnQ onboarding lane, design the canonical intake model for two authorised representatives from the start.
+- The first representative remains the primary operational contact/sign-off person.
+- The second representative is required for the Secondary Compliance Profile lane, even if the UK RC Bundle lane alone may not independently require two reps.
+- If Bugs chooses a lighter first public form, rep 2 can be collected as a follow-up/manual step, but the state model should not treat rep 2 as optional once Secondary Compliance Profile submission is in scope.
+- Each representative record, where collected, should support:
+  - first name;
+  - last name;
+  - business/work email;
+  - phone number;
+  - business title;
+  - job position.
+
+Do not collect date of birth, passport, driving licence, government ID, or proof-of-address documents in the launch intake unless Twilio's live flow explicitly requires it. Twilio asks for extra identity evidence if it cannot digitally verify the representative or their association with the business. If that happens, route evidence through a Twilio-managed compliance step where that lane is embeddable-supported, or through a secure manual/admin process, not the current static form and Google Sheet path.
+
+Compliance Embeddable design boundary from Isa/Twilio follow-up:
+
+- UK long-code Regulatory Compliance Bundles are explicitly within Compliance Embeddable scope.
+- Follow-up confirmation on Saturday 16 May 2026: this is supported at product-scope level, but not self-serve/default on every account. RightOnQ must complete the Compliance Embeddable access/registration step before building a live UX around it.
+- Later Isa Bell / Twilio Digital Sales clarification confirmed the architecture pattern is right for supported programs: Twilio collects sensitive evidence in the white-label embedded flow, RightOnQ keeps the customer experience inside its app, and RightOnQ persists only Twilio references/statuses.
+- Important caveat: RCS sender onboarding itself is not publicly confirmed as a Compliance Embeddable-supported flow. Treat RCS sender review as its own provider-review lane unless Twilio confirms account/use-case support.
+- The published ISV pattern also assumes an approved primary business compliance profile with business identity set to ISV/Reseller. This should be the legal `Continuity AI Ltd` profile, with `RightOnQ` supplied only where the flow has a separate trading-name / brand / DBA-style field.
+- Generic Trust Hub Secondary Compliance Profile support through Compliance Embeddable is not clearly confirmed by public docs; public docs explicitly list Secondary Customer Profiles for Voice Trust, which is narrower.
+- Therefore, treat UK RC Bundle evidence/resubmission as the likely embeddable/self-service lane, but keep Secondary Compliance Profile creation/resubmission RightOnQ/API/Console-managed unless Twilio confirms account/use-case enablement.
+- Compliance Embeddable is white-label and does not require the end client to have a Twilio login.
+- Compliance Embeddable session tokens are ephemeral; persist `inquiry_id` and `registration_id`, not the session token.
+- Twilio's Compliance Embeddable FAQ says data for this product is stored in the US; keep that visible for privacy review.
+- Twilio's published initialize endpoint and field-map example are publicly verifiable for Toll-Free Verification; exact initialize endpoint and request body for UK RC Bundle / generic Secondary Profile embeddable flows are not publicly confirmed in the docs. Treat those as account/program-specific until Twilio provides them.
+- Client-side events documented for the embeddable pattern are `onReady`, `onInquirySubmitted`, `onComplete`, `onCancel`, and `onError`; use `onInquirySubmitted` as the stronger submission hook because `onComplete` can depend on the user clicking the final exit/done button.
+- Supporting Document APIs expose metadata/status such as SIDs, mime type, status, failure reason, attributes, and timestamps; do not design around retrieving raw uploaded file contents.
+- Locked-down environments may need to allowlist `withpersona.com`.
+
+The field-authority principle is:
+
+- when RCS and Trust Hub ask for overlapping data, RightOnQ should ask the stricter/more precise version once;
+- the canonical RightOnQ answer then feeds both the RCS sender registration and Twilio Trust Hub/KYC workflow.
+
+Useful official references checked:
+
+- Twilio Secondary Compliance Profiles: `https://www.twilio.com/docs/trust-hub/profiles/secondary-compliance-profiles`
+- Twilio Trust Hub overview: `https://www.twilio.com/docs/trust-hub`
+- Twilio API: Create a Secondary Customer Profile: `https://www.twilio.com/docs/trust-hub/trusthub-rest-api/api-create-secondary-customer-profile`
+- Twilio UK long-code KYC: `https://support.twilio.com/hc/en-us/articles/21038555454875-Know-Your-Customer-KYC-in-the-United-Kingdom`
+- Twilio Compliance Embeddable FAQ: `https://help.twilio.com/articles/31769870199707-What-is-the-Compliance-Embeddable`
+- Twilio Compliance Embeddable onboarding guide: `https://www.twilio.com/docs/messaging/compliance/toll-free/compliance-embeddable-onboarding`
+
+### Isa Bell Email - Answer Received
+
+Bugs emailed Isa Bell at Twilio on Thursday 14 May 2026 to confirm the build-critical KYC points.
+
+The email asked, in practical terms:
+
+- whether each UK limited-company client should have a Secondary Customer/Compliance Profile under the approved Primary Profile for `Continuity AI Ltd`, with `RightOnQ` represented only as the trading/product brand where a separate field exists;
+- whether the UK long-code Regulatory Compliance Bundle is separate from, or fed by, the Secondary Customer/Compliance Profile;
+- what identity evidence is normally required for the authorised representative of a UK limited company;
+- whether RightOnQ can complete or trigger any passport/driving-licence verification through Twilio/Persona without storing copies of personal ID;
+- whether one or two authorised representatives are required;
+- whether larger/well-established UK limited companies can rely more on Companies House/company records, or whether individual identity verification is always required;
+- how UK long-code SMS fallback numbers should be assigned when the number sits inside a RightOnQ-controlled Twilio subaccount.
+
+Isa replied on Thursday 14 May 2026 with these build-impacting answers:
+
+- RightOnQ's ISV model is correct:
+  - `Continuity AI Ltd` keeps the approved Primary Compliance Profile on the parent account as the legal business name;
+  - `RightOnQ` belongs only in a separate trading-name / product-brand field where that specific Twilio flow provides one;
+  - each end-client UK limited company gets its own Secondary Compliance Profile using the end client's own legal business name when that entity differs from the parent Primary Compliance Profile;
+  - Twilio docs now use `Compliance Profile` where older docs may say `Customer Profile`.
+- The UK long-code Regulatory Compliance Bundle is separate from the Secondary Compliance Profile:
+  - the data overlaps;
+  - one does not replace the other;
+  - UK long-code fallback numbers should be assigned to the RC Bundle representing the actual end business.
+- Personal identity evidence is not a universal upfront intake requirement:
+  - baseline UK business-bundle fields are business details, address, registration data, and authorised rep contact details;
+  - government ID/passport is an exception path if Twilio cannot digitally verify the representative;
+  - do not make passport or driving licence a mandatory upfront intake field.
+- First-reply rep guidance was one required primary authorised representative plus optional second backup rep. This is now superseded for the default Secondary Profile lane by the later follow-up: collect/model two reps when Secondary Compliance Profile creation is in scope.
+- If avoiding ID storage is important, design exception handling so the end customer enters/uploads evidence directly into a Twilio-managed compliance step or another secure approved route, not by emailing/uploading documents into the static app or Sheet.
+
+Immediate build impact:
+
+- this first reply moved the working assumption from `two reps likely required` to `one required, optional second`;
+- Isa's later Compliance Embeddable / Secondary Profile follow-up supersedes that rep-count assumption for the default RightOnQ flow: collect/model two reps when Secondary Compliance Profile creation is part of onboarding;
+- keep the current customer-facing form free of ID upload fields;
+- keep KYC evidence as exception-only;
+- treat Secondary Compliance Profile and UK RC Bundle as two separate operational checklist/status lanes, even though they share data.
+
+### Isa Bell Follow-Up - Embeddable Scope and Rep Count Correction
+
+Bugs later received a more specific Twilio/Isa follow-up about Compliance Embeddable scope, UK RC Bundles, Secondary Compliance Profiles, and representative count.
+
+Build-impacting corrections:
+
+- Compliance Embeddable can be used for Regulatory Compliance Bundles for Long Codes, so the UK long-code RC Bundle lane should be designed as the client self-service / Twilio-managed evidence path where account enablement is available.
+- Latest Isa/Twilio follow-up confirms the build matrix as:
+  - `UK long-code RC Bundle via Compliance Embeddable`: yes, supported in scope;
+  - `Availability by default`: no, prior Compliance Embeddable access/registration is required;
+  - `Secondary Compliance Profile via Compliance Embeddable`: do not assume; keep RightOnQ/API/Console-managed for now.
+- Public docs do not clearly confirm generic Secondary Compliance Profile support in Compliance Embeddable. They explicitly mention Secondary Customer Profiles for Voice Trust, which is not the same as saying all Trust Hub secondary profile flows are embeddable-supported.
+- Do not assume Secondary Compliance Profile evidence/resubmission uses the same embedded UX unless Twilio confirms it for RightOnQ's account/use case.
+- Compliance Embeddable can appear inside RightOnQ without visible Twilio branding, but:
+  - form content/copy/order is not customizable;
+  - it renders in English only;
+  - UI styling uses `ThemeSetId`;
+  - access requires prior registration/enablement.
+- The end client does not need Twilio Console access for an embeddable-supported flow; RightOnQ initializes server-side and embeds the returned inquiry/session flow.
+- The session token expires after 24 hours. Persist `inquiry_id` and `registration_id`; regenerate session tokens as needed.
+- Compliance Embeddable supports prefilling data from RightOnQ's canonical onboarding record.
+- Compliance Embeddable FAQ says data for this product is stored in the US, so privacy wording/review should account for that.
+
+Rep-count correction:
+
+- Secondary Compliance Profile public guidance says to provide contact details for two authorised representatives.
+- Because RightOnQ expects a Secondary Compliance Profile per end-client as the default compliance lane, the canonical state model should collect/support two representatives from the start.
+- For a lighter first customer form, rep 2 may be collected as a follow-up/manual field before Secondary Profile submission, but the workflow should not treat it as optional once Secondary Profile submission is required.
+
+State-machine / storage impact:
+
+- Keep separate lanes:
+  - `Secondary Compliance Profile`;
+  - `UK RC Bundle`;
+  - `RCS Sender approval`.
+- Persist by lane:
+  - Compliance Embeddable inquiry: `inquiry_id`, `registration_id`, latest status, rejection code/reason, callback/event history;
+  - Secondary profile: `CustomerProfileSid` / secondary profile SID, profile status, rejection reasons, callback/webhook history;
+  - UK RC Bundle: Bundle SID, bundle status, evaluation results where used, rejection reasons, callback history.
+- Do not persist `inquiry_session_token` as a durable identifier.
+- Store IDs/status/rejection reasons/callback history, not raw identity documents.
+
+### AI Reply Verification Pass - 2026-05-16
+
+Bugs asked for the Isa Bell / Twilio AI-assisted reply to be checked against official Twilio documentation.
+
+Verification result: confirmed with nuance.
+
+| Claim | Verification result | Implementation stance |
+| --- | --- | --- |
+| Compliance Embeddable supports Regulatory Compliance Bundles for Long Codes | Confirmed. Twilio's Compliance Embeddable FAQ lists `Regulatory Compliance Bundles for Long Codes`. | UK RC Bundle lane can target Compliance Embeddable once access is enabled. |
+| Compliance Embeddable access requires prior registration | Confirmed. Twilio's onboarding guide says Compliance Embeddable API access requires prior registration. | Do not build a live UX assuming access is already available. |
+| ISV flow expects ISV/Reseller primary profile | Confirmed in the Compliance Embeddable onboarding guide, with adjacent Trust Hub docs requiring approved primary profiles for registrations. Isa Bell's later naming clarification says the legal-business-name field should use the exact registered legal name. | Ensure `Continuity AI Ltd` has the correct parent primary profile / ISV-Reseller business identity ready before relying on the embeddable path. Put `RightOnQ` only in a separate trading-name / brand / DBA field where the flow explicitly offers one. |
+| Generic Secondary Compliance Profile embeddable support | Not confirmed by public docs. FAQ explicitly lists `Secondary Customer Profiles for Voice Trust`, not generic Trust Hub secondary profiles. | Keep Secondary Compliance Profile RightOnQ/API/Console-managed unless Twilio confirms account/use-case support. |
+| Secondary Profile representative count | Confirmed with product-specific nuance. Generic API/policy docs include both `authorized_representative_1` and `authorized_representative_2`, while Voice Integrity docs can treat rep 2 as optional. | Canonical model supports two reps; still fetch/observe live policy requirements dynamically where possible. |
+| End client does not need Twilio Console login for embeddable-supported flow | Supported by the self-service white-label embed model, but not found as a literal login statement. | Safe UX assumption for embeddable-supported lanes, but phrase as RightOnQ-hosted/Twilio-managed rather than promising Console details. |
+| Prefill, callbacks, session token, data residency | Confirmed. Docs show prefill through initialize API, callbacks including `onReady`, `onInquirySubmitted`, `onComplete`, `onCancel`, `onError`, an ephemeral 24-hour session token, and US data storage. | Persist `inquiry_id` / `registration_id`, not session token; flag US storage for privacy review. |
+
+Official references used:
+
+- Twilio Compliance Embeddable FAQ: `https://help.twilio.com/articles/31769870199707-What-is-the-Compliance-Embeddable`
+- Twilio Toll-Free Verification Compliance Embeddable Onboarding Guide: `https://www.twilio.com/docs/messaging/compliance/toll-free/compliance-embeddable-onboarding`
+- Twilio Secondary Compliance Profiles: `https://www.twilio.com/docs/trust-hub/profiles/secondary-compliance-profiles`
+- Twilio API: Create a Secondary Customer Profile: `https://www.twilio.com/docs/trust-hub/trusthub-rest-api/api-create-secondary-customer-profile`
+- Twilio Policies Resource: `https://www.twilio.com/docs/trust-hub/trusthub-rest-api/policies`
+- Twilio Profiles: `https://www.twilio.com/docs/trust-hub/profiles`
+
+Bottom line:
+
+- The Isa/Twilio AI-assisted reply is reliable enough for current build direction.
+- Remaining uncertainty is not architecture; it is account/program enablement and exact live policy requirements.
+
+### Spawned Agent Research - Twilio KYC Docs
+
+Bugs spawned research agents after Isa's reply and pasted the consolidated build impact on Thursday 14 May 2026.
+
+The research supports the current architecture:
+
+- `Continuity AI Ltd` keeps the approved parent Primary Compliance Profile as the legal business name.
+- `RightOnQ` is the trading/product brand and should only be supplied in separate brand/DBA-style fields where Twilio exposes them.
+- Each end-client company gets its own Secondary Compliance Profile using the end client's own registered legal business name when that entity differs from the parent Primary Compliance Profile.
+- If UK long-code SMS fallback is used, RightOnQ should build a separate UK Regulatory Compliance Bundle for the end business, then assign the UK number to that approved bundle.
+
+Earlier intake fields from this research should now be read with the follow-up correction above:
+
+- two authorised representatives where Secondary Compliance Profile submission is in scope, each with:
+  - first name;
+  - last name;
+  - work email;
+  - mobile number;
+  - business title;
+  - job position;
+- UK business fields:
+  - legal company name;
+  - company registration number;
+  - website;
+  - address;
+  - business classification;
+  - subassignment flag;
+  - optional comments;
+- Twilio status tracking:
+  - `draft`;
+  - `pending_review`;
+  - `in_review`;
+  - `twilio_approved`;
+  - `twilio_rejected`;
+  - rejection/error reasons.
+
+Identity evidence remains exception-only:
+
+- `18019`: Twilio could not verify the authorised representative's identity; government ID or passport may be requested.
+- `18020`: Twilio needs proof the representative is associated with the business.
+- `18057`: digital validation of the authorised representative failed; may need a different representative or an explanation of the company/website connection.
+
+Do not make passport or driving licence a normal upfront field.
+
+RightOnQ document-storage stance:
+
+- Use Twilio-managed compliance collection wherever available.
+- Store Twilio IDs, statuses, and rejection reasons rather than raw ID documents.
+- Do not promise universally that RightOnQ never touches evidence until Twilio confirms UK RC Bundle / Secondary Profile coverage for the relevant embeddable path.
+
+Remaining uncertainties from the research:
+
+- Whether UK RCS production onboarding consumes the same Trust Hub Secondary Compliance Profile cleanly, or adds separate carrier/RCS-specific checks.
+- Whether RightOnQ's Twilio account has the required ISV/subaccount/embeddable capabilities enabled.
+- Exact UK long-code purchase enforcement should be tested in the live account before final UX copy.
+
+Research references supplied by the agents:
+
+- Twilio Secondary Compliance Profiles: `https://www.twilio.com/docs/trust-hub/profiles/secondary-compliance-profiles`
+- Twilio API: Create a Secondary Customer Profile: `https://www.twilio.com/docs/trust-hub/trusthub-rest-api/api-create-secondary-customer-profile`
+- Twilio Reading Regulations for the UK Bundle: `https://www.twilio.com/docs/phone-numbers/regulatory/reading-regulations-for-the-uk-bundle`
+- Twilio KYC in the United Kingdom: `https://help.twilio.com/articles/21038555454875-Know-Your-Customer-KYC-in-the-United-Kingdom`
+- Twilio Regulatory Compliance REST APIs: `https://www.twilio.com/docs/phone-numbers/regulatory/api`
+- Twilio Compliance Embeddable onboarding: `https://www.twilio.com/docs/messaging/compliance/toll-free/compliance-embeddable-onboarding`
+- Twilio Voice Integrity ISV/subaccount flow: `https://www.twilio.com/docs/voice/spam-monitoring-with-voiceintegrity/voice-integrity-onboarding/voiceintegrity-onboarding-in-the-twilio-console`
+- Twilio errors `18019`, `18020`, and `18057`.
+
+## Field Authority Map - Draft 1
+
+Purpose: map each customer/intake field to the strictest downstream requirement so RightOnQ asks once, asks accurately, and does not store sensitive data in the wrong place.
+
+| Field area | Current app state | RCS sender registration | Trust Hub / KYC | UK RC Bundle / long-code | Storage sensitivity | Current action |
+| --- | --- | --- | --- | --- | --- | --- |
+| Legal business name | Step 1 asks `Legal business name` | Needed | Needed | Likely needed | Normal business data | Keep; helper should say exact Companies House registered name. |
+| Trading / brand name | Step 1 asks `Trading name`; Step 2 asks sender display name | Needed for brand/sender | May help explain brand vs legal entity | Not primary | Normal business data | Keep; ensure it does not replace legal name. |
+| Companies House number | Step 1 asks `Companies House number` | Useful/needed | Needed as registration number | Likely needed | Normal business data | Keep; consider wording `Companies House company number (CRN)`. |
+| Company type | Step 1 asks `Registered company type`; sole traders excluded | Useful | Needed | May be needed | Normal business data | Align options to Twilio-compatible limited-company language where possible. |
+| Business industry | Step 1 asks `Business industry` | Needed for sender/use case | Needed | Possibly useful | Normal business data | Align options to Twilio/Twilio-RCS categories where practical. |
+| Website URL | Step 1 asks website; Step 3 asks customer-facing website | Needed | Needed and likely checked against business/brand | Likely needed | Normal business data | Strengthen review rule: live site should clearly match legal/trading brand and not be ambiguous. |
+| Registered address | Step 1 asks Companies House registered office address | Useful | Business address needed | Emergency/number compliance may need address | Normal business data unless proof files are added | Keep; add note later if Twilio needs physical operating address separate from registered office. |
+| Business regions of operation | Current Step 7 asks RCS destination countries, not company operating regions | Launch market info | Needed by Trust Hub as operations regions | Not the same as recipient countries | Normal business data | Add later or collect internally; do not confuse with RCS launch markets. |
+| Primary contact | Step 1 asks name/email/phone | Operational | Operational | Operational | Personal contact data | Keep. |
+| Authorised representative 1 | Step 1 asks name/email/job title; auto-syncs from primary contact | Needed for sign-off | Required primary rep; phone and job position may also be needed | May be needed | Personal contact data | Expand to first/last/email/phone/business title/job position before Secondary Profile submission. |
+| Authorised representative 2 | Not currently captured | Usually not needed for RCS | Required for Secondary Compliance Profile per latest Twilio/Isa follow-up | May not be independently required for UK RC Bundle alone | Personal contact data | Add to canonical intake/state model. If not in first public form, collect as follow-up/manual before Secondary Profile submission. |
+| Passport / driving licence / proof of address | Not captured | Not needed for RCS form | Exception-only if Twilio cannot digitally verify rep/business association | Possibly separate KYC evidence | High sensitivity | Must not use static app/Google Sheet; use Twilio-managed compliance step or secure/manual route only. |
+| Sender display name | Step 2 asks it | Needed | May relate to brand context | Not primary | Normal business data | Keep. |
+| Logo, banner, brand colour | Step 2 asks uploads/colour | Needed | Not primary | Not primary | Brand assets | Keep in RCS form. |
+| Public contact and policy links | Step 3 asks email, phone, website, privacy, terms | Needed | Website may overlap | May support compliance | Normal business data | Keep; review for brand ownership and live links. |
+| Sender description and use case | Steps 4/5 ask purpose, description, examples | Needed and high review risk | Not primary | Not primary | Normal business data | Keep; RightOnQ should polish before submission. |
+| Consent/opt-in/opt-out | Step 6 asks consent route, opt-in, opt-out | Needed and high review risk | Not primary | Not primary | Normal business data | Keep; RightOnQ should polish before submission. |
+| RCS destination countries | Step 7 asks launch countries | Needed for RCS/cost planning | Different from Trust Hub operations regions | May influence number strategy | Normal business data | Keep; do not reuse as Trust Hub operations regions without review. |
+
+Immediate audit from this map:
+
+- The existing form is still a good RCS Part A base.
+- Trust Hub adds a compliance layer, not a reason to throw the app away.
+- The likely UI changes later are limited and focused:
+  - sharpen legal name/CRN/company type/industry wording;
+  - possibly add or internally collect business regions of operation;
+  - expand authorised representative fields for both representatives;
+  - add or manually collect representative 2 before Secondary Profile submission;
+  - keep ID/passport evidence out of the static app.
+
+## Field Change Shortlist - Draft 1
+
+This shortlist translates the field authority map into practical build decisions. It should be reviewed with Bugs before editing the customer-facing form.
+
+### Safe To Change Now
+
+These changes are low-risk because they improve clarity for both RCS and KYC without adding sensitive data or changing the application structure.
+
+1. Rename/help-text `Companies House number` to make clear this is the Companies House company number / CRN.
+2. Strengthen website helper text so the client understands the site must clearly match the legal/trading brand.
+3. Tighten `Registered company type` options to reflect the UK limited-company audience and remove any option that makes RightOnQ look open to unsuitable entities.
+4. Add internal review wording that public email/domain should preferably belong to the business, not free webmail.
+5. Add a short note near Step 1 or completion that RightOnQ may need further KYC evidence before SMS fallback/UK numbers can go live, without asking for that evidence in this form.
+
+### Resolved By Isa Bell / Twilio Reply
+
+These points now have a clearer working answer.
+
+1. Secondary Profile submission should plan for two authorised representatives; if the first public form remains lighter, collect rep 2 later/manual before submission.
+2. Passport/government ID should be exception-only, not mandatory upfront.
+3. Secondary Compliance Profile and UK long-code RC Bundle should be treated as separate operational submissions/status lanes.
+4. UK long-code numbers controlled by RightOnQ should still be assigned to the client/end-business compliance bundle/profile.
+
+### Still Needs Later Design
+
+1. Whether both representatives should be collected directly in the public form now, or whether rep 2 is a RightOnQ follow-up/manual field before Secondary Profile submission.
+2. Whether Twilio needs physical operating address separate from Companies House registered office address.
+3. Whether Trust Hub `business_regions_of_operation` should be asked on the client form, collected internally, or inferred/reviewed by RightOnQ.
+4. Whether Twilio Compliance Embeddable becomes the preferred exception path for any ID/document collection.
+
+### Manual / Secure Only
+
+These must not be added to the current static app or Google Sheet submission path.
+
+1. Passport upload.
+2. Driving licence upload.
+3. Representative proof-of-address upload.
+4. Date of birth, unless Twilio explicitly requires it and Bugs approves a secure collection/storage design.
+5. Any ID document link that could be opened by anyone with a sheet/file URL.
+
+### Do Not Change Yet
+
+These areas are already doing useful RCS work and should stay stable while the KYC answer is pending.
+
+1. Step 2 brand profile assets and image validation.
+2. Step 4/5 sender description, use case, and example message drafting.
+3. Step 6 opt-in/opt-out wording.
+4. Step 7 RCS launch markets. This is not the same thing as Trust Hub business regions of operation.
+5. Part B name/logo and video approval storage.
+
+### Likely Next Form Edit Pass
+
+If Bugs approves a small no-regrets edit pass before Isa replies, the safest scope is:
+
+1. CRN wording.
+2. Website/domain matching wording.
+3. Company type option cleanup.
+4. KYC evidence notice with no upload field.
+5. Internal docs/schema labels only, not new sensitive fields.
+
+Status: approved by Bugs and implemented by RCS-Twilio-4 on Thursday 14 May 2026.
+
+Implemented in `rcs-registration/index.html`:
+
+- Step 1 now includes a calm UK KYC note explaining that RightOnQ may need extra business/identity evidence before UK SMS fallback numbers can go live, but no passport, driving licence, or proof-of-address documents should be uploaded in this form.
+- Box 3 was renamed from `Companies House number` to `Companies House company number (CRN)`.
+- Box 3 helper now says only UK Companies House registered businesses are accepted.
+- Box 4 helper now says sole traders and unregistered businesses are not accepted.
+- Box 4 options were tightened to Companies House limited-company style options:
+  - `Private limited company (Ltd)`;
+  - `Public limited company (PLC)`;
+  - `Limited liability partnership (LLP)`;
+  - `Community interest company (CIC)`;
+  - `Company limited by guarantee`.
+- Business website and customer-facing website helpers now say the live site should clearly match/belong to the legal or trading brand.
+- Authorised representative email and customer-facing email helpers now steer away from personal/free webmail where the business has its own domain.
+
+Still not changed:
+
+- no representative 2 fields;
+- no date of birth field;
+- no passport/driving-licence/proof-of-address upload;
+- no Trust Hub operations-region field;
+- no Apps Script schema change for KYC-only data.
+
+## Customer-Facing Journey
+
+Target smooth journey:
+
+1. Client expresses interest and is qualified by RightOnQ/outreach.
+2. Client opens a RightOnQ registration gateway page or receives a guided link.
+3. Client sees the commercial terms:
+   - `£100 + VAT` RCS registration handling fee;
+   - refund guarantee if the application is not approved for reasons outside the client's control;
+   - no monthly platform fee until approved and ready to use;
+   - RightOnQ UK at `£25/month + VAT` after approval;
+   - RightOnQ Global at `£49/month + VAT` after approval;
+   - messaging costs charged separately.
+4. Client accepts service/payment terms.
+5. Client pays the `£100 + VAT` registration handling fee, likely via Revolut.
+6. RightOnQ creates/sends a private onboarding/application link.
+7. Client completes the intake once, with fields accurate enough for both RCS sender registration and Twilio Trust Hub/KYC.
+8. RightOnQ checks the intake.
+9. RightOnQ starts or prepares the Twilio Trust Hub Secondary Compliance Profile track where required.
+10. Client sees Part B storyboard/status.
+11. RightOnQ sends RBM Tester invitation and branded phone preview.
+12. B2 unlocks for name/logo approval.
+13. Client approves name/logo or sends issue feedback.
+14. RightOnQ fixes issues or proceeds.
+15. RightOnQ prepares review video.
+16. B3 unlocks for video review.
+17. Client approves video or requests changes.
+18. RightOnQ submits registration.
+19. B4 shows submitted/tracking state.
+20. Client is notified of provider/carrier outcome.
+21. Once Trust Hub/KYC, RCS approval, and commercial controls are ready, usage is monitored and charged/top-up controlled.
+
+## RightOnQ Internal Journey
+
+Target internal flow:
+
+1. Lead qualified.
+2. Commercial offer agreed.
+3. Revolut checkout/order/payment setup created.
+4. `£100 + VAT` registration handling fee received.
+5. Payment method saved where supported.
+6. Post-approval subscription/base monthly entitlement recorded but not charged until approved and ready to use.
+7. Application record created with stable `application_id`.
+8. Private application link issued.
+9. Part A submitted.
+10. Part A reviewed by RightOnQ.
+11. Registration details corrected/normalised if needed.
+12. Trust Hub/KYC readiness checked; Secondary Compliance Profile created/prepared if required.
+13. Twilio runtime subaccount created/prepared.
+14. Phone preview/test invitation sent.
+15. Application status updated to unlock B2.
+16. Name/logo approval received or issue raised.
+17. If issue raised, stop video work until resolved.
+18. Review video prepared.
+19. Application status updated to unlock B3.
+20. Video approval received or changes requested.
+21. If approved, registration pack submitted.
+22. Provider/carrier status tracked.
+23. Trust Hub/KYC, RCS approval, billing, and live-service gates maintained.
+24. Twilio usage monitored.
+25. Revolut top-ups/payments reconciled.
+26. Service paused if billing risk rules trigger.
+
+## Outreach To Onboarding Handoff Contract
+
+This is the formal plug between the outreach/CRM office and the RCS onboarding
+product flow.
+
+The outreach team must not hand a prospect to onboarding through an informal
+chat note alone. The handoff needs a structured state that agents and later
+automation can reliably detect.
+
+### Formal Trigger
+
+The CRM deal/status/tag trigger is:
+
+`READY_FOR_ONBOARDING`
+
+Meaning:
+
+- the lead has been qualified by RightOnQ/outreach;
+- the prospect has shown enough interest or agreement to start the onboarding
+  process;
+- RightOnQ is ready to create an onboarding application record;
+- the next owner is the onboarding/product flow, not further cold outreach.
+
+Important distinction:
+
+- `READY_FOR_ONBOARDING` means the lead is ready to enter the controlled
+  onboarding path.
+- It does not by itself mean commercial acceptance, billing setup, or provider
+  registration approval is complete.
+- Those remain separate onboarding statuses and must be confirmed before live
+  Twilio-backed service or chargeable usage begins.
+
+### Source Of Truth Split
+
+Before customer acceptance:
+
+- OpenClaw CRM is the source of truth.
+- It owns company, contact, outreach history, campaign context, notes, tasks,
+  and deal state.
+
+After an onboarding application exists:
+
+- the RCS onboarding sheet/app is the source of truth for registration,
+  payment, provider, Twilio, approval, and live-service status.
+- CRM keeps summary status, links, notes, and owner prompts.
+- CRM must not become a messy duplicate of the full Part A/Part B application.
+
+### Minimum Handoff Flow
+
+1. Outreach qualifies the lead in OpenClaw CRM.
+2. Roy/Kate/Scott marks the CRM deal/status/tag as `READY_FOR_ONBOARDING`.
+3. Onboarding creates a stable `application_id`.
+4. Onboarding writes the `application_id` back to the CRM record/deal.
+5. From that point, onboarding owns registration/payment/provider truth.
+6. CRM receives summary updates and next-owner prompts only.
+
+### Minimum Handoff Fields
+
+The handoff should include:
+
+- `crm_company_id`
+- `crm_deal_id`
+- `company_name`
+- `primary_contact_name`
+- `primary_contact_email`
+- `campaign_code`
+- `message_code`
+- `qualified_use_case`
+- `package_interest`
+- `handoff_date`
+- `handoff_notes` or `sales_context`
+- `application_id` once created
+- `onboarding_status` once created
+- `next_owner`
+
+### Handoff Notes / Sales Context
+
+`handoff_notes` or `sales_context` should explain why the prospect is moving
+into onboarding. It should help the onboarding team understand:
+
+- what the prospect appeared to care about;
+- which problem or use case resonated;
+- what RightOnQ has already said or promised;
+- what tone to use next;
+- any risks, caveats, or unresolved questions.
+
+This field is deliberately human. It prevents the onboarding team from treating
+every new application as if it arrived cold.
+
+### Implementation Rule
+
+For the pilot, this can be manual, but it must still be structured:
+
+- CRM must show `READY_FOR_ONBOARDING` before onboarding starts.
+- The onboarding application must store the CRM IDs or a reliable CRM reference.
+- The CRM record must receive the `application_id` after creation.
+- The status bridge should be easy for agents to read before it is automated.
+
+## Status Model
+
+Initial statuses to consider:
+
+- `lead_qualified`
+- `commercial_offer_sent`
+- `commercial_accepted`
+- `billing_setup_started`
+- `billing_active`
+- `usage_credit_paid`
+- `application_created`
+- `part_a_link_sent`
+- `part_a_started`
+- `part_a_submitted`
+- `part_a_internal_review`
+- `part_a_changes_needed`
+- `part_a_accepted`
+- `phone_preview_sent`
+- `name_logo_approved`
+- `name_logo_changes_requested`
+- `video_preparing`
+- `video_ready_for_review`
+- `video_approved`
+- `video_changes_requested`
+- `registration_submitted`
+- `provider_review`
+- `provider_changes_requested`
+- `approved`
+- `rejected`
+- `live`
+- `paused_billing`
+- `paused_operational`
+
+Keep the first implementation smaller if needed, but do not lose these concepts.
+
+## Source Of Truth Direction
+
+For the pilot, a structured Google Sheet is acceptable if the schema is disciplined.
+
+Likely tabs:
+
+- `Applications`
+- `Billing`
+- `Part A`
+- `Part B approvals`
+- `Internal reviews`
+- `Trust Hub KYC`
+- `Twilio setup`
+- `Communications`
+- `Status log`
+
+Potential later move:
+
+- Keep the sheet as an operator-friendly dashboard.
+- Move canonical storage into a database when the workflow needs stronger locking, tokens, admin UI, or real-time status control.
+
+## Source Of Truth Schema - Draft 1
+
+This is the first proposed Google Sheet schema for the pilot. It is intentionally operator-friendly and status-led.
+
+Principles:
+
+- Every client/application has one stable `application_id`.
+- Customer-facing submissions are preserved.
+- RightOnQ internal decisions/statuses are tracked separately from raw customer answers.
+- Payment state and registration state are related but not the same thing.
+- Client communications are logged so the client does not disappear into a black hole.
+- For v1, manual RightOnQ updates are acceptable if they are explicit and timestamped.
+
+### Tab: Applications
+
+Purpose: one row per client application. This is the control row.
+
+Primary writer:
+
+- system on application creation;
+- RightOnQ manually for statuses and internal notes.
+
+Suggested columns:
+
+- `application_id`
+- `client_id`
+- `crm_company_id`
+- `crm_deal_id`
+- `crm_source_record_url`
+- `private_application_token`
+- `client_name`
+- `legal_business_name`
+- `trading_name`
+- `primary_contact_name`
+- `primary_contact_email`
+- `primary_contact_phone`
+- `campaign_code`
+- `message_code`
+- `qualified_use_case`
+- `package_interest`
+- `handoff_date`
+- `sales_context`
+- `package_name`
+- `registration_status`
+- `billing_status`
+- `part_a_status`
+- `part_b_status`
+- `twilio_status`
+- `trust_hub_status`
+- `provider_status`
+- `internal_owner`
+- `created_at`
+- `updated_at`
+- `last_client_action_at`
+- `last_internal_action_at`
+- `next_action_owner`
+- `next_action_note`
+- `internal_notes`
+
+Initial statuses:
+
+- `commercial_accepted`
+- `billing_active`
+- `application_created`
+- `trust_hub_not_started`
+- `trust_hub_draft`
+- `trust_hub_pending_review`
+- `trust_hub_approved`
+- `trust_hub_rejected`
+- `part_a_submitted`
+- `part_a_internal_review`
+- `part_a_accepted`
+- `phone_preview_sent`
+- `name_logo_approved`
+- `video_ready_for_review`
+- `video_approved`
+- `registration_submitted`
+- `provider_review`
+- `approved`
+- `live`
+- `paused_billing`
+
+### Tab: Billing
+
+Purpose: commercial/payment state and usage-credit control.
+
+Primary writer:
+
+- Revolut webhook/API sync where possible;
+- RightOnQ manually for pilot reconciliation;
+- future automation for top-up and pause rules.
+
+Suggested columns:
+
+- `application_id`
+- `client_id`
+- `package_name`
+- `monthly_base_fee_gbp`
+- `registration_fee_gbp`
+- `registration_fee_vat_gbp`
+- `registration_fee_refund_status`
+- `registration_fee_refund_reason`
+- `initial_payment_due_gbp`
+- `initial_payment_status`
+- `initial_payment_revolut_order_id`
+- `revolut_customer_id`
+- `revolut_payment_method_id`
+- `revolut_subscription_id`
+- `subscription_status`
+- `usage_credit_balance_gbp`
+- `top_up_threshold_gbp`
+- `top_up_amount_gbp`
+- `auto_top_up_status`
+- `last_top_up_attempt_at`
+- `last_top_up_status`
+- `last_payment_status`
+- `billing_pause_flag`
+- `billing_pause_reason`
+- `billing_notes`
+- `updated_at`
+
+Starting assumptions to test:
+
+- `package_name`: `RightOnQ UK` or `RightOnQ Global`
+- `monthly_base_fee_gbp`: `25` for RightOnQ UK, `49` for RightOnQ Global
+- `registration_fee_gbp`: `100`
+- `registration_fee_vat_gbp`: calculate at current VAT rate
+- `initial_payment_due_gbp`: `100 + VAT`
+- `top_up_threshold_gbp`: to be agreed
+- `top_up_amount_gbp`: to be agreed
+
+### Tab: Part A
+
+Purpose: the submitted registration data from the customer-facing Part A form.
+
+Primary writer:
+
+- current `rcs-registration/index.html` submission via Apps Script;
+- later, updates should include `application_id`.
+
+Suggested column groups:
+
+- record metadata:
+  - `application_id`
+  - `submission_id`
+  - `submitted_at`
+  - `source_version`
+  - `client_ip_or_user_agent_hash` if ever needed and privacy-approved
+- business details:
+  - `legal_business_name`
+  - `trading_name`
+  - `companies_house_number`
+  - `company_type`
+  - `registration_country`
+  - `registered_address_line_1`
+  - `registered_address_line_2`
+  - `registered_city`
+  - `registered_county`
+  - `registered_postcode`
+  - `business_website`
+  - `business_industry`
+- contacts:
+  - `primary_contact_name`
+  - `primary_contact_email`
+  - `primary_contact_phone`
+  - `authorised_rep_1_first_name`
+  - `authorised_rep_1_last_name`
+  - `authorised_rep_1_email`
+  - `authorised_rep_1_phone`
+  - `authorised_rep_1_business_title`
+  - `authorised_rep_1_job_position`
+  - `authorised_rep_2_first_name`
+  - `authorised_rep_2_last_name`
+  - `authorised_rep_2_email`
+  - `authorised_rep_2_phone`
+  - `authorised_rep_2_business_title`
+  - `authorised_rep_2_job_position`
+- brand profile:
+  - `sender_display_name`
+  - `brand_colour`
+  - `logo_filename`
+  - `logo_validation_status`
+  - `banner_filename`
+  - `banner_validation_status`
+- public profile/contact:
+  - `customer_email`
+  - `customer_phone`
+  - `customer_website`
+  - `privacy_policy_url`
+  - `terms_url`
+  - `rightonq_updates_email`
+- message purpose:
+  - `primary_use_case`
+  - `sender_description`
+  - `monthly_volume`
+  - `message_trigger`
+  - `use_case_description`
+- message examples:
+  - `example_message_1`
+  - `example_message_2`
+  - `help_sample_message`
+  - `stop_sample_message`
+- consent/markets:
+  - `consent_routes`
+  - `consent_route_source`
+  - `opt_in_description`
+  - `opt_out_description`
+  - `reviewer_access`
+  - `launch_markets`
+  - `us_contact_count`
+  - `existing_us_messaging_activity`
+- signoff:
+  - `accuracy_declaration`
+  - `agency_submission_declaration`
+  - `signatory_name`
+  - `signatory_title`
+  - `iphone_preview_number`
+  - `android_preview_number`
+  - `signoff_date`
+
+### Tab: Part B Approvals
+
+Purpose: customer approvals/issues after Part A.
+
+Primary writer:
+
+- future B2/B3 forms;
+- RightOnQ manually for pilot if needed.
+
+Suggested columns:
+
+- `application_id`
+- `part_b_event_id`
+- `event_type`
+- `event_status`
+- `submitted_at`
+- `submitted_by_name`
+- `submitted_by_email`
+- `phone_preview_sent_at`
+- `tester_invitation_received`
+- `branded_message_received`
+- `name_logo_decision`
+- `name_logo_issue_categories`
+- `name_logo_issue_notes`
+- `name_logo_approved_at`
+- `video_url`
+- `video_sent_at`
+- `video_decision`
+- `video_checklist_sender_name`
+- `video_checklist_logo_banner`
+- `video_checklist_message_examples`
+- `video_checklist_permission_route`
+- `video_checklist_opt_out_route`
+- `video_change_notes`
+- `video_approved_at`
+- `rightonq_follow_up_required`
+
+Recommended `event_type` values:
+
+- `name_logo_approval`
+- `name_logo_issue`
+- `video_approval`
+- `video_change_request`
+
+### Tab: Trust Hub KYC
+
+Purpose: Twilio Trust Hub Secondary Compliance Profile / client KYC tracking.
+
+This is separate from the Twilio runtime subaccount. The subaccount is for runtime resources and billing/usage separation. Trust Hub is the compliance/KYC record and should be tracked as its own lane.
+
+Primary writer:
+
+- RightOnQ manually for pilot;
+- later automation using Twilio Trust Hub API.
+
+Suggested columns:
+
+- `application_id`
+- `client_id`
+- `primary_customer_profile_sid`
+- `secondary_customer_profile_sid`
+- `trust_hub_policy_sid`
+- `trust_hub_profile_friendly_name`
+- `trust_hub_status`
+- `trust_hub_status_updated_at`
+- `trust_hub_status_callback_configured`
+- `trust_hub_rejection_reason`
+- `trust_hub_error_code`
+- `trust_hub_error_detail`
+- `business_identity`
+- `business_type`
+- `business_industry`
+- `business_registration_identifier`
+- `business_registration_number`
+- `business_regions_of_operation`
+- `business_website_match_status`
+- `address_sid`
+- `address_validation_status`
+- `supporting_document_sid`
+- `business_info_end_user_sid`
+- `authorised_rep_1_end_user_sid`
+- `authorised_rep_2_end_user_sid`
+- `authorised_rep_1_validation_status`
+- `authorised_rep_2_validation_status`
+- `authorised_rep_exception_code`
+- `authorised_rep_exception_action`
+- `primary_profile_assignment_status`
+- `business_info_assignment_status`
+- `rep_1_assignment_status`
+- `rep_2_assignment_status`
+- `address_assignment_status`
+- `evaluation_status`
+- `evaluation_last_run_at`
+- `evaluation_error_summary`
+- `channel_endpoint_assignment_status`
+- `phone_number_sid`
+- `kyc_internal_notes`
+- `updated_at`
+
+Recommended `trust_hub_status` values:
+
+- `not_started`
+- `draft`
+- `evaluation_failed`
+- `ready_to_submit`
+- `pending_review`
+- `in_review`
+- `twilio_approved`
+- `twilio_rejected`
+- `not_required_rcs_only`
+
+Recommended exception codes to track:
+
+- `18019`: proof of identity required for authorised representative.
+- `18020`: proof of authorised representative's association with business required.
+- `18057`: authorised representative validation failed.
+
+Launch privacy rule:
+
+- Do not store representative date of birth, ID images, or proof-of-address files in the current static form / Google Sheet workflow unless Bugs explicitly approves a secure storage design.
+- If Twilio requires sensitive representative evidence, prefer Twilio-managed compliance collection where available, or handle it as a secure manual follow-up/later backend-admin flow.
+
+### Tab: UK RC Bundles
+
+Purpose: UK long-code Regulatory Compliance Bundle tracking for SMS fallback numbers.
+
+This is separate from the Secondary Compliance Profile. The Secondary Compliance Profile models/verifies the end-client business; the UK RC Bundle is the number-compliance approval for UK local, national, mobile, or toll-free long-code usage.
+
+Primary writer:
+
+- RightOnQ manually for pilot;
+- later automation using Twilio Regulatory Compliance APIs.
+
+Suggested columns:
+
+- `application_id`
+- `client_id`
+- `compliance_embeddable_supported`
+- `compliance_embeddable_inquiry_id`
+- `compliance_embeddable_registration_id`
+- `compliance_embeddable_status`
+- `compliance_embeddable_rejection_code`
+- `compliance_embeddable_rejection_reason`
+- `compliance_embeddable_last_event`
+- `compliance_embeddable_last_event_at`
+- `rc_bundle_sid`
+- `rc_bundle_status`
+- `rc_bundle_status_updated_at`
+- `rc_bundle_rejection_reason`
+- `rc_bundle_error_code`
+- `rc_bundle_error_detail`
+- `end_business_legal_name`
+- `business_registration_number`
+- `number_type`
+- `phone_number_sid`
+- `phone_number`
+- `phone_number_assignment_status`
+- `address_sid`
+- `supporting_document_sid`
+- `compliance_owner`
+- `fallback_required`
+- `internal_notes`
+- `updated_at`
+
+Recommended `rc_bundle_status` values:
+
+- `not_started`
+- `draft`
+- `pending_review`
+- `in_review`
+- `twilio_approved`
+- `twilio_rejected`
+- `not_required_unless_uk_long_code`
+
+Launch note:
+
+- UK long-code fallback numbers must be assigned to the end-business bundle before use.
+- This tab stores Twilio IDs, statuses, and rejection reasons; it must not store raw ID documents.
+- Compliance Embeddable session tokens expire and must not be stored as durable identifiers. Store `inquiry_id` and `registration_id`; regenerate a fresh session token when resuming an inquiry.
+
+### Tab: Internal Reviews
+
+Purpose: RightOnQ operator checklist for reviewing Part A before phone preview, Trust Hub/KYC work, or RCS submission moves forward.
+
+Primary writer:
+
+- system when Part A is received;
+- RightOnQ manually for checklist status and notes during pilot.
+
+Suggested columns:
+
+- `created_at`
+- `application_id`
+- `review_status`
+- `assigned_owner`
+- `legal_company_check`
+- `website_domain_check`
+- `public_links_check`
+- `message_purpose_examples_check`
+- `consent_opt_out_check`
+- `kyc_trust_hub_check`
+- `sms_fallback_rc_bundle_check`
+- `phone_preview_readiness`
+- `next_action`
+- `notes`
+- `source_status`
+- `updated_at`
+
+Initial checklist state:
+
+- `review_status`: `pending_review`
+- `assigned_owner`: `RightOnQ`
+- checklist items: `pending`
+- `kyc_trust_hub_check`: `pending_trust_hub_review`
+
+Implementation note:
+
+- This checklist is internal only.
+- It must not request or store passport, driving licence, proof-of-address files, or date of birth.
+- Its job is to make the manual RightOnQ review visible and repeatable before the application moves forward.
+
+### Tab: Twilio Setup
+
+Purpose: internal runtime setup and provider/Twilio tracking.
+
+Primary writer:
+
+- RightOnQ manually for pilot;
+- later automation can populate subaccount and usage fields.
+
+Suggested columns:
+
+- `application_id`
+- `client_id`
+- `twilio_subaccount_sid`
+- `twilio_subaccount_friendly_name`
+- `twilio_messaging_service_sid`
+- `rbm_agent_id`
+- `rbm_sender_name`
+- `rbm_logo_url`
+- `rbm_banner_url`
+- `provider_submission_reference`
+- `provider_submission_status`
+- `provider_submitted_at`
+- `provider_last_checked_at`
+- `provider_notes`
+- `phone_preview_status`
+- `phone_preview_sent_at`
+- `review_video_url`
+- `review_video_status`
+- `registration_pack_status`
+- `go_live_status`
+- `go_live_date`
+- `manual_pause_flag`
+- `manual_pause_reason`
+
+### Tab: Status Log
+
+Purpose: append-only audit trail. This should not be edited casually.
+
+Primary writer:
+
+- system for form/payment events;
+- RightOnQ manually for important internal status changes.
+
+Suggested columns:
+
+- `event_id`
+- `application_id`
+- `event_at`
+- `event_actor`
+- `event_source`
+- `previous_status`
+- `new_status`
+- `event_type`
+- `event_summary`
+- `event_payload_json`
+- `internal_note`
+
+Useful `event_source` values:
+
+- `customer_form`
+- `rightonq_manual`
+- `revolut_webhook`
+- `twilio_usage_sync`
+- `provider_update`
+- `system`
+
+### Tab: Communications
+
+Purpose: customer-facing email/message cadence and send log.
+
+Primary writer:
+
+- RightOnQ manually for pilot;
+- later automation triggered by status changes.
+
+Why this matters:
+
+- Clients should receive clear safe-receipt and next-step messages.
+- RightOnQ should know which emails were sent, when, and from which template.
+- Later automation can be added without changing the core workflow.
+
+Suggested columns:
+
+- `communication_id`
+- `application_id`
+- `client_id`
+- `recipient_name`
+- `recipient_email`
+- `communication_type`
+- `trigger_status`
+- `trigger_event_id`
+- `subject`
+- `template_version`
+- `sent_at`
+- `sent_by`
+- `send_method`
+- `delivery_status`
+- `requires_reply`
+- `reply_received_at`
+- `next_follow_up_at`
+- `notes`
+
+Recommended `communication_type` values:
+
+- `payment_received_onboarding_started`
+- `application_link_sent`
+- `part_a_received`
+- `part_a_accepted_phone_preview_next`
+- `phone_preview_sent`
+- `name_logo_approved`
+- `name_logo_issue_received`
+- `video_ready`
+- `video_approved`
+- `registration_submitted`
+- `provider_update`
+- `action_needed`
+- `approved_live`
+- `billing_issue`
+- `top_up_failed`
+- `service_paused`
+
+Minimum v1 triggered/manual email cadence:
+
+1. Payment received / onboarding started:
+   - confirm RightOnQ RCS onboarding has started;
+   - explain the next step;
+   - provide or promise the private application link.
+2. Application link sent:
+   - give the private Part A link;
+   - explain what the client needs to complete.
+3. Part A received:
+   - safe receipt;
+   - RightOnQ will check and process the written details.
+4. Part A accepted / phone preview next:
+   - written details are ready;
+   - RightOnQ will send the RBM Tester invitation and branded phone preview.
+5. Phone preview sent:
+   - ask client to check phone;
+   - accept RBM Tester invitation;
+   - return to B2 to approve or raise an issue.
+6. Name/logo approved:
+   - confirm approval;
+   - RightOnQ will prepare the review video.
+7. Name/logo issue received:
+   - safe receipt of issue;
+   - RightOnQ will pause video preparation and review/fix.
+8. Video ready:
+   - ask client to review and approve video in Part B.
+9. Video approved:
+   - confirm approval;
+   - RightOnQ will submit the registration pack.
+10. Registration submitted:
+    - confirm submission;
+    - explain typical provider/carrier review timing.
+11. Provider update / action needed:
+    - use only when there is an update, question, rejection, or required client action.
+12. Approved/live:
+    - confirm approval/live status;
+    - explain what happens with ongoing RightOnQ service, billing, and usage monitoring.
+13. Billing issue / top-up failed / service paused:
+    - clear but calm notice that payment/top-up needs attention before sending can continue.
+
+### First Schema Decision Needed
+
+Before implementation, decide whether Part A should:
+
+1. keep appending full submissions to `Part A` and update the single control row in `Applications`; or
+2. update one row only per application.
+
+Recommendation for v1:
+
+- Keep `Part A` append-only for audit/recovery.
+- Keep `Applications` as the current control row.
+- Use `Status Log` for every important state transition.
+
+## Core Identifiers
+
+Minimum identifiers to track:
+
+- `application_id`
+- `client_id`
+- `client_name`
+- `created_at`
+- `updated_at`
+- `registration_status`
+- `billing_status`
+- `revolut_customer_id`
+- `revolut_order_id`
+- `revolut_payment_method_id`
+- `revolut_subscription_id`
+- `usage_credit_balance`
+- `last_payment_status`
+- `twilio_subaccount_sid`
+- `twilio_messaging_service_sid`
+- `provider_submission_reference`
+- `provider_status`
+- `private_application_token`
+- `internal_owner`
+- `last_communication_at`
+- `next_follow_up_at`
+
+## Existing RCS Form Fit
+
+Current app:
+
+- `/Users/macpro/rightonq-code.github.io/rcs-registration/index.html`
+
+Current shape:
+
+- Part A is the customer data capture application.
+- Part B is currently a static visible preview/workflow:
+  - B1 storyboard;
+  - B2 approve name and logo;
+  - B3 review and approve video;
+  - B4 registration submitted.
+
+Known gap:
+
+- Part B is not yet status-controlled or wired to persistent B2/B3 submissions.
+
+## Build Slices
+
+### Slice 1 - Main Build Plan
+
+Create and maintain this file.
+
+Status: started by RCS-Twilio-4 on Thursday 14 May 2026.
+
+### Slice 2 - Source Of Truth Schema
+
+Define the exact Google Sheet tabs and headers.
+
+Status: draft 1 added by RCS-Twilio-4 on Thursday 14 May 2026.
+
+Output:
+
+- agreed sheet schema;
+- field names;
+- which fields are customer-facing vs internal;
+- which fields are generated by system;
+- which fields are manually updated by RightOnQ.
+
+### Slice 3 - Application ID And Status In Part A
+
+Add stable application identity to the current Part A flow.
+
+Status: v1 implemented and tested by RCS-Twilio-4 on Thursday 14 May 2026.
+
+Temporary v1 decision:
+
+- Generate `application_id` inside the browser form for now.
+- Persist it in autosave/progress/download/submission payloads.
+- Use it to connect Part A submissions to the future `Applications` control row.
+- Before launch, move `application_id` generation to a RightOnQ-created private link or server-side application record.
+
+Implementation note:
+
+- Apps Script must store `application_id`, `registration_status`, and `part_a_status`.
+- The live Google Sheet headers must be updated before deploying/using the changed Apps Script, because these fields are inserted near the start of the append row.
+- Header row update completed by RCS-Twilio-4 on Thursday 14 May 2026 for `Part A submissions!A1:AI1`.
+- Apps Script project was pushed and existing live deployment `AKfycbyI81Ir2xvHLar0R0iFBBWyXa1Nj93T4_8Ni5_eX3XEYDA-AKQbVYbPHnTROLm8e4a6` was redeployed in place to version `4`.
+- Test POSTs wrote rows with `Application ID`, `Registration status`, and `Part A status` correctly populated. Two obvious test rows exist in the live sheet using `ROQ-RCS-TEST-SLICE3-20260514`.
+
+Reason:
+
+- Browser-generated ID is enough to start wiring the workflow spine.
+- Private application links are still a later slice.
+- This must not be treated as final launch architecture.
+
+Output:
+
+- `application_id`;
+- `private_application_token` or equivalent;
+- initial `registration_status`;
+- Part A submission updates one application record or appends an event tied to application ID.
+
+### Slice 4 - Internal Status Control
+
+Give RightOnQ a manual way to update status for pilot use.
+
+Status: first thin version implemented and tested by RCS-Twilio-4 on Thursday 14 May 2026.
+
+Possible v1:
+
+- Google Sheet status columns manually edited. This is the current pilot direction.
+- App reads status by token/application ID. First version now reads by `applicationId`.
+- RightOnQ manually sends the next link/state while private-link generation is still pending.
+
+Implemented in first thin version:
+
+- Apps Script `GET ?applicationId=...` returns the latest matching row's:
+  - `registrationStatus`;
+  - `partAStatus`;
+  - `reviewStatus`;
+  - `partBVideoStatus`;
+  - `notes`;
+  - `lastUpdated`.
+- Existing live Apps Script deployment `AKfycbyI81Ir2xvHLar0R0iFBBWyXa1Nj93T4_8Ni5_eX3XEYDA-AKQbVYbPHnTROLm8e4a6` redeployed in place to version `5`.
+- Static app accepts `?applicationId=...` or `?application_id=...`, stores it locally, and refreshes status from the live Apps Script endpoint.
+- Part B rail displays the current status and marks B2/B3/B4 as waiting or available.
+- B2/B3/B4 remain visible for planning, but the copy clearly says when each stage becomes live.
+
+Test evidence:
+
+- Live status lookup for `ROQ-RCS-TEST-SLICE3-20260514` returned `registrationStatus: part_a_submitted`.
+- Local browser preview at `http://localhost:8902/rcs-registration/index.html?applicationId=ROQ-RCS-TEST-SLICE3-20260514` showed `Part A received` and kept B2 as `Waiting for test message`.
+
+Important launch caveat:
+
+- This is still not the final private-link architecture.
+- Before launch, RightOnQ should create the application row/link before the client starts Part A, then send a private link containing a non-guessable token or equivalent.
+
+### Slice 4A - Applications Control Row
+
+Give each application a one-row internal control record, separate from the append-only Part A submission log.
+
+Status: first thin version implemented and tested by RCS-Twilio-4 on Thursday 14 May 2026.
+
+Implemented:
+
+- Apps Script now creates the `Applications` tab if needed.
+- Apps Script writes one row per `Application ID`.
+- Part A submissions still append to `Part A submissions` for audit/recovery.
+- The `Applications` row stores CRM handoff fields when supplied:
+  - `CRM company ID`;
+  - `CRM deal ID`;
+  - `CRM source record URL`;
+  - `Campaign code`;
+  - `Message code`;
+  - `Qualified use case`;
+  - `Package interest`;
+  - `Handoff date`;
+  - `Sales context`.
+- Status lookup now checks `Applications` first and falls back to `Part A submissions`.
+- Existing live Apps Script deployment `AKfycbyI81Ir2xvHLar0R0iFBBWyXa1Nj93T4_8Ni5_eX3XEYDA-AKQbVYbPHnTROLm8e4a6` redeployed in place to version `6`.
+
+Test evidence:
+
+- Test submission `ROQ-RCS-TEST-SLICE5-20260514` wrote to both `Part A submissions` and `Applications`.
+- `Applications` row included test CRM fields, package interest, handoff date, and sales context.
+- Live status lookup for `ROQ-RCS-TEST-SLICE5-20260514` returned status data from the `Applications` shape, including billing/Part B/Twilio/provider status fields.
+
+Important launch caveat:
+
+- This still uses the browser/generated Application ID when the client starts from the public static page.
+- The next launch-safe move is to create the `Applications` row first, generate a private token/link, then send that private link to the client.
+
+### Slice 4B - Private Application Token Path
+
+Prepare the launch-safe route where RightOnQ creates the application before the client starts Part A.
+
+Status: guarded version implemented and proof-tested by RCS-Twilio-4 on Thursday 14 May 2026.
+
+Implemented:
+
+- Static app accepts private link parameters:
+  - `applicationId` or `application_id`;
+  - `applicationToken`, `privateApplicationToken`, `private_application_token`, or `token`.
+- Static app stores the token locally for status checks and submission, but does not include it in the downloaded client copy.
+- Status lookup can read by Application ID and token.
+- If a token is supplied and does not match the `Applications` row, status lookup returns `found: false`.
+- Part A submission into a token-protected `Applications` row now requires the matching private token.
+- Apps Script has a guarded internal `action: createApplicationDraft` path.
+- That action requires the script property `ONBOARDING_CREATE_PIN`, generates a private token, creates/updates the `Applications` row, and returns a private application link.
+- Token-protected application status now requires the matching token. Application ID alone returns `found: false` for token-protected rows.
+- Existing live Apps Script deployment `AKfycbyI81Ir2xvHLar0R0iFBBWyXa1Nj93T4_8Ni5_eX3XEYDA-AKQbVYbPHnTROLm8e4a6` was redeployed in place to version `11` after proof cleanup.
+
+Test evidence:
+
+- Normal status lookup for `ROQ-RCS-TEST-SLICE5-20260514` still returned the expected application status.
+- Status lookup for that Application ID with a wrong token returned `found: false`.
+- Attempted `createApplicationDraft` without a configured PIN did not create a row in `Applications`.
+- Temporary proof route created `ROQ-RCS-TEST-PIN-20260514173653`, returned a private link shape, submitted Part A against the same token-protected application, and confirmed:
+  - draft status moved from `application_created`;
+  - Part A status became `part_a_submitted`;
+  - wrong token returned `found: false`.
+- Temporary proof route/helper was removed before final deployment.
+- Final live checks confirmed:
+  - token-protected app without a token returns `found: false`;
+  - token-protected app with a wrong token returns `found: false`;
+  - older non-token test app still returns status by Application ID.
+
+Important launch caveat:
+
+- The proof used a temporary PIN and removed/restored the script property afterwards.
+- `ONBOARDING_CREATE_PIN` is not stored in the repo and must be configured in Apps Script properties before ongoing internal draft creation can be used.
+- A proper operator/admin interface is still future work. This is the guarded plumbing layer only.
+
+### Slice 5 - Part B Unlocks
+
+Make Part B stages reflect real application status.
+
+Output:
+
+- B1 visible after Part A;
+- B2 unlocked after `phone_preview_sent`;
+- B3 unlocked after `video_ready_for_review`;
+- B4 visible after `registration_submitted`.
+
+### Slice 6 - B2/B3 Submission Storage
+
+Persist client approval/issue responses.
+
+Status: B2 name/logo storage and B3 video approval/change storage implemented and proof-tested by RCS-Twilio-4 on Thursday 14 May 2026.
+
+Checkpoint:
+
+- Remote branch already includes the B2 checkpoint commits:
+  - `062cee9 Wire B2 name logo approval storage`;
+  - `0b04957 Update RCS handover after B2 storage`.
+- Local B3 implementation checkpoint exists:
+  - `9dd3206 Wire B3 video approval storage`.
+- This final build-plan/handover update sits on top of the B3 implementation checkpoint.
+- Bugs approved pushing the B3 checkpoint and this build-plan/handover update.
+
+Output:
+
+- B2 name/logo approval record - done via `Part B approvals`;
+- B2 issue record with categories/notes - done via `Part B approvals`;
+- B2 status updates based on response - done via `Applications`;
+- B3 video approval record - done via `Part B video approvals`;
+- B3 change request record - done via `Part B video approvals`;
+- B3 status updates based on response - done via `Applications`.
+
+Implemented:
+
+- Static app B2 `Approve name and logo` now posts `action = submitNameLogoApproval`.
+- Payload includes Application ID, private application token when present, tester invite answer, name/logo decision, issue categories, notes, and submitted timestamp.
+- Apps Script appends each response to a new `Part B approvals` event-log tab.
+- Apps Script updates the matching `Applications` row:
+  - approval sets `registrationStatus` and `partBStatus` to `name_logo_approved`;
+  - not-arrived/help/issue/note sets both to `name_logo_changes_requested`;
+  - `Next action owner` becomes `RightOnQ`.
+- Existing live Apps Script deployment `AKfycbyI81Ir2xvHLar0R0iFBBWyXa1Nj93T4_8Ni5_eX3XEYDA-AKQbVYbPHnTROLm8e4a6` was redeployed in place to version `12`.
+- Static app B3 `Review and approve video` now posts `action = submitVideoApproval`.
+- Payload includes Application ID, private application token when present, approval checklist, change decision, change notes, and submitted timestamp.
+- Apps Script appends each B3 response to a new `Part B video approvals` event-log tab.
+- Apps Script updates the matching `Applications` row:
+  - approval sets `registrationStatus` and `partBStatus` to `video_approved`;
+  - change request sets both to `video_changes_requested`;
+  - `Next action owner` becomes `RightOnQ`.
+- Existing live Apps Script deployment was redeployed in place to version `13`.
+
+Test evidence:
+
+- Live test POST against `ROQ-RCS-TEST-SLICE5-20260514` returned `ok: true` and `name_logo_approved`.
+- Live Sheet now has the `Part B approvals` tab with labelled B2 test approval rows.
+- `Applications` row for `ROQ-RCS-TEST-SLICE5-20260514` now shows `Registration status = name_logo_approved`, `Part B status = name_logo_approved`, `Next action owner = RightOnQ`, and `Next action note = Prepare the RCS application review video.`
+- Browser check on `http://localhost:8902/rcs-registration/index.html?applicationId=ROQ-RCS-TEST-SLICE5-20260514` showed B2 opening correctly, approval choices enabling the `Send approval to RightOnQ` button, status reading `Name and logo approved`, and no console errors.
+- Live B3 test POST against `ROQ-RCS-TEST-SLICE5-20260514` returned `ok: true` and `video_approved`.
+- Live Sheet now has the `Part B video approvals` tab with a labelled B3 test approval row.
+- `Applications` row for `ROQ-RCS-TEST-SLICE5-20260514` now shows `Registration status = video_approved`, `Part B status = video_approved`, `Next action owner = RightOnQ`, and the then-current submit-next wording. Slice 11B later tightened this wording so video approval now points to final registration-pack preparation for explicit submission approval.
+- Browser check on the same URL showed B3 opening correctly, the five approval checklist items enabling `Send approval to RightOnQ`, status reading `Video approved`, and no console errors.
+
+Important caveat:
+
+- Three duplicate labelled test rows exist in `Part B approvals` because Apps Script's redirect behaviour wrote during the first curl attempts. Leave them as proof rows unless Bugs approves cleanup.
+
+Next:
+
+- Push the local B3 commits to `origin/rcs-registration-part-a-b-20260507`.
+- Next build slice should move to Slice 6A communications cadence or the manual internal status update/operator view.
+
+### Slice 6A - Internal Status Operator Path
+
+Give RightOnQ a guarded backend route for moving applications through the manual gates without editing the `Applications` row directly.
+
+Status: guarded backend route implemented and deployed by RCS-Twilio-4 on Thursday 14 May 2026. Real operational use still needs `ONBOARDING_OPERATOR_PIN` configured or a wrapper built.
+
+Implemented:
+
+- Apps Script now supports `action = updateApplicationStatus`.
+- The action requires script property `ONBOARDING_OPERATOR_PIN`.
+- It can update selected `Applications` control-row fields:
+  - `Registration status`;
+  - `Billing status`;
+  - `Part A status`;
+  - `Part B status`;
+  - `Twilio status`;
+  - `Provider status`;
+  - `Internal owner`;
+  - `Next action owner`;
+  - `Next action note`;
+  - `Internal notes`.
+- It writes `Updated at` and `Last internal action at`.
+- Successful updates append an audit row to `Status events`.
+- Audit JSON now redacts private application tokens, application tokens, create PINs, and operator PINs before storage.
+- The browser status label list now recognises the full current backend registration status order, including internal review/change/provider/live/paused statuses.
+- Existing live Apps Script deployment was redeployed in place to version `14`.
+
+Test evidence:
+
+- Apps Script syntax passed via `new Function(...)`.
+- Inline `index.html` script syntax passed via extracted script parse.
+- `git diff --check` passed for scoped files.
+- Live unauthorised `updateApplicationStatus` attempt against `ROQ-RCS-TEST-SLICE5-20260514` returned `ok: false` with `ONBOARDING_OPERATOR_PIN is not configured`.
+- The same test application remained at `Registration status = video_approved` and `Part B status = video_approved`, proving the guard did not mutate the control row without the operator PIN.
+
+Important caveat:
+
+- This is not yet an operator UI.
+- Positive live status-change proof is still pending until Bugs chooses how to configure `ONBOARDING_OPERATOR_PIN` or asks for a small internal wrapper.
+- Recommended next activation step: configure the real operator PIN in Apps Script properties, or build an internal wrapper so agents do not handle the PIN manually.
+
+### Slice 6B - Communications Cadence
+
+Define and implement customer communication templates and triggers.
+
+Status: first manual-send queue implemented and proof-tested by RCS-Twilio-4 on Thursday 14 May 2026.
+
+Output:
+
+- first email templates - partially done;
+- trigger statuses - partially done;
+- `Communications` tab write path - done;
+- manual-send fallback for v1 - done;
+- later automation plan.
+
+Implemented:
+
+- Apps Script now has a `Communications` manual-send queue tab.
+- Future Part A submissions queue `part_a_received`.
+- Future B2 name/logo responses queue:
+  - `name_logo_approved_received`;
+  - `name_logo_feedback_received`.
+- Future B3 video responses queue:
+  - `video_approved_received`;
+  - `video_changes_received`.
+- Future guarded internal status updates can queue:
+  - `part_a_accepted`;
+  - `phone_preview_sent`;
+  - `video_ready_for_review`;
+  - `registration_submitted`.
+- Templates are stored as draft body text in the Sheet and marked `queued_manual_send`.
+- No customer email is sent automatically yet.
+- Existing live Apps Script deployment was redeployed in place to version `15`.
+
+Test evidence:
+
+- Apps Script syntax passed via `new Function(...)`.
+- `git diff --check` passed for scoped files.
+- Live labelled Part A test submission `ROQ-RCS-TEST-COMMS-202605141832` returned `ok: true`.
+- Live `Applications` tab now contains the labelled communications test row.
+- Live `Communications` tab contains a queued `part_a_received` draft addressed to `test-comms@example.com`.
+
+Important caveat:
+
+- The live Part A proof also ran the existing Adam notification path.
+- This is a queue, not an auto-send system.
+- Next step should be either template wording review/polish or an internal send/review workflow, not immediate automatic customer email sending.
+
+### Slice 6C - Trust Hub / KYC Field Authority Planning
+
+Status: planning update added by RCS-Twilio-4 on Thursday 14 May 2026 after live Twilio Console/API discovery from Bugs and the assisting agent.
+
+Purpose:
+
+- avoid building the RCS intake as if RCS sender registration is the only approval track;
+- map RightOnQ intake fields to the stricter of RCS sender registration and Twilio Trust Hub/KYC requirements;
+- keep Trust Hub compliance profile work separate from Twilio subaccount/runtime setup.
+
+Current field-authority decisions:
+
+- Legal business name should be exact Companies House / registered name.
+- Registration number should be captured as the Companies House CRN for UK Ltd clients.
+- Business type, industry, regions of operation, website, registered address, and both authorised representatives should be shaped to satisfy Trust Hub first, then reused for RCS where possible.
+- Build for two authorised representatives when Secondary Compliance Profile submission is in scope, following the later Isa/Twilio follow-up and current public Secondary Compliance Profile guidance.
+- Do not collect date of birth in the launch intake unless Twilio's live flow explicitly requires it.
+
+Implementation stance:
+
+- First live version should stay manual: RightOnQ reviews intake, then enters/creates the Secondary Compliance Profile in Twilio Console or a guarded internal workflow.
+- API automation should come after the manual process is proven and after the required fields are verified from Twilio's live policy/evaluation resources.
+- Do not submit fake/test profiles to Twilio review. Keep test profiles clearly labelled draft-only.
+
+### Slice 6D - Internal Review Checklist
+
+Status: first thin implementation added by RCS-Twilio-4 on Thursday 14 May 2026.
+
+Purpose:
+
+- give RightOnQ an operator checklist when Part A lands;
+- keep the manual review visible before phone preview, Trust Hub/KYC, or RCS submission work moves forward;
+- avoid building a full admin UI before the workflow has settled.
+
+Implemented:
+
+- Apps Script now defines an `Internal reviews` tab.
+- Future Part A submissions append one checklist row to `Internal reviews`.
+- The checklist includes:
+  - legal/company check;
+  - website/domain check;
+  - public links check;
+  - message purpose/examples check;
+  - consent/opt-out check;
+  - KYC/Trust Hub check;
+  - SMS fallback/RC bundle check;
+  - phone preview readiness;
+  - next action;
+  - notes.
+- `Applications` now has a `Trust Hub status` control field.
+- Guarded internal status updates can now update `trustHubStatus`.
+- Existing live Apps Script deployment was redeployed in place to version `16`.
+
+Test evidence:
+
+- Apps Script syntax passed via `new Function(...)`.
+- `git diff --check` passed for scoped files.
+- Live labelled Part A test submission `ROQ-RCS-TEST-REVIEW-202605142008` returned `ok: true`.
+- Live `Internal reviews` tab contains a pending checklist row for `ROQ-RCS-TEST-REVIEW-202605142008`.
+- Live `Applications` tab contains `Trust Hub status = not_started` for `ROQ-RCS-TEST-REVIEW-202605142008`.
+- Live status lookup for `ROQ-RCS-TEST-REVIEW-202605142008` returns `trustHubStatus: not_started`.
+
+Important caveat:
+
+- This is not a full operator dashboard.
+- It is a sheet-backed internal checklist and status spine only.
+- It does not request, upload, store, or link sensitive ID evidence.
+- Two earlier labelled curl attempts displayed a Google Drive error page because the redirect was followed incorrectly, but they still reached the Apps Script backend and wrote test rows `ROQ-RCS-TEST-REVIEW-202605142006` and `ROQ-RCS-TEST-REVIEW-202605142007`. Leave them as obvious proof rows unless Bugs asks for cleanup.
+
+### Slice 6E - Guarded Internal Review Update Action
+
+Status: implemented and deployed by RCS-Twilio-4 on Thursday 14 May 2026.
+
+Purpose:
+
+- make the `Internal reviews` checklist actionable without manually editing every cell;
+- keep the same operator-PIN guard used by internal status changes;
+- allow RightOnQ to mark Part A accepted from the review workflow when the checklist is ready.
+
+Implemented behaviour:
+
+- Apps Script supports `action = updateInternalReview`.
+- The action requires `ONBOARDING_OPERATOR_PIN`.
+- It updates the latest `Internal reviews` row for the supplied `applicationId`, or creates one if missing.
+- Accepted/checklist fields include:
+  - `reviewStatus`;
+  - `assignedOwner`;
+  - `legalCompanyCheck`;
+  - `websiteDomainCheck`;
+  - `publicLinksCheck`;
+  - `messagePurposeExamplesCheck`;
+  - `consentOptOutCheck`;
+  - `kycTrustHubCheck`;
+  - `smsFallbackRcBundleCheck`;
+  - `phonePreviewReadiness`;
+  - `nextAction`;
+  - `notes`;
+  - `sourceStatus`.
+- If `partAAccepted = true` or `reviewStatus = accepted`, it reuses the existing internal status path to set:
+  - `registrationStatus = part_a_accepted`;
+  - `partAStatus = part_a_accepted`;
+  - `nextActionOwner = RightOnQ`;
+  - `nextActionNote = Prepare the phone name and logo preview` unless supplied.
+- Because it reuses the status path, the existing status-event and communications queue behaviour should still apply.
+
+Important caveat:
+
+- Positive live proof still depends on `ONBOARDING_OPERATOR_PIN` being configured or an internal wrapper being built.
+- Safe live proof completed against version `17`: an unauthorised `updateInternalReview` call for `ROQ-RCS-TEST-REVIEW-202605142008` returned `ONBOARDING_OPERATOR_PIN is not configured`.
+- Spreadsheet readback after that rejected call showed the `Internal reviews` row stayed `pending_review` and the `Applications` row stayed `part_a_submitted`, with `Trust Hub status = not_started`.
+
+### Slice 6F - Local Operator Review Wrapper
+
+Status: implemented by RCS-Twilio-4 on Thursday 14 May 2026.
+
+Purpose:
+
+- give RightOnQ a repeatable local command for updating `Internal reviews`;
+- avoid hand-building curl payloads for every internal review;
+- keep the operator PIN out of the public static app, repo, and Sheet audit JSON;
+- create a small contract that can later be reused by a proper internal admin UI.
+
+Implemented behaviour:
+
+- repo-owned Node wrapper at `rcs-registration/tools/operator-review.mjs`;
+- reads `RCS_ONBOARDING_OPERATOR_PIN` from the local environment;
+- sends `action = updateInternalReview` to the deployed Apps Script endpoint;
+- supports `--dry-run` so operators can inspect the payload without sending it;
+- supports checklist fields and `--part-a-accepted` to trigger the guarded Part A acceptance path.
+
+Verification:
+
+- `node --check rcs-registration/tools/operator-review.mjs` passed.
+- `--dry-run` printed the expected `updateInternalReview` payload without an operator PIN.
+- Running without `RCS_ONBOARDING_OPERATOR_PIN` failed locally before sending.
+- Running with a dummy local PIN reached Apps Script and returned `ONBOARDING_OPERATOR_PIN is not configured`.
+- Spreadsheet readback after the dummy live attempt showed no mutation: the review row stayed `pending_review`, the application stayed `part_a_submitted`, and `Trust Hub status` stayed `not_started`.
+
+Important caveat:
+
+- The wrapper does not configure the Apps Script-side `ONBOARDING_OPERATOR_PIN`.
+- Positive live proof still requires that script property to be configured.
+
+### Slice 6G - Guarded Operator Snapshot Readback
+
+Status: implemented and deployed by RCS-Twilio-4 on Thursday 14 May 2026.
+
+Purpose:
+
+- let RightOnQ inspect one application's operational state before and after an operator action;
+- avoid relying on manual Sheet scanning for every review;
+- keep the client-facing status endpoint limited and token-safe;
+- give the future internal admin UI a clean readback contract.
+
+Implemented behaviour:
+
+- Apps Script supports guarded `action = getOperatorSnapshot`;
+- the action requires `ONBOARDING_OPERATOR_PIN`;
+- response includes a redacted application summary, latest internal review, recent status events, and queued communications;
+- `Private application token` and raw `Submission JSON` are not returned in the operator snapshot;
+- local wrapper at `rcs-registration/tools/operator-status.mjs` sends the guarded readback request using `RCS_ONBOARDING_OPERATOR_PIN`.
+
+Verification:
+
+- `Code.gs` syntax check passed.
+- `node --check rcs-registration/tools/operator-status.mjs` passed.
+- `operator-status.mjs --dry-run` printed the expected `getOperatorSnapshot` payload without an operator PIN.
+- `git diff --check` passed for the scoped files.
+- Apps Script version `18` was created and deployed to the existing web app deployment.
+- A dummy live operator-status request reached Apps Script and returned `ONBOARDING_OPERATOR_PIN is not configured`.
+- Spreadsheet readback after the dummy live attempt showed no mutation.
+
+Important caveat:
+
+- Positive live proof still requires the Apps Script-side `ONBOARDING_OPERATOR_PIN` script property to be configured.
+
+### Slice 6H - Local Private Application Link Wrapper
+
+Status: implemented by RCS-Twilio-4 on Thursday 14 May 2026.
+
+Purpose:
+
+- give RightOnQ a repeatable local command for turning a qualified CRM/outreach handoff into a private application link;
+- avoid hand-building `createApplicationDraft` curl payloads;
+- keep the create PIN out of the public static app, repo, and Sheet audit JSON;
+- preserve the source-of-truth split: CRM qualifies the lead, onboarding creates the application record/link.
+
+Implemented behaviour:
+
+- repo-owned Node wrapper at `rcs-registration/tools/operator-create-application.mjs`;
+- reads `RCS_ONBOARDING_CREATE_PIN` from the local environment;
+- sends `action = createApplicationDraft` to the deployed Apps Script endpoint;
+- supports CRM, company, contact, campaign, package, and handoff context fields;
+- supports `--dry-run` so operators can inspect the payload without sending it;
+- successful live runs return the private application link for that specific client/application.
+
+Verification:
+
+- `node --check rcs-registration/tools/operator-create-application.mjs` passed.
+- `--dry-run` printed the expected `createApplicationDraft` payload without a create PIN.
+- Running without `RCS_ONBOARDING_CREATE_PIN` failed locally before sending.
+- Running with a dummy local create PIN reached Apps Script and returned `ONBOARDING_CREATE_PIN is not configured`.
+- Spreadsheet readback after the dummy live attempt showed no new `ROQ-RCS-TEST-CREATE-WRAPPER-202605142032` row in `Applications`.
+
+Important caveat:
+
+- The wrapper does not configure the Apps Script-side `ONBOARDING_CREATE_PIN`.
+- Positive live proof still requires that script property to be configured.
+
+### Slice 6I - Isa Bell Reply Integration
+
+Status: implemented and deployed by RCS-Twilio-4 on Thursday 14 May 2026.
+
+Purpose:
+
+- incorporate Isa Bell's Twilio reply into the source-of-truth build plan;
+- remove stale `pending Isa` assumptions from future build decisions;
+- align future internal checklist rows with the now-known KYC stance.
+
+Implemented behaviour:
+
+- update Trust Hub/RC Bundle assumptions:
+  - Secondary Compliance Profile per UK limited-company end client;
+  - UK long-code RC Bundle remains a separate number-compliance lane;
+  - later follow-up now means two authorised representatives for Secondary Profile readiness;
+  - ID evidence is exception-only, not upfront;
+  - ID/document evidence must not enter the static app or Sheet path;
+- change future `Internal reviews` KYC default from `pending_isa_reply` to `pending_trust_hub_review`.
+
+Verification:
+
+- `Code.gs` syntax check passed.
+- `git diff --check` passed for the scoped files.
+- Apps Script version `19` was created and deployed to the existing web app deployment.
+- No live test submission was created for this small default-value change; existing `pending_isa_reply` test rows remain historical proof rows.
+
+Important caveat:
+
+- Existing test rows with `pending_isa_reply` are historical proof rows and do not need mutation unless Bugs asks for cleanup.
+
+### Slice 6J - Internal Trust Hub / RC Bundle Tracking Rows
+
+Status: implemented and deployed by RCS-Twilio-4 on Thursday 14 May 2026.
+
+Purpose:
+
+- move Trust Hub and UK RC Bundle tracking from planning-only into the internal Sheet/backend layer;
+- keep KYC/number-compliance work separate from the public Part A form;
+- make operator snapshots show the current Trust Hub and UK RC Bundle state for each application;
+- avoid collecting or storing raw ID evidence.
+
+Implemented behaviour:
+
+- Apps Script defines internal `Trust Hub KYC` headers.
+- Apps Script defines internal `UK RC bundles` headers.
+- Future Part A submissions append one internal row to each tracking tab.
+- Guarded operator snapshots include the latest Trust Hub KYC row and latest UK RC Bundle row.
+- Future rows store IDs, statuses, exception codes, rejection summaries, and notes only.
+
+Verification:
+
+- `Code.gs` syntax check passed.
+- `git diff --check` passed for the scoped files.
+- Local mocked-Sheet proof confirmed `Trust Hub KYC` row length matches headers.
+- Local mocked-Sheet proof confirmed `UK RC bundles` row length matches headers.
+- Apps Script version `20` was created and deployed to the existing web app deployment.
+- No live Part A submission was created for this tracking-structure slice, to avoid another Sheet/email proof row.
+
+Important caveat:
+
+- Existing applications/test rows will not be backfilled automatically.
+- This slice does not call Twilio APIs or submit compliance profiles/bundles.
+- This slice does not add sensitive ID upload fields.
+
+### Slice 6K - Operator Tool Usage Notes
+
+Status: implemented by RCS-Twilio-4 on Thursday 14 May 2026.
+
+Purpose:
+
+- make the local operator workflow usable without reading tool source code;
+- give future agents/operators a clear safe order of operations;
+- keep PIN handling and private-link handling explicit.
+
+Implemented behaviour:
+
+- add `rcs-registration/tools/README.md`;
+- document all three local operator tools:
+  - `operator-create-application.mjs`;
+  - `operator-status.mjs`;
+  - `operator-review.mjs`;
+- include dry-run examples before live examples;
+- explain local environment PIN variables without storing any real PIN;
+- list expected results and common failure messages.
+
+Verification:
+
+- `operator-create-application.mjs` dry-run example produced the expected `createApplicationDraft` payload.
+- `operator-status.mjs` dry-run example produced the expected `getOperatorSnapshot` payload.
+- `operator-review.mjs` dry-run example produced the expected `updateInternalReview` payload.
+- `git diff --check` passed for the scoped documentation files.
+
+Important caveat:
+
+- This is documentation only.
+- It does not configure Apps Script PINs.
+
+### Slice 6L - Positive Operator PIN Proof
+
+Status: completed by Bugs and RCS-Twilio-4 on Thursday 14 May 2026 using Bugs' normal Mac Terminal.
+
+Purpose:
+
+- prove the real Apps Script-side `ONBOARDING_CREATE_PIN` and `ONBOARDING_OPERATOR_PIN` properties work;
+- prove the local operator toolchain can create, read, approve, and read back an application without exposing PINs in chat/repo files;
+- verify the status-event and communication-queue side effects of Part A acceptance.
+
+What happened:
+
+- Bugs set both Script Properties in Apps Script Project Settings:
+  - `ONBOARDING_CREATE_PIN`;
+  - `ONBOARDING_OPERATOR_PIN`.
+- An initial long pasted command was mangled by Terminal and produced `Unknown option: --`; this was a paste issue, not a PIN or backend issue.
+- A read-only terminal refresh then proved `operator-status.mjs` could use `ONBOARDING_OPERATOR_PIN` successfully.
+- Bugs then ran `operator-review.mjs` successfully against the created test application.
+
+Test application:
+
+- `ROQ-RCS-TEST-POSITIVE-20260514211204`
+
+Verified result:
+
+- `operator-create-application.mjs` created the private application record:
+  - `registrationStatus = application_created`;
+  - `partAStatus = draft`;
+  - private application link was present in the returned result but was not pasted into the docs.
+- `operator-status.mjs` read the guarded operator snapshot successfully.
+- `operator-review.mjs` accepted Part A:
+  - `reviewStatus = accepted`;
+  - `partAAccepted = true`;
+  - `registrationStatus = part_a_accepted`;
+  - `partAStatus = part_a_accepted`.
+- Final operator snapshot showed:
+  - `Applications` row moved to `part_a_accepted`;
+  - `Next action owner = RightOnQ`;
+  - `Next action note = Prepare the phone name and logo preview.`;
+  - latest `Internal reviews` row had all supplied checks and `Phone preview readiness = ready`;
+  - one `Status events` row was present for `internal_review_completed`;
+  - one `Communications` row was queued with code `part_a_accepted`;
+  - `Submission JSON` in the operator snapshot was redacted.
+
+Expected limitation:
+
+- `Trust Hub KYC` and `UK RC bundles` were empty for this test because it created a private application link but did not submit Part A through the public form. Those rows are created on Part A submission.
+
+Security note:
+
+- PINs were not committed or written to repo files.
+- The final proof used Bugs' local Terminal environment variables, then unset them.
+
+### Slice 6M - Public Part A Submission Proof
+
+Goal:
+
+- prove the customer-facing/public Part A submission path after Apps Script version `20`;
+- confirm that a real Part A submission through a private application link creates the internal Trust Hub KYC and UK RC Bundle tracking rows.
+
+Added helper:
+
+- `rcs-registration/tools/proof-public-part-a-submit.mjs`
+
+Helper behaviour:
+
+- creates a private test application using the existing guarded `createApplicationDraft` action;
+- extracts the private application token from the returned link without printing it;
+- submits a complete Part A test payload through the normal public submission branch;
+- reads the guarded operator snapshot;
+- prints a redacted summary only.
+
+Proof application:
+
+- `ROQ-RCS-TEST-PUBLIC-PARTA-20260514211901`
+
+Proof result:
+
+- private application creation returned:
+  - `registrationStatus = application_created`;
+  - `partAStatus = draft`;
+  - private application link present.
+- public Part A submission returned:
+  - `ok = true`;
+  - `submissionId = RCS-20260514-PUBLIC-PARTA-PROOF`;
+  - `registrationStatus = part_a_submitted`;
+  - `receivedAt = 2026-05-14T21:19:06.317Z`.
+- operator snapshot confirmed:
+  - `Applications.registrationStatus = part_a_submitted`;
+  - `Applications.partAStatus = part_a_submitted`;
+  - `Applications.Trust Hub status = not_started`;
+  - latest `Internal reviews` row exists with `pending_review`;
+  - latest `Trust Hub KYC` row exists with `Trust Hub status = not_started`;
+  - latest `UK RC bundles` row exists with `RC bundle status = not_started`;
+  - `UK RC bundles.Fallback required = to_be_confirmed`;
+  - `UK RC bundles.Compliance owner = end_business`;
+  - queued communication code includes `part_a_received`.
+
+Security:
+
+- PINs were entered by Bugs in local Terminal and unset after the proof.
+- The helper does not print the private token, private application link, create PIN, or operator PIN.
+
+Outcome:
+
+- The previous evidence gap is closed.
+- The next build slice can safely focus on guarded operator update actions for Trust Hub KYC and UK RC Bundle statuses.
+
+### Slice 6N - Guarded Trust Hub / RC Bundle Operator Updates
+
+Goal:
+
+- let RightOnQ update internal Trust Hub KYC and UK RC Bundle tracking without direct Sheet edits;
+- keep the public form free of identity-document collection;
+- preserve audit/status-event evidence for manual operator changes.
+
+Apps Script version:
+
+- version `21`;
+- deployed to existing web app deployment `AKfycbyI81Ir2xvHLar0R0iFBBWyXa1Nj93T4_8Ni5_eX3XEYDA-AKQbVYbPHnTROLm8e4a6`.
+
+Added guarded actions:
+
+- `updateTrustHubKyc`;
+- `updateUkRcBundle`.
+
+Both actions:
+
+- require `ONBOARDING_OPERATOR_PIN`;
+- reject incorrect PINs;
+- update the matching internal tracking row by `Application ID`;
+- append/update status evidence without storing raw identity evidence.
+
+Added local tools:
+
+- `rcs-registration/tools/operator-trusthub-kyc.mjs`;
+- `rcs-registration/tools/operator-rc-bundle.mjs`.
+
+Live proof application:
+
+- `ROQ-RCS-TEST-PUBLIC-PARTA-20260514211901`
+
+Security proof:
+
+- an incorrect operator PIN was entered first;
+- Trust Hub update, RC Bundle update, and status snapshot all returned `Invalid onboarding operator PIN`;
+- the correct PIN was then entered and the proof succeeded.
+
+Correct-PIN proof result:
+
+- Trust Hub KYC update returned:
+  - `trustHubStatus = pending_review`;
+  - `secondaryComplianceProfileSid = BU_TEST_SECONDARY_PROFILE`;
+  - `evaluationStatus = not_run`;
+  - `updatedAt = 2026-05-15T07:24:16.476Z`.
+- UK RC Bundle update returned:
+  - `rcBundleStatus = pending_review`;
+  - `fallbackRequired = yes`;
+  - `updatedAt = 2026-05-15T07:24:23.739Z`.
+- operator snapshot confirmed:
+  - `Applications.Trust Hub status = pending_review`;
+  - latest `Trust Hub KYC` row has `Trust Hub status = pending_review`;
+  - latest `Trust Hub KYC` row has `Secondary compliance profile SID = BU_TEST_SECONDARY_PROFILE`;
+  - latest `Trust Hub KYC` row has `Business website match status = pending_review`;
+  - latest `Trust Hub KYC` row has `Evaluation status = not_run`;
+  - latest `UK RC bundles` row has `RC bundle status = pending_review`;
+  - latest `UK RC bundles` row has `Fallback required = yes`;
+  - latest `UK RC bundles` row has `Compliance owner = end_business`;
+  - `Status events` includes `trust_hub_kyc_updated`;
+  - `Status events` includes `uk_rc_bundle_updated`;
+  - `Submission JSON` remains redacted in operator snapshots.
+
+Outcome:
+
+- manual Trust Hub and RC Bundle status tracking is now available through guarded local tools;
+- no client-facing ID collection was added;
+- no raw identity documents, DOB, passport, driving licence, or proof-of-address fields were added to the public form or Sheet workflow.
+
+### Slice 6O - Evidence Exception Tracking Fields
+
+Goal:
+
+- prepare for Twilio-managed evidence exceptions without adding ID uploads to the public form;
+- keep RightOnQ's internal record aware of the evidence status;
+- store only status/reference data.
+
+Added to `Trust Hub KYC`:
+
+- `Evidence collection mode`;
+- `Evidence status`;
+- `Evidence provider`;
+- `Evidence inquiry ID`;
+- `Evidence registration ID`;
+- `Evidence requested at`;
+- `Evidence submitted at`;
+- `Evidence approved at`;
+- `Evidence rejected at`;
+- `Evidence rejection reason`.
+
+Default for new Part A submissions:
+
+- `Evidence collection mode = not_required`;
+- `Evidence status = not_required`.
+
+Supported update path:
+
+- `operator-trusthub-kyc.mjs` can update the evidence fields through guarded `updateTrustHubKyc`.
+
+Apps Script version:
+
+- version `22`;
+- deployed to existing web app deployment `AKfycbyI81Ir2xvHLar0R0iFBBWyXa1Nj93T4_8Ni5_eX3XEYDA-AKQbVYbPHnTROLm8e4a6`.
+
+Live proof application:
+
+- `ROQ-RCS-TEST-PUBLIC-PARTA-20260514211901`
+
+Proof result:
+
+- `operator-trusthub-kyc.mjs` returned `ok = true`;
+- snapshot confirmed:
+  - `Authorised rep exception code = 18019`;
+  - `Authorised rep exception action = twilio_managed_evidence_required`;
+  - `Evidence collection mode = twilio_managed`;
+  - `Evidence status = requested`;
+  - `Evidence provider = twilio_compliance_embeddable`;
+  - `Evidence inquiry ID = inq_TEST_EVIDENCE`;
+  - `Evidence registration ID = tri_TEST_EVIDENCE`;
+  - `Evidence requested at = 2026-05-15T08:00:00Z`;
+  - `KYC internal notes = Evidence exception proof only. No identity evidence stored.`
+
+Boundary:
+
+- no passport, driving licence, DOB, proof-of-address, government ID, or raw identity document field was added;
+- the current design stores only Twilio/compliance IDs, status values, timestamps, rejection reasons, and operator notes.
+
+### Slice 7 - Customer Commercial/Payment Entry Page
+
+Design/build the onboarding page before the RCS form.
+
+Status:
+
+- started as `Slice 7A - Commercial gateway mechanics draft`;
+- customer-facing plan/fee acknowledgement mechanics now exist in `rcs-registration/index.html`;
+- `Slice 7B - Billing tracking sheet and operator tool` is complete;
+- live payment/checkout is still not implemented.
+
+Output:
+
+- package explanation;
+- `£100 + VAT` RCS registration handling fee wording;
+- refund guarantee wording;
+- post-approval plan wording for RightOnQ UK and RightOnQ Global;
+- terms acceptance;
+- Revolut checkout handoff;
+- success route to private application link.
+
+Current implemented gateway mechanics:
+
+- customer chooses `RightOnQ UK` or `RightOnQ Global`;
+- customer acknowledges the `£100 + VAT` registration handling fee and refund terms;
+- `Complete Part A` is gated until plan choice and acknowledgement are complete;
+- Part A payload carries:
+  - `packageName`;
+  - `packageInterest`;
+  - `monthlyBaseFeeGbp`;
+  - `registrationFeeGbp`;
+  - `registrationFeeVatTreatment`;
+  - `registrationFeeAcknowledgement`;
+  - `billingStatus = registration_fee_pending`.
+
+Remaining Slice 7 work:
+
+- decide the final public wording and layout after mechanics are settled;
+- create the real payment/checkout start point;
+- mark payment as received before private Part A access;
+- generate or reveal the private application link only after payment/manual payment confirmation;
+- connect payment IDs/statuses into the application record;
+- decide whether the static page remains the gateway or whether a separate checkout/start page should precede it.
+
+Implemented billing tracking:
+
+- new `Billing` sheet;
+- new guarded Apps Script `action = updateBilling`;
+- new local tool `rcs-registration/tools/operator-billing.mjs`;
+- `getOperatorSnapshot` returns latest Billing row;
+- `createApplicationDraft` queues default billing state;
+- Part A submission queues/updates billing state;
+- billing updates write `billing_updated` events and update `Applications.Billing status`;
+- Apps Script version `24` is deployed to the existing web app deployment.
+
+Billing fields currently track:
+
+- registration fee amount/VAT treatment/acknowledgement;
+- payment provider;
+- provider customer ID;
+- checkout/order ID;
+- payment ID;
+- payment method ID;
+- payment status;
+- payment received timestamp;
+- refund status/reason/amount/timestamp;
+- monthly plan;
+- monthly base fee;
+- monthly billing start date;
+- next billing cycle date;
+- usage/top-up status;
+- internal notes.
+
+Billing safety boundary:
+
+- store provider references, statuses, timestamps, and notes only;
+- never store card numbers, CVV, raw card data, bank credentials, or sensitive payment evidence.
+
+Parked page polish:
+
+- top-of-page journey storyboard;
+- 4-6 week process reassurance;
+- no monthly platform fee until approval and ready-to-use;
+- month-end plan changes only;
+- no pro-rata credits currently;
+- desktop/laptop/tablet-first completion experience.
+
+### Slice 8 - Revolut Sandbox Proof
+
+Test Revolut flow before committing to implementation.
+
+Status:
+
+- started on 2026-05-15 after external read-only sanity check confirmed this is the highest-value next slice;
+- `rcs-registration/REVOLUT_SANDBOX_PROOF.md` created as the proof runbook;
+- `rcs-registration/tools/revolut-sandbox-proof.mjs` created as the local sandbox helper;
+- no live Revolut secret has been stored in the repo;
+- no live Revolut API call has been made yet.
+
+Questions:
+
+- Can RightOnQ create a customer/order/payment in sandbox?
+- Can the payment method be saved for future merchant-initiated charge?
+- Can the first payment be `£100 + VAT`?
+- Can later top-up charge be initiated?
+- What webhook events arrive?
+- How are failed payments represented?
+- What IDs should be stored?
+
+Initial doc-backed findings:
+
+- Hosted Checkout Page via API can create a backend order and return an `id` plus `checkout_url`.
+- Sandbox API calls should use `https://sandbox-merchant.revolut.com/` instead of production endpoints.
+- Subscriptions API supports plans/variations, hosted onboarding/setup orders, automatic charging of saved payment methods, lifecycle tracking, and billing-cycle history.
+- Creating a subscription can produce a `setup_order_id`; retrieving that order gives the `checkout_url` for the hosted setup payment page.
+- Saved payment methods are created as part of payment/setup flows, not manually by RightOnQ.
+- Merchant-initiated later charges require a saved payment method ID/type and a new order/payment call.
+- Webhooks support order lifecycle events such as `ORDER_AUTHORISED` and `ORDER_COMPLETED`, but event delivery order is not guaranteed; RightOnQ webhook handling must be idempotent.
+
+Current proof helper:
+
+```bash
+node rcs-registration/tools/revolut-sandbox-proof.mjs --dry-run
+```
+
+When Bugs has a sandbox Merchant API secret, run it locally only through an environment variable:
+
+```bash
+export REVOLUT_MERCHANT_API_SECRET="sk_sandbox_..."
+node rcs-registration/tools/revolut-sandbox-proof.mjs --create-registration-order
+unset REVOLUT_MERCHANT_API_SECRET
+```
+
+Do not paste Revolut secrets into chat or commit them.
+
+External sanity check note:
+
+- Claude Code read the build plan and Twilio-4 handover in read-only mode.
+- It agreed the three-lane split is right: commercial/payment, Trust Hub + UK RC Bundle, RCS sender registration.
+- It warned that endpoint exposure and anonymous submission hardening must happen before public launch.
+- It recommended `Slice 8 - Revolut Sandbox Proof` before further wording or Trust Hub field expansion.
+- It recommended pausing more Trust Hub/RC field expansion until one real Twilio submission teaches the actual requirements.
+
+Revolut proof refinement:
+
+- prove both possible monthly billing paths:
+  - Revolut Subscriptions API;
+  - RightOnQ-owned monthly scheduler using merchant-initiated charges against a saved payment method;
+- do not assume a Stripe-style subscription model until sandbox proves the fit;
+- use `applicationId` as the Revolut reference where supported, so webhooks can route back to the application;
+- prove `Idempotency-Key` behaviour before running repeated checkout/order tests;
+- add full/partial refund proof before relying on the registration-fee refund promise;
+- capture at least one failed/abandoned payment path;
+- capture webhook signature verification details;
+- keep public endpoint hardening ahead of website integration.
+
+Updated local helper:
+
+```bash
+node rcs-registration/tools/revolut-sandbox-proof.mjs \
+  --dry-run \
+  --application-id ROQ-RCS-TEST-PUBLIC-PARTA-20260514211901 \
+  --idempotency-key proof-ROQ-RCS-TEST-PUBLIC-PARTA-20260514211901
+```
+
+Slice 8 continuation after public/operator hardening:
+
+- Revolut official docs were refreshed on 2026-05-15 before coding the next proof step.
+- Confirmed Hosted Checkout API is server-side only because the Merchant API secret must not be exposed to frontend code.
+- Confirmed `merchant_order_data.reference` is the create-order reference, while webhook callbacks expose the same business reference as `merchant_order_ext_ref`.
+- Confirmed refunds are full/partial, require completed orders, and should use `Idempotency-Key`.
+- Confirmed saved-method MIT charging needs a payment method saved for merchant use.
+- Confirmed webhook callbacks include `Revolut-Request-Timestamp` and `Revolut-Signature`; the webhook signing secret must not be stored in the repo.
+- Confirmed webhook signature verification uses `v1.{timestamp}.{raw payload}` with HMAC SHA-256 and a 5-minute timestamp tolerance.
+- `revolut-sandbox-proof.mjs` now supports dry/live scaffolding for:
+  - registration order creation;
+  - order retrieval;
+  - order listing by reference;
+  - payment-list retrieval;
+  - refund proof;
+  - saved-method payment proof.
+- `revolut-webhook-verify.mjs` now supports:
+  - local fake-data self-test;
+  - real captured sandbox payload verification via `REVOLUT_WEBHOOK_SIGNING_SECRET`;
+  - multiple comma-separated `v1=` signatures during signing-secret rotation;
+  - replay-window checks using the Revolut timestamp header.
+- Post-review polish steers real webhook checks to `--payload-file`, adds a raw-payload mismatch hint, and records that any live webhook endpoint must enforce timestamp tolerance with no skip flag.
+- `revolut-webhook-map.mjs` now maps verified Revolut order/payment webhook payloads into proposed `operator-billing.mjs --dry-run` updates without calling Apps Script or writing to the Sheet.
+- Dry-run checks passed for create-order, refund, and saved-method payment payloads.
+- Webhook verifier self-test passed for valid, tampered-payload, and stale-timestamp cases.
+- Webhook mapper self-test passed for completed-payment and declined-payment cases.
+- First live Revolut Merchant sandbox Hosted Checkout proof passed on 2026-05-16:
+  - `GBP 120.00` order created for application `ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747`;
+  - Hosted Checkout accepted a sandbox card payment;
+  - final order state was `completed`;
+  - final payment state was `captured`;
+  - payment ID was `6a082633-a973-ac00-837c-e68c28186597`.
+- Repeating create-order with the same `Idempotency-Key` created a second order. RightOnQ must enforce duplicate checkout protection in its own Billing lane before creating another Revolut order.
+- List by `merchant_order_data_reference` works for reconciliation, but list responses did not include checkout URLs; store checkout URL/token at create time.
+- The first payment-success redirect hit a RightOnQ 404 page after payment; this has since been addressed with a static payment-return page for future checkout tests.
+- No production Revolut API call has been made yet. A sandbox webhook has now been registered/captured and dry-run mapped as recorded below, and a full sandbox refund has been created successfully.
+
+Payment-side review follow-up:
+
+- Claude Code read-only review found no Critical payment issues after the sandbox proof.
+- It confirmed webhook proof is safe to continue as a sandbox/local dry-run activity.
+- It also confirmed public payment-gate wiring is not safe yet.
+- Highest-risk issue found: Apps Script `updateBilling` was injecting default fee/refund/usage/plan values into every billing update, which could reset refund or usage state during later webhook/operator updates.
+- RCS-Twilio-4 fixed `updateBilling` so defaults are only applied when the caller did not provide the field and the existing Billing row is blank.
+- Rechecked on 2026-05-16: current `updateBilling` uses `const billingPayload = { ...payload }` plus `applyDefaultPayloadValue(...)`, so this default-clobber issue is fixed in the current code.
+- Syntax check passed with `node --check --input-type=commonjs < rcs-registration/google-apps-script/Code.gs`.
+- Remaining payment blockers before public gate:
+  - keep the active-checkout guard in the create-order path before exposing customer checkout;
+  - finish refund/refunded status and event mapping after capturing refund webhook event names;
+  - build a real raw-body webhook endpoint with signature/timestamp verification, dedupe, and payment enrichment;
+  - run a fresh sandbox checkout using the new payment-return URL and capture the real post-payment browser landing.
+
+Webhook proof follow-up:
+
+- Temporary Revolut sandbox webhook was registered on 2026-05-16.
+- Revolut delivered real sandbox `ORDER_AUTHORISED` and `ORDER_COMPLETED` events for order `6a084d13-d84d-a49b-bb44-916bb9237ba4`.
+- The `ORDER_COMPLETED` payload contained:
+  - `event`;
+  - `order_id`;
+  - `merchant_order_ext_ref`.
+- Signature verification confirmed `signatureMatched: true`.
+- Timestamp verification failed only because the archived sample was verified after the 5-minute replay window. The future live endpoint must enforce that window.
+- `revolut-webhook-map.mjs` mapped the real `ORDER_COMPLETED` event into a dry-run Billing update:
+  - `registration_fee_paid`;
+  - `paymentProvider = revolut`;
+  - `paymentStatus = paid`;
+  - `checkoutOrderId = 6a084d13-d84d-a49b-bb44-916bb9237ba4`.
+
+Full refund proof follow-up:
+
+- Official Revolut refund docs were refreshed again on 2026-05-16 before the live sandbox refund proof.
+- `revolut-sandbox-proof.mjs` now sends refund references in the current documented request shape: `merchant_order_data.reference`.
+- Full sandbox refund succeeded for return-page proof order `6a0866ef-9b11-a041-bfa2-e973e15e564d`.
+- Initial refund response summary exposed refund order ID `6a0872b4-89b8-a82d-884b-703f6470c124`, `type = REFUND`, `state = PROCESSING`, and embedded refund payment ID `6a0872b4-395a-a536-8ca5-0ab9c27056af` with state `COMPLETED`; the authoritative later direct retrieval of the refund order returned lowercase `type = refund` and `state = completed`, so endpoint enrichment should normalise casing and treat lowercase `refund` as the observed sandbox retrieval shape.
+- Immediate original-order retrieval returned `refundedAmount = 12000`, confirming the full `GBP 120.00` sandbox refund was associated with the paid order.
+- Original order payment-list still returned the original captured payment only, so refund status should not be inferred from original payment-list retrieval alone.
+- Refund webhook capture found a real sandbox event for the refund order:
+  - webhook.site request ID `d6d383cf-8ea0-4ca1-ab9d-b4859ed7cd6b`;
+  - raw payload `{"event":"ORDER_COMPLETED","order_id":"6a0872b4-89b8-a82d-884b-703f6470c124"}`;
+  - no `merchant_order_ext_ref`, refund payment ID, or refund-specific body fields;
+  - signature verification matched using the local webhook signing secret.
+- `revolut-webhook-map.mjs` now treats recognised events with no `merchant_order_ext_ref` as `enrichmentRequired` rather than throwing or producing a Billing update.
+- `revolut-webhook-map.mjs` can now accept an enriched refund order plus an application ID and classify the event as `refund_order`, producing a refund-status dry-run that does not overwrite the original checkout/order ID.
+- Build implication: store refund order ID, refund payment ID where present, refund amount/currency, refund reference, and original order ID; refund webhooks must retrieve/enrich the order and resolve the application from RightOnQ's ledger/original-order lookup before automating Billing refund updates.
+- The webhook payload did not include `payment_id`, so payment ID must be enriched from order/payment retrieval if needed.
+- No live Billing row update has been made from the webhook proof.
+- Replace the previous "capture a real sandbox webhook" blocker with:
+  - build a real raw-body webhook endpoint;
+  - verify signature and timestamp atomically;
+  - dedupe events before writing;
+  - optionally enrich payment ID/state from Revolut before updating Billing.
+
+Active-checkout protection started:
+
+- Claude Code read-only design review recommended an append-only `Payment orders` ledger as the source of truth, with Billing remaining a derived/operator summary.
+- RCS-Twilio-4 added a `Payment orders` sheet model with guarded operator actions:
+  - `checkActiveCheckout`;
+  - `recordPaymentOrder`.
+- `checkActiveCheckout` scans the latest non-superseded order snapshots for an application:
+  - `completed` -> `already_paid`, do not create another checkout;
+  - `creating` / `pending` / `processing` / `authorised` / `authorized` -> `reuse`, reuse the stored checkout URL;
+  - no completed/open order -> `safe_to_create`.
+- `recordPaymentOrder` appends a ledger snapshot containing Revolut order ID, state, amount, currency, checkout URL, merchant reference, idempotency key, payment ID/state, purpose, superseded flag, and notes.
+- `lookupPaymentOrder` reads the latest ledger snapshot by Revolut order ID across the `Payment orders` ledger. This is the first local building block for resolving refund webhook application context.
+- `getOperatorSnapshot` now includes `activeCheckout` plus recent `paymentOrders`.
+- Local tool added: `rcs-registration/tools/operator-payment-order.mjs`.
+- Webhook endpoint groundwork started:
+  - `revolut-webhook-verify.mjs` exports the tested signature/timestamp verification primitives while preserving the CLI;
+  - `revolut-webhook-map.mjs` exports the tested event mapping primitives while preserving the CLI;
+  - `revolut-webhook-handler.mjs` proves the endpoint-core shape offline without live calls or writes;
+  - future live webhook endpoint should import these instead of copying crypto/mapping logic;
+  - endpoint host must support exact raw body and `Revolut-Request-Timestamp` / `Revolut-Signature` headers.
+  - live Billing apply remains blocked until `ORDER_COMPLETED` events are enriched/typed, dedupe storage is designed, and slow enrichment is separated from the first signature/timestamp verification pass.
+- Webhook host/dedupe design started in `REVOLUT_WEBHOOK_ENDPOINT_DESIGN.md`:
+  - recommended host is a small Google Cloud Run function/service;
+  - dedupe source of truth should be Firestore Native mode, not the Google Sheet;
+  - Firestore document identity is now payload-stable: `sha256(revolut:{event}:{orderId})`, with application/resolution context stored as fields after enrichment;
+  - first live implementation should be record-only/dry-run, with automatic Billing writes still disabled.
+- Declined-attempt sandbox proof passed:
+  - order `6a08af68-51f9-ae4b-be9e-c388fc6f400e` first emitted `ORDER_PAYMENT_DECLINED` then later `ORDER_AUTHORISED` and `ORDER_COMPLETED` after a successful retry;
+  - declined payment attempt ID `6a08afb8-937c-ae29-8437-9e0045df3bac`, captured payment attempt ID `6a08affd-b4b7-ae3e-9d39-4c3eb1c05f79`;
+  - webhook bodies included event, order ID, and merchant reference, but no payment ID;
+  - mapper dry-run confirmed `ORDER_PAYMENT_DECLINED` -> `registration_fee_failed` / `declined` and later `ORDER_COMPLETED` -> `registration_fee_paid` / `paid`;
+  - no live Billing update was made.
+- Terminal failed-payment sandbox proof passed:
+  - `revolut-webhook-map.mjs --self-test` now includes `ORDER_PAYMENT_FAILED` -> `registration_fee_failed` / `failed`;
+  - `revolut-webhook-handler.mjs --self-test` now includes a signed `ORDER_PAYMENT_FAILED` payload and keeps the response in dry-run/no-write mode;
+  - Revolut sandbox docs checked on 2026-05-16 (`https://developer.revolut.com/docs/guides/accept-payments/get-started/test-implementation/test-cards`) list card `4242424242424242` as a 3DS verification failure test card for GBP orders of at least `2500` minor units, expected decline reason `customer_challenge_failed`, payment state `failed`;
+  - live order `6a08b551-d18e-a506-9cfa-6a27983dd1de` / reference `ROQ-RCS-TEST-FAILED-20260516-002` produced payment ID `6a08b5b0-1eef-af17-9eed-f34734a1db3b`, payment state `failed`, embedded decline reason `customer_challenge_failed`;
+  - webhook.site captured `ORDER_PAYMENT_FAILED` with body containing only event, order ID, and merchant reference; no payment ID, decline reason, or card data;
+  - mapper dry-run confirmed `ORDER_PAYMENT_FAILED` -> `registration_fee_failed` / `failed`;
+  - no live Billing update was made.
+- Local Cloud Run webhook source skeleton added:
+  - folder `rcs-registration/cloud-run/revolut-webhook/`;
+  - imports the shared `handleRevolutWebhook` primitive;
+  - requires `POST`, `req.rawBody`, and `REVOLUT_WEBHOOK_SIGNING_SECRET`;
+  - returns only the public response body and logs redacted record-mode fields;
+  - self-test passed with fake data;
+  - originally local-only; later deployed as record-only Cloud Run service `roq-rcs-revolut-webhook`; no Revolut webhook URL changed; no Apps Script call or Billing write exists.
+- Source-only dedupe primitives added:
+  - `rcs-registration/cloud-run/revolut-webhook/dedupe.mjs`;
+  - Firestore collection name `revolut_webhook_events`;
+  - document ID is `sha256(revolut:{event}:{orderId})`, so it stays stable across unresolved/resolved application context;
+  - `logicalDedupeKey` stores the richer `revolut:{event}:{orderId}:{applicationId-or-unresolved}` audit key;
+  - in-memory self-test proves first create vs duplicate terminal detection;
+  - Firestore adapter source exists and the exported runtime handler wires `FirestoreDedupeStore.fromDefault()`; the deployed record-only Cloud Run proof wrote one mapped test document and duplicate proof did not create or update another.
+- Google Cloud boundary planning recorded:
+  - correct-account read-only console check confirmed project `RightOnQ-GOG` / `rightonq-gog` / project number `872475523113` under organisation `rightonq.co.uk`;
+  - earlier wrong-account browser check is superseded;
+  - do not use `Personal-GOG` / `personal-gog-490412` for this webhook unless Adam explicitly reverses this later; it appears personal/dev-adjacent, not the intended Revolut/payment infrastructure boundary;
+  - endpoint should use Cloud Run functions / Functions Framework Node.js source deployment;
+  - proposed target region is `europe-west2` / London, because official docs list London for Cloud Run, Secret Manager, and Cloud Firestore and the RightOnQ workflow is UK-first;
+  - Secret Manager names proposed separately for sandbox and live Revolut secrets;
+  - billing is now linked to `My Billing Account` / `01D966-E98801-B3C276` under `rightonq.co.uk`; Adam reported on 2026-05-17 that the Google Cloud account was activated to full billing while retaining the trial credit/time window;
+  - `RightOnQ-GOG safety budget` was created on 2026-05-17 for billing account `My Billing Account` / `01D966-E98801-B3C276`, scoped to `RightOnQ-GOG` / `rightonq-gog`, all services, monthly `GBP 10.00`, with actual-spend email alerts at 50%, 90%, and 100%;
+  - budget is an alert-only guardrail and does not cap or stop Google Cloud resource/API consumption;
+  - Firestore database was created on 2026-05-17: database ID `(default)`, Standard edition, Firestore in Native mode, regional location `europe-west2` / London, restrictive security rules denying all reads/writes by default;
+  - Cloud Firestore API is now active for the project; the console showed no explicit API-enable interstitial during creation;
+  - dedicated webhook service account was created on 2026-05-17: `roq-rcs-revolut-webhook@rightonq-gog.iam.gserviceaccount.com`, display name / ID `roq-rcs-revolut-webhook`, status Enabled, no project roles, no keys;
+  - Secret Manager API (`secretmanager.googleapis.com`) was enabled on 2026-05-17;
+  - sandbox secrets were created as regional `europe-west2` secrets: `roq-rcs-revolut-webhook-signing-secret-sandbox` (version 2 Enabled, version 1 Destroyed) and `roq-rcs-revolut-merchant-api-secret-sandbox` (version 1 Enabled);
+  - both current `latest` secret values were verified through Secret Manager on 2026-05-17 without exposing values: webhook signing secret matched the known `ORDER_PAYMENT_FAILED` HMAC fixture, and Merchant API secret retrieved sandbox order `6a08b551-d18e-a506-9cfa-6a27983dd1de` with HTTP 200;
+  - Cloud Shell verification found that `gcloud secrets versions access ... --location=europe-west2` failed against the global endpoint in SDK `567.0.0`; the regional REST hostname `https://secretmanager.europe-west2.rep.googleapis.com/...` worked and should be used/considered if CLI routing fails for regional secrets;
+  - Cloud Run secret wiring then proved that Cloud Run does not support regional Secret Manager secrets: the console rejected the `europe-west2` regional resource IDs and the official Cloud Run secrets documentation states this limitation;
+  - two Cloud Run-compatible global sandbox secret copies were created on 2026-05-17: `roq-rcs-revolut-webhook-signing-secret-sandbox-global` (version 1 Enabled) and `roq-rcs-revolut-merchant-api-secret-sandbox-global` (version 1 Enabled); the original regional secrets remain intact and unchanged;
+  - sandbox Merchant API key was initially entered into the wrong secret before that wrong version was destroyed; rotation was recommended as hygiene, but Adam explicitly chose not to rotate the sandbox key on 2026-05-17 after verification passed; this sandbox exception must not be carried into live/production secret handling;
+  - runtime service account `roq-rcs-revolut-webhook@rightonq-gog.iam.gserviceaccount.com` was granted `roles/secretmanager.secretAccessor` directly on both regional sandbox secrets and both global Cloud Run sandbox copies; the grants are secret-level/resource-level, not project-wide;
+  - Cloud Run Admin API was enabled on 2026-05-17; first sandbox record-only Cloud Run service was deployed on 2026-05-17 as `roq-rcs-revolut-webhook` at `https://roq-rcs-revolut-webhook-872475523113.europe-west2.run.app`;
+  - initial Cloud Build/deploy succeeded: build ID `bdb4a239-1585-440f-a61d-5805fa3df927`, latest repo-built revision `roq-rcs-revolut-webhook-00003-ss7`, 100% traffic;
+  - deployed settings match the runbook: region `europe-west2` / London, source repo `rightonq-code/rightonq-code.github.io`, branch `rcs-registration-part-a-b-20260507`, build context `/rcs-registration`, function target `revolutWebhook`, runtime service account `roq-rcs-revolut-webhook@rightonq-gog.iam.gserviceaccount.com`, ingress `All`, authentication `Allow public access`, request-based billing, min instances `0`, max instances `2`, concurrency `10`, timeout `60 seconds`, and the two global sandbox secrets exposed as environment variables;
+  - Cloud Run deployment runbook lives at `rcs-registration/cloud-run/revolut-webhook/DEPLOYMENT_PREP.md`; endpoint proof passed on 2026-05-17, and on 2026-05-18 the Revolut sandbox Merchant webhook URL was changed from `webhook.site` to the Cloud Run URL after explicit approval;
+  - live endpoint proof results: `GET` returned `405 method_not_allowed`; unsigned POST returned `400 missing_revolut_signature_headers`; signed proof for order `roq-rcs-cloudrun-proof-20260517200925` returned `HTTP 202` / `verified_mapped_dry_run`; Firestore wrote exactly one document `1e3762fc7aa304c4692a4e4260d6db91bdd481e4e119396fda47a0fcb31a36d2`; duplicate signed proof logged `dedupeDecision=duplicate_terminal`, `dedupeRecorded=false`, `dedupeDuplicate=true`; no Billing update occurred;
+  - post-switch real delivery proof passed on 2026-05-18: existing sandbox Merchant webhook `e6f32548-ffef-4f77-92fa-a0d2ae0b7dea` now points to `https://roq-rcs-revolut-webhook-872475523113.europe-west2.run.app`; order `6a0ae033-fef3-a25e-b781-b0c4011e158f` / reference `ROQ-RCS-CLOUDRUN-WEBHOOK-PROOF-20260518094729` produced real `ORDER_AUTHORISED` and `ORDER_COMPLETED` webhook deliveries from Revolut to Cloud Run; both matched signatures, returned `HTTP 202`, wrote exactly one Firestore document per event, and kept `billingUpdateApplied: false`; `ORDER_COMPLETED` enrichment succeeded as `payment_order`;
+  - `rcs-registration/package.json` now exists as the deploy-root package, pointing Functions Framework at `cloud-run/revolut-webhook/index.mjs`; deploy root must be `rcs-registration` because the entry module imports shared webhook primitives from `rcs-registration/tools`;
+  - `rcs-registration/.gcloudignore` now allowlists only the deploy-root package, `cloud-run/revolut-webhook/**`, and the three shared `tools/revolut-webhook-*.mjs` modules needed by the endpoint, so unrelated docs, Apps Script, website pages, and operator tools are not uploaded into the Cloud Run source;
+  - runtime service account now has Firestore data read/write access for dedupe: project-level `roles/datastore.user` / Cloud Datastore User was granted to `roq-rcs-revolut-webhook@rightonq-gog.iam.gserviceaccount.com` on 2026-05-17 after the console exposed no database-level IAM panel for this role;
+  - Firestore Native mode remains the dedupe/event store choice; the deployed proof wrote one mapped record-only test document and duplicate proof did not create or update a second document;
+  - first deployed mode must be record-only;
+  - creating service account keys, additional IAM grants, changing Revolut webhook URL/events again, automatic Billing writes, and strict payment gating remain explicitly forbidden until approved.
+- Cloud webhook source observability tightened:
+  - rejected-method and missing-raw-body cases now emit redacted record-only log entries;
+  - local self-tests cover the new rejection logs and confirm no raw body or signature is logged;
+  - source remains undeployed and no Google Cloud, Revolut, Apps Script, or Billing action was taken.
+- Source-only Revolut order enrichment helper added:
+  - `cloud-run/revolut-webhook/enrich.mjs` retrieves/summarises an order through injected fetch;
+  - fake-fetch self-test covers payment order, refund order, and refund-without-related-order warning;
+  - helper returns `ledgerLookupOrderId` so refund webhooks can resolve through the original checkout order later;
+  - not wired to the endpoint and no live Revolut call was made.
+- Refund-order retrieval proof closed the enrichment-shape caveat:
+  - existing sandbox refund order `6a0872b4-89b8-a82d-884b-703f6470c124` retrieved successfully;
+  - returned `type = refund`, `state = completed`, `amount = 12000`, `currency = GBP`;
+  - returned `relatedOrderId = 6a0866ef-9b11-a041-bfa2-e973e15e564d`, confirming the original checkout order link needed for `lookupPaymentOrder`;
+  - enrichment self-test now mirrors the observed lowercase refund shape and camelCase `relatedOrderId` summary path.
+- Source-only record-mode handler now wires enrichment after verification and dedupe:
+  - fresh non-duplicate `ORDER_COMPLETED` events attempt enrichment when a Merchant API secret/fetch implementation is configured;
+  - duplicate `ORDER_COMPLETED` events skip enrichment, so Revolut retries do not cause repeated Merchant API calls;
+  - `ORDER_COMPLETED` dedupe records stay in `enrichment_required` state until a later apply flow is explicitly built;
+  - fake-fetch self-test covers payment completion, duplicate completion, and refund completion; no live Revolut, Google Cloud, Apps Script, or Billing action was taken.
+- Source-only runtime handler now wires Firestore dedupe:
+  - exported `revolutWebhook(req, res)` obtains `FirestoreDedupeStore.fromDefault()` and passes it into the record-only handler path;
+  - the handler fails closed with `dedupe_store_unavailable` before enrichment if a recordable webhook cannot obtain the dedupe store or if the dedupe record/transaction fails;
+  - local self-tests still use an injected in-memory store and fake fetch; no live Firestore, Revolut, Google Cloud, Apps Script, or Billing action was taken.
+- Payment-order lookup is now deployed to a new clean API-only operator deployment after the Apps Script code push:
+  - deployment ID `AKfycbzj0I9m_vld5Aw-zPQFsTZXslrmxlrDA6Ut0RtFnd6_fxXpVDc4qhhRuKVAA5EuhWG9`;
+  - version `35`;
+  - description `Operator API executable (Step 8L lookup after push)`.
+- `.clasp.json` now points operator wrappers at the clean v35 API-only deployment.
+- Live lookup proof passed through v35:
+  - lookup order ID `6a084d13-d84d-a49b-bb44-916bb9237ba4`;
+  - returned `found = true`;
+  - returned `applicationId = ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747`;
+  - returned latest ledger snapshot with `orderState = completed`, `paymentState = captured`, amount `12000 GBP`, and `orderPurpose = registration_fee`.
+- Deployment cleanup after the v35 proof:
+  - archived previous clean operator v34 `AKfycbwPbeT3Mxpmr_Q88WdSp0hRnDk96Pm93GDTsA1eOsJxmiaVpSS2xAg78ox848YsqCQU`;
+  - archived previous clean operator v33 `AKfycbwSdO73nyxrOKVPQVQgkoGg29RwvYmJXWDYAgFqs5cdxyI4pJXFW3cZZSS1-6y3zlex`;
+  - final Active Apps Script deployments are v35 clean Operator API executable, public web app v31, and the RCS Part A intake receiver.
+- Apps Script HEAD was pushed and a clean API-only operator deployment now serves this slice:
+  - deployment ID `AKfycbwSdO73nyxrOKVPQVQgkoGg29RwvYmJXWDYAgFqs5cdxyI4pJXFW3cZZSS1-6y3zlex`;
+  - version `33`;
+  - description `Operator API executable (Step 8H clean API-only)`;
+  - access `Anyone within rightonq.co.uk`.
+- The previous v32 active-checkout-guard operator deployment `AKfycbyG5yW-r0sfaKt1bwUUGFAHHdQoKK8wBCfR1riVxvYamu9YhfOBpRJhnRL_5iBP0VSC` was archived after it picked up a Web app entry point during deployment refresh.
+- `.clasp.json` now points operator wrappers at the clean v33 API-only deployment.
+- Live operator proof passed through the clean v33 API-only deployment:
+  - first `checkActiveCheckout` returned `safe_to_create` and `canCreateCheckout = true`;
+  - `recordPaymentOrder` appended completed sandbox order `6a084d13-d84d-a49b-bb44-916bb9237ba4`;
+  - second `checkActiveCheckout` returned `already_paid` and `canCreateCheckout = false`;
+  - stored checkout URL is present for the completed sandbox order;
+  - no card data or Revolut secret was stored.
+- Static payment-return page added:
+  - path `rcs-registration/payment-return.html`;
+  - future sandbox proof orders now default to `https://rightonq-code.github.io/rcs-registration/payment-return.html?applicationId=...`;
+  - page clearly says browser return is not the authoritative payment verification source.
+- Fresh sandbox checkout proved the return page:
+  - application/reference `ROQ-RCS-TEST-RETURN-PAGE-20260516-001`;
+  - order `6a0866ef-9b11-a041-bfa2-e973e15e564d`;
+  - browser landed on `https://www.rightonq.co.uk/rcs-registration/payment-return.html?applicationId=ROQ-RCS-TEST-RETURN-PAGE-20260516-001`;
+  - API retrieval confirmed order `completed` and payment `captured`;
+  - no live Billing row update was made from this proof.
+- This is still operator-run pilot protection, not the automated public payment gate.
+
+### Slice 8B - Public Endpoint Hardening Started
+
+Purpose:
+
+- close the obvious public submission spam path before any website integration;
+- reduce Adam MailApp notification abuse risk while keeping pilot notifications useful.
+
+Implemented:
+
+- public Part A submissions now require:
+  - an existing `Applications` record;
+  - a matching private application token;
+  - `Part A status` of `draft` or `part_a_changes_needed`;
+- unknown application IDs can no longer create fresh application/submission rows through the anonymous public submit branch;
+- `PART_A_PAYMENT_GATE_MODE` script property can switch payment gating from advisory to strict;
+- strict payment gate allows Part A only when `Applications.Billing status` is one of:
+  - `registration_fee_paid`;
+  - `registration_fee_manually_confirmed`;
+  - `registration_fee_waived`;
+- default mode remains advisory until Revolut/payment confirmation is wired end-to-end;
+- Adam MailApp notifications are rate-limited per notification type to reduce inbox/quota abuse;
+- `proof-public-part-a-submit.mjs` now starts by proving a fake public Part A submission is rejected before creating a valid private-link proof.
+
+Deployment/proof:
+
+- Apps Script version `25` deployed to the existing web app deployment;
+- a live no-PIN fake public Part A submission was rejected with the private-link verification error, confirming unknown application IDs do not create rows.
+- full valid private-link proof passed on 2026-05-15:
+  - fake public submit rejected first;
+  - private application created as `ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747`;
+  - valid Part A submitted as `RCS-20260515-PUBLIC-PARTA-PROOF`;
+  - snapshot confirmed `Billing`, `Internal reviews`, `Trust Hub KYC`, `UK RC bundles`, and queued `part_a_received` communication rows.
+
+Still required before public website integration:
+
+- split anonymous customer actions from operator actions, or move operator actions to a Google-authenticated/private deployment;
+- wire real Revolut payment confirmation before setting `PART_A_PAYMENT_GATE_MODE = strict`;
+- decide whether Adam notifications should become Communications-queue-only.
+
+### Slice 8C - Operator/Public Split Foundation Started
+
+Purpose:
+
+- prepare the local tooling for separate public/customer and private/operator Apps Script deployments without breaking the current combined pilot deployment.
+
+Action classification:
+
+- public/customer actions:
+  - anonymous Part A submission branch;
+  - `submitNameLogoApproval`;
+  - `submitVideoApproval`;
+- operator/internal actions:
+  - `createApplicationDraft`;
+  - `getOperatorSnapshot`;
+  - `updateApplicationStatus`;
+  - `updateBilling`;
+  - `updateInternalReview`;
+  - `updateTrustHubKyc`;
+  - `updateUkRcBundle`.
+
+Implemented locally:
+
+- operator tools now prefer `RCS_ONBOARDING_OPERATOR_WEB_APP_URL`;
+- public/customer proof uses `RCS_ONBOARDING_PUBLIC_WEB_APP_URL` for public submissions;
+- `RCS_ONBOARDING_WEB_APP_URL` remains a compatibility fallback for the current combined deployment;
+- no live deployment behaviour changed by this tooling-only slice.
+
+Next implementation decision:
+
+- choose whether the private operator path is:
+  - a second Apps Script deployment with Google Workspace access restrictions if Apps Script deployment settings support the needed split cleanly; or
+  - a separate Apps Script project for operator actions only, sharing the same Sheet but deployed as RightOnQ-only.
+
+### Slice 8D - Authenticated Operator API Spike
+
+Decision:
+
+- a private/domain-only web app is not ideal for the terminal operator tools because Node fetch does not carry a browser Google login session;
+- the better operator path is Apps Script API execution via authenticated `clasp run` / scripts.run, while the public web app remains anonymous for customer actions.
+
+Implemented scaffold:
+
+- added server-side `rcsOperatorAction(payload)`;
+- it allows only operator/internal actions:
+  - `createApplicationDraft`;
+  - `getOperatorSnapshot`;
+  - `updateApplicationStatus`;
+  - `updateBilling`;
+  - `updateInternalReview`;
+  - `updateTrustHubKyc`;
+  - `updateUkRcBundle`;
+- it does not route public customer actions;
+- added `executionApi.access = DOMAIN` to the manifest.
+
+Proof result:
+
+- `clasp run rcsOperatorAction ...` does not yet run;
+- `MYSELF` and `DOMAIN` execution API attempts both failed from the CLI with permission/API executable errors;
+- temporary failed API deployments were deleted;
+- current public web app deployment remains version `25`;
+- `clasp apis` reports `GCP project ID is not set, unable to continue.`
+
+Conclusion:
+
+- this is blocked on associating the Apps Script project with a standard Google Cloud project and enabling the Apps Script API / Execution API requirements;
+- do not weaken the operator API to `ANYONE`;
+- keep the v25 public web app as-is until the authenticated operator API proof passes.
+
+Update on 2026-05-15:
+
+- standard Google Cloud project `rightonq-gog` / `RightOnQ-GOG` is now linked to the Apps Script project;
+- Apps Script API is enabled on that project;
+- API executable deployment was created as API-only:
+  - deployment ID `AKfycbzogKHOijtu6kjp2MVrL9WcVuF6mWrgQyKUzQGRvpTfozdUSA9y_B6X_eWpQeQ-mWtS`;
+  - original version `28`;
+  - access `Anyone within rightonq.co.uk`;
+- RCS-Twilio-4 found and fixed a missing server-side PIN check inside `rcsOperatorAction(payload)`;
+- the same API executable deployment was redeployed as version `29` with description `Operator API executable (Step 2B pin guard)`;
+- public web app v25 remains the public customer endpoint and was re-verified after the API update;
+- `clasp apis` now runs successfully.
+
+Remaining proof gap:
+
+- `clasp run rcsOperatorAction ...` still cannot execute from the terminal;
+- dev-mode currently fails with a permission error before function execution;
+- `--nondev` currently reports the function is not found as an API executable;
+- next work should verify OAuth / caller authorisation and confirm in the Apps Script UI that the version 29 deployment remains API executable only.
+
+Step 2C update:
+
+- a clean API-only deployment now exists:
+  - deployment ID `AKfycbwSdO73nyxrOKVPQVQgkoGg29RwvYmJXWDYAgFqs5cdxyI4pJXFW3cZZSS1-6y3zlex`;
+  - version `33`;
+  - description `Operator API executable (Step 8H clean API-only)`;
+- local `.clasp.json` points at this clean v33 deployment;
+- the previous v32 active-checkout-guard deployment `AKfycbyG5yW-r0sfaKt1bwUUGFAHHdQoKK8wBCfR1riVxvYamu9YhfOBpRJhnRL_5iBP0VSC` was contaminated with Web app + API executable types and has been archived after approval;
+- the contaminated v29 deployment `AKfycbzogKHOijtu6kjp2MVrL9WcVuF6mWrgQyKUzQGRvpTfozdUSA9y_B6X_eWpQeQ-mWtS` has been archived after approval;
+- do not run `clasp deploy -i` against the clean v33 deployment while the manifest still has web app deployment settings;
+- `clasp run` still fails before executing `rcsOperatorAction`, so the OAuth / execution-permission proof remains open.
+
+Step 2E update:
+
+- existing Desktop OAuth client `RightOnQ-GOG-Client` is now used by named clasp login `rightonq-gog`;
+- login was refreshed with the Sheets scope required by `SpreadsheetApp.openById`;
+- no-PIN API execution reaches Apps Script and correctly fails on `Invalid onboarding operator PIN`;
+- valid-PIN read-only `rcsOperatorAction` snapshot returned `ok: true` for `ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747`;
+- Trust Hub KYC header drift was fixed by reconciling tracking sheets to canonical header order before operator readback;
+- normal `clasp run` is proven; `clasp run --nondev` still cannot find the function as an API executable, so keep that caveat in the runbook.
+
+Step 2F update:
+
+- local operator wrappers now use an authenticated Apps Script Execution API client instead of posting to the web app;
+- the shared helper is `rcs-registration/tools/operator-api-client.mjs`;
+- public customer submissions use the public web app deployment, now updated to v31;
+- `operator-status.mjs` live proof returned strict JSON with `ok: true`;
+- this completes the practical public/operator transport split for the pilot.
+
+Step 2G update:
+
+- a read-only external review found that the anonymous public `doPost` endpoint still accepted operator-only actions if called directly with a PIN;
+- `doPost` now blocks operator-only actions before opening the Sheet:
+  - `createApplicationDraft`;
+  - `getOperatorSnapshot`;
+  - `updateApplicationStatus`;
+  - `updateBilling`;
+  - `updateInternalReview`;
+  - `updateTrustHubKyc`;
+  - `updateUkRcBundle`;
+- public Part A, B2 name/logo approval, and B3 video approval remain on the public web app;
+- Apps Script HEAD was pushed and version `31` was created with description `Disable public operator actions`;
+- the existing public web app deployment was updated through the Apps Script UI to version `31` with description `Harden public Part A submission + block public operator actions`;
+- live public proof confirmed a public `getOperatorSnapshot` POST now returns `ok: false`, `rejected: true`, and `Operator action is not supported on the public endpoint...`;
+- do not use `clasp deploy -i` for that public deployment update unless the manifest/deployment-type risk has been deliberately revisited;
+- operator wrappers now call `scripts.run` with the clean API executable deployment ID and `devMode: false`, so they are pinned to the deployed operator API rather than Apps Script HEAD;
+- dummy-PIN proof against the clean API deployment reached `rcsOperatorAction` and returned `Invalid onboarding operator PIN`;
+- local clasp/OAuth credential files were tightened to file mode `600`, and `.gitignore` now blocks common clasp/client-secret filename patterns.
+
+### Slice 9 - Twilio Trust Hub / Subaccount / Usage Tracking Fields
+
+Add internal Twilio compliance, runtime setup, and usage tracking fields.
+
+Status: deployed to the clean Apps Script API-only operator deployment on Tuesday 19 May 2026. The public customer web app remains pinned to version `31`.
+
+Output:
+
+- secondary compliance profile SID;
+- Trust Hub status;
+- Trust Hub rejection/evaluation summary;
+- Trust Hub error code/detail;
+- authorised representative exception code/action;
+- authorised representative 1 tracking fields;
+- authorised representative 2 tracking fields;
+- UK RC Bundle SID/status/rejection fields;
+- subaccount SID;
+- setup status;
+- registration/provider reference;
+- usage pull plan;
+- manual pause flag;
+- usage balance reconciliation fields.
+
+Implemented in source:
+
+- expanded `Billing` headers and `operator-billing.mjs` to cover:
+  - usage credit balance;
+  - top-up threshold / amount;
+  - auto top-up status;
+  - last top-up attempt/status;
+  - last payment status;
+  - billing pause flag/reason.
+- expanded `UK RC bundles` headers to cover Compliance Embeddable inquiry/registration/status/rejection/event fields.
+- added internal `Twilio setup` tracking with:
+  - Twilio subaccount SID/friendly name;
+  - Messaging Service SID;
+  - RBM agent/sender/assets;
+  - provider submission reference/status/check timestamps;
+  - phone preview, review video, registration pack, go-live status;
+  - usage pull/reconciliation fields;
+  - manual pause flag/reason.
+- `getOperatorSnapshot` now includes the latest `twilioSetup` row.
+- new guarded operator action: `updateTwilioSetup`.
+- new local wrapper: `tools/operator-twilio-setup.mjs`.
+
+Deployment state:
+
+- Apps Script HEAD was pushed, version `36` was created, and the existing clean API-only operator deployment was updated through the Apps Script UI.
+- The first live snapshot proof showed `twilioSetup: {}` but also exposed that the expanded `Billing` and `UK RC bundles` headers had been inserted before historical columns, causing existing row values to read under the wrong new header names.
+- Version `37` corrects those expansions to be append-only after the historical columns.
+- Version `38` adds a safe return serializer for Apps Script Execution API responses.
+- Version `39` changes the shared Sheet header reconciler to append missing columns only and repairs the known `Applications` header drift from earlier header reordering.
+- Version `40` changes `appendTrackingRecord` to write new rows by the live Sheet header row, preventing future append rows from depending on code constant order.
+- Version `41` preserves numeric `0` in Payment orders summaries after the Slice 9C append proof exposed that zero rendered as blank in lookup output.
+- Version `42` moves zero preservation into the shared Sheet row-read helpers after the version `41` lookup proved numeric zero was still collapsed before Payment orders summary construction.
+- The clean API-only operator deployment now serves version `42` with description `Operator API executable (Slice 9C preserve zero row readback)`.
+- Deployment ID remains `AKfycbzj0I9m_vld5Aw-zPQFsTZXslrmxlrDA6Ut0RtFnd6_fxXpVDc4qhhRuKVAA5EuhWG9`.
+- Public customer web app deployment remains version `31` and was not touched.
+- Version `40` proof passed: valid-PIN read-only snapshot returned `ok: true`, and a synthetic superseded Payment orders row (`roq-rcs-v40-append-proof-202605191340`) appended and looked up correctly without any Revolut/Twilio/provider call.
+- Version `42` proof passed: valid-PIN lookup for the same synthetic superseded row returned `amountMinor: 0`, confirming numeric zero survives shared Sheet readback.
+- `clasp deployments` confirmed the operator deployment at `@42` and public web app still at `@31`; dummy-PIN proof still returned `Invalid onboarding operator PIN`.
+- Read-only live Sheet audit after version `42` compared all tracked tab header rows with the source constants and checked low-exposure timestamp/application/status columns. `Part A submissions`, `Applications`, `Part B approvals`, `Part B video approvals`, `Status events`, `Communications`, `Internal reviews`, `Trust Hub KYC`, `UK RC bundles`, `Twilio setup`, `Billing`, and `Payment orders` all had the expected header order and row shape.
+- It does not call Twilio APIs, create Twilio subaccounts, change provider registrations, or enable live usage.
+- It stores IDs, statuses, URLs, and operator notes only; no Twilio auth tokens, API secrets, raw message payloads, or customer message content.
+
+Local checks passed:
+
+- `node --check --input-type=commonjs < rcs-registration/google-apps-script/Code.gs`
+- `node --check rcs-registration/tools/operator-twilio-setup.mjs`
+- `node --check rcs-registration/tools/operator-billing.mjs`
+- `operator-twilio-setup.mjs --dry-run`
+- `operator-billing.mjs --dry-run` with usage/pause fields
+- `clasp deployments` confirmed operator deployment `AKfycbzj0I9m_vld5Aw-zPQFsTZXslrmxlrDA6Ut0RtFnd6_fxXpVDc4qhhRuKVAA5EuhWG9 @39` and public web app `AKfycbyI81Ir2xvHLar0R0iFBBWyXa1Nj93T4_8Ni5_eX3XEYDA-AKQbVYbPHnTROLm8e4a6 @31`
+- dummy-PIN proof returned `Invalid onboarding operator PIN`
+- valid-PIN `operator-status.mjs` snapshot returned `ok: true`, populated `twilioSetup` with the Slice 9B tracking proof row, corrected Applications readback, corrected Billing readback, and corrected UK RC Bundle readback for `ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747`
+
+### Slice 10 - Website Integration
+
+Decide how the public website introduces this flow.
+
+Output:
+
+- public RCS service page;
+- call-to-action into onboarding;
+- clear expectations before payment/form;
+- read-only context file for website agents to understand this workflow.
+
+### Slice 10A - Twilio Provider Inventory Preflight
+
+Status: live read-only inventory completed on Tuesday 19 May 2026.
+
+Purpose:
+
+- run the first provider-connected step as read-only inventory, not creation;
+- confirm the Twilio parent account, existing subaccounts, existing Messaging Services, and configured sender pool before creating anything;
+- keep subaccount/runtime setup separate from Trust Hub / compliance profile work.
+
+Implemented in source:
+
+- `tools/twilio-account-inventory.mjs`
+
+Boundary:
+
+- `GET` requests only;
+- no subaccount creation;
+- no Messaging Service creation;
+- no sender/RCS sender/phone-number creation;
+- no Trust Hub / RC Bundle mutation;
+- no message send;
+- no chargeable usage.
+
+Initial live inventory result:
+
+- parent Twilio account: `Continuity AI Ltd`, `active`, `Full`;
+- one visible active child subaccount: `test account`;
+- one parent Messaging Service: `RightOnQ`, use case `notifications`;
+- configured sender pool contains one GB phone number sender with `SMS` and `Voice` capabilities;
+- no alpha senders or short codes were present in the configured sender pool.
+
+### Slice 10B - Twilio Proof Subaccount Creation
+
+Status: completed on Tuesday 19 May 2026.
+
+Decision:
+
+- create a clearly named proof/customer subaccount instead of reusing the generic existing `test account`;
+- keep this as the smallest provider write: Twilio subaccount only, no Messaging Service, no sender/RCS sender, no phone number, no compliance submission, no message send.
+
+Implemented in source:
+
+- `tools/twilio-subaccount-create.mjs`
+
+Live result:
+
+- created subaccount `RightOnQ RCS proof customer - 2026-05-19`;
+- Twilio subaccount SID: recorded in the live operator proof output; redacted from GitHub docs because GitHub push protection flags full Twilio Account SIDs;
+- status `active`, type `Full`, owned by parent account `Continuity AI Ltd`;
+- independent read-only inventory confirmed two child subaccounts are now visible: `RightOnQ RCS proof customer - 2026-05-19` and `test account`;
+- parent Messaging Service `RightOnQ` and its sender pool remained unchanged.
+
+Boundary:
+
+- one duplicate-check `GET`;
+- one Twilio subaccount creation `POST`;
+- one read-only inventory verification;
+- no customer-facing change or chargeable usage.
+
+### Slice 10C - Twilio Proof Subaccount Tracking Link
+
+Status: completed on Tuesday 19 May 2026.
+
+Purpose:
+
+- link the live Twilio proof subaccount back into the internal `Twilio setup` tracking row;
+- keep provider setup frozen after the subaccount step: no Messaging Service, RCS sender, phone number, compliance submission, message send, or chargeable usage.
+
+Implemented in source:
+
+- `tools/operator-twilio-subaccount-link.mjs`
+- `tools/operator-status.mjs` now redacts Twilio Account SIDs from terminal output;
+- Apps Script operator snapshot serialisation now preserves numeric zero values.
+
+Live result:
+
+- `operator-twilio-subaccount-link.mjs` resolved `RightOnQ RCS proof customer - 2026-05-19` by friendly name and updated application `ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747`;
+- `twilioStatus` reads back as `subaccount_created`;
+- `Provider submission status`, `Go-live status`, and `Usage pull status` remain `not_started`;
+- `Manual pause flag` reads back as `no`;
+- `Twilio subaccount friendly name` reads back correctly;
+- terminal output redacts the full Twilio Account SID;
+- synthetic Payment orders proof row now reads back `Amount minor: 0` in the full operator snapshot.
+
+Deployment:
+
+- Apps Script operator API deployment updated to version `43` with description `Operator API executable (Slice 10B redacted status + zero snapshot)`;
+- public customer web app remained on version `31`.
+
+### Slice 10D - Twilio Proof Subaccount Messaging Inventory
+
+Status: live read-only inventory completed on Tuesday 19 May 2026.
+
+Purpose:
+
+- inspect Messaging Service state inside the new proof subaccount before creating any Messaging Service;
+- follow Twilio's subaccount rule: parent credentials resolve the subaccount, then the resolved subaccount credentials are used in memory for `messaging.twilio.com` reads;
+- keep this as a read-only provider preflight.
+
+Implemented in source:
+
+- `tools/twilio-subaccount-messaging-inventory.mjs`
+
+Live result:
+
+- subaccount `RightOnQ RCS proof customer - 2026-05-19` is active;
+- Messaging Services inside the subaccount: none;
+- sender pools inside the subaccount: none;
+- terminal output redacted full Twilio Account SIDs;
+- no Twilio resource was created, updated, deleted, or used to send a message.
+
+Boundary:
+
+- one subaccount lookup `GET`;
+- one subaccount-authenticated Messaging Services `GET`;
+- no Messaging Service creation;
+- no sender pool / phone number movement;
+- no RCS sender, compliance submission, message send, customer-facing change, or chargeable usage.
+
+### Slice 10E - Twilio Proof Messaging Service Creation
+
+Status: completed on Tuesday 19 May 2026.
+
+Purpose:
+
+- create the first Messaging Service inside the isolated proof subaccount;
+- keep the write intentionally narrow: Messaging Service only, no senders or outbound traffic.
+
+Implemented in source:
+
+- `tools/twilio-subaccount-messaging-service-create.mjs`
+
+Live result:
+
+- created Messaging Service `RightOnQ RCS proof messaging`;
+- Messaging Service SID: `MG2a5be4e825e32a31340b5ddb2e50d3a7`;
+- use case: `notifications`;
+- inbound request URL: blank;
+- status callback URL: blank;
+- independent read-only inventory confirmed exactly one Messaging Service in the proof subaccount;
+- sender pools are empty: no phone numbers, alpha senders, or short codes attached.
+
+Boundary:
+
+- one subaccount lookup `GET`;
+- one Messaging Services duplicate-check `GET`;
+- one Messaging Service creation `POST`;
+- one read-only inventory verification;
+- no sender pool / phone number movement;
+- no RCS sender, compliance submission, message send, customer-facing change, or chargeable usage.
+
+### Slice 10F - Twilio Proof Messaging Service Tracking Link
+
+Status: completed on Tuesday 19 May 2026.
+
+Purpose:
+
+- link the proof Messaging Service into the internal `Twilio setup` tracking row;
+- keep all provider submission, go-live, usage, sender, and compliance gates closed.
+
+Live result:
+
+- application `ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747` now stores Messaging Service SID `MG2a5be4e825e32a31340b5ddb2e50d3a7`;
+- `twilioStatus` reads back as `messaging_service_created`;
+- `Provider submission status`, `Go-live status`, and `Usage pull status` remain `not_started`;
+- `Manual pause flag` remains `no`;
+- `Twilio subaccount SID` is redacted in terminal readback;
+- status event history includes `twilio_setup_updated` for `messaging_service_created`.
+
+Source polish:
+
+- `tools/operator-twilio-setup.mjs` now redacts full Twilio Account SIDs from terminal output.
+
+Boundary:
+
+- one internal Apps Script operator update;
+- one valid-PIN operator snapshot readback;
+- no Twilio provider call in this tracking-link step;
+- no sender pool / phone number movement;
+- no RCS sender, compliance submission, message send, customer-facing change, or chargeable usage.
+
+### Slice 10G - RCS Sender / Compliance Preflight
+
+Status: read-only preflight completed on Tuesday 19 May 2026.
+
+Purpose:
+
+- decide whether the next provider-connected action should be callback configuration, sender-pool work, or RCS sender/compliance preparation;
+- compare the current RightOnQ intake and tracking model against current public Twilio RCS and Trust Hub documentation;
+- keep this as research and documentation only.
+
+Official Twilio truth checked:
+
+- Twilio's branded RCS onboarding remains Console-led; Twilio says RCS sender setup should allow four to six weeks or longer for multi-region launch, and that RCS Senders cannot be created/onboarded programmatically at scale.
+- RCS sender public details require display name, description, logo image, banner image, accent color, contact details, privacy policy URL, and terms URL.
+- RCS compliance registration requires business/use-case material including authorised representative contact details, opt-in and opt-out descriptions, opt-in proof images hosted at public URLs, use-case description, and a public hosted video showing the use case in action.
+- Secondary Compliance Profiles are used when the brand/entity differs from the parent Twilio account business. They require an approved primary business compliance profile first, then business details, operating regions, two authorised representatives, address, and supporting documents.
+- Twilio's Messaging Service docs confirm RCS senders sit in Messaging Service sender pools, and Twilio's RCS send docs confirm Messaging Services attempt RCS first when an RCS Sender is in the sender pool and fall back to SMS/MMS when needed.
+
+Current RightOnQ coverage:
+
+- Part A already captures most RCS sender public-profile and compliance text: sender display name, sender description, logo/banner upload, brand colour, contact details, websites, privacy policy, terms, use case, sample messages, consent route, opt-in description, opt-out description, reviewer notes, and target countries.
+- `Twilio setup` already has tracking fields for subaccount, Messaging Service, RBM agent ID, RBM sender name, RBM logo URL, RBM banner URL, provider submission reference/status, review video URL/status, registration pack status, go-live status, usage status, and manual pause.
+- `Trust Hub KYC` already has tracking fields for primary/secondary profile SIDs, policy SID, business identity/type/industry/registration/regions, two representative end-user SIDs/statuses, evidence/evaluation/status callback fields, and KYC notes.
+- `Internal reviews` already tracks legal/company, website/domain, public links, message purpose/examples, consent/opt-out, KYC/Trust Hub, SMS fallback/RC bundle, and phone-preview readiness.
+
+Readiness gaps before any RCS sender/compliance submission:
+
+- Public asset URLs: Part A validates local logo/banner files for preview, but Twilio requires logo/banner assets to be accessible from public URLs. The tracking model has `RBM logo URL` and `RBM banner URL`; RightOnQ still needs the controlled hosting/upload step before submission.
+- Opt-in proof images: Twilio requires opt-in policy images hosted on a publicly accessible URL. Part A captures opt-in narrative and consent route, but not a public proof-image URL.
+- Review video URL: the Part B video generator/story is present and `Review video URL` exists in tracking, but the actual public hosted review video URL must exist before submission.
+- Secondary Profile rep 2: the tracking model supports two representatives, and the plan already says Secondary Profile readiness should model two reps, but the current public Part A form collects only the primary/first authorised representative. Rep 2 remains a manual/follow-up collection requirement before Secondary Profile submission.
+- Business operating regions: the Trust Hub field exists, but Part A launch countries are RCS recipient countries, not necessarily Trust Hub business operating regions. Do not conflate them.
+- Callback/webhook route: not a blocker for sender/compliance preflight, but delivery/status callbacks should be configured only after the RightOnQ Twilio callback receiver exists and is separately proved.
+
+Boundary:
+
+- no Twilio API call;
+- no Apps Script or Sheet write;
+- no RCS Sender creation;
+- no compliance or Trust Hub submission;
+- no sender-pool or phone-number movement;
+- no message send, customer-facing change, or chargeable usage.
+
+Recommended next slice:
+
+- registration-pack readiness map: source-only/read-only checklist that maps every Twilio RCS sender and Secondary Compliance Profile requirement to either a captured Part A field, an internal tracking field, or a deliberate manual follow-up.
+- Do not submit RCS sender/compliance, attach phone numbers, configure callbacks, or send messages until that map is complete.
+
+### Slice 10H - Registration Pack Readiness Map
+
+Status: source-only map completed on Tuesday 19 May 2026.
+
+New source:
+
+- `RCS_REGISTRATION_PACK_READINESS_MAP.md`
+
+Result:
+
+- Twilio RCS Sender public-profile requirements are mapped against Part A and `Twilio setup`.
+- Twilio RCS compliance requirements are mapped against Part A, Part B, and manual follow-ups.
+- Secondary Compliance Profile requirements are mapped against Part A and `Trust Hub KYC`.
+- Messaging Service / fallback readiness is mapped against the proof subaccount, proof Messaging Service, UK RC Bundle, and future callback route.
+
+Main hard stops before RCS Sender submission:
+
+- public hosted `RBM logo URL`;
+- public hosted `RBM banner URL`;
+- public hosted opt-in proof image URL or URLs;
+- public hosted `Review video URL`;
+- internal review of public links, use case, examples, consent, and opt-out wording;
+- client Part B name/logo and video approvals.
+
+Main hard stops before Secondary Compliance Profile submission:
+
+- approved parent primary business compliance profile confirmed;
+- end-client operating regions confirmed separately from RCS recipient countries;
+- second authorised representative collected;
+- secure path chosen for any exception-only ID/address evidence;
+- Trust Hub callback strategy confirmed or deliberately deferred.
+
+Recommended next slice:
+
+- hosted asset/proof URL workflow: decide where approved logo, banner, opt-in proof image, and review video files live; add a safe operator update/readback path for those URLs; keep `Provider submission status`, `Go-live status`, and `Usage pull status` at `not_started`.
+
+### Slice 10I - Hosted Asset / Proof URL Tracking Source
+
+Status: deployed and proof-read on Tuesday 19 May 2026.
+
+Purpose:
+
+- add the missing internal landing field for public hosted opt-in proof images;
+- reuse the existing `Twilio setup` URL fields for hosted logo, banner, and review video;
+- keep the change deployable separately before any real RCS Sender/compliance submission.
+
+Source changes:
+
+- `Twilio setup` gains `Opt-in proof URL(s)` as an append-only tracking header.
+- `buildTwilioSetupFieldMap()` maps `optInProofUrls` to `Opt-in proof URL(s)`.
+- `operator-twilio-setup.mjs` accepts `--opt-in-proof-urls`.
+- Tool docs now show hosted logo, banner, opt-in proof, and review video URL examples.
+
+Boundary:
+
+- Apps Script operator API deployment updated to version `44`;
+- public web app stayed on version `31`;
+- one proof Sheet update/readback was performed against the existing proof application only;
+- no Twilio API call;
+- no public asset upload;
+- no RCS Sender creation/submission;
+- no Trust Hub or compliance submission;
+- no callback configuration, sender-pool movement, phone-number movement, message send, customer-facing change, or chargeable usage.
+
+Proof:
+
+- `clasp deployments` confirmed operator deployment `AKfycbzj0I9m_vld5Aw-zPQFsTZXslrmxlrDA6Ut0RtFnd6_fxXpVDc4qhhRuKVAA5EuhWG9 @44`;
+- public web app remained `AKfycbyI81Ir2xvHLar0R0iFBBWyXa1Nj93T4_8Ni5_eX3XEYDA-AKQbVYbPHnTROLm8e4a6 @31`;
+- dummy-PIN proof still rejected with `Invalid onboarding operator PIN`;
+- valid-PIN proof update/readback on `ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747` showed:
+  - `RBM logo URL = https://example.com/rightonq-proof-logo.png`;
+  - `RBM banner URL = https://example.com/rightonq-proof-banner.png`;
+  - `Opt-in proof URL(s) = https://example.com/rightonq-proof-opt-in.png`;
+  - `Review video URL = https://example.com/rightonq-proof-review-video.webm`;
+  - `Provider submission status = not_started`;
+  - `Go-live status = not_started`;
+  - `Usage pull status = not_started`.
+
+Recommended next gate:
+
+- choose and prove the actual hosting route for approved logo, banner, opt-in proof image, and review video files, then replace the placeholder URLs with real approved hosted proof URLs.
+
+### Slice 10J - Google Cloud Proof Asset Host Proved
+
+Status: deployed and proof-tested on Tuesday 19 May 2026.
+
+Purpose:
+
+- choose a durable Google Cloud hosted route for RCS proof assets;
+- avoid storing provider-review assets in the website repo;
+- produce stable public URLs for Twilio/RCS review without making a GCS bucket publicly listable.
+
+Direct public GCS finding:
+
+- bucket `gs://rightonq-rcs-proof-assets` was created in `europe-west2`;
+- direct public bucket IAM failed because effective org policy `iam.allowedPolicyMemberDomains` only permits Workspace customer ID `C00jtmx91`;
+- object-level public ACLs are also unavailable because effective org policy `storage.uniformBucketLevelAccess` is enforced;
+- `storage.publicAccessPrevention` is not enforced, but the two policies above still block direct public GCS publication;
+- signed URLs were rejected as the main route because RCS review may take weeks and signed URLs expire.
+
+Chosen architecture:
+
+- store proof files in private GCS bucket `rightonq-rcs-proof-assets`;
+- expose approved public objects through Cloud Run service `roq-rcs-proof-assets`;
+- service URL: `https://roq-rcs-proof-assets-872475523113.europe-west2.run.app`;
+- service account: `roq-rcs-proof-assets@rightonq-gog.iam.gserviceaccount.com`;
+- service account has bucket-scoped `roles/storage.objectViewer`;
+- service uses `--no-invoker-iam-check` rather than public `allUsers` IAM;
+- service max scale is `2`, min instances `0`, concurrency `20`;
+- public prefix is `rcs-proof/`;
+- methods are `GET` and `HEAD` only;
+- no upload endpoint and no directory listing.
+
+Source:
+
+- `cloud-run/proof-assets/package.json`;
+- `cloud-run/proof-assets/index.mjs`;
+- `cloud-run/proof-assets/README.md`.
+
+Proof:
+
+- local syntax/self-test passed for the proof-assets source;
+- Cloud Run revision `roq-rcs-proof-assets-00001-8jq` deployed with 100% traffic;
+- placeholder object uploaded to `gs://rightonq-rcs-proof-assets/rcs-proof/ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747/placeholder.txt`;
+- unauthenticated `GET` and `HEAD` passed against `https://roq-rcs-proof-assets-872475523113.europe-west2.run.app/rcs-proof/ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747/placeholder.txt`;
+- path outside the allowed prefix returned `404`.
+
+Boundary:
+
+- no Twilio API call;
+- no provider submission;
+- no customer-facing change;
+- no real customer/private evidence uploaded;
+- proof application still has placeholder `example.com` asset URLs until real approved files are uploaded and read back.
+
+Recommended next gate:
+
+- upload actual approved logo, banner, opt-in proof image, and review video files through this route;
+- confirm their public URLs;
+- update the proof application's `Twilio setup` URL fields with real hosted URLs;
+- keep `Provider submission status`, `Go-live status`, and `Usage pull status` at `not_started`.
+
+### Slice 10K - Cloud Run Proof Asset URLs Written Back
+
+Status: proof-tested and read back on Tuesday 19 May 2026.
+
+Purpose:
+
+- prove the full hosted asset URL workflow end to end;
+- replace `example.com` placeholder URLs on the proof application with real RightOnQ-hosted Cloud Run URLs;
+- keep all provider and go-live statuses stopped.
+
+Proof assets:
+
+- four valid placeholder files were created locally under `/private/tmp/roq-rcs-proof-assets`;
+- the files were uploaded to private GCS under `rcs-proof/ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747/`;
+- content types were set to `image/png` for logo/banner/opt-in and `video/webm` for review video;
+- public Cloud Run `HEAD` checks returned `HTTP/2 200` for all four hosted URLs.
+
+Readback:
+
+- `RBM logo URL = https://roq-rcs-proof-assets-872475523113.europe-west2.run.app/rcs-proof/ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747/rightonq-proof-logo.png`;
+- `RBM banner URL = https://roq-rcs-proof-assets-872475523113.europe-west2.run.app/rcs-proof/ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747/rightonq-proof-banner.png`;
+- `Opt-in proof URL(s) = https://roq-rcs-proof-assets-872475523113.europe-west2.run.app/rcs-proof/ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747/rightonq-proof-opt-in.png`;
+- `Review video URL = https://roq-rcs-proof-assets-872475523113.europe-west2.run.app/rcs-proof/ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747/rightonq-proof-review-video.webm`;
+- `Review video status = placeholder_hosted_url_proof`;
+- `Registration pack status = hosted_url_proof_only`;
+- `Provider submission status = not_started`;
+- `Go-live status = not_started`;
+- `Usage pull status = not_started`.
+
+Boundary:
+
+- no Twilio API call;
+- no provider submission;
+- no customer-facing change;
+- no real customer/private evidence uploaded;
+- hosted files are placeholder proof assets only and must be replaced before any provider submission.
+
+Recommended next gate:
+
+- replace these hosted placeholder files with approved client assets and rerun public URL verification before any RCS Sender/compliance submission planning.
+
+### Slice 10L - Twilio Callback Receiver Record-Only Proof
+
+Status: deployed and proof-tested on Tuesday 19 May 2026.
+
+Purpose:
+
+- create the dedicated Twilio Messaging callback receiver outside the Revolut webhook;
+- validate Twilio signatures against form-encoded status callbacks;
+- prove conservative callback projection without changing Sheets, Messaging Service settings, or provider state.
+
+Source:
+
+- `cloud-run/twilio-callback/package.json`;
+- `cloud-run/twilio-callback/index.mjs`;
+- `cloud-run/twilio-callback/README.md`.
+
+Runtime:
+
+- Cloud Run service `roq-rcs-twilio-callback`;
+- URL `https://roq-rcs-twilio-callback-872475523113.europe-west2.run.app`;
+- revision `roq-rcs-twilio-callback-00001-c4c`;
+- service account `roq-rcs-twilio-callback@rightonq-gog.iam.gserviceaccount.com`;
+- secret `roq-rcs-twilio-auth-token-sandbox-global`, version `1`, accessed only by the callback service account;
+- public via `--no-invoker-iam-check`;
+- max scale `2`, min instances `0`, concurrency `20`.
+
+Projection:
+
+- `provider_message_id = MessageSid`;
+- `provider_event_id = EventSid` when present, otherwise `null`;
+- `status = MessageStatus`;
+- `channel_event = EventType`;
+- `channel = rcs` when `From` starts with `rcs:`;
+- `error_code = ErrorCode`;
+- `human_error = ChannelStatusMessage`;
+- read receipt signal is detected for `MessageStatus=read` or `EventType=READ`, but no read-state projection is written in this slice.
+
+Proof:
+
+- local `node --check` and `--self-test` passed;
+- unsigned POST returned `403`;
+- GET returned `405`;
+- signed delivered-style proof returned `200`, `accepted: true`, `channel: rcs`, `write_applied: false`;
+- signed `EventType=READ` proof without `MessageStatus` returned `200`, `read_receipt_signal: true`, `write_applied: false`.
+
+Boundary:
+
+- no Twilio Messaging Service callback URL configured;
+- no message send;
+- no Sheet/App Script write;
+- no Firestore event persistence yet;
+- no RCS Sender or compliance submission;
+- no sender-pool or phone-number movement.
+
+Recommended next gate:
+
+- keep the Twilio callback receiver parked as proof/staging until product/onboarding callback ownership is confirmed;
+- return the main onboarding path to proof pack, review video, Part B approval, and hosted URL readiness.
+
+### Slice 11A - Proof Video Generator Refocus
+
+Date: 2026-05-20
+
+Purpose:
+
+- refocus the next build on the RCS proof pack and review video;
+- avoid drifting into callback persistence or provider submission;
+- make the existing browser-generated video output honest as a draft, not a finished submission asset.
+
+Changes:
+
+- Part B generator copy now says `Draft proof video generator`.
+- The generated file name now ends `rcs-proof-video-draft.webm` or `rcs-proof-video-draft.mp4`, matching the browser-supported recording MIME type.
+- Output status says RightOnQ must review, host, and get client approval before provider submission.
+- The visible checklist now covers sender identity, permission route, primary/secondary messages, HELP, and STOP/opt-out handling.
+- Canvas scenes now label the video as a registration proof/review draft rather than a live product demo.
+
+Boundary:
+
+- no Twilio API call;
+- no provider submission;
+- no callback configuration;
+- no A-ID implementation;
+- no message send;
+- no public hosted file replacement.
+
+### Slice 11B - Reviewer Drift Cleanup
+
+Date: 2026-05-20
+
+Purpose:
+
+- act on the first fresh-Codex read-only risk review;
+- remove wording and examples that could pull the build back toward callback persistence or premature provider-review status;
+- keep the main path focused on proof pack, review video, final pack review, and explicit submission approval.
+
+Changes:
+
+- Twilio setup tool examples now keep `Provider submission status` at `not_started`.
+- Video approval next action now says to prepare the final registration pack for explicit submission approval, not to submit immediately.
+- Part B video checklist copy now says the approved video URL is ready for RightOnQ final pack review.
+- Readiness map callback wording now requires product/onboarding ownership decision before callback persistence or Messaging Service callback configuration.
+
+Boundary:
+
+- no Apps Script deployment;
+- no operator action;
+- no provider status mutation;
+- no callback configuration;
+- no Twilio API call.
+
+### Slice 11C - Provider Submission Preflight Checklist
+
+Date: 2026-05-20
+
+Purpose:
+
+- add a compact operator guardrail before any RCS Sender / provider submission action;
+- make final pack approval separate from video approval;
+- keep `Provider submission status`, `Go-live status`, and `Usage pull status` at `not_started` until explicit submission approval.
+
+Changes:
+
+- Added `RCS_PROVIDER_SUBMISSION_PREFLIGHT_CHECKLIST.md`.
+- Linked it from `README.md`.
+- Checklist covers business/legal review, message use case, approved public proof assets, Part B approval, Trust Hub/compliance readiness, Messaging Service/fallback readiness, callback ownership, billing/pause/usage controls, and the final operator decision.
+
+Boundary:
+
+- documentation only;
+- no Apps Script deployment;
+- no operator action;
+- no provider submission;
+- no Twilio/Google/Trust Hub call;
+- no status mutation.
+
+### Slice 11D - Provider Lifecycle CLI Guardrail
+
+Date: 2026-05-20
+
+Purpose:
+
+- turn the provider-submission boundary from documentation-only into a local tool guardrail;
+- stop copy-paste operator commands from moving `Provider submission status`, `Go-live status`, or `Usage pull status` beyond `not_started` before the explicit submission gate;
+- keep routine proof-pack, asset URL, and Twilio setup tracking updates simple.
+
+Changes:
+
+- `tools/operator-twilio-setup.mjs` now rejects non-`not_started` values for `--provider-submission-status`, `--go-live-status`, and `--usage-pull-status` unless `--confirm-provider-state-change` is supplied.
+- `tools/README.md`, `RCS_PROVIDER_SUBMISSION_PREFLIGHT_CHECKLIST.md`, and `RCS_PROOF_VIDEO_WORKFLOW.md` now record the tool-level guardrail.
+
+Boundary:
+
+- no Apps Script deployment;
+- no operator action;
+- no provider submission;
+- no Twilio/Google/Trust Hub call;
+- no status mutation.
+
+### Slice 11E - Internal Review Preflight Checker
+
+Date: 2026-05-20
+
+Purpose:
+
+- add an offline checkpoint before `operator-review.mjs --part-a-accepted`;
+- make Part A acceptance readiness visible from a saved operator snapshot;
+- keep KYC/Trust Hub and SMS fallback/RC bundle as explicit pending provider lanes without blocking Part A acceptance when they are not ambiguous or failed.
+
+Changes:
+
+- Added `tools/internal-review-preflight.mjs`.
+- The checker reads a saved `operator-status.mjs` JSON snapshot and reports blockers, warnings, and info for Part A acceptance.
+- It treats legal/company, website/domain, public links, message purpose/examples, consent/opt-out, and phone-preview readiness as acceptance gates.
+- It warns, rather than blocks, for expected post-Part-A lanes such as `pending_trust_hub_review` and pending SMS fallback/RC bundle checks.
+- Linked the checker from `tools/README.md` and the top-level RCS README.
+
+Boundary:
+
+- no Apps Script deployment;
+- no operator action;
+- no Google Sheets read/write;
+- no provider submission;
+- no Twilio/Google/Trust Hub/Revolut call;
+- no status mutation.
+
+### Slice 11F - Part A Acceptance CLI Guardrail
+
+Date: 2026-05-20
+
+Purpose:
+
+- align the live internal-review mutation tool with the offline preflight checker;
+- stop copy-paste operator commands from moving Part A to `part_a_accepted` before the acceptance gate has deliberately passed;
+- keep ordinary internal review row updates available without extra friction.
+
+Changes:
+
+- `tools/operator-review.mjs` now rejects `--part-a-accepted` unless `--confirm-part-a-acceptance` is supplied.
+- The same path also requires `--review-status accepted`, so Part A cannot be accepted while the review row is still marked pending or changes-needed.
+- `tools/README.md` examples now include the explicit confirmation flag and explain the preflight-first workflow.
+
+Boundary:
+
+- no Apps Script deployment;
+- no operator action;
+- no Google Sheets read/write;
+- no provider submission;
+- no Twilio/Google/Trust Hub/Revolut call;
+- no status mutation.
+
+### Slice 11G - Proof Pack Part B Gate
+
+Date: 2026-05-20
+
+Purpose:
+
+- close the gap where the proof-pack preflight could pass without explicit Part B video approval;
+- keep name/logo approval separate from review-video approval;
+- make provider submission impossible to treat as ready while Part B is only at `name_logo_approved` or any changes-requested state.
+
+Changes:
+
+- `tools/proof-pack-preflight.mjs` now blocks provider-submission readiness unless `partBStatus` is `video_approved` or later.
+- It gives specific blockers for `name_logo_approved`, `video_changes_requested`, and `name_logo_changes_requested`.
+- The proof-pack checker self-tests now cover the Part B gate.
+- `tools/README.md`, `RCS_PROVIDER_SUBMISSION_PREFLIGHT_CHECKLIST.md`, and `RCS_PROOF_VIDEO_WORKFLOW.md` now record that name/logo approval alone is not proof-pack readiness.
+
+Boundary:
+
+- no Apps Script deployment;
+- no operator action;
+- no Google Sheets read/write;
+- no provider submission;
+- no Twilio/Google/Trust Hub/Revolut call;
+- no status mutation.
+
+### Slice 11H - Public Part B Order Source Guard
+
+Date: 2026-05-20
+
+Purpose:
+
+- make the public Part B source enforce the intended order, not just the operator preflight;
+- stop name/logo approval before Part A has been accepted;
+- stop review-video approval before name/logo approval has been recorded.
+
+Changes:
+
+- `google-apps-script/Code.gs` now validates the application control row before accepting `submitNameLogoApproval`.
+- Name/logo approval is allowed only after Part A acceptance, or after a prior name/logo changes-requested state.
+- `submitVideoApproval` now requires `Part B status` to be `name_logo_approved` or `video_changes_requested`.
+- The source guard complements `tools/proof-pack-preflight.mjs`, which blocks provider submission unless `partBStatus` is `video_approved` or later.
+- Apps Script HEAD was pushed, version `45` was created, and the existing public web app deployment `AKfycbyI81Ir2xvHLar0R0iFBBWyXa1Nj93T4_8Ni5_eX3XEYDA-AKQbVYbPHnTROLm8e4a6` was redeployed in place to version `45` with description `Public web app (Slice 11H Part B order guard)`.
+- `clasp deployments` confirmed the public web app at `@45`, the clean operator API executable still at `@44`, and the separate RCS Part A intake receiver still at `@1`.
+- Public web app health GET returned `{"ok":true,"service":"RightOnQ RCS Part A Intake","sheetName":"Part A submissions"}`.
+
+Boundary:
+
+- public web app deployment only;
+- clean operator API deployment unchanged;
+- no operator action;
+- no Google Sheets read/write;
+- no provider submission;
+- no Twilio/Google/Trust Hub/Revolut call;
+- no status mutation.
+
+### Slice 11I - Public Part B Guard Proof Helper
+
+Date: 2026-05-20
+
+Purpose:
+
+- add a repeatable local proof helper for the live public Part B order guards;
+- avoid hand-built curl payloads and private-token leakage;
+- keep the default mode dry-run so the helper is not accidentally used as a public mutation tool.
+
+Changes:
+
+- Added `tools/proof-public-part-b-guards.mjs`.
+- The helper defaults to dry-run unless `--confirm-live-proof` is supplied.
+- Live proof creates one synthetic draft application through the operator API, extracts the private token without printing it, then calls public name/logo and video approval endpoints expecting both to reject as out-of-order.
+- It treats any accepted public Part B approval as a failed proof.
+- Linked the helper from `tools/README.md`.
+
+Boundary:
+
+- source/tooling only in this slice;
+- no Apps Script deployment;
+- no live proof run yet;
+- no Google Sheets read/write in this slice;
+- no provider submission;
+- no Twilio/Google/Trust Hub/Revolut call;
+- no status mutation.
+
+### Slice 11J - Public Part B Guard Live Proof
+
+Date: 2026-05-20
+
+Purpose:
+
+- prove the deployed public web app guards reject out-of-order Part B approval calls;
+- confirm the proof helper does not print private application tokens or PINs;
+- leave a repeatable evidence trail before continuing proof-pack/video work.
+
+Proof run:
+
+```bash
+node rcs-registration/tools/proof-public-part-b-guards.mjs --confirm-live-proof
+```
+
+Result:
+
+- Created one synthetic draft application: `ROQ-RCS-TEST-PUBLIC-PARTB-GUARD-20260520193346`.
+- Name/logo approval was rejected with `Part B name/logo approval is not open yet. RightOnQ must accept Part A first.`
+- Review-video approval was rejected with `Part B video approval is not open yet. Name/logo approval must be recorded before the review video can be approved.`
+- Operator snapshot confirmed the synthetic application remained at `registrationStatus: application_created`, `partAStatus: draft`, `partBStatus: ""`.
+- Snapshot confirmed no recent status events and no queued communication codes for the synthetic application.
+
+Boundary:
+
+- one synthetic draft application was created for guard proof only;
+- no Part B approval row was written;
+- no status event was created;
+- no queued communication was created;
+- no provider submission;
+- no Twilio/Google/Trust Hub/Revolut call;
+- no message send or chargeable usage.
+
+### Slice 11K - Proof Pack Final Gate Tightening
+
+Date: 2026-05-20
+
+Purpose:
+
+- make the offline provider-submission preflight fail clearly when final-pack evidence is not complete;
+- avoid an `ok: true` result when the pack still has placeholder assets, unclear approval statuses, or unaccepted review stages;
+- keep the checker aligned with the operational rule that final provider submission needs a completed proof pack plus separate RightOnQ approval.
+
+Changes:
+
+- `tools/proof-pack-preflight.mjs` now treats placeholder proof URLs as blockers.
+- Review-video status must be explicitly client-approved or equivalent.
+- Registration-pack status must be explicitly reviewed/approved or equivalent.
+- Part A status must be present and accepted before final proof-pack readiness.
+- Internal review status must be present and accepted before final proof-pack readiness.
+- Missing legal business name, trading name, or primary contact email in the snapshot are blockers.
+- `tools/README.md` and `RCS_PROVIDER_SUBMISSION_PREFLIGHT_CHECKLIST.md` now describe these as final-pack blockers.
+
+Boundary:
+
+- local offline checker only;
+- no Apps Script deployment;
+- no operator action;
+- no Google Sheets read/write;
+- no provider submission;
+- no Twilio/Google/Trust Hub/Revolut call;
+- no status mutation.
+
+### Slice 11L - Public Proof Asset URL Preflight
+
+Date: 2026-05-20
+
+Purpose:
+
+- add a repeatable read-only check for hosted proof-pack asset URLs;
+- verify that final logo, banner, opt-in proof, and review-video URLs are publicly reachable before provider submission;
+- keep the Twilio/Google banner-size discrepancy visible instead of burying it in chat.
+
+Changes:
+
+- Added `tools/proof-asset-url-preflight.mjs`.
+- The tool reads a saved `operator-status.mjs` JSON snapshot and fetches only the public proof asset URLs in `Twilio setup`.
+- It checks HTTPS, HTTP reachability, PNG/JPEG content types, logo dimensions `224x224`, logo max `50kB`, banner max `200kB`, and video content type.
+- It originally defaulted to the `1440x448` banner size shown by Google/RBM guidance and the available console evidence at the time.
+- It also supports `--banner-profile twilio-onboarding-doc` for the `1140x448` size shown by Twilio's RCS onboarding page, and `--banner-profile either` for comparison.
+- `tools/README.md`, `RCS_PROVIDER_SUBMISSION_PREFLIGHT_CHECKLIST.md`, and `RCS_PROOF_VIDEO_WORKFLOW.md` now include the verifier in the final-pack workflow.
+
+Proof run:
+
+- `node rcs-registration/tools/proof-asset-url-preflight.mjs --snapshot-file /tmp/roq-rcs-current-operator-snapshot.json`
+  - Original result before the profile correction: `ok: false`, `assets: 4`, `blockers: 1`.
+  - All four hosted proof asset URLs were reachable.
+  - Logo returned `image/png`, `224x224`, `5600` bytes.
+  - Opt-in proof returned `image/png`, `1200x800`, `48187` bytes.
+  - Review video returned `video/webm`, `6616` bytes.
+  - Banner returned `image/png`, `1440x448`, `36542` bytes.
+- `node rcs-registration/tools/proof-asset-url-preflight.mjs --snapshot-file /tmp/roq-rcs-current-operator-snapshot.json --banner-profile either`
+  - Result: `ok: true`, `assets: 4`, `blockers: 0`.
+  - The checker identified the current hosted banner as matching Google's current `1440x448` RBM agent-banner dimensions.
+
+Superseded correction:
+
+- A follow-up check initially interpreted the available Twilio Help/Console evidence as aligning with Google at `1440x448`, while treating Twilio's onboarding-page `1140x448` value as a comparison profile.
+- Under that now-superseded interpretation, corrected default proof against `/tmp/roq-rcs-current-operator-snapshot.json` returned `ok: true`, `assets: 4`, `blockers: 0`, while `--banner-profile twilio-onboarding-doc` returned `ok: false`, `blockers: 1`.
+- This interpretation was later superseded by the Slice 11Q Twilio Digital Sales clarification: keep `1440x448` as the reusable master, but use `1140x448` for the actual Twilio sender-profile submission export.
+
+Boundary:
+
+- public URL fetches only;
+- no Apps Script deployment;
+- no operator action;
+- no Google Sheets read/write;
+- no provider submission;
+- no Twilio/Google/Trust Hub/Revolut API call;
+- no status mutation.
+
+### Slice 11M - Proof Video Readiness Preflight
+
+Date: 2026-05-20
+
+Purpose:
+
+- make the review-video lane mechanically checkable before final pack review;
+- distinguish draft/placeholder hosted video evidence from client-approved video evidence;
+- keep proof-video readiness separate from public URL/content checks and separate from provider submission approval.
+
+Changes:
+
+- Added `tools/proof-video-preflight.mjs`.
+- The tool reads a saved `operator-status.mjs` JSON snapshot and performs no network or provider calls.
+- It blocks when the review-video URL is missing, non-HTTPS, or placeholder/proof-only.
+- It blocks when `Review video status` is missing, placeholder/proof-only, or not one of the approved equivalents.
+- It blocks when the application `partBStatus` has not reached `video_approved` or later, and gives specific handling for name/logo-only and video-changes states.
+- It warns when the registration pack is not yet reviewed and when no recent video-approval event/communication is visible in the snapshot window.
+- `tools/README.md`, `RCS_PROOF_VIDEO_WORKFLOW.md`, and `RCS_PROVIDER_SUBMISSION_PREFLIGHT_CHECKLIST.md` now include the checker in the final-pack workflow.
+
+Proof run:
+
+- `node rcs-registration/tools/proof-video-preflight.mjs --self-test`
+  - Result: `ok: true`, with ready/draft/changes cases passing.
+- `node rcs-registration/tools/proof-video-preflight.mjs --snapshot-file /tmp/roq-rcs-current-operator-snapshot.json`
+  - Result: `ok: false`, `videoReadyForFinalPackReview: false`, `blockers: 3`, `warnings: 2`.
+  - Blockers: placeholder review-video URL, placeholder review-video status, and `partBStatus` not yet `video_approved`.
+  - Warnings: placeholder registration-pack status and no recent video approval signal in the snapshot window.
+
+Boundary:
+
+- local offline checker only;
+- no Apps Script deployment;
+- no operator action;
+- no Google Sheets read/write;
+- no public URL fetch;
+- no provider submission;
+- no Twilio/Google/Trust Hub/Revolut call;
+- no status mutation.
+
+### Slice 11N - Combined Final Pack Preflight
+
+Date: 2026-05-20
+
+Purpose:
+
+- give operators one command for the final pre-submission gate;
+- aggregate proof-pack, proof-video, and public asset URL checks from the same saved operator snapshot;
+- keep the component checkers as diagnostics while making the normal workflow easier to run correctly.
+
+Changes:
+
+- Added `tools/final-pack-preflight.mjs`.
+- The tool imports the existing `assessProofPack`, `assessVideoReadiness`, and `assessAssetUrls` functions so the individual rules remain the source of truth.
+- It outputs per-section summaries plus an aggregate `finalPackReady` boolean.
+- It fetches public proof asset URLs read-only by default.
+- It supports `--skip-asset-url-check` for fully offline status/video checks when network access is unavailable.
+- `tools/README.md`, `RCS_PROVIDER_SUBMISSION_PREFLIGHT_CHECKLIST.md`, and `RCS_PROOF_VIDEO_WORKFLOW.md` now point operators to the combined gate first.
+
+Proof run:
+
+- `node rcs-registration/tools/final-pack-preflight.mjs --self-test`
+  - Result: `ok: true`, with ready-offline and blocked-offline cases passing.
+- `node rcs-registration/tools/final-pack-preflight.mjs --snapshot-file /tmp/roq-rcs-current-operator-snapshot.json --skip-asset-url-check`
+  - Result: `ok: false`, `finalPackReady: false`, `blockers: 12`, `warnings: 2`, `assetUrlCheckSkipped: true`.
+  - Section summary: proof pack `9` blockers; proof video `3` blockers and `2` warnings; asset URL check skipped.
+- `node rcs-registration/tools/final-pack-preflight.mjs --snapshot-file /tmp/roq-rcs-current-operator-snapshot.json`
+  - Result: `ok: false`, `finalPackReady: false`, `blockers: 12`, `warnings: 2`, `assetUrlCheckSkipped: false`.
+  - Section summary: proof pack `9` blockers; proof video `3` blockers and `2` warnings; asset URLs `ok: true`, `assets: 4`, `blockers: 0`.
+  - Interpretation: hosted proof URLs are reachable and mechanically plausible, but the pack is still blocked because the URLs/statuses remain placeholder-labelled, Part A/internal review are not accepted, and Part B has not reached `video_approved`.
+
+Boundary:
+
+- no Apps Script deployment;
+- no operator action;
+- no Google Sheets read/write;
+- no provider submission;
+- no Twilio/Google/Trust Hub/Revolut API call;
+- no status mutation.
+- Public proof asset URL fetches are read-only and may be skipped.
+
+### Slice 11O - Part A Acceptance Gate Checkpoint
+
+Date: 2026-05-20
+
+Purpose:
+
+- try the next lifecycle gate without forcing the proof app forward;
+- confirm that the internal-review preflight blocks Part A acceptance while required review checks remain pending;
+- keep a dry-run acceptance command shape ready for when the review evidence is genuinely passed.
+
+Proof run:
+
+- `node rcs-registration/tools/internal-review-preflight.mjs --snapshot-file /tmp/roq-rcs-current-operator-snapshot.json`
+  - Result: `ok: false`, `readyForPartAAcceptance: false`, `blockers: 6`, `warnings: 3`.
+  - Blockers: Legal/company, Website/domain, Public links, Message purpose/examples, Consent/opt-out, and Phone preview readiness are still pending/not ready.
+  - Warnings: KYC/Trust Hub and SMS fallback/RC bundle remain tracked pending lanes; Billing row still says `registration_fee_pending` while active checkout says `already_paid`.
+- `node rcs-registration/tools/internal-review-preflight.mjs --self-test`
+  - Result: `ok: true`.
+- `node rcs-registration/tools/operator-review.mjs ... --part-a-accepted --confirm-part-a-acceptance ... --dry-run`
+  - Result: printed the redacted `updateInternalReview` payload shape for the future accepted path.
+
+Decision:
+
+- Do not run the live Part A acceptance mutation yet.
+- The proof app should move forward only after the hard internal-review checks are actually passed and phone-preview readiness is set to ready.
+
+Boundary:
+
+- offline preflight and dry-run only;
+- no Apps Script deployment;
+- no operator action;
+- no Google Sheets read/write;
+- no provider submission;
+- no Twilio/Google/Trust Hub/Revolut call;
+- no status mutation.
+
+### Slice 11P - Internal Review Command Planner
+
+Date: 2026-05-20
+
+Purpose:
+
+- bridge the gap between the offline internal-review preflight and the guarded live `operator-review.mjs` mutation;
+- make the current Part A acceptance blockers and warnings visible in one command-plan artifact;
+- print future dry-run/live command templates without moving the proof app forward.
+
+Implementation:
+
+- Added `tools/internal-review-command-plan.mjs`.
+- The planner reads a saved `operator-status.mjs` JSON snapshot and imports the same `assessInternalReview` gate used by `internal-review-preflight.mjs`.
+- If blockers remain, it prints the blocker list and a dry-run command only; it deliberately withholds the live command template.
+- If the hard gate has no blockers, it prints:
+  - the dry-run `operator-review.mjs` command;
+  - a PIN-prompting live command template;
+  - safety notes requiring actual evidence review and explicit RightOnQ approval.
+- The planner keeps KYC/Trust Hub and SMS fallback/RC bundle as explicit tracked lanes, not as raw-document collection in the static app.
+
+Verification:
+
+- `node --check rcs-registration/tools/internal-review-command-plan.mjs`
+- `node rcs-registration/tools/internal-review-command-plan.mjs --self-test`
+- `node rcs-registration/tools/internal-review-command-plan.mjs --snapshot-file /tmp/roq-rcs-current-operator-snapshot.json`
+
+Boundary:
+
+- offline snapshot planning only;
+- no Apps Script deployment;
+- no operator action;
+- no Google Sheets read/write;
+- no provider submission;
+- no Twilio/Google/Trust Hub/Revolut call;
+- no status mutation.
+
+### Slice 11Q - Twilio Banner And Video Clarification
+
+Date: 2026-05-20
+
+Source:
+
+- Isa Bell / Twilio Digital Sales reply received 2026-05-20.
+
+Provider clarification:
+
+- Logo remains `224 x 224 px`, JPG/JPEG/PNG, max `50 KB`, public URL.
+- For banner/hero assets, Twilio confirmed the docs mismatch is real:
+  - keep a `1440 x 448 px` master asset internally for reusable client packs and Google/RBM alignment;
+  - export a `1140 x 448 px` file for the actual Twilio sender-profile submission;
+  - if only one Twilio-ready file is prepared for the application itself, use `1140 x 448`.
+- The use-case/review video must be publicly hosted and show the sender in action plus opt-out capability.
+- Twilio's public docs do not publish a strict video file type, max duration, or requirement that the recording be captured from a live/test RCS sender.
+- The proof pack should standardise opt-in description, opt-out description, opt-in policy image URL, and review video URL together; the video is not the whole compliance proof.
+
+Implementation:
+
+- `tools/proof-asset-url-preflight.mjs` now treats `--banner-profile twilio` as the `1140x448` Twilio sender submission export.
+- `--banner-profile google` remains the `1440x448` Google/RBM master check.
+- `--banner-profile twilio-onboarding-doc` remains as a backward-compatible alias for the `1140x448` Twilio onboarding-doc size.
+- `--banner-profile either` continues to support packs that intentionally retain both derivatives.
+- `tools/README.md`, `RCS_REGISTRATION_PACK_READINESS_MAP.md`, `RCS_PROVIDER_SUBMISSION_PREFLIGHT_CHECKLIST.md`, `RCS_ONBOARDING_ARCHITECTURE_BLUEPRINT.md`, and `RCS_PROOF_VIDEO_WORKFLOW.md` now record this clarification.
+
+Boundary:
+
+- docs/tooling clarification only;
+- no Apps Script deployment;
+- no operator action;
+- no Google Sheets read/write;
+- no provider submission;
+- no Twilio/Google/Trust Hub/Revolut call;
+- no status mutation.
+
+### Slice 11R - Compliance Embeddable And A-ID Clarification
+
+Date: 2026-05-20
+
+Source:
+
+- Isa Bell / Twilio Digital Sales reply received 2026-05-20, covering Compliance Embeddable, RCS sender onboarding, UK long-code Regulatory Compliance Bundles, Secondary Compliance Profiles, prefill, client events, resume, status callbacks, and document-storage boundaries.
+
+Provider clarification:
+
+- The Twilio-managed evidence handoff pattern is valid for supported compliance programs:
+  - Twilio collects sensitive evidence inside a white-label embedded flow;
+  - RightOnQ can keep the customer experience inside its own app;
+  - RightOnQ should persist only Twilio references, statuses, timestamps, and rejection/failure reasons.
+- Do not assume RCS sender onboarding itself is Compliance Embeddable-supported. Public docs do not currently list RCS sender onboarding as an Embeddable-supported program.
+- Publicly documented Compliance Embeddable support includes Regulatory Compliance Bundles for Long Codes and Secondary Customer Profiles for Voice Trust, but generic Secondary Compliance Profile support outside Voice Trust is not explicitly confirmed in the public FAQ.
+- Access is account/program-specific and gated by prior registration/enablement.
+- The only public initialize endpoint Isa could validate from docs is for Toll-Free Verification; UK long-code RC Bundle or generic Secondary Profile initialize endpoints/field schemas are not publicly confirmed in the docs.
+- Prefill is a documented product capability, but exact RC Bundle / Secondary Profile field maps should be treated as program-specific until Twilio provides them.
+- Compliance Embeddable can be embedded inside a RightOnQ-branded A-ID page where the program supports it:
+  - Twilio branding need not be visible;
+  - `ThemeSetId` can apply Twilio-configured theme styling;
+  - theme setup is not self-service;
+  - form copy/order cannot be rewritten;
+  - UI is English-only;
+  - Compliance Embeddable data is stored in the US.
+- Client-side events: `onReady`, `onInquirySubmitted`, `onComplete`, `onCancel`, `onError`. Use `onInquirySubmitted` as the better submission hook when RightOnQ needs to know the inquiry was submitted.
+- Users can resume incomplete/rejected inquiries using the same inquiry ID and a fresh session token. Do not persist session tokens as durable identifiers.
+- For Regulatory Compliance Bundles, status callbacks include `AccountSID`, `BundleSID`, `Status`, and `FailureReason`.
+- Public docs expose Supporting Document metadata/status fields, but do not expose a public API for retrieving raw uploaded file contents. Continue designing RightOnQ as references/status-only.
+- Locked-down environments may need to allowlist `withpersona.com`.
+
+Implementation stance:
+
+- Normal Part A stays business/use-case/asset capture only; no passport, driving licence, government ID, proof-of-address, or raw document uploads.
+- A-ID remains an exception-only step opened only if Twilio/Trust Hub asks for extra evidence.
+- For RCS sender submission, keep the path separate from Compliance Embeddable unless Twilio confirms RCS support for RightOnQ's account/use case.
+- For UK long-code RC Bundle collection, design toward Compliance Embeddable if/when access is enabled.
+- For Secondary Compliance Profile, keep RightOnQ/API/Console-managed until Twilio confirms generic SCP embeddable support for this account/use case.
+
+Boundary:
+
+- docs/source-of-truth clarification only;
+- no Apps Script deployment;
+- no operator action;
+- no Google Sheets read/write;
+- no provider submission;
+- no Twilio/Google/Trust Hub/Revolut call;
+- no status mutation.
+
+### Slice 11S - Local Proof Asset Manifest Planner
+
+Date: 2026-05-20
+
+Purpose:
+
+- begin the approved proof-pack asset slice without uploading or mutating anything;
+- make the required local asset set explicit before replacing hosted placeholders;
+- keep the `1440x448` reusable banner master separate from the `1140x448` Twilio sender submission export.
+
+Implementation:
+
+- Added `tools/proof-asset-manifest-plan.mjs`.
+- The planner can run with only `--application-id` to print the planned object paths, public URLs, and Twilio setup tracking-preview URLs.
+- With `--asset-dir`, it checks local candidate files using the expected naming convention:
+  - `rightonq-proof-logo.*` - `224x224`, max `50 KB`;
+  - `rightonq-proof-banner-master.*` - `1440x448`, max `200 KB`;
+  - `rightonq-proof-banner.*` - Twilio submission export, `1140x448`, max `200 KB`;
+  - `rightonq-proof-opt-in.*` - opt-in proof image;
+  - `rightonq-proof-review-video.*` - review/use-case video.
+- It emits the planned GCS object names under `rcs-proof/<application-id>/`, the Cloud Run public URLs, and the operator tracking fields that will later be written after upload.
+- It blocks upload readiness when required local files are missing, oversized, or have the wrong dimensions.
+
+Verification:
+
+- `node --check rcs-registration/tools/proof-asset-manifest-plan.mjs`
+- `node rcs-registration/tools/proof-asset-manifest-plan.mjs --self-test`
+- `node rcs-registration/tools/proof-asset-manifest-plan.mjs --application-id ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747`
+- `git diff --check -- rcs-registration`
+
+Boundary:
+
+- local/offline manifest planning only;
+- no upload;
+- no Apps Script deployment;
+- no operator action;
+- no Google Sheets read/write;
+- no provider submission;
+- no Twilio/Google/Trust Hub/Revolut/Google Cloud API call;
+- no status mutation.
+
+### Slice 11T - Local Proof Asset Candidate Staging
+
+Date: 2026-05-20
+
+Purpose:
+
+- test the manifest planner against the best existing local proof-pack candidates;
+- prove the Twilio `1140x448` banner derivative can be produced locally from the reusable `1440x448` master;
+- record the remaining proof-pack blockers before any upload or status update.
+
+Implementation:
+
+- Added `RCS_PROOF_ASSET_STAGING_NOTE.md`.
+- Created a local-only candidate folder outside the repo:
+  - `/private/tmp/roq-rcs-proof-assets-candidate-ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747`
+- Staged three candidate files from existing storyboard assets:
+  - `rightonq-proof-logo.png` - `224x224`, under `50 KB`;
+  - `rightonq-proof-banner-master.jpg` - `1440x448`, under `200 KB`;
+  - `rightonq-proof-banner.jpg` - `1140x448`, under `200 KB`, derived locally from the master by center crop.
+- Ran the manifest planner against the candidate folder.
+
+Result:
+
+- logo: passes local manifest checks;
+- banner master: passes local manifest checks;
+- Twilio banner export: passes local manifest checks;
+- opt-in proof image: missing;
+- review/use-case video: missing;
+- `readyForUpload` remains `false`.
+
+Boundary:
+
+- local candidate staging only;
+- no proof asset upload;
+- no Apps Script deployment;
+- no operator action;
+- no Google Sheets read/write;
+- no provider submission;
+- no Twilio/Google/Trust Hub/Revolut/Google Cloud API call;
+- no callback configuration;
+- no sender pool or phone-number movement;
+- no message sending;
+- no status mutation.
+
+## Open Questions
+
+- Exact sales-page wording for `RightOnQ UK` and `RightOnQ Global`.
+- Exact VAT-inclusive checkout amount for the `£100 + VAT` registration handling fee.
+- Exact prepaid credit/top-up threshold.
+- Whether auto top-up is mandatory or optional.
+- Whether clients can use Direct Debit later.
+- Whether Revolut subscriptions are reliable enough in sandbox for the monthly base fee.
+- How private application links are generated and revoked.
+- Whether Google Sheets remains the source of truth beyond pilot.
+- Who inside RightOnQ manually approves each status transition.
+- Exact live Twilio Trust Hub Secondary Business policy requirements for UK clients.
+- Whether both representatives should be collected in the customer form or rep 2 should be kept as a RightOnQ manual follow-up before Secondary Profile submission.
+- Exact first/last/email/mobile/title/job-position field shape for both authorised representatives.
+- Which secure/Twilio-managed route will handle exception-only identity evidence if Twilio cannot digitally verify a representative.
+
+## Update Rules For Future Agents
+
+When working on RCS onboarding:
+
+1. Read this file.
+2. Read the latest `RCS_TWILIO_*_HANDOVER_*.md`.
+3. Update this file when product decisions, workflow, statuses, schema, payment assumptions, or build slices change.
+4. Keep implementation notes brief here; put detailed local state and dirty-checkout warnings in the agent handover diary.
+5. Do not silently pivot from Revolut-first to Stripe-first without recording the reason.

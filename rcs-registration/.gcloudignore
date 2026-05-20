@@ -1,0 +1,16 @@
+# Scope the Cloud Run source upload to the record-only Revolut webhook runtime.
+# Keep this file in sync with cloud-run/revolut-webhook/DEPLOYMENT_PREP.md.
+
+*
+
+!.gcloudignore
+!package.json
+
+!cloud-run/
+!cloud-run/revolut-webhook/
+!cloud-run/revolut-webhook/**
+
+!tools/
+!tools/revolut-webhook-handler.mjs
+!tools/revolut-webhook-map.mjs
+!tools/revolut-webhook-verify.mjs

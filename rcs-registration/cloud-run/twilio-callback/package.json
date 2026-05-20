@@ -1,0 +1,14 @@
+{
+  "name": "roq-rcs-twilio-callback",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "index.mjs",
+  "scripts": {
+    "start": "functions-framework --target=twilioCallback",
+    "self-test": "node index.mjs --self-test"
+  },
+  "dependencies": {
+    "@google-cloud/functions-framework": "^3.4.6"
+  }
+}

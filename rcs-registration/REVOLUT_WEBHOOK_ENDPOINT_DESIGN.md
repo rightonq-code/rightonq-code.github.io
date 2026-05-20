@@ -1,0 +1,330 @@
+# Revolut Webhook Endpoint Design
+
+Status: design plus deployed sandbox record-only Cloud Run endpoint. Endpoint proof passed on 2026-05-17; the Revolut sandbox Merchant webhook now points at Cloud Run and real sandbox delivery proof passed on 2026-05-18. No live Billing write is enabled from webhooks.
+
+Last updated: 2026-05-18.
+
+## Decision
+
+Use a small Google Cloud Run function/service as the real Revolut webhook entrypoint, not GitHub Pages and not the existing Apps Script public web app.
+
+Rationale:
+
+- GitHub Pages is static and cannot receive webhook `POST` requests.
+- The webhook must verify the exact raw request body plus the `Revolut-Request-Timestamp` and `Revolut-Signature` headers before trusting the event.
+- Google Cloud Run functions for Node.js expose HTTP request/response objects and, per Google docs, provide access to parsed `req.body` and `req.rawBody`.
+- Cloud Run can use Secret Manager for the Revolut webhook signing secret and Merchant API secret. Google docs recommend Secret Manager rather than environment variables for secrets.
+- Cloud Run has normal request/container logging through Cloud Logging, which is useful for webhook audit and debugging.
+- Apps Script remains the Sheets/operator API layer. Do not use the Apps Script public web app as the direct Revolut webhook entrypoint unless it separately proves exact raw body and custom-header access.
+
+Official docs checked:
+
+- Cloud Run Node.js / HTTP functions: https://docs.cloud.google.com/run/docs/write-http-functions
+- Cloud Run Node.js runtime: https://docs.cloud.google.com/run/docs/runtimes/nodejs
+- Cloud Run environment variables and Secret Manager recommendation: https://docs.cloud.google.com/run/docs/configuring/services/environment-variables
+- Cloud Run Secret Manager references and regional-secret limitation: https://docs.cloud.google.com/run/docs/configuring/services/secrets
+- Cloud Run logging: https://docs.cloud.google.com/run/docs/logging
+- Cloud Run locations: https://cloud.google.com/run/docs/locations
+- Secret Manager locations: https://cloud.google.com/secret-manager/docs/locations
+- Cloud Firestore locations: https://firebase.google.com/docs/firestore/locations
+- Firestore add/set document model: https://firebase.google.com/docs/firestore/manage-data/add-data
+
+## Endpoint Boundary
+
+Initial endpoint name: `roq-rcs-revolut-webhook`.
+
+Initial route: `POST /revolut/webhook`.
+
+The endpoint must:
+
+1. Read the exact raw body as bytes/string.
+2. Read `Revolut-Request-Timestamp` and `Revolut-Signature` headers case-insensitively.
+3. Verify HMAC and timestamp before JSON parsing or mapping.
+4. Return a small public response to Revolut.
+5. Store internal diagnostics in logs/dedupe records, not in the public response.
+6. Record/check dedupe before any Billing write.
+7. Enrich `ORDER_COMPLETED` events before treating them as paid.
+8. Call the Apps Script operator API only after the event is verified, deduped, mapped, and safe to apply.
+
+The endpoint must not:
+
+- print webhook signing secrets, Merchant API secrets, OAuth refresh tokens, PINs, raw card data, or full request bodies in logs;
+- return internal diagnostics, dry-run commands, raw payload, HMACs, or secrets to Revolut;
+- use the verifier CLI `--skip-timestamp-tolerance` behavior;
+- directly trust `ORDER_COMPLETED` as registration-fee-paid without order-type proof;
+- call public Apps Script `doPost` for operator updates.
+
+## Existing Local Primitives
+
+These files are the source of truth for the first endpoint implementation:
+
+- `tools/revolut-webhook-verify.mjs`
+  - exports `verifyWebhook`, `computeSignature`, and timestamp/signature helpers.
+  - verifies `v1.{timestamp}.{rawBody}` HMAC.
+  - enforces timestamp tolerance unless the CLI-only archived-sample flag is used.
+- `tools/revolut-webhook-map.mjs`
+  - exports `mapWebhookPayload`, `buildOperatorBillingArgs`, and `EVENT_MAP`.
+  - maps verified events into proposed Billing arguments.
+  - returns `enrichmentRequired` when application context is missing.
+- `tools/revolut-webhook-handler.mjs`
+  - offline endpoint-core proof.
+  - verifies first, maps second.
+  - returns `body` for the public HTTP response and `internal` for diagnostics.
+  - performs no network calls and no writes.
+- `cloud-run/revolut-webhook/index.mjs`
+  - first Cloud Run / Functions Framework source skeleton.
+  - requires `POST`, `req.rawBody`, and `REVOLUT_WEBHOOK_SIGNING_SECRET`.
+  - returns only the public handler body.
+  - logs redacted record-mode fields only.
+  - in source-only record mode, enriches fresh non-duplicate `ORDER_COMPLETED` events when a Merchant API secret and fetch implementation are configured.
+- `cloud-run/revolut-webhook/dedupe.mjs`
+  - builds payload-stable receipt keys and Firestore document IDs.
+  - stores application context in `logicalDedupeKey`, not in the document ID.
+  - includes an in-memory test store and a Firestore adapter source.
+  - the deployed sandbox endpoint logs dedupe create/duplicate decisions; endpoint proof wrote exactly one record-only Firestore document and the duplicate proof did not create or update another document.
+- `cloud-run/revolut-webhook/enrich.mjs`
+  - source-only Revolut order enrichment helper.
+  - retrieves `/orders/{order_id}` through an injected fetch function.
+  - summarises order/payment fields without returning tokens, full payment-method IDs, raw bodies, or secrets.
+  - classifies payment vs refund orders and returns the order ID that should be used for the Payment orders ledger lookup.
+  - local self-test uses fake orders and fake fetch only; no Revolut call is made.
+
+## Dedupe Store
+
+Use Firestore Native mode as the first dedupe store.
+
+Collection: `revolut_webhook_events`.
+
+Document ID:
+
+```text
+sha256(receiptKey)
+```
+
+Where `receiptKey` must be payload-stable across first receipt, enrichment, and Revolut retries:
+
+```text
+revolut:{event}:{orderId}
+```
+
+Do not include `applicationId`, resolved context, classification, or enrichment-derived values in the Firestore document ID. A retry of the same webhook will resend the original payload, so the document ID must be derivable from fields present before enrichment.
+
+Store the richer logical/audit key separately as a field:
+
+```text
+logicalDedupeKey = revolut:{event}:{orderId}:{applicationId-or-unresolved}
+```
+
+Record fields:
+
+- `receiptKey`
+- `dedupeKey`
+- `logicalDedupeKey`
+- `event`
+- `orderId`
+- `applicationId`
+- `classification`
+- `receivedAt`
+- `requestTimestamp`
+- `signatureMatched`
+- `timestampAccepted`
+- `state`: one of `received`, `processing`, `enrichment_required`, `mapped`, `ignored`, `applied`, `failed`
+- `billingUpdateApplied`: boolean
+- `billingStatus`
+- `paymentStatus`
+- `refundStatus`
+- `provisionalBillingStatus`
+- `provisionalPaymentStatus`
+- `provisionalRefundStatus`
+- `revolutOrderType`
+- `relatedOrderId`
+- `leaseExpiresAt`
+- `errorCode`
+- `errorMessage`: sanitised/truncated; do not store raw payload fragments
+
+Atomic behavior:
+
+1. Start a Firestore transaction.
+2. Compute `receiptKey = revolut:{event}:{orderId}` from the verified payload.
+3. Check `sha256(receiptKey)`.
+4. If it does not exist, create it as `received` with a short lease.
+5. If it exists in `applied`, `mapped`, `ignored`, or `enrichment_required`, return duplicate/no-op for record-only mode. `enrichment_required` is terminal only for the current record-only endpoint; the later automatic apply flow must introduce a separate progress state before any Billing side effect.
+6. If it exists in `processing` and the lease has not expired, return duplicate/in-flight.
+7. If it exists in `processing` or `received` and the lease has expired, reacquire the lease and continue.
+8. If it exists in `failed`, retry only when the failure is marked retryable; otherwise keep failed and return no-op.
+9. Never perform the same Billing write twice. When automatic apply is later enabled, transition to `applied` only after the Apps Script operator API call succeeds.
+
+`duplicate` is a response outcome, not a stored state.
+
+Do not use the Google Sheet as the dedupe source of truth. Sheets are still useful for operator-visible Billing/Payment-order state, but dedupe needs an atomic store.
+
+## Enrichment Rules
+
+The webhook body alone is not enough for all cases.
+
+Observed refund webhook:
+
+```json
+{"event":"ORDER_COMPLETED","order_id":"6a0872b4-89b8-a82d-884b-703f6470c124"}
+```
+
+That event did not include `merchant_order_ext_ref`, refund-specific fields, or the refund payment ID.
+
+Observed sandbox refund order retrieval:
+
+```json
+{
+  "id": "6a0872b4-89b8-a82d-884b-703f6470c124",
+  "type": "refund",
+  "state": "completed",
+  "amount": 12000,
+  "currency": "GBP",
+  "relatedOrderId": "6a0866ef-9b11-a041-bfa2-e973e15e564d"
+}
+```
+
+The actual sandbox proof confirms the refund order type is lowercase `refund` and the original checkout order is exposed as `relatedOrderId` in the local proof-tool summary. The enrichment helper accepts both raw Revolut snake_case (`related_order_id`) and summary camelCase (`relatedOrderId`) forms.
+
+Rules:
+
+1. Always enrich `ORDER_COMPLETED` before any live Billing update until refund-vs-payment distinguishability is independently proven.
+2. If the enriched order type is `refund` (case-insensitive), route through refund lifecycle logic, not the registration-fee-paid path.
+3. If the event is missing `merchant_order_ext_ref`, retrieve/enrich the order and resolve application context through the RightOnQ Payment orders ledger or original/related order.
+4. For refund-order webhooks, use the enriched refund order's original/related order ID, then call `lookupPaymentOrder(originalOrderId)` to resolve the RightOnQ application ID. Calling `lookupPaymentOrder(refundOrderId)` is expected to return not found because the Payment orders ledger stores original checkout/payment orders.
+5. Verify signature/timestamp once at initial receipt. Do not call the full handler again after a slow enrichment step; use `mapWebhookPayload` with the already verified raw payload and enriched order.
+
+## Apply Rules
+
+First live implementation should run in dry-run/record-only mode.
+
+Allowed in dry-run/record-only mode:
+
+- verify webhook;
+- create/check dedupe record;
+- map event;
+- enrich order;
+- log internal diagnostics without secrets;
+- optionally write a non-authoritative event record.
+
+Not allowed until a later explicit slice:
+
+- update Apps Script Billing row automatically;
+- mark `registration_fee_paid` automatically;
+- mark refund status automatically;
+- enable strict public payment gate from webhook state alone.
+
+When automatic apply is finally enabled:
+
+1. Only apply if verification passed.
+2. Only apply if dedupe says this event has not already been applied.
+3. Only apply if mapping is recognised.
+4. Only apply if `ORDER_COMPLETED` has been enriched/typed.
+5. Only call `rcsOperatorAction` through the clean operator API, never public `doPost`.
+6. Store the final apply result back to the dedupe/event record.
+
+## Google Cloud Boundary
+
+Status: planning decision only. Do not create, enable, deploy, or edit Google Cloud resources until this boundary is confirmed in the Google Cloud console and explicitly approved.
+
+Traffic expectation:
+
+- RightOnQ registration-fee volume is low compared with an online shop.
+- Optimise for correctness, auditability, duplicate safety, and low operational maintenance rather than high throughput.
+- Managed services are preferred over custom servers.
+
+Recommended boundary:
+
+- Google account / organisation: `rightonq.co.uk` / RightOnQ-controlled Google account.
+- Google Cloud project: `RightOnQ-GOG` / `rightonq-gog` / project number `872475523113`.
+- Organisation/folder: `rightonq.co.uk`, directly under the Workspace organisation; no folder shown in the read-only console check.
+- Boundary status: confirmed reachable from the correct `adam@rightonq.co.uk` Workspace account on 2026-05-16. An earlier wrong-account browser check is superseded.
+- Do not use `Personal-GOG` / `personal-gog-490412` for this webhook unless Adam explicitly reverses this later. It appears personal/dev-adjacent, not the intended Revolut/payment infrastructure boundary.
+- Runtime: Cloud Run functions / Functions Framework Node.js source deployment for `roq-rcs-revolut-webhook`.
+- Proposed region: `europe-west2` / London. Official docs list `europe-west2` for Cloud Run, Secret Manager, and Cloud Firestore, making it the natural UK-first choice for a UK-based RightOnQ workflow. Confirm availability in the console before any action.
+- Dedupe/event store: Firestore Native mode, collection `revolut_webhook_events`.
+- Billing state: linked on 2026-05-16 to billing account `My Billing Account` / `01D966-E98801-B3C276` under `rightonq.co.uk`. Adam reported on 2026-05-17 that the Google Cloud account was activated to full billing while retaining the trial credit/time window. Activation is complete; spend still needs to stay behind the budget and explicit approval controls below.
+- Budget state: `RightOnQ-GOG safety budget` created on 2026-05-17 under billing account `My Billing Account` / `01D966-E98801-B3C276`, scoped to project `RightOnQ-GOG` / `rightonq-gog`, all services, monthly specified amount `GBP 10.00`, actual-spend alerts at 50%, 90%, and 100%, with default email alerts to billing admins/users. This is an alert guardrail only; Google Cloud budgets do not cap or stop resource/API consumption.
+- Firestore state: created on 2026-05-17 in project `RightOnQ-GOG` / `rightonq-gog`. Database ID `(default)`, Standard edition, Firestore in Native mode, regional location `europe-west2` / London, restrictive security rules denying all reads/writes by default. The deployed webhook proof wrote one dedupe/event document for proof order `roq-rcs-cloudrun-proof-20260517200925`; duplicate proof did not create or modify a second document.
+- Cloud Run state: Cloud Run Admin API enabled on 2026-05-17. First sandbox record-only service deployed on 2026-05-17: service `roq-rcs-revolut-webhook`, URL `https://roq-rcs-revolut-webhook-872475523113.europe-west2.run.app`, latest repo-built revision `roq-rcs-revolut-webhook-00003-ss7` with 100% traffic, Cloud Build ID `bdb4a239-1585-440f-a61d-5805fa3df927`. Runtime service account is `roq-rcs-revolut-webhook@rightonq-gog.iam.gserviceaccount.com`. The service is public/unauthenticated for Revolut delivery, but remains record-only. Endpoint proof passed on 2026-05-17: `GET` and unsigned POST failed closed; signed proof returned `HTTP 202`; duplicate signed proof logged `dedupeDecision=duplicate_terminal`, `dedupeRecorded=false`, `dedupeDuplicate=true`; no Billing update occurred. On 2026-05-18 the existing Revolut sandbox Merchant webhook `e6f32548-ffef-4f77-92fa-a0d2ae0b7dea` was updated from the temporary `webhook.site` URL to the Cloud Run URL, preserving all six original events and without rotating the signing secret. Real sandbox delivery proof then passed for order `6a0ae033-fef3-a25e-b781-b0c4011e158f` / reference `ROQ-RCS-CLOUDRUN-WEBHOOK-PROOF-20260518094729`: Revolut delivered `ORDER_AUTHORISED` and `ORDER_COMPLETED`; both returned `HTTP 202`, matched signatures, wrote one Firestore document per event, and kept `billingUpdateApplied: false`; `ORDER_COMPLETED` enrichment classified the order as `payment_order`.
+- Cloud Run deployment runbook: repo runbook `rcs-registration/cloud-run/revolut-webhook/DEPLOYMENT_PREP.md` records the deployed first sandbox settings and proof. Service name `roq-rcs-revolut-webhook`; region `europe-west2`; Node.js 22/buildpack source deployment; deploy source root `rcs-registration`; entry point `revolutWebhook`; entry module `cloud-run/revolut-webhook/index.mjs`; service account `roq-rcs-revolut-webhook@rightonq-gog.iam.gserviceaccount.com`; ingress `All`; authentication `Allow public access`; request-based billing; service min instances `0`; first sandbox max instances `2`; concurrency `10`; timeout `60 seconds`; secrets wired as environment variables; `.gcloudignore` allowlists only the runtime package, webhook source, and three shared webhook tool modules.
+- Secret Manager state: Secret Manager API (`secretmanager.googleapis.com`) enabled on 2026-05-17 in project `RightOnQ-GOG` / `rightonq-gog`. Two regional sandbox secrets exist in `europe-west2` / London. `roq-rcs-revolut-webhook-signing-secret-sandbox` has version 2 Enabled and version 1 Destroyed; `roq-rcs-revolut-merchant-api-secret-sandbox` has version 1 Enabled. Both current `latest` regional values were verified through Secret Manager on 2026-05-17: the webhook signing secret matched a known Revolut HMAC fixture, and the Merchant API secret retrieved known sandbox order `6a08b551-d18e-a506-9cfa-6a27983dd1de` with HTTP 200. Cloud Run later proved unable to wire those regional secrets directly: the console rejected regional resource IDs, and official Cloud Run docs state that Cloud Run does not support regional secrets. On 2026-05-17 Adam/Cloud Shell created global sandbox copies for Cloud Run: `roq-rcs-revolut-webhook-signing-secret-sandbox-global` and `roq-rcs-revolut-merchant-api-secret-sandbox-global`, both automatically replicated, both with version 1 Enabled. The original regional secrets remain intact and verified. The sandbox Merchant API key had briefly been entered into the wrong regional secret before that wrong version was destroyed; rotation was recommended as hygiene, but Adam explicitly chose not to rotate the sandbox key on 2026-05-17. This sandbox exception must not be carried into live/production secret handling.
+- Service account state: dedicated webhook service account created on 2026-05-17: `roq-rcs-revolut-webhook@rightonq-gog.iam.gserviceaccount.com`. Display name / ID `roq-rcs-revolut-webhook`; description `Runs the RightOnQ RCS Revolut webhook record-only Cloud Run endpoint`; unique ID `105980809530711130186`; status Enabled. It has no keys. On 2026-05-17 it was granted `roles/secretmanager.secretAccessor` directly on each regional sandbox secret and later directly on each Cloud Run global sandbox copy; no project-wide Secret Manager role was granted. It was also granted project-level `roles/datastore.user` / Cloud Datastore User on `RightOnQ-GOG` on 2026-05-17 because the console exposed no database-level IAM panel for this server-side Firestore role. The pre-existing `gog-keep-access@rightonq-gog.iam.gserviceaccount.com` account is for gog CLI / Google Keep domain-wide delegation and must not be reused for this webhook.
+- Secret store: Secret Manager.
+- Initial endpoint mode: record-only. It may verify, dedupe, log, and later enrich; it must not update Apps Script Billing automatically.
+
+Runtime service account:
+
+```text
+roq-rcs-revolut-webhook@rightonq-gog.iam.gserviceaccount.com
+```
+
+Minimum intended permissions, subject to console/IAM verification:
+
+- read the Revolut webhook signing secret; done at secret-resource level for the Cloud Run global sandbox secret;
+- read the Revolut Merchant API secret for enrichment; done at secret-resource level for the Cloud Run global sandbox secret;
+- read/write Firestore documents in the dedupe/event collection; done via project-level `roles/datastore.user` / Cloud Datastore User, which was the narrowest practical console path available for the server-side runtime service account. Do not grant Owner or Editor.
+- write Cloud Logging entries.
+
+Sandbox Secret Manager secrets:
+
+```text
+Regional source/verification copies:
+roq-rcs-revolut-webhook-signing-secret-sandbox
+roq-rcs-revolut-merchant-api-secret-sandbox
+
+Cloud Run global environment-variable secrets:
+roq-rcs-revolut-webhook-signing-secret-sandbox-global
+roq-rcs-revolut-merchant-api-secret-sandbox-global
+```
+
+Later production names should be separate, not reused:
+
+```text
+roq-rcs-revolut-webhook-signing-secret-live
+roq-rcs-revolut-merchant-api-secret-live
+```
+
+Deployment/redeployment checklist:
+
+1. Keep the `RightOnQ-GOG safety budget` in place as an alert-only guardrail; do not treat it as a spending cap.
+2. Confirm billing/permissions are suitable for Cloud Run, Secret Manager, Firestore, and Cloud Logging.
+3. Use `europe-west2` / London for Cloud Run; the console confirmed it is available.
+4. Use Cloud Run functions / Functions Framework Node.js source deployment; the console confirmed Node.js 22 is available and currently default.
+5. Use deploy source root `rcs-registration`, not `rcs-registration/cloud-run/revolut-webhook` alone, because the entry module imports shared webhook primitives from `rcs-registration/tools`.
+6. Use runtime service account `roq-rcs-revolut-webhook@rightonq-gog.iam.gserviceaccount.com`; the console confirmed it is selectable.
+7. Firestore data read/write access is now granted through project-level `roles/datastore.user`; do not broaden it to Owner, Editor, Datastore Owner, or Firebase Admin.
+8. Keep service-level min instances at `0`; leave revision-level min instances blank unless a specific per-revision need appears.
+9. First sandbox deploy settings use max instances `2`, concurrency `10`, and request timeout `60 seconds` to keep the public endpoint bounded; keep these unless a future approved redeploy deliberately changes them.
+10. Use `Allow public access` / ingress `All` for the Revolut webhook endpoint because Revolut must be able to call it from outside Google IAM; the endpoint security gate remains HMAC signature verification, timestamp tolerance, dedupe, and record-only behaviour.
+11. Confirm the endpoint will start in record-only mode.
+12. Revolut sandbox webhook URL change was completed on 2026-05-18 after deployment proof; any future webhook URL/event change remains a separate explicit action.
+
+Forbidden until explicitly approved:
+
+- creating service account keys or additional IAM grants;
+- redeploying or changing Cloud Run service configuration;
+- changing the Revolut webhook URL or event subscriptions again;
+- enabling automatic Apps Script Billing updates;
+- enabling strict public payment gating based on webhook state.
+
+## First Implementation Plan
+
+1. Add a small Cloud Run function source folder. Done in `cloud-run/revolut-webhook`; first sandbox record-only Cloud Run service deployed on 2026-05-17.
+2. Import `handleRevolutWebhook`. Done.
+3. Pass `req.rawBody`, `req.headers`, and signing secret from Secret Manager. Source skeleton reads `REVOLUT_WEBHOOK_SIGNING_SECRET`; deployment must wire it from Secret Manager.
+4. Return only `result.body` to Revolut. Done in source skeleton.
+5. Log/store only redacted `result.internal`. Source skeleton logs redacted record-mode fields only.
+6. Add Firestore dedupe in record-only mode. Source primitives, adapter, exported runtime-handler wiring, real Firestore IAM, deployment, and live endpoint proof are done for the sandbox record-only path.
+7. Add order enrichment using the Revolut Merchant API secret from Secret Manager. Source helper exists in `cloud-run/revolut-webhook/enrich.mjs` and is wired into the source-only record-mode handler for fresh non-duplicate `ORDER_COMPLETED` events.
+8. Use `lookupPaymentOrder` on the original/related order ID from refund-order enrichment to resolve application context when refund events arrive without `merchant_order_ext_ref`. Source helper now returns `ledgerLookupOrderId` for this purpose.
+9. Keep Billing updates disabled until the record-only path has been proven with sandbox webhooks.
+
+## Remaining Confirmations
+
+- Resolved on 2026-05-17: `europe-west2` / London was confirmed and used for the deployed Cloud Run service.
+- Resolved on 2026-05-17: runtime service account has direct secret access for the sandbox secrets and project-level Cloud Datastore User for Firestore.
+- Resolved on 2026-05-17: first sandbox service uses `All` ingress and `Allow public access`; endpoint security is the Revolut signature/timestamp/raw-body/dedupe boundary.
+- Do not carry the sandbox "no rotation" exception into production/live secrets.
+- Whether Revolut retry behavior expects a `2xx` for enrichment-required events. Current design returns `202` to avoid retries while recording the need for internal enrichment.
+- How long to retain dedupe/event records.
+- Failed/declined sandbox paths are now captured: retryable `ORDER_PAYMENT_DECLINED` and terminal `ORDER_PAYMENT_FAILED`.

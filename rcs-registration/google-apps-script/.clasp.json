@@ -1,0 +1,18 @@
+{
+  "scriptId": "1RUuIglGVcVpNSveeXlzw6O0wJ_A5QTtGCHwRMrJoUSSiyZ0TD_DD9ad8",
+  "projectId": "rightonq-gog",
+  "deploymentId": "AKfycbzj0I9m_vld5Aw-zPQFsTZXslrmxlrDA6Ut0RtFnd6_fxXpVDc4qhhRuKVAA5EuhWG9",
+  "rootDir": "",
+  "scriptExtensions": [
+    ".js",
+    ".gs"
+  ],
+  "htmlExtensions": [
+    ".html"
+  ],
+  "jsonExtensions": [
+    ".json"
+  ],
+  "filePushOrder": [],
+  "skipSubdirectories": false
+}
