@@ -3668,6 +3668,36 @@ Boundary:
 - no Twilio/Google/Trust Hub/Revolut call;
 - no message send or chargeable usage.
 
+### Slice 11K - Proof Pack Final Gate Tightening
+
+Date: 2026-05-20
+
+Purpose:
+
+- make the offline provider-submission preflight fail clearly when final-pack evidence is not complete;
+- avoid an `ok: true` result when the pack still has placeholder assets, unclear approval statuses, or unaccepted review stages;
+- keep the checker aligned with the operational rule that final provider submission needs a completed proof pack plus separate RightOnQ approval.
+
+Changes:
+
+- `tools/proof-pack-preflight.mjs` now treats placeholder proof URLs as blockers.
+- Review-video status must be explicitly client-approved or equivalent.
+- Registration-pack status must be explicitly reviewed/approved or equivalent.
+- Part A status must be present and accepted before final proof-pack readiness.
+- Internal review status must be present and accepted before final proof-pack readiness.
+- Missing legal business name, trading name, or primary contact email in the snapshot are blockers.
+- `tools/README.md` and `RCS_PROVIDER_SUBMISSION_PREFLIGHT_CHECKLIST.md` now describe these as final-pack blockers.
+
+Boundary:
+
+- local offline checker only;
+- no Apps Script deployment;
+- no operator action;
+- no Google Sheets read/write;
+- no provider submission;
+- no Twilio/Google/Trust Hub/Revolut call;
+- no status mutation.
+
 ## Open Questions
 
 - Exact sales-page wording for `RightOnQ UK` and `RightOnQ Global`.

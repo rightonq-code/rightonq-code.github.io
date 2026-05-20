@@ -192,6 +192,11 @@ Only after all applicable sections pass may RightOnQ prepare the provider-submis
 
 The checker treats `name_logo_approved` as incomplete. Provider submission requires recorded review-video approval (`video_approved` or later), because name/logo approval only unlocks video preparation.
 
+The checker also treats these final-pack gaps as blockers, not soft warnings:
+placeholder proof URLs, unclear review-video status, unreviewed registration-pack
+status, missing or unaccepted Part A, missing or pending internal review, and
+missing core business fields in the operator snapshot.
+
 The Apps Script source also guards this order: public name/logo approval is only open after Part A acceptance, and public video approval is only open after name/logo approval. Check deployment status before assuming those source guards are live.
 
 The next action should be explicit, for example:

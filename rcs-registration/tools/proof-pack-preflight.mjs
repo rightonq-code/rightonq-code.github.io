@@ -138,7 +138,7 @@ function validateProofUrlField(twilioSetup, label, codeName, blockers, warnings)
       return;
     }
     if (isPlaceholderUrl(url)) {
-      add(warnings, "placeholder_" + codeName + "_url", label + " still looks like placeholder/proof-only material: " + url, label);
+      add(blockers, "placeholder_" + codeName + "_url", label + " still looks like placeholder/proof-only material: " + url, label);
     }
   });
 
@@ -195,16 +195,16 @@ function assessProofPack(snapshot) {
 
   const reviewVideoStatus = valueFrom(twilioSetup, "Review video status", "reviewVideoStatus");
   if (!reviewVideoStatus || reviewVideoStatus === "not_started") {
-    add(warnings, "video_not_approved", "Review video status is not yet client-approved.", "Review video status");
+    add(blockers, "video_not_approved", "Review video status is not yet client-approved.", "Review video status");
   } else if (!APPROVED_VIDEO_STATUSES.has(reviewVideoStatus)) {
-    add(warnings, "video_status_unclear", "Review video status is '" + reviewVideoStatus + "'; confirm this means client-approved.", "Review video status");
+    add(blockers, "video_status_unclear", "Review video status is '" + reviewVideoStatus + "'; confirm this means client-approved.", "Review video status");
   }
 
   const registrationPackStatus = valueFrom(twilioSetup, "Registration pack status", "registrationPackStatus");
   if (!registrationPackStatus || registrationPackStatus === "not_started") {
-    add(warnings, "pack_not_reviewed", "Registration pack status is not yet reviewed/approved.", "Registration pack status");
+    add(blockers, "pack_not_reviewed", "Registration pack status is not yet reviewed/approved.", "Registration pack status");
   } else if (!REVIEWED_PACK_STATUSES.has(registrationPackStatus)) {
-    add(warnings, "pack_status_unclear", "Registration pack status is '" + registrationPackStatus + "'; confirm this means reviewed/approved.", "Registration pack status");
+    add(blockers, "pack_status_unclear", "Registration pack status is '" + registrationPackStatus + "'; confirm this means reviewed/approved.", "Registration pack status");
   }
 
   const manualPauseFlag = valueFrom(twilioSetup, "Manual pause flag", "manualPauseFlag");
@@ -213,8 +213,10 @@ function assessProofPack(snapshot) {
   }
 
   const partAStatus = application.partAStatus || application.registrationStatus || "";
-  if (partAStatus && !["part_a_accepted", "part_b_in_progress", "provider_review", "approved"].includes(partAStatus)) {
-    add(warnings, "part_a_not_accepted", "Application Part A status is '" + partAStatus + "'; final proof pack normally follows accepted Part A.", "partAStatus");
+  if (!partAStatus) {
+    add(blockers, "missing_part_a_status", "Application Part A status is missing; final proof pack normally follows accepted Part A.", "partAStatus");
+  } else if (!["part_a_accepted", "part_b_in_progress", "provider_review", "approved"].includes(partAStatus)) {
+    add(blockers, "part_a_not_accepted", "Application Part A status is '" + partAStatus + "'; final proof pack normally follows accepted Part A.", "partAStatus");
   }
 
   const partBStatus = valueFrom(application, "Part B status", "partBStatus") || application.registrationStatus || "";
@@ -231,8 +233,10 @@ function assessProofPack(snapshot) {
   }
 
   const reviewStatus = valueFrom(internalReview, "Review status", "reviewStatus");
-  if (reviewStatus && reviewStatus !== "accepted") {
-    add(warnings, "internal_review_not_accepted", "Internal review status is '" + reviewStatus + "'.", "Review status");
+  if (!reviewStatus) {
+    add(blockers, "missing_internal_review_status", "Internal review status is missing.", "Review status");
+  } else if (reviewStatus !== "accepted") {
+    add(blockers, "internal_review_not_accepted", "Internal review status is '" + reviewStatus + "'.", "Review status");
   }
 
   const requiredApplicationFields = [
@@ -242,7 +246,7 @@ function assessProofPack(snapshot) {
   ];
   requiredApplicationFields.forEach(function([fieldName, label]) {
     if (!application[fieldName]) {
-      add(warnings, "missing_" + fieldName, label + " is missing from the application snapshot.", fieldName);
+      add(blockers, "missing_" + fieldName, label + " is missing from the application snapshot.", fieldName);
     }
   });
 
@@ -347,8 +351,8 @@ function runSelfTest() {
   const draft = assessProofPack(makeDraftSnapshot());
   assert(draft.ok === false, "draft snapshot should have a Part B blocker");
   assert(draft.readyForProviderSubmission === false, "draft snapshot should not be ready for submission");
-  assert(draft.warnings.some(item => item.code === "placeholder_logo_url"), "draft snapshot should flag placeholder logo");
-  assert(draft.warnings.some(item => item.code === "video_not_approved"), "draft snapshot should flag video not approved");
+  assert(draft.blockers.some(item => item.code === "placeholder_logo_url"), "draft snapshot should block placeholder logo");
+  assert(draft.blockers.some(item => item.code === "video_not_approved"), "draft snapshot should block unapproved video status");
   assert(draft.blockers.some(item => item.code === "video_not_approved_by_client"), "draft snapshot should flag missing client video approval");
 
   const unsafe = assessProofPack(makeUnsafeSnapshot());

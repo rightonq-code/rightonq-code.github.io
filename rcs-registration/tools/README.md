@@ -534,7 +534,11 @@ node rcs-registration/tools/proof-pack-preflight.mjs \
   --snapshot-file /tmp/roq-rcs-operator-snapshot.json
 ```
 
-Use `--strict` if warnings should also fail the command:
+Most final submission gates are blockers: missing or placeholder proof URLs,
+unclear review-video status, unreviewed registration-pack status, unaccepted
+Part A, missing or pending internal review, and missing core business fields all
+return `ok: false`. Use `--strict` if any remaining warnings should also fail
+the command:
 
 ```bash
 node rcs-registration/tools/proof-pack-preflight.mjs \
