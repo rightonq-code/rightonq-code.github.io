@@ -3698,6 +3698,48 @@ Boundary:
 - no Twilio/Google/Trust Hub/Revolut call;
 - no status mutation.
 
+### Slice 11L - Public Proof Asset URL Preflight
+
+Date: 2026-05-20
+
+Purpose:
+
+- add a repeatable read-only check for hosted proof-pack asset URLs;
+- verify that final logo, banner, opt-in proof, and review-video URLs are publicly reachable before provider submission;
+- keep the Twilio/Google banner-size discrepancy visible instead of burying it in chat.
+
+Changes:
+
+- Added `tools/proof-asset-url-preflight.mjs`.
+- The tool reads a saved `operator-status.mjs` JSON snapshot and fetches only the public proof asset URLs in `Twilio setup`.
+- It checks HTTPS, HTTP reachability, PNG/JPEG content types, logo dimensions `224x224`, logo max `50kB`, banner max `200kB`, and video content type.
+- It defaults to the current Twilio banner profile `1140x448`.
+- It also supports `--banner-profile google` for Google's current `1440x448` RBM agent-banner size, and `--banner-profile either` for comparison before final asset selection.
+- `tools/README.md`, `RCS_PROVIDER_SUBMISSION_PREFLIGHT_CHECKLIST.md`, and `RCS_PROOF_VIDEO_WORKFLOW.md` now include the verifier in the final-pack workflow.
+
+Proof run:
+
+- `node rcs-registration/tools/proof-asset-url-preflight.mjs --snapshot-file /tmp/roq-rcs-current-operator-snapshot.json`
+  - Result: `ok: false`, `assets: 4`, `blockers: 1`.
+  - All four hosted proof asset URLs were reachable.
+  - Logo returned `image/png`, `224x224`, `5600` bytes.
+  - Opt-in proof returned `image/png`, `1200x800`, `48187` bytes.
+  - Review video returned `video/webm`, `6616` bytes.
+  - Banner returned `image/png`, `1440x448`, `36542` bytes, which blocks under the default Twilio profile because current Twilio RCS onboarding states `1140x448`.
+- `node rcs-registration/tools/proof-asset-url-preflight.mjs --snapshot-file /tmp/roq-rcs-current-operator-snapshot.json --banner-profile either`
+  - Result: `ok: true`, `assets: 4`, `blockers: 0`.
+  - The checker identified the current hosted banner as matching Google's current `1440x448` RBM agent-banner dimensions.
+
+Boundary:
+
+- public URL fetches only;
+- no Apps Script deployment;
+- no operator action;
+- no Google Sheets read/write;
+- no provider submission;
+- no Twilio/Google/Trust Hub/Revolut API call;
+- no status mutation.
+
 ## Open Questions
 
 - Exact sales-page wording for `RightOnQ UK` and `RightOnQ Global`.

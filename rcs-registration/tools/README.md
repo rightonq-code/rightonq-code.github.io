@@ -47,6 +47,7 @@ The proof helper uses the authenticated operator API for creating the private te
 | `operator-billing.mjs` | Update the internal billing/payment tracking row. | `RCS_ONBOARDING_OPERATOR_PIN` |
 | `operator-payment-order.mjs` | Check, append, or look up Revolut payment-order ledger snapshots for active-checkout protection. | `RCS_ONBOARDING_OPERATOR_PIN` |
 | `proof-pack-preflight.mjs` | Offline proof-pack checker for a saved `operator-status.mjs` JSON snapshot before provider submission. | No PIN; local JSON only |
+| `proof-asset-url-preflight.mjs` | Read-only public URL/content check for logo, banner, opt-in proof, and review video assets in a saved operator snapshot. | No PIN; public URL fetches only |
 | `twilio-account-inventory.mjs` | Read-only Twilio parent/subaccount/Messaging Service inventory preflight before provider-connected setup. | `TWILIO_ACCOUNT_SID` and `TWILIO_AUTH_TOKEN` |
 | `twilio-subaccount-create.mjs` | Create one clearly named Twilio subaccount after a duplicate-name preflight. | `TWILIO_ACCOUNT_SID` and `TWILIO_AUTH_TOKEN` |
 | `twilio-subaccount-messaging-inventory.mjs` | Read-only Messaging Service and sender-pool inventory inside a named Twilio subaccount. | `TWILIO_ACCOUNT_SID` and `TWILIO_AUTH_TOKEN` |
@@ -559,6 +560,46 @@ provider submission action needs separate explicit RightOnQ approval.
 The checker blocks provider submission unless `partBStatus` is `video_approved`
 or later. `name_logo_approved` is not enough because the review/proof video still
 needs client approval.
+
+## Public Proof Asset URL Preflight
+
+This checker reads a saved operator snapshot and fetches the public asset URLs
+only. It verifies that the logo, banner, opt-in proof image, and review video are
+reachable, use plausible content types, and meet the image constraints that can
+be checked mechanically.
+
+```bash
+node rcs-registration/tools/proof-asset-url-preflight.mjs \
+  --snapshot-file /tmp/roq-rcs-operator-snapshot.json
+```
+
+Default banner profile is `twilio`, using the current Twilio RCS onboarding
+constraint of `1140x448`. Use `--banner-profile google` to check Google's
+current RBM `1440x448` agent-banner size, or `--banner-profile either` when
+comparing provider requirements before final asset selection.
+
+```bash
+node rcs-registration/tools/proof-asset-url-preflight.mjs \
+  --snapshot-file /tmp/roq-rcs-operator-snapshot.json \
+  --banner-profile either
+```
+
+Local self-test:
+
+```bash
+node rcs-registration/tools/proof-asset-url-preflight.mjs --self-test
+```
+
+Safety: this tool is read-only. It fetches public URLs and does not call Apps
+Script, Twilio, Revolut, Google Cloud APIs, or Google Sheets. A clean asset URL
+result is not provider-submission approval; run the full proof-pack preflight and
+record explicit RightOnQ approval before any submission action.
+
+Latest proof against `ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747`: all four hosted
+asset URLs were publicly reachable. The current banner is `1440x448`, so the
+default `twilio` profile blocks it while `--banner-profile either` passes and
+identifies it as the Google RBM banner profile. Keep this explicit until the
+final Twilio submission asset size is confirmed.
 
 ## Public Part B Guard Proof
 

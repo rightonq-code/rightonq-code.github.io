@@ -201,6 +201,14 @@ node rcs-registration/tools/proof-pack-preflight.mjs \
   --strict
 ```
 
+Use the public proof asset URL checker to confirm the hosted asset URLs are
+reachable and mechanically plausible:
+
+```sh
+node rcs-registration/tools/proof-asset-url-preflight.mjs \
+  --snapshot-file /tmp/roq-rcs-operator-snapshot.json
+```
+
 Do not submit only because the video is approved. The proof pack also needs final RightOnQ approval.
 
 The offline checker blocks provider submission before `video_approved`. A name/logo approval is necessary, but it only means RightOnQ can prepare the review video; it is not final proof-pack readiness.
