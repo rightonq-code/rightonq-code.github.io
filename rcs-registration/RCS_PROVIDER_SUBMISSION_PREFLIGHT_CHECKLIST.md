@@ -180,7 +180,24 @@ Must not proceed if:
 
 ## Final Operator Decision
 
-Before the final decision, run the offline snapshot checker if an operator snapshot has been saved:
+Before the final decision, run the combined final-pack checker if an operator snapshot has been saved:
+
+```sh
+node rcs-registration/tools/final-pack-preflight.mjs \
+  --snapshot-file /tmp/roq-rcs-operator-snapshot.json \
+  --strict
+```
+
+If the combined checker cannot fetch public URLs in the current environment, run
+the local-only gate first:
+
+```sh
+node rcs-registration/tools/final-pack-preflight.mjs \
+  --snapshot-file /tmp/roq-rcs-operator-snapshot.json \
+  --skip-asset-url-check
+```
+
+The component checks remain available for diagnosis:
 
 ```sh
 node rcs-registration/tools/proof-pack-preflight.mjs \

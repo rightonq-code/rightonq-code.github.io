@@ -3787,6 +3787,47 @@ Boundary:
 - no Twilio/Google/Trust Hub/Revolut call;
 - no status mutation.
 
+### Slice 11N - Combined Final Pack Preflight
+
+Date: 2026-05-20
+
+Purpose:
+
+- give operators one command for the final pre-submission gate;
+- aggregate proof-pack, proof-video, and public asset URL checks from the same saved operator snapshot;
+- keep the component checkers as diagnostics while making the normal workflow easier to run correctly.
+
+Changes:
+
+- Added `tools/final-pack-preflight.mjs`.
+- The tool imports the existing `assessProofPack`, `assessVideoReadiness`, and `assessAssetUrls` functions so the individual rules remain the source of truth.
+- It outputs per-section summaries plus an aggregate `finalPackReady` boolean.
+- It fetches public proof asset URLs read-only by default.
+- It supports `--skip-asset-url-check` for fully offline status/video checks when network access is unavailable.
+- `tools/README.md`, `RCS_PROVIDER_SUBMISSION_PREFLIGHT_CHECKLIST.md`, and `RCS_PROOF_VIDEO_WORKFLOW.md` now point operators to the combined gate first.
+
+Proof run:
+
+- `node rcs-registration/tools/final-pack-preflight.mjs --self-test`
+  - Result: `ok: true`, with ready-offline and blocked-offline cases passing.
+- `node rcs-registration/tools/final-pack-preflight.mjs --snapshot-file /tmp/roq-rcs-current-operator-snapshot.json --skip-asset-url-check`
+  - Result: `ok: false`, `finalPackReady: false`, `blockers: 12`, `warnings: 2`, `assetUrlCheckSkipped: true`.
+  - Section summary: proof pack `9` blockers; proof video `3` blockers and `2` warnings; asset URL check skipped.
+- `node rcs-registration/tools/final-pack-preflight.mjs --snapshot-file /tmp/roq-rcs-current-operator-snapshot.json`
+  - Result: `ok: false`, `finalPackReady: false`, `blockers: 12`, `warnings: 2`, `assetUrlCheckSkipped: false`.
+  - Section summary: proof pack `9` blockers; proof video `3` blockers and `2` warnings; asset URLs `ok: true`, `assets: 4`, `blockers: 0`.
+  - Interpretation: hosted proof URLs are reachable and mechanically plausible, but the pack is still blocked because the URLs/statuses remain placeholder-labelled, Part A/internal review are not accepted, and Part B has not reached `video_approved`.
+
+Boundary:
+
+- no Apps Script deployment;
+- no operator action;
+- no Google Sheets read/write;
+- no provider submission;
+- no Twilio/Google/Trust Hub/Revolut API call;
+- no status mutation.
+- Public proof asset URL fetches are read-only and may be skipped.
+
 ## Open Questions
 
 - Exact sales-page wording for `RightOnQ UK` and `RightOnQ Global`.

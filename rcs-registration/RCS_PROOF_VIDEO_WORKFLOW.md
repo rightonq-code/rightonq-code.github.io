@@ -193,7 +193,15 @@ Before provider submission, run the full preflight checklist:
 
 - `RCS_PROVIDER_SUBMISSION_PREFLIGHT_CHECKLIST.md`
 
-Use the offline snapshot checker as a mechanical guardrail:
+Use the combined final-pack checker as the main mechanical guardrail:
+
+```sh
+node rcs-registration/tools/final-pack-preflight.mjs \
+  --snapshot-file /tmp/roq-rcs-operator-snapshot.json \
+  --strict
+```
+
+The component checkers are available for diagnosis:
 
 ```sh
 node rcs-registration/tools/proof-pack-preflight.mjs \

@@ -46,6 +46,7 @@ The proof helper uses the authenticated operator API for creating the private te
 | `operator-twilio-subaccount-link.mjs` | Resolve a Twilio subaccount by friendly name and link it into the internal Twilio setup row with redacted terminal output. | `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, and `RCS_ONBOARDING_OPERATOR_PIN` |
 | `operator-billing.mjs` | Update the internal billing/payment tracking row. | `RCS_ONBOARDING_OPERATOR_PIN` |
 | `operator-payment-order.mjs` | Check, append, or look up Revolut payment-order ledger snapshots for active-checkout protection. | `RCS_ONBOARDING_OPERATOR_PIN` |
+| `final-pack-preflight.mjs` | Combined final-pack gate that runs proof-pack, proof-video, and public asset URL checks from one saved operator snapshot. | No PIN; public URL fetches unless skipped |
 | `proof-pack-preflight.mjs` | Offline proof-pack checker for a saved `operator-status.mjs` JSON snapshot before provider submission. | No PIN; local JSON only |
 | `proof-video-preflight.mjs` | Offline proof-video readiness checker for review-video URL/status and client approval state in a saved operator snapshot. | No PIN; local JSON only |
 | `proof-asset-url-preflight.mjs` | Read-only public URL/content check for logo, banner, opt-in proof, and review video assets in a saved operator snapshot. | No PIN; public URL fetches only |
@@ -561,6 +562,40 @@ provider submission action needs separate explicit RightOnQ approval.
 The checker blocks provider submission unless `partBStatus` is `video_approved`
 or later. `name_logo_approved` is not enough because the review/proof video still
 needs client approval.
+
+## Final Pack Preflight
+
+This is the one-command operator gate before a provider-submission decision. It
+runs:
+
+- `proof-pack-preflight.mjs`;
+- `proof-video-preflight.mjs`;
+- `proof-asset-url-preflight.mjs`.
+
+```bash
+node rcs-registration/tools/final-pack-preflight.mjs \
+  --snapshot-file /tmp/roq-rcs-operator-snapshot.json \
+  --strict
+```
+
+Use offline-only mode when network access is unavailable or you want to inspect
+Sheet/status blockers before fetching public proof asset URLs:
+
+```bash
+node rcs-registration/tools/final-pack-preflight.mjs \
+  --snapshot-file /tmp/roq-rcs-operator-snapshot.json \
+  --skip-asset-url-check
+```
+
+Local self-test:
+
+```bash
+node rcs-registration/tools/final-pack-preflight.mjs --self-test
+```
+
+Expected result: JSON with per-section summaries and `finalPackReady`. A clean
+result is still only a gate result; provider submission needs separate explicit
+RightOnQ approval and a separate submission action.
 
 ## Offline Proof Video Preflight
 
