@@ -4034,6 +4034,50 @@ Boundary:
 - no Twilio/Google/Trust Hub/Revolut/Google Cloud API call;
 - no status mutation.
 
+### Slice 11T - Local Proof Asset Candidate Staging
+
+Date: 2026-05-20
+
+Purpose:
+
+- test the manifest planner against the best existing local proof-pack candidates;
+- prove the Twilio `1140x448` banner derivative can be produced locally from the reusable `1440x448` master;
+- record the remaining proof-pack blockers before any upload or status update.
+
+Implementation:
+
+- Added `RCS_PROOF_ASSET_STAGING_NOTE.md`.
+- Created a local-only candidate folder outside the repo:
+  - `/private/tmp/roq-rcs-proof-assets-candidate-ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747`
+- Staged three candidate files from existing storyboard assets:
+  - `rightonq-proof-logo.png` - `224x224`, under `50 KB`;
+  - `rightonq-proof-banner-master.jpg` - `1440x448`, under `200 KB`;
+  - `rightonq-proof-banner.jpg` - `1140x448`, under `200 KB`, derived locally from the master by center crop.
+- Ran the manifest planner against the candidate folder.
+
+Result:
+
+- logo: passes local manifest checks;
+- banner master: passes local manifest checks;
+- Twilio banner export: passes local manifest checks;
+- opt-in proof image: missing;
+- review/use-case video: missing;
+- `readyForUpload` remains `false`.
+
+Boundary:
+
+- local candidate staging only;
+- no proof asset upload;
+- no Apps Script deployment;
+- no operator action;
+- no Google Sheets read/write;
+- no provider submission;
+- no Twilio/Google/Trust Hub/Revolut/Google Cloud API call;
+- no callback configuration;
+- no sender pool or phone-number movement;
+- no message sending;
+- no status mutation.
+
 ## Open Questions
 
 - Exact sales-page wording for `RightOnQ UK` and `RightOnQ Global`.
