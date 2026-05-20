@@ -3498,6 +3498,33 @@ Boundary:
 - no Twilio/Google/Trust Hub call;
 - no status mutation.
 
+### Slice 11E - Internal Review Preflight Checker
+
+Date: 2026-05-20
+
+Purpose:
+
+- add an offline checkpoint before `operator-review.mjs --part-a-accepted`;
+- make Part A acceptance readiness visible from a saved operator snapshot;
+- keep KYC/Trust Hub and SMS fallback/RC bundle as explicit pending provider lanes without blocking Part A acceptance when they are not ambiguous or failed.
+
+Changes:
+
+- Added `tools/internal-review-preflight.mjs`.
+- The checker reads a saved `operator-status.mjs` JSON snapshot and reports blockers, warnings, and info for Part A acceptance.
+- It treats legal/company, website/domain, public links, message purpose/examples, consent/opt-out, and phone-preview readiness as acceptance gates.
+- It warns, rather than blocks, for expected post-Part-A lanes such as `pending_trust_hub_review` and pending SMS fallback/RC bundle checks.
+- Linked the checker from `tools/README.md` and the top-level RCS README.
+
+Boundary:
+
+- no Apps Script deployment;
+- no operator action;
+- no Google Sheets read/write;
+- no provider submission;
+- no Twilio/Google/Trust Hub/Revolut call;
+- no status mutation.
+
 ## Open Questions
 
 - Exact sales-page wording for `RightOnQ UK` and `RightOnQ Global`.
