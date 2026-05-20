@@ -248,7 +248,7 @@ Recommended next onboarding build slice:
 
 1. Create the activation handover contract in the onboarding docs/model.
 2. Mark the Twilio callback receiver as staging/proof-only until production callback ownership is confirmed.
-3. Update the readiness map to replace "add callback persistence/dedupe before callback configuration" with a clearer build-team decision gate.
+3. Keep the readiness map aligned on this rule: product/onboarding callback ownership must be decided before callback persistence or Messaging Service callback configuration is treated as a next build step.
 4. Continue normal onboarding work on registration pack readiness, Trust Hub/Secondary Compliance Profile preflight, and secure evidence-route design.
 
 Do not yet:

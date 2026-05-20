@@ -1613,7 +1613,7 @@ Test evidence:
 - Browser check on `http://localhost:8902/rcs-registration/index.html?applicationId=ROQ-RCS-TEST-SLICE5-20260514` showed B2 opening correctly, approval choices enabling the `Send approval to RightOnQ` button, status reading `Name and logo approved`, and no console errors.
 - Live B3 test POST against `ROQ-RCS-TEST-SLICE5-20260514` returned `ok: true` and `video_approved`.
 - Live Sheet now has the `Part B video approvals` tab with a labelled B3 test approval row.
-- `Applications` row for `ROQ-RCS-TEST-SLICE5-20260514` now shows `Registration status = video_approved`, `Part B status = video_approved`, `Next action owner = RightOnQ`, and `Next action note = Submit the RCS registration pack.`
+- `Applications` row for `ROQ-RCS-TEST-SLICE5-20260514` now shows `Registration status = video_approved`, `Part B status = video_approved`, `Next action owner = RightOnQ`, and the then-current submit-next wording. Slice 11B later tightened this wording so video approval now points to final registration-pack preparation for explicit submission approval.
 - Browser check on the same URL showed B3 opening correctly, the five approval checklist items enabling `Send approval to RightOnQ`, status reading `Video approved`, and no console errors.
 
 Important caveat:
@@ -3424,6 +3424,31 @@ Boundary:
 - no A-ID implementation;
 - no message send;
 - no public hosted file replacement.
+
+### Slice 11B - Reviewer Drift Cleanup
+
+Date: 2026-05-20
+
+Purpose:
+
+- act on the first fresh-Codex read-only risk review;
+- remove wording and examples that could pull the build back toward callback persistence or premature provider-review status;
+- keep the main path focused on proof pack, review video, final pack review, and explicit submission approval.
+
+Changes:
+
+- Twilio setup tool examples now keep `Provider submission status` at `not_started`.
+- Video approval next action now says to prepare the final registration pack for explicit submission approval, not to submit immediately.
+- Part B video checklist copy now says the approved video URL is ready for RightOnQ final pack review.
+- Readiness map callback wording now requires product/onboarding ownership decision before callback persistence or Messaging Service callback configuration.
+
+Boundary:
+
+- no Apps Script deployment;
+- no operator action;
+- no provider status mutation;
+- no callback configuration;
+- no Twilio API call.
 
 ## Open Questions
 

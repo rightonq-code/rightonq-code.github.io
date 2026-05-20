@@ -242,10 +242,10 @@ node rcs-registration/tools/operator-twilio-setup.mjs \
   --rbm-banner-url https://example.com/banner.png \
   --opt-in-proof-urls https://example.com/opt-in-proof.png \
   --review-video-url https://example.com/review-video.webm \
-  --provider-submission-status provider_review \
+  --provider-submission-status not_started \
   --usage-pull-status not_started \
   --manual-pause-flag no \
-  --internal-notes "Twilio subaccount prepared; usage pull not enabled yet." \
+  --internal-notes "Proof pack tracking update only; provider submission not started." \
   --dry-run
 ```
 
@@ -259,15 +259,15 @@ RCS_ONBOARDING_OPERATOR_PIN="..." node rcs-registration/tools/operator-twilio-se
   --rbm-banner-url https://example.com/banner.png \
   --opt-in-proof-urls https://example.com/opt-in-proof.png \
   --review-video-url https://example.com/review-video.webm \
-  --provider-submission-status provider_review \
+  --provider-submission-status not_started \
   --usage-pull-status not_started \
   --manual-pause-flag no \
-  --internal-notes "Twilio subaccount prepared; usage pull not enabled yet."
+  --internal-notes "Proof pack tracking update only; provider submission not started."
 ```
 
 Expected live result: JSON showing the stored Twilio subaccount SID, provider submission status, go-live status, and manual pause flag.
 
-Safety: store Twilio resource IDs, statuses, public asset/proof URLs, and operator notes only. Do not store Twilio auth tokens, API keys, webhook secrets, raw message payloads, customer message content, or private/signed URLs in this workflow.
+Safety: store Twilio resource IDs, statuses, public asset/proof URLs, and operator notes only. Keep `--provider-submission-status not_started` until a separate explicit submission approval gate has passed. Do not store Twilio auth tokens, API keys, webhook secrets, raw message payloads, customer message content, or private/signed URLs in this workflow.
 
 ## Link Twilio Proof Subaccount Into Tracking
 

@@ -54,7 +54,7 @@ function usage() {
     "  --twilio-messaging-service-sid MG...",
     "  --rbm-agent-id agent_xxx",
     "  --provider-submission-reference ref_xxx",
-    "  --provider-submission-status provider_review",
+    "  --provider-submission-status not_started",
     "  --phone-preview-status sent",
     "  --review-video-url https://...",
     "  --go-live-status not_started",

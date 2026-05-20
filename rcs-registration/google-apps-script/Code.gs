@@ -810,7 +810,7 @@ function submitVideoApproval(spreadsheet, payload) {
   const registrationStatus = approved ? "video_approved" : "video_changes_requested";
   const partBStatus = registrationStatus;
   const nextActionNote = approved
-    ? "Submit the RCS registration pack."
+    ? "Prepare final registration pack for explicit submission approval."
     : "Review requested video changes and prepare an amended review video.";
 
   const sheet = getOrCreateSheet(spreadsheet, PART_B_VIDEO_APPROVALS_SHEET_NAME, PART_B_VIDEO_APPROVAL_HEADERS);
