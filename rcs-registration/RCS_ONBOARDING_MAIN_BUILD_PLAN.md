@@ -3634,6 +3634,40 @@ Boundary:
 - no Twilio/Google/Trust Hub/Revolut call;
 - no status mutation.
 
+### Slice 11J - Public Part B Guard Live Proof
+
+Date: 2026-05-20
+
+Purpose:
+
+- prove the deployed public web app guards reject out-of-order Part B approval calls;
+- confirm the proof helper does not print private application tokens or PINs;
+- leave a repeatable evidence trail before continuing proof-pack/video work.
+
+Proof run:
+
+```bash
+node rcs-registration/tools/proof-public-part-b-guards.mjs --confirm-live-proof
+```
+
+Result:
+
+- Created one synthetic draft application: `ROQ-RCS-TEST-PUBLIC-PARTB-GUARD-20260520193346`.
+- Name/logo approval was rejected with `Part B name/logo approval is not open yet. RightOnQ must accept Part A first.`
+- Review-video approval was rejected with `Part B video approval is not open yet. Name/logo approval must be recorded before the review video can be approved.`
+- Operator snapshot confirmed the synthetic application remained at `registrationStatus: application_created`, `partAStatus: draft`, `partBStatus: ""`.
+- Snapshot confirmed no recent status events and no queued communication codes for the synthetic application.
+
+Boundary:
+
+- one synthetic draft application was created for guard proof only;
+- no Part B approval row was written;
+- no status event was created;
+- no queued communication was created;
+- no provider submission;
+- no Twilio/Google/Trust Hub/Revolut call;
+- no message send or chargeable usage.
+
 ## Open Questions
 
 - Exact sales-page wording for `RightOnQ UK` and `RightOnQ Global`.

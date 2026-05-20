@@ -576,6 +576,12 @@ Expected live result: JSON showing one synthetic draft application was created,
 then public name/logo and video approval attempts were both rejected before any
 Part B approval rows could be written.
 
+Latest live proof: 2026-05-20 created
+`ROQ-RCS-TEST-PUBLIC-PARTB-GUARD-20260520193346`; both out-of-order public Part B
+approval attempts were rejected, and the operator snapshot stayed at
+`partAStatus: draft` with no Part B status, no recent status events, and no
+queued communication codes.
+
 Safety: live proof creates one synthetic draft application. A successful public
 Part B approval is treated as a failed proof. Private application tokens and PINs
 are never printed.
