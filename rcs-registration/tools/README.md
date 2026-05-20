@@ -2,7 +2,7 @@
 
 These tools are local RightOnQ operator helpers for the RCS onboarding pilot.
 
-Operator tools call the authenticated Apps Script Execution API through the clean `rcsOperatorAction` route. Public customer submissions use the public v31 web app. The tools do not store PINs in this repo. Always use `--dry-run` first, then run the live command only when the Apps Script-side PIN has been configured.
+Operator tools call the authenticated Apps Script Execution API through the clean `rcsOperatorAction` route. Public customer submissions use the public web app deployment. The tools do not store PINs in this repo. Always use `--dry-run` first, then run the live command only when the Apps Script-side PIN has been configured.
 
 ## Apps Script Auth
 
@@ -12,7 +12,7 @@ Operator tools use the named clasp/OAuth login:
 - local OAuth credential source: `~/.clasprc.json`;
 - Apps Script project config: `rcs-registration/google-apps-script/.clasp.json`;
 - clean API executable deployment: `AKfycbzj0I9m_vld5Aw-zPQFsTZXslrmxlrDA6Ut0RtFnd6_fxXpVDc4qhhRuKVAA5EuhWG9` at Apps Script version `44`;
-- public customer web app deployment: `AKfycbyI81Ir2xvHLar0R0iFBBWyXa1Nj93T4_8Ni5_eX3XEYDA-AKQbVYbPHnTROLm8e4a6`.
+- public customer web app deployment: `AKfycbyI81Ir2xvHLar0R0iFBBWyXa1Nj93T4_8Ni5_eX3XEYDA-AKQbVYbPHnTROLm8e4a6` at Apps Script version `45`.
 
 Operator wrappers call `scripts.run` against the clean API executable deployment ID in `.clasp.json` with `devMode: false`. They are pinned to the deployed operator API version rather than Apps Script HEAD.
 
@@ -28,7 +28,7 @@ The public Part A proof helper still uses a web app URL for fake/valid customer 
 
 1. `RCS_ONBOARDING_PUBLIC_WEB_APP_URL`;
 2. `RCS_ONBOARDING_WEB_APP_URL`;
-3. built-in public v31 deployment URL.
+3. built-in public web app deployment URL.
 
 The proof helper uses the authenticated operator API for creating the private test application and reading the snapshot.
 
@@ -57,7 +57,7 @@ The proof helper uses the authenticated operator API for creating the private te
 | `revolut-webhook-map.mjs` | Map a verified Revolut webhook payload into a proposed `operator-billing.mjs --dry-run` update. | No RCS PIN; performs no writes |
 | `revolut-webhook-handler.mjs` | Offline endpoint-core proof: verify headers/body, map payload, and return public/internal handler results without writes. | No RCS PIN; fake-data self-test only for now |
 
-Note: `operator-twilio-setup.mjs` and the expanded Billing/RC Bundle fields are live on the clean API executable deployment at version `44`. Version `39` kept missing Sheet headers append-only, repaired the known `Applications` header drift, and proved the Slice 9B Twilio setup tracking row readback. Version `40` hardened append writers to write by the live Sheet header row before any provider-connected slice. Version `42` preserves numeric zero values through shared Sheet row readback. Version `43` preserves numeric zero values in full operator snapshots and `operator-status.mjs` redacts Twilio Account SIDs from terminal output. Version `44` adds `Opt-in proof URL(s)` to Twilio setup tracking and proves hosted asset/proof URL readback.
+Note: `operator-twilio-setup.mjs` and the expanded Billing/RC Bundle fields are live on the clean API executable deployment at version `44`; public customer submissions use the public web app deployment at version `45`. Version `39` kept missing Sheet headers append-only, repaired the known `Applications` header drift, and proved the Slice 9B Twilio setup tracking row readback. Version `40` hardened append writers to write by the live Sheet header row before any provider-connected slice. Version `42` preserves numeric zero values through shared Sheet row readback. Version `43` preserves numeric zero values in full operator snapshots and `operator-status.mjs` redacts Twilio Account SIDs from terminal output. Version `44` adds `Opt-in proof URL(s)` to Twilio setup tracking and proves hosted asset/proof URL readback. Version `45` adds public Part B order guards to the web app deployment.
 
 ## Safety Rules
 
