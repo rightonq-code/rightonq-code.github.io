@@ -746,6 +746,8 @@ Implemented:
 
 Bugs supplied a Twilio onboarding screenshot showing the logo requirement as 224 x 224 px, not the app's earlier 256 x 256 minimum. Twilio and Google docs both confirm the logo is 224 x 224 px with a 50 KB max. Google also confirms the banner image is 1440 x 448 px with a 200 KB max.
 
+Historical note added 2026-05-20: this section records the state of the work on 2026-05-12. It is superseded for Twilio sender-profile submission assets by the later Isa Bell / Twilio Digital Sales clarification: keep the 1440 x 448 banner as the reusable Google/RBM master, but export/use a 1140 x 448 derivative for the actual Twilio sender-profile submission. See `RCS_ONBOARDING_MAIN_BUILD_PLAN.md` Slice 11Q and `RCS_REGISTRATION_PACK_READINESS_MAP.md` for the current rule.
+
 Implemented:
 
 - Box 21 `Brand logo` helper changed to exactly `224 x 224 px` and `50 KB`.

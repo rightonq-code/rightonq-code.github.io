@@ -547,14 +547,14 @@ Save a snapshot first:
 
 ```bash
 RCS_ONBOARDING_OPERATOR_PIN="..." node rcs-registration/tools/operator-status.mjs \
-  --application-id ROQ-RCS-... > /tmp/roq-rcs-operator-snapshot.json
+  --application-id ROQ-RCS-... > /tmp/roq-rcs-current-operator-snapshot.json
 ```
 
 Run the offline check:
 
 ```bash
 node rcs-registration/tools/proof-pack-preflight.mjs \
-  --snapshot-file /tmp/roq-rcs-operator-snapshot.json
+  --snapshot-file /tmp/roq-rcs-current-operator-snapshot.json
 ```
 
 Most final submission gates are blockers: missing or placeholder proof URLs,
@@ -565,7 +565,7 @@ the command:
 
 ```bash
 node rcs-registration/tools/proof-pack-preflight.mjs \
-  --snapshot-file /tmp/roq-rcs-operator-snapshot.json \
+  --snapshot-file /tmp/roq-rcs-current-operator-snapshot.json \
   --strict
 ```
 
@@ -594,7 +594,7 @@ runs:
 
 ```bash
 node rcs-registration/tools/final-pack-preflight.mjs \
-  --snapshot-file /tmp/roq-rcs-operator-snapshot.json \
+  --snapshot-file /tmp/roq-rcs-current-operator-snapshot.json \
   --strict
 ```
 
@@ -603,7 +603,7 @@ Sheet/status blockers before fetching public proof asset URLs:
 
 ```bash
 node rcs-registration/tools/final-pack-preflight.mjs \
-  --snapshot-file /tmp/roq-rcs-operator-snapshot.json \
+  --snapshot-file /tmp/roq-rcs-current-operator-snapshot.json \
   --skip-asset-url-check
 ```
 
@@ -625,14 +625,14 @@ needed for final pack review.
 
 ```bash
 node rcs-registration/tools/proof-video-preflight.mjs \
-  --snapshot-file /tmp/roq-rcs-operator-snapshot.json
+  --snapshot-file /tmp/roq-rcs-current-operator-snapshot.json
 ```
 
 Use `--strict` if warnings should also fail the command:
 
 ```bash
 node rcs-registration/tools/proof-video-preflight.mjs \
-  --snapshot-file /tmp/roq-rcs-operator-snapshot.json \
+  --snapshot-file /tmp/roq-rcs-current-operator-snapshot.json \
   --strict
 ```
 
@@ -659,7 +659,7 @@ be checked mechanically.
 
 ```bash
 node rcs-registration/tools/proof-asset-url-preflight.mjs \
-  --snapshot-file /tmp/roq-rcs-operator-snapshot.json
+  --snapshot-file /tmp/roq-rcs-current-operator-snapshot.json
 ```
 
 Default banner profile is `twilio`, using the `1140x448` Twilio sender
@@ -671,7 +671,7 @@ checking a pack that intentionally stores both derivatives.
 
 ```bash
 node rcs-registration/tools/proof-asset-url-preflight.mjs \
-  --snapshot-file /tmp/roq-rcs-operator-snapshot.json \
+  --snapshot-file /tmp/roq-rcs-current-operator-snapshot.json \
   --banner-profile either
 ```
 
