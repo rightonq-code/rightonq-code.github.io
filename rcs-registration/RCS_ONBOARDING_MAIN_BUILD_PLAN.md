@@ -4078,6 +4078,42 @@ Boundary:
 - no message sending;
 - no status mutation.
 
+### Slice 11U - Draft Opt-In Proof Export
+
+Date: 2026-05-21
+
+Purpose:
+
+- close the tooling gap between the existing draft review-video generator and
+  the separate opt-in proof image required in the proof pack;
+- keep proof evidence generation hidden from the normal public Part A journey;
+- avoid ad hoc screenshots for opt-in proof evidence.
+
+Implementation:
+
+- Updated `index.html` proof studio:
+  - the studio remains hidden on the normal public route;
+  - RightOnQ can open it with `?proof-studio=1`;
+  - added `Download opt-in proof`;
+  - the opt-in proof export renders the permission-route scene to a draft PNG;
+  - the existing review-video generator remains a draft WebM export.
+- Updated `RCS_PROOF_VIDEO_WORKFLOW.md` to document the internal query flag and
+  draft/export boundaries.
+
+Boundary:
+
+- draft local/browser evidence export only;
+- no proof asset upload;
+- no Apps Script deployment;
+- no operator action;
+- no Google Sheets read/write;
+- no provider submission;
+- no Twilio/Google/Trust Hub/Revolut/Google Cloud API call;
+- no callback configuration;
+- no sender pool or phone-number movement;
+- no message sending;
+- no status mutation.
+
 ## Open Questions
 
 - Exact sales-page wording for `RightOnQ UK` and `RightOnQ Global`.
