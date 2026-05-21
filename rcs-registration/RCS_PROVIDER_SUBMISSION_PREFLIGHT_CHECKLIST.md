@@ -90,6 +90,7 @@ Provider clarification:
 
 - Isa Bell / Twilio Digital Sales confirmed this operational split on 2026-05-20.
 - The same reply confirmed that current public docs require the review video to be publicly hosted and show the use case plus opt-out capability, but do not publish a strict file type, max duration, or live/test-sender capture requirement.
+- Isa Bell / Twilio Digital Sales clarified on 2026-05-21 that the opt-in policy image URL can be a public screenshot of the opt-in page, the opt-in webpage itself, or a document explaining the opt-in flow. Public docs do not publish required dimensions, file type, max size, or number-of-images limits for this specific opt-in-policy asset.
 - Standardise opt-in descriptions, opt-out descriptions, opt-in policy image URL, and review video URL together; do not treat the video as the whole compliance proof.
 
 Must not proceed if:
@@ -126,9 +127,10 @@ Required:
 - business identity/value confirmed;
 - business type, industry, CRN, website, address checked;
 - operating regions confirmed separately from RCS launch countries;
-- authorised representative 1 checked;
-- authorised representative 2 collected or explicitly deferred by approved policy;
+- branded RCS authorised representative checked against the one-representative public RCS field set: first name, last name, email, business title, and business website URL;
+- any additional representative records collected only if the separate Secondary Compliance Profile / Trust Hub lane actually requires them;
 - A-ID route decided if Twilio requests extra evidence;
+- Twilio-managed evidence route preferred for any ID/address exception where supported;
 - Compliance Embeddable account/program support confirmed before any embedded evidence flow is offered to a customer.
 
 Must not proceed if:
@@ -136,6 +138,7 @@ Must not proceed if:
 - raw passport, driving licence, government ID, proof-of-address, or identity documents are in the static form, Google Sheet, GitHub, chat, or normal notes;
 - A-ID evidence is required but no secure Twilio-managed or approved secure-admin route exists;
 - RCS sender onboarding is being treated as Compliance Embeddable-supported without explicit Twilio account/use-case confirmation;
+- Compliance Embeddable is being treated as a universal Secondary Compliance Profile exception route without explicit Twilio account/use-case confirmation;
 - Trust Hub / Secondary Compliance requirement is unresolved for the planned submission.
 
 ## Preflight 6: Messaging Service And Fallback Readiness

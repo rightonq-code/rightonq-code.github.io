@@ -240,7 +240,7 @@ Potential future build, if Twilio flow supports it:
 - A secure evidence gateway that sends the client into Twilio/Trust Hub/Compliance Embeddable or another approved secure upload flow.
 - RightOnQ stores the resulting inquiry/document/verification IDs and status callbacks, not the document content.
 
-This could become a strong onboarding feature, but it should be built as a compliance-safe evidence handoff, not as a general file-upload box. The latest Isa Bell / Twilio clarification keeps the boundary tight: Compliance Embeddable is the right pattern for supported/enabled compliance programs, but RCS sender onboarding itself is not publicly confirmed as an Embeddable-supported flow. Treat RCS sender review, UK long-code RC Bundle, and Secondary Compliance Profile as separate lanes unless Twilio confirms they share the same embedded route for RightOnQ's account/use case.
+This could become a strong onboarding feature, but it should be built as a compliance-safe evidence handoff, not as a general file-upload box. The latest Isa Bell / Twilio clarification keeps the boundary tight: Twilio-managed evidence collection is the safest assumption when ID/address evidence is needed, and Compliance Embeddable is the right pattern only for supported/enabled compliance programs. RCS sender onboarding itself is not publicly confirmed as an Embeddable-supported flow, and Compliance Embeddable should not be hard-coded as a universal Secondary Compliance Profile exception path. Treat RCS sender review, UK long-code RC Bundle, and Secondary Compliance Profile as separate lanes unless Twilio confirms they share the same embedded route for RightOnQ's account/use case.
 
 ## What We Should Do Next
 
@@ -250,6 +250,7 @@ Recommended next onboarding build slice:
 2. Mark the Twilio callback receiver as staging/proof-only until production callback ownership is confirmed.
 3. Keep the readiness map aligned on this rule: product/onboarding callback ownership must be decided before callback persistence or Messaging Service callback configuration is treated as a next build step.
 4. Continue normal onboarding work on registration pack readiness, Trust Hub/Secondary Compliance Profile preflight, and secure evidence-route design.
+5. Treat Status callback URL as go-live/runtime configuration, not a blocker to branded RCS sender submission.
 
 Do not yet:
 
