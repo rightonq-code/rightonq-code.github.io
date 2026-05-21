@@ -146,7 +146,8 @@ Expected live result: JSON confirming that a private application link was writte
 to `/private/tmp/roq-rcs-private-link.txt` with `0600` permissions. The private
 link/token is not printed. The tool refuses `--output` values outside
 `/private/tmp`, and refuses to repair the link if multiple rows match the same
-application ID.
+application ID. Treat the output file as write-on-demand, short-lived handoff
+storage; future agents should not assume it persists between runs.
 
 ## Read Operator Snapshot
 
