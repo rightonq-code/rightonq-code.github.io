@@ -651,6 +651,10 @@ function rcsOperatorAction(payload) {
       requireOperatorPin(payload);
       return serialiseExecutionApiValue(updateInternalReview(spreadsheet, payload));
     }
+    if (payload.action === "ensurePrivateApplicationLink") {
+      requireOperatorPin(payload);
+      return serialiseExecutionApiValue(ensurePrivateApplicationLink(spreadsheet, payload));
+    }
     if (payload.action === "updateTrustHubKyc") {
       requireOperatorPin(payload);
       return serialiseExecutionApiValue(updateTrustHubKyc(spreadsheet, payload));
@@ -724,6 +728,43 @@ function createApplicationDraft(spreadsheet, payload) {
     partAStatus: partAStatus,
     privateApplicationLink: buildPrivateApplicationLink(applicationId, privateApplicationToken),
     createdAt: now.toISOString()
+  };
+}
+
+function ensurePrivateApplicationLink(spreadsheet, payload) {
+  const now = new Date();
+  const applicationId = payload.applicationId;
+  if (!applicationId) throw new Error("Missing application ID");
+  if (!payload.confirmPrivateLinkRepair) {
+    throw new Error("Refusing private application link repair without explicit confirmation.");
+  }
+
+  const applicationRecords = findApplicationRecords(spreadsheet, { applicationId: applicationId });
+  if (applicationRecords.length === 0) throw new Error("Application not found for private link repair.");
+  if (applicationRecords.length > 1) {
+    throw new Error("Multiple application rows found for private link repair; refusing to choose one.");
+  }
+  const applicationRecord = applicationRecords[0];
+
+  let privateApplicationToken = applicationRecord["Private application token"];
+  const created = !privateApplicationToken;
+  if (created) {
+    privateApplicationToken = buildPrivateApplicationToken();
+    updateApplicationControlFields(spreadsheet, applicationId, {
+      "Private application token": privateApplicationToken,
+      "Updated at": now,
+      "Last internal action at": now
+    });
+  }
+
+  return {
+    ok: true,
+    applicationId: applicationId,
+    privateApplicationLink: buildPrivateApplicationLink(applicationId, privateApplicationToken),
+    privateApplicationLinkCreated: created,
+    note: created
+      ? "Private application token was missing and has been repaired for this application row only."
+      : "Existing private application token was reused for this application row."
   };
 }
 
@@ -2200,19 +2241,25 @@ function upsertApplicationRecord(spreadsheet, payload, options) {
 }
 
 function findApplicationRecord(spreadsheet, criteria) {
+  const records = findApplicationRecords(spreadsheet, criteria);
+  return records[0] || null;
+}
+
+function findApplicationRecords(spreadsheet, criteria) {
   const sheet = getOrCreateSheet(spreadsheet, APPLICATIONS_SHEET_NAME, APPLICATION_HEADERS);
-  if (!sheet) return null;
+  if (!sheet) return [];
 
   const values = sheet.getDataRange().getValues();
-  if (values.length < 2) return null;
+  if (values.length < 2) return [];
 
   const headers = normaliseHeaders(values[0]);
   const applicationIdColumn = headers.indexOf("Application ID");
   const tokenColumn = headers.indexOf("Private application token");
   const applicationId = typeof criteria === "object" ? criteria.applicationId : criteria;
   const privateApplicationToken = typeof criteria === "object" ? criteria.privateApplicationToken : "";
-  if (applicationIdColumn === -1) return null;
+  if (applicationIdColumn === -1) return [];
 
+  const records = [];
   for (let rowIndex = values.length - 1; rowIndex >= 1; rowIndex -= 1) {
     const row = values[rowIndex];
     const idMatches = applicationId && String(row[applicationIdColumn]) === String(applicationId);
@@ -2221,10 +2268,10 @@ function findApplicationRecord(spreadsheet, criteria) {
     if (applicationId && !privateApplicationToken && !idMatches) continue;
     if (!applicationId && privateApplicationToken && !tokenMatches) continue;
     if (!applicationId && !privateApplicationToken) continue;
-    return rowToObject(row, headers);
+    records.push(rowToObject(row, headers));
   }
 
-  return null;
+  return records;
 }
 
 function findLatestRecordByApplicationId(spreadsheet, sheetName, applicationId, headersList) {
