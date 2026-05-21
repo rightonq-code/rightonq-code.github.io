@@ -123,7 +123,21 @@ The current generator shows:
 - STOP unsubscribe flow;
 - closing proof-pack summary.
 
-Draft output should remain labelled as a draft.
+The proof studio is intentionally hidden on the normal public Part A route. For
+RightOnQ internal drafting, open the registration page with:
+
+```text
+?proof-studio=1
+```
+
+The studio can export:
+
+- a draft opt-in proof PNG from the permission-route scene;
+- a draft WebM review video.
+
+Draft output should remain labelled as a draft. The opt-in proof image and
+review video both need RightOnQ review and client approval before hosting or
+provider submission.
 
 ### 2. RightOnQ Internal Review
 

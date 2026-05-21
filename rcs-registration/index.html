@@ -3038,7 +3038,10 @@
                   <h3 id="videoStudioTitle">Draft proof video generator</h3>
                   <p>Creates a representative registration-review video draft showing opt-in, sender identity, sample RCS messages, HELP, and STOP opt-out handling.</p>
                 </div>
-                <button type="button" class="btn secondary" id="recordVideoButton">Generate draft video</button>
+                <div class="button-row">
+                  <button type="button" class="btn secondary" id="downloadOptInProofButton">Download opt-in proof</button>
+                  <button type="button" class="btn secondary" id="recordVideoButton">Generate draft video</button>
+                </div>
               </div>
               <div class="video-stage">
                 <div class="video-canvas-wrap">
@@ -3192,6 +3195,8 @@
     const nextButton = document.getElementById("nextButton");
     const submitPartAButton = document.getElementById("submitPartAButton");
     const finalActionNote = document.getElementById("finalActionNote");
+    const videoStudio = document.querySelector(".video-studio");
+    const downloadOptInProofButton = document.getElementById("downloadOptInProofButton");
     const recordVideoButton = document.getElementById("recordVideoButton");
     const saveProgressButton = document.getElementById("saveProgressButton");
     const resumeFileInput = document.getElementById("resumeFileInput");
@@ -3535,6 +3540,7 @@
 
       backButton.addEventListener("click", () => showStep(Math.max(0, currentStep - 1)));
       submitPartAButton.addEventListener("click", submitPartA);
+      downloadOptInProofButton.addEventListener("click", downloadOptInProofImage);
       recordVideoButton.addEventListener("click", generateDemoVideo);
       saveProgressButton.addEventListener("click", downloadProgressFile);
       resumeFileInput.addEventListener("change", restoreFromProgressFile);
@@ -3553,6 +3559,7 @@
       updateEuropeBundleState();
       updateUsRegistrationFields();
       updatePartBStatusDisplay();
+      enableProofStudioIfRequested();
       if (!restoredProgress) showStep(0);
       refreshApplicationStatus();
     }
@@ -5303,10 +5310,43 @@
       drawDemoFrame(0, data, { logo: null, banner: null });
     }
 
-    function drawDemoFrame(progress, data, assets) {
-      const ctx = demoContext;
-      const width = demoCanvas.width;
-      const height = demoCanvas.height;
+    function enableProofStudioIfRequested() {
+      const params = new URLSearchParams(window.location.search);
+      if (!params.has("proof-studio")) return;
+      videoStudio.hidden = false;
+      recordingStatus.textContent = "Proof studio enabled for RightOnQ draft evidence exports.";
+    }
+
+    async function downloadOptInProofImage() {
+      if (!validateAllSteps()) return;
+      downloadOptInProofButton.disabled = true;
+      recordingStatus.textContent = "Generating draft opt-in proof image...";
+
+      const data = collectData();
+      const assets = await loadVideoAssets();
+      const proofCanvas = document.createElement("canvas");
+      proofCanvas.width = demoCanvas.width;
+      proofCanvas.height = demoCanvas.height;
+      const proofContext = proofCanvas.getContext("2d");
+      drawDemoFrame(0.18, data, assets, proofContext, proofCanvas);
+
+      proofCanvas.toBlob(blob => {
+        if (!blob) {
+          recordingStatus.textContent = "Could not generate the opt-in proof image in this browser.";
+          downloadOptInProofButton.disabled = false;
+          return;
+        }
+        const filename = `${slugify(data.displayName || data.legalBusinessName || "rcs-sender")}-rcs-opt-in-proof-draft.png`;
+        downloadBlob(blob, filename);
+        recordingStatus.textContent = "Draft opt-in proof image generated. RightOnQ must review and approve it before hosting.";
+        downloadOptInProofButton.disabled = false;
+      }, "image/png");
+    }
+
+    function drawDemoFrame(progress, data, assets, targetContext = demoContext, targetCanvas = demoCanvas) {
+      const ctx = targetContext;
+      const width = targetCanvas.width;
+      const height = targetCanvas.height;
       const brand = data.displayName || data.tradingName || data.legalBusinessName || "Client Brand";
       const colour = /^#[0-9a-fA-F]{6}$/.test(data.brandColour || "") ? data.brandColour : "#3f8cff";
       const accent = getReadableAccent(colour);
