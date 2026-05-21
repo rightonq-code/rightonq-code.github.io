@@ -116,6 +116,38 @@ RCS_ONBOARDING_CREATE_PIN="..." node rcs-registration/tools/operator-create-appl
 
 Expected live result: JSON containing `applicationId` and `privateApplicationLink`.
 
+## Repair Private Application Link
+
+Use this only when an existing proof row predates private application token
+tracking, or when the stored private link must be written to a local temp file
+without printing it. The Apps Script action is operator-PIN gated and only
+creates a token if the exact application row is missing one; otherwise it reuses
+the existing row token.
+
+Dry run:
+
+```bash
+node rcs-registration/tools/operator-private-link.mjs \
+  --application-id ROQ-RCS-... \
+  --confirm-private-link-repair \
+  --dry-run
+```
+
+Live run:
+
+```bash
+RCS_ONBOARDING_OPERATOR_PIN="..." node rcs-registration/tools/operator-private-link.mjs \
+  --application-id ROQ-RCS-... \
+  --confirm-private-link-repair \
+  --output /private/tmp/roq-rcs-private-link.txt
+```
+
+Expected live result: JSON confirming that a private application link was written
+to `/private/tmp/roq-rcs-private-link.txt` with `0600` permissions. The private
+link/token is not printed. The tool refuses `--output` values outside
+`/private/tmp`, and refuses to repair the link if multiple rows match the same
+application ID.
+
 ## Read Operator Snapshot
 
 Dry run:

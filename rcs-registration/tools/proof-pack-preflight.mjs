@@ -25,6 +25,7 @@ const APPROVED_VIDEO_STATUSES = new Set([
 
 const REVIEWED_PACK_STATUSES = new Set([
   "proof_pack_reviewed",
+  "final_pack_review_ready",
   "client_approved",
   "approved",
   "approved_for_submission",
@@ -115,11 +116,7 @@ function isPlaceholderUrl(url) {
   return (
     lower.includes("example.com") ||
     lower.includes("placeholder") ||
-    lower.includes("proof-only") ||
-    lower.includes("rightonq-proof-logo") ||
-    lower.includes("rightonq-proof-banner") ||
-    lower.includes("rightonq-proof-opt-in") ||
-    lower.includes("rightonq-proof-review-video")
+    lower.includes("proof-only")
   );
 }
 
