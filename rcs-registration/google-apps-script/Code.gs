@@ -604,6 +604,7 @@ function isOperatorOnlyAction(action) {
     recordPaymentOrder: true,
     lookupPaymentOrder: true,
     updateInternalReview: true,
+    ensurePrivateApplicationLink: true,
     updateTrustHubKyc: true,
     updateUkRcBundle: true,
     updateTwilioSetup: true

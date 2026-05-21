@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
-import { chmod, writeFile } from "node:fs/promises";
-import { resolve, sep } from "node:path";
+import { chmod, lstat, open, rename, rm } from "node:fs/promises";
+import { basename, dirname, resolve } from "node:path";
 import { runOperatorAction } from "./operator-api-client.mjs";
 
 const DEFAULT_OUTPUT_FILE = "/private/tmp/roq-rcs-private-link.txt";
@@ -22,7 +22,8 @@ function usage() {
     "Safety:",
     "  The operator PIN is read from RCS_ONBOARDING_OPERATOR_PIN.",
     "  The private application link is written to a chmod 600 local file and is not printed.",
-    "  The Apps Script action only creates a token if this exact application row is missing one."
+    "  The Apps Script action only creates a token if this exact application row is missing one.",
+    "  The output file is write-on-demand, short-lived handoff storage, not durable storage."
   ].join("\n");
 }
 
@@ -79,8 +80,8 @@ function buildPayload(options) {
 function validateOutputFile(path) {
   const resolved = resolve(path);
   const root = resolve(OUTPUT_ROOT);
-  if (resolved !== root && !resolved.startsWith(root + sep)) {
-    throw new Error("--output must be inside " + OUTPUT_ROOT);
+  if (dirname(resolved) !== root || basename(resolved).startsWith(".")) {
+    throw new Error("--output must be a non-hidden file directly inside " + OUTPUT_ROOT);
   }
   return resolved;
 }
@@ -93,8 +94,30 @@ function sanitisePayload(payload) {
 
 async function writePrivateLink(path, privateApplicationLink) {
   if (!privateApplicationLink) throw new Error("Operator API did not return a private application link");
-  await writeFile(path, privateApplicationLink, { mode: 0o600 });
-  await chmod(path, 0o600);
+  const temporaryPath = path + ".tmp-" + process.pid + "-" + Date.now();
+  let handle;
+
+  try {
+    const existing = await lstat(path).catch(error => {
+      if (error && error.code === "ENOENT") return null;
+      throw error;
+    });
+    if (existing && existing.isSymbolicLink()) {
+      throw new Error("Refusing to write private link through a symlink: " + path);
+    }
+
+    handle = await open(temporaryPath, "wx", 0o600);
+    await handle.writeFile(privateApplicationLink);
+    await handle.sync();
+    await handle.close();
+    handle = null;
+    await chmod(temporaryPath, 0o600);
+    await rename(temporaryPath, path);
+    await chmod(path, 0o600);
+  } finally {
+    if (handle) await handle.close().catch(() => {});
+    await rm(temporaryPath, { force: true }).catch(() => {});
+  }
 }
 
 async function main() {

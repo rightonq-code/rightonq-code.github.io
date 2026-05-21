@@ -145,6 +145,7 @@ Target state before public website integration:
   - `checkActiveCheckout`;
   - `recordPaymentOrder`;
   - `updateInternalReview`;
+  - `ensurePrivateApplicationLink`;
   - `updateTrustHubKyc`;
   - `updateUkRcBundle`;
   - `updateTwilioSetup`;
@@ -161,7 +162,8 @@ Authenticated operator API scaffold:
 - `rcsOperatorAction(payload)` is available in `Code.gs` as the intended Apps Script API entry point for operator-only actions.
 - The manifest includes `executionApi.access = DOMAIN`.
 - The Apps Script project is now linked to standard Google Cloud project `rightonq-gog`.
-- The current clean operator API executable deployment is `AKfycbzj0I9m_vld5Aw-zPQFsTZXslrmxlrDA6Ut0RtFnd6_fxXpVDc4qhhRuKVAA5EuhWG9` (version `44`, `Operator API executable (Slice 10I opt-in proof URL tracking)`).
+- The current clean operator API executable deployment is `AKfycbzj0I9m_vld5Aw-zPQFsTZXslrmxlrDA6Ut0RtFnd6_fxXpVDc4qhhRuKVAA5EuhWG9` (version `46`, `Operator API executable (private application link repair)`).
+- Version `46` includes `ensurePrivateApplicationLink`; the public customer web app remains separately pinned and should only be redeployed through an explicit public-web-app release gate.
 - The previous clean operator API executable deployments have been archived after the v35 lookup proof passed:
   - `AKfycbwPbeT3Mxpmr_Q88WdSp0hRnDk96Pm93GDTsA1eOsJxmiaVpSS2xAg78ox848YsqCQU` (version `34`);
   - `AKfycbwSdO73nyxrOKVPQVQgkoGg29RwvYmJXWDYAgFqs5cdxyI4pJXFW3cZZSS1-6y3zlex` (version `33`, description `Operator API executable (Step 8H clean API-only)`).
