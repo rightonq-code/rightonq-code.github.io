@@ -225,7 +225,7 @@ Use the combined final-pack checker as the main mechanical guardrail:
 
 ```sh
 node rcs-registration/tools/final-pack-preflight.mjs \
-  --snapshot-file /tmp/roq-rcs-current-operator-snapshot.json \
+  --snapshot-file /private/tmp/roq-rcs-current-operator-snapshot.json \
   --strict
 ```
 
@@ -233,7 +233,7 @@ The component checkers are available for diagnosis:
 
 ```sh
 node rcs-registration/tools/proof-pack-preflight.mjs \
-  --snapshot-file /tmp/roq-rcs-current-operator-snapshot.json \
+  --snapshot-file /private/tmp/roq-rcs-current-operator-snapshot.json \
   --strict
 ```
 
@@ -242,7 +242,7 @@ material and has reached the client-approved state:
 
 ```sh
 node rcs-registration/tools/proof-video-preflight.mjs \
-  --snapshot-file /tmp/roq-rcs-current-operator-snapshot.json \
+  --snapshot-file /private/tmp/roq-rcs-current-operator-snapshot.json \
   --strict
 ```
 
@@ -251,7 +251,7 @@ reachable and mechanically plausible:
 
 ```sh
 node rcs-registration/tools/proof-asset-url-preflight.mjs \
-  --snapshot-file /tmp/roq-rcs-current-operator-snapshot.json
+  --snapshot-file /private/tmp/roq-rcs-current-operator-snapshot.json
 ```
 
 Do not submit only because the video is approved. The proof pack also needs final RightOnQ approval.
