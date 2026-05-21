@@ -5467,19 +5467,19 @@
       drawSuggestedChip(ctx, 714, 488, "HELP", sceneProgress > 0.52);
       drawSceneLabel(ctx, secondMessage ? "3. Secondary use-case message" : "2. Primary branded RCS message", 584, 590);
 
-      drawBrowserWindow(ctx, 965, 168, 250, 388, data.customerWebsite || data.businessWebsite || "https://example.com");
+      drawBrowserWindow(ctx, 948, 168, 270, 388, data.customerWebsite || data.businessWebsite || "https://example.com");
       ctx.fillStyle = colour;
-      roundRect(ctx, 990, 230, 200, 84, 8, true);
-      drawLogo(ctx, assets.logo, 1008, 248, 48, colour, brand);
+      roundRect(ctx, 972, 230, 220, 84, 8, true);
+      drawLogo(ctx, assets.logo, 990, 248, 48, colour, brand);
       ctx.fillStyle = "#fff";
-      ctx.font = "800 22px Syne, Arial, sans-serif";
-      wrapText(ctx, brand, 1068, 264, 110, 24);
+      ctx.font = "800 16px Syne, Arial, sans-serif";
+      truncateText(ctx, brand, 1046, 264, 136);
       ctx.fillStyle = "#23344a";
-      ctx.font = "800 19px Syne, Arial, sans-serif";
-      ctx.fillText("Links and actions", 990, 360);
+      ctx.font = "800 17px Syne, Arial, sans-serif";
+      ctx.fillText("Links and actions", 972, 360);
       ctx.fillStyle = "#5d7087";
       ctx.font = "500 15px DM Sans, Arial, sans-serif";
-      wrapText(ctx, "Preview shows the sender identity, message content, and expected customer actions.", 990, 390, 190, 22);
+      wrapText(ctx, "Preview shows the sender identity, message content, and expected customer actions.", 972, 390, 214, 22);
     }
 
     function drawOptOutScene(ctx, data, assets, sceneProgress, colour, accent) {
@@ -5493,14 +5493,14 @@
       drawSceneLabel(ctx, "4. STOP unsubscribe flow", 584, 618);
 
       ctx.fillStyle = "#fff";
-      roundRect(ctx, 964, 178, 236, 294, 8, true);
+      roundRect(ctx, 948, 178, 270, 294, 8, true);
       ctx.fillStyle = "#10223a";
-      ctx.font = "800 25px Syne, Arial, sans-serif";
-      ctx.fillText("Compliance checks", 990, 232);
-      drawCheckLine(ctx, "Customer can opt out", 990, 282);
-      drawCheckLine(ctx, "STOP response shown", 990, 326);
-      drawCheckLine(ctx, "No real customer data", 990, 370);
-      drawCheckLine(ctx, "For hosted review URL", 990, 414);
+      ctx.font = "800 20px Syne, Arial, sans-serif";
+      truncateText(ctx, "Checks", 974, 232, 212);
+      drawCheckLine(ctx, "Opt-out shown", 974, 282);
+      drawCheckLine(ctx, "STOP response", 974, 326);
+      drawCheckLine(ctx, "No real data", 974, 370);
+      drawCheckLine(ctx, "Hosted review URL", 974, 414);
     }
 
     function drawClosingScene(ctx, data, assets, sceneProgress, colour, accent) {
@@ -5549,8 +5549,8 @@
       ctx.fillStyle = "#fff";
       roundRect(ctx, x, y, width, height, 8, true);
       ctx.fillStyle = "#10223a";
-      ctx.font = "800 30px Syne, Arial, sans-serif";
-      ctx.fillText(title, x + 34, y + 72);
+      ctx.font = "800 21px Syne, Arial, sans-serif";
+      truncateText(ctx, title, x + 34, y + 72, width - 68);
       ctx.fillStyle = "#52667e";
       ctx.font = "500 20px DM Sans, Arial, sans-serif";
       wrapText(ctx, body || "Messages are sent after the customer has opted in and are limited to the stated sender use case.", x + 34, y + 118, width - 68, 31);
