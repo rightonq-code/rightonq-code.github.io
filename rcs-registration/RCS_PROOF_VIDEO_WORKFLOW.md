@@ -23,6 +23,7 @@ Official references checked on 2026-05-20:
 - Twilio RCS onboarding: `https://www.twilio.com/docs/rcs/onboarding`
 - Google RCS launch approval: `https://developers.google.com/business-communications/rcs-business-messaging/guides/launch/launch-approval`
 - Twilio Digital Sales clarification from Isa Bell on 2026-05-20: current public docs require a public review-video URL showing use case and opt-out capability, but do not publish a strict file type, max duration, or live/test-sender capture requirement.
+- Twilio Digital Sales clarification from Isa Bell on 2026-05-21: opt-in policy URL can be a public screenshot of the opt-in page, the opt-in webpage itself, or a document explaining the opt-in flow; no public dimensions, file type, max size, or image-count limit is published for that specific asset.
 
 Local source files:
 
@@ -100,6 +101,13 @@ Required:
 - approved use-case description and trigger;
 - confirmed public website, privacy URL, and terms URL;
 - final RightOnQ decision on whether browser-generated representative video is good enough or whether a real-device recording is required.
+
+Opt-in proof operating standard:
+
+- use one clear, full, legible, branded proof artifact at a public URL unless Twilio requests more;
+- show where and how the consumer opts in;
+- make the brand and permission wording visible;
+- keep raw ID, private customer data, and signed/private asset URLs out of the proof.
 
 Do not include:
 

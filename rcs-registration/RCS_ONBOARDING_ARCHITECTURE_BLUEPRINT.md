@@ -114,6 +114,7 @@ The onboarding lane has already proved:
 - placeholder hosted URLs for logo, banner, opt-in proof, and review video;
 - record-only Twilio callback receiver, signature-proved but not configured on the Messaging Service;
 - builder-facing product bridge note for Professor.
+- hidden proof studio export for draft opt-in proof PNG and draft review video WebM.
 
 ### Not Yet Done
 
@@ -124,7 +125,7 @@ The onboarding lane has not yet completed:
 - real opt-in proof image upload;
 - real review/proof video creation;
 - client Part B approval of name/logo/video;
-- second authorised representative collection;
+- any extra representative collection required by a separate Secondary Compliance Profile / Trust Hub lane;
 - end-client Trust Hub operating regions collection;
 - Secondary Compliance Profile creation/submission;
 - RCS Sender submission;
@@ -163,6 +164,8 @@ Names in different sources:
 - RightOnQ internal: RCS review video / registration proof video
 
 The video should show the declared messaging use case in action and clearly demonstrate opt-out/STOP behaviour. It must be hosted at a publicly accessible URL for review.
+
+The opt-in proof should also stay in the approval-evidence lane. Current Twilio clarification says the opt-in policy URL can point to a screenshot of the opt-in page, the webpage where the consumer opts in, or a document explaining the opt-in flow. No public size/type/count rule is published for that specific proof asset, so RightOnQ's default should be one clear, full, legible, branded artifact unless Twilio asks for more.
 
 This is separate from:
 
@@ -214,6 +217,7 @@ Decision:
 - keep the callback receiver as proof/staging infrastructure;
 - pause deeper callback persistence in onboarding;
 - do not configure Messaging Service callbacks until the product/onboarding ownership decision is confirmed;
+- do not treat Status callback URL as a sender-submission blocker; Isa Bell / Twilio Digital Sales clarified on 2026-05-21 that it is optional in the RCS registration flow and can be configured later before live traffic;
 - expect production callbacks to belong in `rightonq-system`, because that repo already owns `message_events`, `message_event_processing`, delivery projection, and cards.
 
 ## Secure Evidence Boundary
@@ -231,11 +235,12 @@ It must not collect or store raw passport, driving licence, government ID, or pr
 
 If Twilio requires extra identity or address evidence, the desired build is a separate A-ID secure evidence handoff:
 
-- Twilio-managed or Compliance Embeddable flow where the underlying compliance program is supported and account access is enabled;
+- Twilio-managed flow where the exact compliance lane supports it;
+- Compliance Embeddable only where the underlying compliance program is supported and account access is enabled;
 - secure-admin route if needed;
 - RightOnQ stores only inquiry IDs, document SIDs, status fields, timestamps, and rejection/exception reasons.
 
-A-ID is not part of normal Part A. It should open only when Twilio/Trust Hub requests extra evidence, then return the applicant to the normal onboarding path once accepted or resolved. Do not assume RCS sender onboarding itself is Compliance Embeddable-supported; keep RCS sender review separate unless Twilio confirms support for RightOnQ's account/use case. For supported embeddable flows, persist inquiry/registration/document references and statuses only, not session tokens or raw document contents.
+A-ID is not part of normal Part A. It should open only when Twilio/Trust Hub requests extra evidence, then return the applicant to the normal onboarding path once accepted or resolved. Do not assume RCS sender onboarding itself is Compliance Embeddable-supported, and do not hard-code Compliance Embeddable as the universal route for every Secondary Compliance Profile exception unless Twilio confirms support for RightOnQ's account/use case. For supported embeddable flows, persist inquiry/registration/document references and statuses only, not session tokens or raw document contents.
 
 ## Product Activation Handover
 
@@ -329,7 +334,7 @@ Make client approval explicit:
 
 Collect/confirm:
 
-- second authorised representative;
+- any extra representative records required by the separate compliance lane;
 - operating regions;
 - secure A-ID evidence route decision;
 - Secondary Compliance Profile creation strategy.
