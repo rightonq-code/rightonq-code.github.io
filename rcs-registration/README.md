@@ -26,6 +26,8 @@ The main website should only link to this form when ready. This folder should st
 - `REVOLUT_WEBHOOK_ENDPOINT_DESIGN.md` - design-only plan for the future Revolut webhook host, dedupe store, enrichment flow, and no-live-Billing-write boundary
 - `RCS_REGISTRATION_PACK_READINESS_MAP.md` - source-only map of Twilio RCS Sender / Secondary Compliance Profile requirements against RightOnQ Part A and internal tracking fields
 - `RCS_PROVIDER_SUBMISSION_PREFLIGHT_CHECKLIST.md` - operator guardrail for final proof-pack review before moving provider submission out of `not_started`
+- `RCS_PROVIDER_SUBMISSION_READBACK_2026-05-21.md` - point-in-time readback proving the hosted proof pack passed final preflight without performing provider submission
+- `RCS_PROVIDER_SUBMISSION_ACTION_PACK_2026-05-21.md` - scoped operator packet for the manual/provider RCS Sender submission step and the separate post-submission tracking update
 - `RCS_PROOF_VIDEO_WORKFLOW.md` - workflow guardrail for preparing, reviewing, hosting, approving, and storing the RCS proof/review video URL
 - `RCS_ONBOARDING_ARCHITECTURE_BLUEPRINT.md` - short architecture scaffold for the whole onboarding lane, including current progress, proof-video focus, callback boundary, and product activation handover
 - `RCS_ONBOARDING_ACTIVATION_HANDOVER_CONTRACT.md` - design guardrail for the narrow packet handed from onboarding into the main RightOnQ product after approval
