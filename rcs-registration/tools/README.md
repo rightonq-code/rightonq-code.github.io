@@ -11,7 +11,7 @@ Operator tools use the named clasp/OAuth login:
 - clasp user: `rightonq-gog`;
 - local OAuth credential source: `~/.clasprc.json`;
 - Apps Script project config: `rcs-registration/google-apps-script/.clasp.json`;
-- clean API executable deployment: `AKfycbzj0I9m_vld5Aw-zPQFsTZXslrmxlrDA6Ut0RtFnd6_fxXpVDc4qhhRuKVAA5EuhWG9` at Apps Script version `44`;
+- clean API executable deployment: `AKfycbzj0I9m_vld5Aw-zPQFsTZXslrmxlrDA6Ut0RtFnd6_fxXpVDc4qhhRuKVAA5EuhWG9` at Apps Script version `46`;
 - public customer web app deployment: `AKfycbyI81Ir2xvHLar0R0iFBBWyXa1Nj93T4_8Ni5_eX3XEYDA-AKQbVYbPHnTROLm8e4a6` at Apps Script version `45`.
 
 Operator wrappers call `scripts.run` against the clean API executable deployment ID in `.clasp.json` with `devMode: false`. They are pinned to the deployed operator API version rather than Apps Script HEAD.
@@ -63,7 +63,7 @@ The proof helper uses the authenticated operator API for creating the private te
 | `revolut-webhook-map.mjs` | Map a verified Revolut webhook payload into a proposed `operator-billing.mjs --dry-run` update. | No RCS PIN; performs no writes |
 | `revolut-webhook-handler.mjs` | Offline endpoint-core proof: verify headers/body, map payload, and return public/internal handler results without writes. | No RCS PIN; fake-data self-test only for now |
 
-Note: `operator-twilio-setup.mjs` and the expanded Billing/RC Bundle fields are live on the clean API executable deployment at version `44`; public customer submissions use the public web app deployment at version `45`. Version `39` kept missing Sheet headers append-only, repaired the known `Applications` header drift, and proved the Slice 9B Twilio setup tracking row readback. Version `40` hardened append writers to write by the live Sheet header row before any provider-connected slice. Version `42` preserves numeric zero values through shared Sheet row readback. Version `43` preserves numeric zero values in full operator snapshots and `operator-status.mjs` redacts Twilio Account SIDs from terminal output. Version `44` adds `Opt-in proof URL(s)` to Twilio setup tracking and proves hosted asset/proof URL readback. Version `45` adds public Part B order guards to the web app deployment.
+Note: `operator-twilio-setup.mjs` and the expanded Billing/RC Bundle fields are live on the clean API executable deployment at version `46`; public customer submissions use the public web app deployment at version `45`. Version `39` kept missing Sheet headers append-only, repaired the known `Applications` header drift, and proved the Slice 9B Twilio setup tracking row readback. Version `40` hardened append writers to write by the live Sheet header row before any provider-connected slice. Version `42` preserves numeric zero values through shared Sheet row readback. Version `43` preserves numeric zero values in full operator snapshots and `operator-status.mjs` redacts Twilio Account SIDs from terminal output. Version `44` adds `Opt-in proof URL(s)` to Twilio setup tracking and proves hosted asset/proof URL readback. Version `45` adds public Part B order guards to the web app deployment. Version `46` adds the private-link repair operator action on the API executable deployment.
 
 ## Safety Rules
 
@@ -166,7 +166,13 @@ RCS_ONBOARDING_OPERATOR_PIN="..." node rcs-registration/tools/operator-status.mj
   --application-id ROQ-RCS-...
 ```
 
-Expected live result: JSON containing application status, latest internal review, Trust Hub KYC row, UK RC Bundle row, recent status events, and queued communications. The snapshot also includes the latest `twilioSetup` row, and `operator-status.mjs` redacts full Twilio Account SIDs in terminal output.
+Expected live result: a short JSON summary on stdout and a redacted snapshot
+written to `/private/tmp/roq-rcs-current-operator-snapshot.json` with `0600`
+permissions. The snapshot contains application status, latest internal review,
+Trust Hub KYC row, UK RC Bundle row, recent status events, queued
+communications, and the latest `twilioSetup` row. `operator-status.mjs` redacts
+full Twilio Account SIDs before writing the file and refuses to write if the
+snapshot ever contains a `Private application token` key.
 
 ## Check Internal Review Readiness
 
@@ -174,7 +180,7 @@ Offline check from a saved `operator-status.mjs` snapshot:
 
 ```bash
 node rcs-registration/tools/internal-review-preflight.mjs \
-  --snapshot-file /tmp/roq-rcs-current-operator-snapshot.json
+  --snapshot-file /private/tmp/roq-rcs-current-operator-snapshot.json
 ```
 
 Expected result: JSON showing whether the internal Part A review has blockers or warnings before `operator-review.mjs --part-a-accepted` is used.
@@ -195,7 +201,7 @@ Offline command plan from the same saved `operator-status.mjs` snapshot:
 
 ```bash
 node rcs-registration/tools/internal-review-command-plan.mjs \
-  --snapshot-file /tmp/roq-rcs-current-operator-snapshot.json
+  --snapshot-file /private/tmp/roq-rcs-current-operator-snapshot.json
 ```
 
 Expected result: JSON showing the same internal-review hard gate, all current blockers/warnings, a dry-run `operator-review.mjs` command, and a live command template only when the hard gate has no blockers.
@@ -581,14 +587,15 @@ Save a snapshot first:
 
 ```bash
 RCS_ONBOARDING_OPERATOR_PIN="..." node rcs-registration/tools/operator-status.mjs \
-  --application-id ROQ-RCS-... > /tmp/roq-rcs-current-operator-snapshot.json
+  --application-id ROQ-RCS-... \
+  --output /private/tmp/roq-rcs-current-operator-snapshot.json
 ```
 
 Run the offline check:
 
 ```bash
 node rcs-registration/tools/proof-pack-preflight.mjs \
-  --snapshot-file /tmp/roq-rcs-current-operator-snapshot.json
+  --snapshot-file /private/tmp/roq-rcs-current-operator-snapshot.json
 ```
 
 Most final submission gates are blockers: missing or placeholder proof URLs,
@@ -599,7 +606,7 @@ the command:
 
 ```bash
 node rcs-registration/tools/proof-pack-preflight.mjs \
-  --snapshot-file /tmp/roq-rcs-current-operator-snapshot.json \
+  --snapshot-file /private/tmp/roq-rcs-current-operator-snapshot.json \
   --strict
 ```
 
@@ -628,7 +635,7 @@ runs:
 
 ```bash
 node rcs-registration/tools/final-pack-preflight.mjs \
-  --snapshot-file /tmp/roq-rcs-current-operator-snapshot.json \
+  --snapshot-file /private/tmp/roq-rcs-current-operator-snapshot.json \
   --strict
 ```
 
@@ -637,7 +644,7 @@ Sheet/status blockers before fetching public proof asset URLs:
 
 ```bash
 node rcs-registration/tools/final-pack-preflight.mjs \
-  --snapshot-file /tmp/roq-rcs-current-operator-snapshot.json \
+  --snapshot-file /private/tmp/roq-rcs-current-operator-snapshot.json \
   --skip-asset-url-check
 ```
 
@@ -659,14 +666,14 @@ needed for final pack review.
 
 ```bash
 node rcs-registration/tools/proof-video-preflight.mjs \
-  --snapshot-file /tmp/roq-rcs-current-operator-snapshot.json
+  --snapshot-file /private/tmp/roq-rcs-current-operator-snapshot.json
 ```
 
 Use `--strict` if warnings should also fail the command:
 
 ```bash
 node rcs-registration/tools/proof-video-preflight.mjs \
-  --snapshot-file /tmp/roq-rcs-current-operator-snapshot.json \
+  --snapshot-file /private/tmp/roq-rcs-current-operator-snapshot.json \
   --strict
 ```
 
@@ -693,7 +700,7 @@ be checked mechanically.
 
 ```bash
 node rcs-registration/tools/proof-asset-url-preflight.mjs \
-  --snapshot-file /tmp/roq-rcs-current-operator-snapshot.json
+  --snapshot-file /private/tmp/roq-rcs-current-operator-snapshot.json
 ```
 
 Default banner profile is `twilio`, using the `1140x448` Twilio sender
@@ -705,7 +712,7 @@ checking a pack that intentionally stores both derivatives.
 
 ```bash
 node rcs-registration/tools/proof-asset-url-preflight.mjs \
-  --snapshot-file /tmp/roq-rcs-current-operator-snapshot.json \
+  --snapshot-file /private/tmp/roq-rcs-current-operator-snapshot.json \
   --banner-profile either
 ```
 

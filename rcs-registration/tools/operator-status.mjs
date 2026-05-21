@@ -1,6 +1,10 @@
 #!/usr/bin/env node
 
+import fs from "node:fs/promises";
+import path from "node:path";
 import { runOperatorAction } from "./operator-api-client.mjs";
+
+const DEFAULT_OUTPUT_FILE = "/private/tmp/roq-rcs-current-operator-snapshot.json";
 
 function usage() {
   return [
@@ -9,16 +13,20 @@ function usage() {
     "",
     "Options:",
     "  --application-id ROQ-RCS-...   Required application ID",
+    "  --output /private/tmp/file     Write the redacted snapshot to this 0600 file",
     "  --dry-run                     Print the guarded request payload without sending it",
     "",
     "Safety:",
     "  The operator PIN is read from RCS_ONBOARDING_OPERATOR_PIN.",
-    "  The PIN is never printed and should not be passed as a command argument."
+    "  The PIN is never printed and should not be passed as a command argument.",
+    "  Live runs write the redacted snapshot to a non-hidden file directly inside /private/tmp."
   ].join("\n");
 }
 
 function parseArgs(argv) {
-  const options = {};
+  const options = {
+    outputFile: DEFAULT_OUTPUT_FILE
+  };
   for (let index = 0; index < argv.length; index += 1) {
     const token = argv[index];
     if (token === "--help" || token === "-h") {
@@ -33,6 +41,13 @@ function parseArgs(argv) {
       const value = argv[index + 1];
       if (!value || value.startsWith("--")) throw new Error("Missing value for --application-id");
       options.applicationId = value;
+      index += 1;
+      continue;
+    }
+    if (token === "--output") {
+      const value = argv[index + 1];
+      if (!value || value.startsWith("--")) throw new Error("Missing value for --output");
+      options.outputFile = value;
       index += 1;
       continue;
     }
@@ -76,6 +91,65 @@ function redactTwilioAccountSids(value) {
   return value;
 }
 
+function assertNoForbiddenSnapshotKeys(value, pathParts = []) {
+  if (Array.isArray(value)) {
+    value.forEach(function(item, index) {
+      assertNoForbiddenSnapshotKeys(item, pathParts.concat(String(index)));
+    });
+    return;
+  }
+  if (!value || typeof value !== "object") return;
+
+  Object.entries(value).forEach(function([key, item]) {
+    const nextPath = pathParts.concat(key);
+    if (key === "Private application token") {
+      throw new Error("Refusing to write operator snapshot containing forbidden key: " + nextPath.join("."));
+    }
+    assertNoForbiddenSnapshotKeys(item, nextPath);
+  });
+}
+
+function validateOutputFile(outputFile) {
+  const root = "/private/tmp";
+  const resolved = path.resolve(outputFile);
+  if (path.dirname(resolved) !== root) {
+    throw new Error("Refusing to write snapshot outside /private/tmp");
+  }
+  if (path.basename(resolved).startsWith(".")) {
+    throw new Error("Refusing to write snapshot to a hidden file");
+  }
+  return resolved;
+}
+
+async function writePrivateJsonFile(outputFile, value) {
+  const resolved = validateOutputFile(outputFile);
+  try {
+    const stat = await fs.lstat(resolved);
+    if (stat.isSymbolicLink()) {
+      throw new Error("Refusing to write snapshot through a symlink");
+    }
+  } catch (error) {
+    if (error && error.code !== "ENOENT") throw error;
+  }
+
+  const tmp = resolved + ".tmp-" + process.pid + "-" + Date.now();
+  let handle;
+  try {
+    handle = await fs.open(tmp, "wx", 0o600);
+    await handle.writeFile(JSON.stringify(value, null, 2) + "\n", "utf8");
+    await handle.sync();
+    await handle.chmod(0o600);
+    await handle.close();
+    handle = null;
+    await fs.rename(tmp, resolved);
+    await fs.chmod(resolved, 0o600);
+  } finally {
+    if (handle) await handle.close().catch(function() {});
+    await fs.rm(tmp, { force: true }).catch(function() {});
+  }
+  return resolved;
+}
+
 async function main() {
   const options = parseArgs(process.argv.slice(2));
   if (options.help) {
@@ -83,14 +157,24 @@ async function main() {
     return;
   }
 
+  const outputFile = validateOutputFile(options.outputFile);
   const payload = buildPayload(options);
   if (options.dryRun) {
     console.log(JSON.stringify(sanitisePayload(payload), null, 2));
     return;
   }
 
-  const result = await runOperatorAction(payload);
-  console.log(JSON.stringify(redactTwilioAccountSids(result), null, 2));
+  const result = redactTwilioAccountSids(await runOperatorAction(payload));
+  assertNoForbiddenSnapshotKeys(result);
+  const writtenFile = await writePrivateJsonFile(outputFile, result);
+  console.log(JSON.stringify({
+    ok: result.ok === true,
+    applicationId: result.applicationId || options.applicationId,
+    generatedAt: result.generatedAt || "",
+    snapshotWritten: true,
+    outputFile: writtenFile,
+    note: "Redacted operator snapshot written with mode 0600. Use --output to choose a non-hidden file directly inside /private/tmp."
+  }, null, 2));
 }
 
 main().catch(function(error) {

@@ -195,7 +195,7 @@ Before the final decision, run the combined final-pack checker if an operator sn
 
 ```sh
 node rcs-registration/tools/final-pack-preflight.mjs \
-  --snapshot-file /tmp/roq-rcs-current-operator-snapshot.json \
+  --snapshot-file /private/tmp/roq-rcs-current-operator-snapshot.json \
   --strict
 ```
 
@@ -204,7 +204,7 @@ the local-only gate first:
 
 ```sh
 node rcs-registration/tools/final-pack-preflight.mjs \
-  --snapshot-file /tmp/roq-rcs-current-operator-snapshot.json \
+  --snapshot-file /private/tmp/roq-rcs-current-operator-snapshot.json \
   --skip-asset-url-check
 ```
 
@@ -212,7 +212,7 @@ The component checks remain available for diagnosis:
 
 ```sh
 node rcs-registration/tools/proof-pack-preflight.mjs \
-  --snapshot-file /tmp/roq-rcs-current-operator-snapshot.json \
+  --snapshot-file /private/tmp/roq-rcs-current-operator-snapshot.json \
   --strict
 ```
 
@@ -220,7 +220,7 @@ Run the proof-video checker against the same saved snapshot:
 
 ```sh
 node rcs-registration/tools/proof-video-preflight.mjs \
-  --snapshot-file /tmp/roq-rcs-current-operator-snapshot.json \
+  --snapshot-file /private/tmp/roq-rcs-current-operator-snapshot.json \
   --strict
 ```
 
@@ -228,7 +228,7 @@ Then run the public proof asset URL checker against the same saved snapshot:
 
 ```sh
 node rcs-registration/tools/proof-asset-url-preflight.mjs \
-  --snapshot-file /tmp/roq-rcs-current-operator-snapshot.json
+  --snapshot-file /private/tmp/roq-rcs-current-operator-snapshot.json
 ```
 
 Only after all applicable sections pass may RightOnQ prepare the provider-submission action.

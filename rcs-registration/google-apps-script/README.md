@@ -44,7 +44,15 @@ Deployment:
 
 - Execute as: `adam@rightonq.co.uk`
 - Access: `Anyone`
-- Current public web app version: `31`
+- Current public web app version: `45`
+
+Authoritative deployed versions, last verified with `clasp deployments` on
+2026-05-21:
+
+- Operator API executable: `AKfycbzj0I9m_vld5Aw-zPQFsTZXslrmxlrDA6Ut0RtFnd6_fxXpVDc4qhhRuKVAA5EuhWG9` at version `46`
+- Public customer web app: `AKfycbyI81Ir2xvHLar0R0iFBBWyXa1Nj93T4_8Ni5_eX3XEYDA-AKQbVYbPHnTROLm8e4a6` at version `45`
+- Original RCS Part A intake receiver: `AKfycbyyPTV0Dl4y0_gSrFWW2e1QK5uX_ptS-3atps3Qo6Ca7NSYjHzEckDZZE1SDTiHjqBw` at version `1`
+
 - Version `4` added Application ID, registration status, and Part A status columns to the intake row.
 - Version `5` adds Application ID status lookup via `GET ?applicationId=...`.
 - Version `6` adds the `Applications` control-row tab and writes/reads one row per Application ID.
@@ -65,8 +73,8 @@ Deployment:
 - Version `23` adds billing/commercial tracking scaffolding.
 - Version `24` fixes default billing fee fields for future billing updates.
 - Version `25` hardens public Part A submission by requiring an existing private application link/token, adds advisory/strict payment gate support, and rate-limits Adam MailApp notifications.
-- Version `32` adds the `Payment orders` ledger plus guarded `checkActiveCheckout` and `recordPaymentOrder` operator actions for Revolut active-checkout protection. The public web app is still pinned to version `31`.
-- Version `35` adds guarded `lookupPaymentOrder` for read-only Payment orders lookup by Revolut order ID. It was deployed as a clean API-only operator deployment; the public web app remains pinned to version `31`.
+- Version `32` adds the `Payment orders` ledger plus guarded `checkActiveCheckout` and `recordPaymentOrder` operator actions for Revolut active-checkout protection. At the time, the public web app was still pinned to version `31`.
+- Version `35` adds guarded `lookupPaymentOrder` for read-only Payment orders lookup by Revolut order ID. It was deployed as a clean API-only operator deployment; at the time, the public web app remained pinned to version `31`.
 - Version `36` deployed the Slice 9A `Twilio setup` tab shape, `updateTwilioSetup` operator action, Compliance Embeddable tracking fields on `UK RC bundles`, and usage/top-up/pause fields on `Billing`.
 - Version `37` keeps the Slice 9A fields live and keeps the expanded `Billing` and `UK RC bundles` fields append-only after historical Sheet columns.
 - Version `38` adds a safe operator API return serializer so Sheet-derived values cannot break Apps Script Execution API responses.
@@ -76,6 +84,8 @@ Deployment:
 - Version `42` preserves numeric `0` in the shared Sheet row-read helpers, after the version `41` lookup proved the lower-level row mapper still collapsed zero to blank before the Payment orders summary saw it.
 - Version `43` preserves numeric `0` in full operator snapshots and pairs with `operator-status.mjs` redaction of Twilio Account SIDs in terminal output.
 - Version `44` adds `Opt-in proof URL(s)` to `Twilio setup` tracking and the local `operator-twilio-setup.mjs` wrapper.
+- Version `45` adds public Part B order guards to the public web app deployment.
+- Version `46` adds the private application link repair action to the operator API executable deployment.
 
 ## Behaviour
 
@@ -129,7 +139,7 @@ Current pilot state:
 
 - public customer actions run through the anonymous public web app;
 - operator actions run through `rcsOperatorAction` using authenticated Apps Script API execution;
-- public version `31` rejects operator-only actions if they arrive through the anonymous `doPost` web app path.
+- public version `45` rejects operator-only actions if they arrive through the anonymous `doPost` web app path.
 
 Target state before public website integration:
 
@@ -172,8 +182,8 @@ Authenticated operator API scaffold:
 - `rcsOperatorAction(payload)` now enforces the same PIN guard as the web app operator path:
   - `createApplicationDraft` requires the create PIN;
   - the other operator actions require the operator PIN.
-- Public web app version `31` is the live public customer endpoint.
-- Version `31` blocks operator-only actions on the public `doPost` path before opening the Sheet.
+- Public web app version `45` is the live public customer endpoint.
+- Version `45` blocks operator-only actions on the public `doPost` path before opening the Sheet.
 - Do not run `clasp deploy -i` against the clean API executable while `appsscript.json` still contains public web app deployment settings.
 
 Operator API proof:
@@ -184,21 +194,22 @@ Operator API proof:
 - The named login includes the Sheets scope needed by `SpreadsheetApp.openById`.
 - Direct `scripts.run` execution against the clean API deployment with a dummy PIN reaches Apps Script and correctly returns `Invalid onboarding operator PIN`.
 - Valid-PIN read-only snapshot for `ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747` returned `ok: true` on version `39`, included the populated `twilioSetup` proof row, and confirmed `Applications`, `Billing`, and `UK RC bundles` read back under the correct headers after append-only sheet reconciliation.
-- Dummy-PIN proof against version `40` returned `Invalid onboarding operator PIN`; public web app version `31` remained untouched.
+- Dummy-PIN proof against version `40` returned `Invalid onboarding operator PIN`; at the time, public web app version `31` remained untouched.
 - Valid-PIN read-only snapshot against version `40` returned `ok: true`; the synthetic superseded Payment orders append proof then returned `ok: true` and lookup found the same `roq-rcs-v40-append-proof-202605191340` row, proving header-aware append/readback without provider calls.
-- Version `41` was deployed through the Apps Script UI after the zero-amount summary tightening; `clasp deployments` confirmed the operator API at `@41` and public web app still at `@31`, and dummy-PIN proof still returned `Invalid onboarding operator PIN`.
+- Version `41` was deployed through the Apps Script UI after the zero-amount summary tightening; at the time, `clasp deployments` confirmed the operator API at `@41` and public web app still at `@31`, and dummy-PIN proof still returned `Invalid onboarding operator PIN`.
 - Valid-PIN lookup against version `41` still returned `amountMinor: ""`, proving the shared row mapper was collapsing numeric zero before `buildPaymentOrderSummary` saw it. Version `42` moves the zero-preservation fix into `rowToObject` and `readColumn`.
 - Valid-PIN lookup against version `42` for synthetic superseded row `roq-rcs-v40-append-proof-202605191340` returned `amountMinor: 0`, confirming numeric zero survives Apps Script Sheet readback.
 - Read-only live Sheet audit after version `42` compared header rows for `Part A submissions`, `Applications`, `Part B approvals`, `Part B video approvals`, `Status events`, `Communications`, `Internal reviews`, `Trust Hub KYC`, `UK RC bundles`, `Twilio setup`, `Billing`, and `Payment orders` against the current source constants. All matched; low-exposure row-shape checks confirmed expected timestamp/application/status columns without reading private tokens or raw JSON bodies.
-- Version `43` was deployed through the Apps Script REST deployment update API, avoiding `clasp deploy -i`; `clasp deployments` confirmed the operator API at `@43` and public web app still at `@31`. Valid-PIN `operator-status.mjs` readback confirmed Twilio Account SID redaction in terminal output and `Amount minor: 0` in the full snapshot.
-- Version `44` was deployed with `clasp redeploy` against the existing clean API-only operator deployment ID, avoiding `clasp deploy -i`; `clasp deployments` confirmed the operator API at `@44` and public web app still at `@31`.
+- Version `43` was deployed through the Apps Script REST deployment update API, avoiding `clasp deploy -i`; at the time, `clasp deployments` confirmed the operator API at `@43` and public web app still at `@31`. Valid-PIN `operator-status.mjs` readback confirmed Twilio Account SID redaction in terminal output and `Amount minor: 0` in the full snapshot.
+- Version `44` was deployed with `clasp redeploy` against the existing clean API-only operator deployment ID, avoiding `clasp deploy -i`; at the time, `clasp deployments` confirmed the operator API at `@44` and public web app still at `@31`.
 - Dummy-PIN proof against version `44` returned `Invalid onboarding operator PIN`.
 - Valid-PIN proof update/readback for `ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747` confirmed `RBM logo URL`, `RBM banner URL`, `Opt-in proof URL(s)`, and `Review video URL` read back from `Twilio setup`, while `Provider submission status`, `Go-live status`, and `Usage pull status` remained `not_started`.
 - Operator snapshot readback now preserves existing tracked Sheet column order, appends any missing headers, and reads rows by the live Sheet header row.
+- Operator application summaries are explicit allow-lists and do not expose the `Private application token`; generic operator records also omit that key before returning snapshots.
 - Local operator wrappers now call `https://script.googleapis.com/v1/scripts/{deploymentId}:run` directly with the PIN in the HTTPS request body, not in a command-line `clasp run --params` argument.
 - The direct `scripts.run` helper uses `devMode: false` and the clean API executable deployment ID from `.clasp.json`, so wrappers are pinned to the deployed operator API version rather than Apps Script HEAD.
 - `operator-status.mjs` proved the wrapper path by returning strict JSON with `ok: true` for `ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747`.
-- Public customer submissions remain on the public v31 web app.
+- Public customer submissions remain on the public v45 web app.
 
 Current caveat:
 
