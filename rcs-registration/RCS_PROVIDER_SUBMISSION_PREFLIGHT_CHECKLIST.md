@@ -82,7 +82,7 @@ Required:
 Banner asset standard:
 
 - Keep a reusable 1440 x 448 Google/RBM master asset internally.
-- Export a 1140 x 448 derivative for the actual Twilio sender-profile submission.
+- Export a 1140 x 448 derivative for the actual Twilio sender-profile submission; this submission export size remains under review pending Twilio ticket `#26791676`.
 - Host the approved Twilio submission derivative and store that exact asset URL in `RBM banner URL`.
 - If both derivatives are retained in the client pack, label them clearly so the Twilio submission file is not confused with the master.
 
