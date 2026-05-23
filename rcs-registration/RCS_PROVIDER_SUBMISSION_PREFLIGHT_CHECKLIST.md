@@ -89,6 +89,7 @@ Banner asset standard:
 Provider clarification:
 
 - Isa Bell / Twilio Digital Sales confirmed this operational split on 2026-05-20.
+- On 2026-05-22, the logged-in Twilio Console RCS Sender public-details screen and Twilio Help Center AI both indicated `1440 x 448`; this conflicts with the earlier `1440` master / `1140` Twilio export guidance, so RightOnQ posted a clarification request on Twilio ticket `#26791676`. Until Twilio replies, keep both asset paths alive and visually preview before client/provider use. See `RCS_TWILIO_CONSOLE_ASSET_CLARIFICATION_2026-05-22.md`.
 - The same reply confirmed that current public docs require the review video to be publicly hosted and show the use case plus opt-out capability, but do not publish a strict file type, max duration, or live/test-sender capture requirement.
 - Isa Bell / Twilio Digital Sales clarified on 2026-05-21 that the opt-in policy image URL can be a public screenshot of the opt-in page, the opt-in webpage itself, or a document explaining the opt-in flow. Public docs do not publish required dimensions, file type, max size, or number-of-images limits for this specific opt-in-policy asset.
 - Standardise opt-in descriptions, opt-out descriptions, opt-in policy image URL, and review video URL together; do not treat the video as the whole compliance proof.
