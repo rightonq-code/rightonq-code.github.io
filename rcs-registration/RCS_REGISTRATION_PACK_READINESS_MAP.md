@@ -1,6 +1,6 @@
 # RightOnQ RCS Registration Pack Readiness Map
 
-Status: readiness map plus hosted proof-asset route, updated Tuesday 19 May 2026.
+Status: current source of truth for registration-pack readiness, updated Monday 25 May 2026.
 
 Scope:
 
@@ -9,6 +9,27 @@ Scope:
 - Keep RCS Sender submission, Trust Hub submission, callback configuration, sender-pool movement, phone-number movement, and message sending behind separate explicit gates.
 
 No Twilio or Trust Hub action was performed for this map: no Twilio API call, no Google Sheet write, no Trust Hub submission, no RCS Sender creation, no message send. A Google Cloud proof-asset host was later deployed separately as `roq-rcs-proof-assets`; it serves approved public proof files from a private GCS bucket.
+
+## Test Fixture Vs Real Client Readiness
+
+The passing final-pack preflight on
+`ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747` proves the hosted proof-pack
+mechanism, not real-client readiness.
+
+Current readiness distinction:
+
+- Test-fixture proof pack: mechanism proved.
+- Real-client proof pack: not started until client-approved logo, banner,
+  opt-in proof, and review video assets exist and pass the same hosted URL
+  checks.
+- Provider submission, go-live, and usage pull: keep `not_started` until a
+  separate explicit approval moves each gate.
+- Banner submission size: interim/unresolved pending Twilio ticket `#26791676`;
+  keep both the `1440 x 448` master and `1140 x 448` Twilio export paths alive
+  until Twilio replies or RightOnQ records a deliberate decision.
+
+This map supersedes the dated 2026-05-20 staging note for current readiness
+status without rewriting that historical candidate snapshot.
 
 ## Source Anchors
 
@@ -43,7 +64,7 @@ Local RightOnQ source checked:
 | Sender display name | Part A `displayName`; `Twilio setup` `RBM sender name` | Ready | Collected and seeded into tracking. Client approves name/logo in Part B before submission. |
 | Sender description | Part A `senderDescription` | Ready | Max 100 characters in the current form. Needs RightOnQ review for clarity before submission. |
 | Logo image | Part A `logoUpload` validates PNG/JPEG, 224 x 224 px, max 50 KB | Build gap | Twilio requires a publicly accessible URL. Current form validates metadata and local preview only. Must host approved asset and store `RBM logo URL`. |
-| Banner image | Part A `bannerUpload` validates PNG/JPEG, 1440 x 448 px Google/RBM master, max 200 KB | Build gap | Twilio requires a publicly accessible URL. Isa Bell / Twilio Digital Sales confirmed on 2026-05-20 that the safest operational standard is to keep a 1440 x 448 master internally and export a 1140 x 448 file for the actual Twilio sender-profile submission. Host the approved Twilio submission derivative and store that exact submitted `RBM banner URL`; retain the 1440 master for reusable client packs. |
+| Banner image | Part A `bannerUpload` validates PNG/JPEG, 1440 x 448 px Google/RBM master, max 200 KB | Build gap | Twilio requires a publicly accessible URL. Current interim stance is to keep a 1440 x 448 master internally and retain the 1140 x 448 Twilio export path, but the final Twilio submission size remains unresolved pending ticket `#26791676`. Host the approved submission derivative and store that exact submitted `RBM banner URL`; retain the 1440 master for reusable client packs and visual QA. |
 | Brand/accent colour | Part A `brandColour` | Ready | Captured as hex. |
 | Customer-facing email | Part A `customerEmail` | Ready | Needs internal review that it belongs to the brand where possible. |
 | Customer-facing phone | Part A `customerPhone` | Ready | Needs internal review that it is reachable and brand-appropriate. |
@@ -125,7 +146,10 @@ The following must be true before sender-pool/phone-number movement:
 
 ## Recommended Next Slice
 
-Use the proved hosted asset/proof URL workflow next, with `RCS_PROOF_VIDEO_WORKFLOW.md` as the video-specific guardrail, still without RCS Sender submission:
+Use the proved hosted asset/proof URL workflow next for a real-client proof
+pack, with `RCS_PROOF_VIDEO_WORKFLOW.md` as the video-specific guardrail and
+the test-fixture distinction above kept visible, still without RCS Sender
+submission:
 
 1. Replace the current placeholder hosted proof files with approved client logo, banner, opt-in proof image, and review video files under the same `rcs-proof/` object paths.
 2. Reconfirm each Cloud Run proof-assets URL opens without login.
