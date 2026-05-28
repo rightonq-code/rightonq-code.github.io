@@ -1,5 +1,7 @@
 # RCS-Twilio-3 Handover To RCS-Twilio-4
 
+> **SUPERSEDED (2026-05-28).** Historical handover from the RCS-Twilio-3 session. The current living handover is `RCS_TWILIO_4_HANDOVER_2026-05-12.md`. Kept for the handover chain/history only.
+
 Date: Tuesday 12 May 2026
 Project: RightOnQ RCS registration / Twilio RCS sender application / Part A and Part B workflow
 Repo: `/Users/macpro/rightonq-code.github.io`

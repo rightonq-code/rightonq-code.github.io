@@ -1,5 +1,7 @@
 # RCS-Twilio-2 Handover
 
+> **SUPERSEDED (2026-05-28).** Historical handover from the RCS-Twilio-2 session. The current living handover is `RCS_TWILIO_4_HANDOVER_2026-05-12.md`. Kept for the handover chain/history only.
+
 Date: 2026-05-11
 Owner so far: RCS-Twilio-2
 Project: RightOnQ RCS sender review / storyboard / eventual real RBM test recording

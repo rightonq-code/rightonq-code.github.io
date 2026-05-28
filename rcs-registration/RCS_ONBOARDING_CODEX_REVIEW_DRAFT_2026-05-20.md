@@ -1,5 +1,7 @@
 # RCS onboarding Codex review draft
 
+> **REFERENCE / HISTORY (2026-05-28).** A point-in-time second-pair review brief from 2026-05-20, not current product truth. Live architecture: `RCS_ONBOARDING_ARCHITECTURE_BLUEPRINT.md`; current lane state is on `main` and in `RCS_TWILIO_4_HANDOVER_2026-05-12.md`.
+
 Date: 2026-05-20
 
 Status: draft for second-pair review. This is not a provider submission pack and not a request to perform live Twilio, Google, Trust Hub, callback, sender-pool, phone-number, or message-send actions.

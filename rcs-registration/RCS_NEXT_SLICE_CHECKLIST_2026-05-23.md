@@ -1,5 +1,7 @@
 # RCS next slice checklist
 
+> **SUPERSEDED (2026-05-28).** Replaced by the recovery re-anchor and post-merge sections of `RCS_TWILIO_4_HANDOVER_2026-05-12.md`. Kept for history — do not use as the current next-slice plan.
+
 Status: planning checkpoint only. This is not a provider submission, not a
 Twilio Console save, not an Apps Script deployment, not a Google Sheet write,
 and not permission to move any lifecycle gate.

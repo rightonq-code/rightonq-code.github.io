@@ -1,5 +1,7 @@
 # RCS-Twilio-1 Handover Diary
 
+> **SUPERSEDED (2026-05-28).** Historical handover from the RCS-Twilio-1 session. The current living handover is `RCS_TWILIO_4_HANDOVER_2026-05-12.md`. Kept for the handover chain/history only.
+
 Started: Wednesday 6 May 2026  
 Last updated: Tuesday 12 May 2026, morning BST
 Project: RightOnQ RCS Registration Studio  
