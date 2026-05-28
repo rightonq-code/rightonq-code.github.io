@@ -992,18 +992,28 @@ function getOperatorSnapshot(spreadsheet, payload) {
 
   const applicationRecord = findApplicationRecord(spreadsheet, { applicationId: applicationId });
   if (!applicationRecord) throw new Error("Application ID not found");
+  const applicationSummary = buildOperatorApplicationSummary(applicationRecord);
+  const partASubmission = findLatestPartASubmissionSummary(spreadsheet, applicationId);
+  const internalReview = findLatestRecordByApplicationId(spreadsheet, INTERNAL_REVIEWS_SHEET_NAME, applicationId, INTERNAL_REVIEW_HEADERS);
+  const twilioSetup = findLatestRecordByApplicationId(spreadsheet, TWILIO_SETUP_SHEET_NAME, applicationId, TWILIO_SETUP_HEADERS);
 
   return {
     ok: true,
     applicationId: applicationId,
-    application: buildOperatorApplicationSummary(applicationRecord),
+    application: applicationSummary,
+    operatorSubmissionPack: buildOperatorSubmissionPack({
+      application: applicationSummary,
+      partASubmission: partASubmission,
+      internalReview: internalReview,
+      twilioSetup: twilioSetup
+    }),
     billing: findLatestRecordByApplicationId(spreadsheet, BILLING_SHEET_NAME, applicationId, BILLING_HEADERS),
     activeCheckout: checkActiveCheckout(spreadsheet, payload),
     paymentOrders: findRecentRecordsByApplicationId(spreadsheet, PAYMENT_ORDERS_SHEET_NAME, applicationId, 10, PAYMENT_ORDER_HEADERS),
-    internalReview: findLatestRecordByApplicationId(spreadsheet, INTERNAL_REVIEWS_SHEET_NAME, applicationId, INTERNAL_REVIEW_HEADERS),
+    internalReview: internalReview,
     trustHubKyc: findLatestRecordByApplicationId(spreadsheet, TRUST_HUB_KYC_SHEET_NAME, applicationId, TRUST_HUB_KYC_HEADERS),
     ukRcBundle: findLatestRecordByApplicationId(spreadsheet, UK_RC_BUNDLES_SHEET_NAME, applicationId, UK_RC_BUNDLE_HEADERS),
-    twilioSetup: findLatestRecordByApplicationId(spreadsheet, TWILIO_SETUP_SHEET_NAME, applicationId, TWILIO_SETUP_HEADERS),
+    twilioSetup: twilioSetup,
     recentStatusEvents: findRecentRecordsByApplicationId(spreadsheet, STATUS_EVENTS_SHEET_NAME, applicationId, 5),
     queuedCommunications: findRecentRecordsByApplicationId(spreadsheet, COMMUNICATIONS_SHEET_NAME, applicationId, 5),
     generatedAt: new Date().toISOString()
@@ -1044,6 +1054,245 @@ function buildOperatorApplicationSummary(record) {
     nextActionOwner: record["Next action owner"] || "",
     nextActionNote: record["Next action note"] || "",
     internalNotes: record["Internal notes"] || ""
+  };
+}
+
+function findLatestPartASubmissionSummary(spreadsheet, applicationId) {
+  const sheet = spreadsheet.getSheetByName(SHEET_NAME);
+  if (!sheet) return {};
+
+  const values = sheet.getDataRange().getValues();
+  if (values.length < 2) return {};
+
+  const headers = normaliseHeaders(values[0]);
+  const applicationIdColumn = headers.indexOf("Application ID");
+  if (applicationIdColumn === -1) return {};
+
+  for (let index = values.length - 1; index >= 1; index -= 1) {
+    if (String(values[index][applicationIdColumn]) !== String(applicationId)) continue;
+    const record = rowToObject(values[index], headers);
+    return buildOperatorPartASubmissionSummary(record);
+  }
+
+  return {};
+}
+
+function buildOperatorPartASubmissionSummary(record) {
+  const payload = parseOperatorSubmissionJson(record["Submission JSON"]);
+  const consentRoutes = firstValue(
+    record["Consent route"],
+    record["Consent routes"],
+    Array.isArray(payload.consentRoutes) ? payload.consentRoutes.join(", ") : "",
+    Array.isArray(payload.consentRoute) ? payload.consentRoute.join(", ") : "",
+    payload.consentRoute
+  );
+  const regions = firstValue(
+    record["Regions"],
+    Array.isArray(payload.regions) ? payload.regions.join(", ") : "",
+    payload.regions
+  );
+
+  return {
+    receivedAt: serialiseOperatorValue(record["Received at"]),
+    submissionId: firstValue(record["Submission ID"], payload.submissionId),
+    registrationStatus: firstValue(record["Registration status"], payload.registrationStatus),
+    partAStatus: firstValue(record["Part A status"], payload.partAStatus),
+    reviewStatus: firstValue(record["Review status"], payload.reviewStatus),
+    legalBusinessName: firstValue(record["Legal business name"], payload.legalBusinessName),
+    tradingName: firstValue(record["Trading name"], payload.tradingName),
+    senderDisplayName: firstValue(record["Sender display name"], record["Client name"], payload.displayName),
+    companiesHouseNumber: firstValue(record["Companies House number"], payload.companiesHouseNumber),
+    businessWebsite: firstValue(record["Business website"], payload.businessWebsite),
+    businessIndustry: firstValue(record["Business industry"], payload.businessIndustry),
+    primaryUseCase: firstValue(record["Primary use case"], payload.primaryUseCase),
+    senderDescription: firstValue(record["Public profile description"], payload.senderDescription),
+    brandColour: firstValue(record["Brand colour"], payload.brandColour),
+    customerEmail: firstValue(record["Customer-facing email"], payload.customerEmail),
+    customerPhone: firstValue(record["Customer-facing phone"], payload.customerPhone),
+    customerWebsite: firstValue(record["Customer-facing website"], payload.customerWebsite, payload.businessWebsite),
+    privacyPolicyUrl: firstValue(record["Privacy policy URL"], payload.privacyPolicyUrl),
+    termsUrl: firstValue(record["Terms URL"], record["Terms and conditions URL"], payload.termsUrl),
+    consentRoutes: consentRoutes,
+    optInDescription: firstValue(record["Opt-in description"], payload.optInDescription),
+    optOutDescription: firstValue(record["Opt-out description"], payload.optOutDescription),
+    useCaseDescription: firstValue(record["Use case description"], payload.useCaseDescription),
+    messageTrigger: firstValue(record["Message trigger"], payload.messageTrigger),
+    exampleMessageOne: firstValue(record["Example message 1"], payload.exampleMessageOne),
+    exampleMessageTwo: firstValue(record["Example message 2"], payload.exampleMessageTwo),
+    helpSampleMessage: firstValue(record["HELP sample message"], payload.helpSampleMessage),
+    stopSampleMessage: firstValue(record["STOP sample message"], payload.stopSampleMessage),
+    launchCountries: regions,
+    monthlyVolume: firstValue(record["Monthly volume"], payload.monthlyVolume),
+    usSelected: firstValue(record["US selected"], payload.usSelected),
+    usFeeStatus: firstValue(record["US fee status"], payload.usFeeStatus),
+    notes: firstValue(record["Notes"], payload.notes),
+    lastUpdated: serialiseOperatorValue(record["Last updated"])
+  };
+}
+
+function parseOperatorSubmissionJson(value) {
+  if (!value || typeof value !== "string") return {};
+  try {
+    const parsed = JSON.parse(value);
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {};
+  } catch (error) {
+    return {};
+  }
+}
+
+function chooseOperatorPackValue(candidates) {
+  for (let index = 0; index < candidates.length; index += 1) {
+    const candidate = candidates[index];
+    const value = firstValue(candidate.value);
+    if (!value) continue;
+    return {
+      value: value,
+      source: candidate.source || ""
+    };
+  }
+  return {
+    value: "",
+    source: ""
+  };
+}
+
+function buildOperatorSubmissionPack(context) {
+  const application = context.application || {};
+  const partA = context.partASubmission || {};
+  const twilioSetup = context.twilioSetup || {};
+  const internalReview = context.internalReview || {};
+  const packFields = {
+    senderDisplayName: chooseOperatorPackValue([
+      { value: twilioSetup["RBM sender name"], source: "Twilio setup / RBM sender name" },
+      { value: partA.senderDisplayName, source: "Part A submission / sender display name" },
+      { value: application.clientName, source: "Applications / client name" },
+      { value: application.tradingName, source: "Applications / trading name" },
+      { value: application.legalBusinessName, source: "Applications / legal business name" }
+    ]),
+    legalBusinessName: chooseOperatorPackValue([
+      { value: partA.legalBusinessName, source: "Part A submission / legal business name" },
+      { value: application.legalBusinessName, source: "Applications / legal business name" }
+    ]),
+    tradingName: chooseOperatorPackValue([
+      { value: partA.tradingName, source: "Part A submission / trading name" },
+      { value: application.tradingName, source: "Applications / trading name" }
+    ]),
+    senderDescription: chooseOperatorPackValue([{ value: partA.senderDescription, source: "Part A submission / public profile description" }]),
+    brandColour: chooseOperatorPackValue([{ value: partA.brandColour, source: "Part A submission / brand colour" }]),
+    customerEmail: chooseOperatorPackValue([{ value: partA.customerEmail, source: "Part A submission / customer-facing email" }]),
+    customerPhone: chooseOperatorPackValue([{ value: partA.customerPhone, source: "Part A submission / customer-facing phone" }]),
+    customerWebsite: chooseOperatorPackValue([
+      { value: partA.customerWebsite, source: "Part A submission / customer-facing website" },
+      { value: partA.businessWebsite, source: "Part A submission / business website" }
+    ]),
+    privacyPolicyUrl: chooseOperatorPackValue([{ value: partA.privacyPolicyUrl, source: "Part A submission / privacy policy URL" }]),
+    termsUrl: chooseOperatorPackValue([{ value: partA.termsUrl, source: "Part A submission / terms URL" }]),
+    rbmLogoUrl: chooseOperatorPackValue([{ value: twilioSetup["RBM logo URL"], source: "Twilio setup / reviewed hosted RBM logo URL" }]),
+    rbmBannerUrl: chooseOperatorPackValue([{ value: twilioSetup["RBM banner URL"], source: "Twilio setup / reviewed hosted RBM banner URL" }]),
+    primaryUseCase: chooseOperatorPackValue([
+      { value: partA.primaryUseCase, source: "Part A submission / primary use case" },
+      { value: application.qualifiedUseCase, source: "Applications / qualified use case" }
+    ]),
+    useCaseDescription: chooseOperatorPackValue([{ value: partA.useCaseDescription, source: "Part A submission / use-case description" }]),
+    messageTrigger: chooseOperatorPackValue([{ value: partA.messageTrigger, source: "Part A submission / message trigger" }]),
+    exampleMessageOne: chooseOperatorPackValue([{ value: partA.exampleMessageOne, source: "Part A submission / example message 1" }]),
+    exampleMessageTwo: chooseOperatorPackValue([{ value: partA.exampleMessageTwo, source: "Part A submission / example message 2" }]),
+    helpSampleMessage: chooseOperatorPackValue([{ value: partA.helpSampleMessage, source: "Part A submission / HELP sample message" }]),
+    stopSampleMessage: chooseOperatorPackValue([{ value: partA.stopSampleMessage, source: "Part A submission / STOP sample message" }]),
+    consentRoutes: chooseOperatorPackValue([{ value: partA.consentRoutes, source: "Part A submission / consent routes" }]),
+    optInDescription: chooseOperatorPackValue([{ value: partA.optInDescription, source: "Part A submission / opt-in description" }]),
+    optOutDescription: chooseOperatorPackValue([{ value: partA.optOutDescription, source: "Part A submission / opt-out description" }]),
+    optInProofUrls: chooseOperatorPackValue([{ value: twilioSetup["Opt-in proof URL(s)"], source: "Twilio setup / reviewed hosted opt-in proof URL(s)" }]),
+    reviewVideoUrl: chooseOperatorPackValue([{ value: twilioSetup["Review video URL"], source: "Twilio setup / reviewed hosted review video URL" }]),
+    launchCountries: chooseOperatorPackValue([{ value: partA.launchCountries, source: "Part A submission / launch countries" }])
+  };
+
+  return {
+    purpose: "Internal operator copy view for manual Twilio RCS Sender submission preparation. This is not approval to submit.",
+    applicationId: firstValue(application.applicationId, partA.applicationId, twilioSetup["Application ID"]),
+    senderProfile: {
+      senderDisplayName: packFields.senderDisplayName.value,
+      legalBusinessName: packFields.legalBusinessName.value,
+      tradingName: packFields.tradingName.value,
+      senderDescription: packFields.senderDescription.value,
+      brandColour: packFields.brandColour.value,
+      customerEmail: packFields.customerEmail.value,
+      customerPhone: packFields.customerPhone.value,
+      customerWebsite: packFields.customerWebsite.value,
+      privacyPolicyUrl: packFields.privacyPolicyUrl.value,
+      termsUrl: packFields.termsUrl.value,
+      rbmLogoUrl: packFields.rbmLogoUrl.value,
+      rbmBannerUrl: packFields.rbmBannerUrl.value
+    },
+    useCaseAndConsent: {
+      primaryUseCase: packFields.primaryUseCase.value,
+      useCaseDescription: packFields.useCaseDescription.value,
+      messageTrigger: packFields.messageTrigger.value,
+      exampleMessageOne: packFields.exampleMessageOne.value,
+      exampleMessageTwo: packFields.exampleMessageTwo.value,
+      helpSampleMessage: packFields.helpSampleMessage.value,
+      stopSampleMessage: packFields.stopSampleMessage.value,
+      consentRoutes: packFields.consentRoutes.value,
+      optInDescription: packFields.optInDescription.value,
+      optOutDescription: packFields.optOutDescription.value,
+      optInProofUrls: packFields.optInProofUrls.value,
+      reviewVideoUrl: packFields.reviewVideoUrl.value,
+      launchCountries: packFields.launchCountries.value
+    },
+    reviewAndGates: {
+      partAStatus: firstValue(application.partAStatus, partA.partAStatus),
+      partBStatus: application.partBStatus || "",
+      internalReviewStatus: internalReview["Review status"] || "",
+      reviewVideoStatus: twilioSetup["Review video status"] || "",
+      registrationPackStatus: twilioSetup["Registration pack status"] || "",
+      providerSubmissionStatus: twilioSetup["Provider submission status"] || "not_started",
+      goLiveStatus: twilioSetup["Go-live status"] || "not_started",
+      usagePullStatus: twilioSetup["Usage pull status"] || "not_started",
+      manualPauseFlag: twilioSetup["Manual pause flag"] || ""
+    },
+    canonicalSources: {
+      senderProfile: {
+        senderDisplayName: packFields.senderDisplayName.source,
+        legalBusinessName: packFields.legalBusinessName.source,
+        tradingName: packFields.tradingName.source,
+        senderDescription: packFields.senderDescription.source,
+        brandColour: packFields.brandColour.source,
+        customerEmail: packFields.customerEmail.source,
+        customerPhone: packFields.customerPhone.source,
+        customerWebsite: packFields.customerWebsite.source,
+        privacyPolicyUrl: packFields.privacyPolicyUrl.source,
+        termsUrl: packFields.termsUrl.source,
+        rbmLogoUrl: packFields.rbmLogoUrl.source,
+        rbmBannerUrl: packFields.rbmBannerUrl.source
+      },
+      useCaseAndConsent: {
+        primaryUseCase: packFields.primaryUseCase.source,
+        useCaseDescription: packFields.useCaseDescription.source,
+        messageTrigger: packFields.messageTrigger.source,
+        exampleMessageOne: packFields.exampleMessageOne.source,
+        exampleMessageTwo: packFields.exampleMessageTwo.source,
+        helpSampleMessage: packFields.helpSampleMessage.source,
+        stopSampleMessage: packFields.stopSampleMessage.source,
+        consentRoutes: packFields.consentRoutes.source,
+        optInDescription: packFields.optInDescription.source,
+        optOutDescription: packFields.optOutDescription.source,
+        optInProofUrls: packFields.optInProofUrls.source,
+        reviewVideoUrl: packFields.reviewVideoUrl.source,
+        launchCountries: packFields.launchCountries.source
+      },
+      reviewAndGates: {
+        partAStatus: "Applications / Part A status, falling back to Part A submission status",
+        partBStatus: "Applications / Part B status",
+        internalReviewStatus: "Internal reviews / Review status",
+        reviewVideoStatus: "Twilio setup / Review video status",
+        registrationPackStatus: "Twilio setup / Registration pack status",
+        providerSubmissionStatus: "Twilio setup / Provider submission status",
+        goLiveStatus: "Twilio setup / Go-live status",
+        usagePullStatus: "Twilio setup / Usage pull status",
+        manualPauseFlag: "Twilio setup / Manual pause flag"
+      }
+    },
+    operatorInstruction: "Run final-pack-preflight against this snapshot and do not submit to Twilio unless the gate is green and RightOnQ explicitly approves provider submission."
   };
 }
 
