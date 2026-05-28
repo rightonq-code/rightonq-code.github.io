@@ -1,5 +1,7 @@
 # RCS Provider Submission Action Pack - 2026-05-21
 
+> **TEST FIXTURE ONLY — NOT A REAL CUSTOMER SUBMISSION (2026-05-28).** Every value here is for the test application `ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747`. This is an operator drill/reference, not a record of a real provider submission and not real customer data.
+
 Status: operator action pack. This is not proof that a provider submission has
 already happened. It is the controlled packet to use when RightOnQ performs the
 RCS Sender submission in the provider workflow.

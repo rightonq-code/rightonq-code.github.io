@@ -1,5 +1,7 @@
 # RCS Provider Submission Readback - 2026-05-21
 
+> **TEST FIXTURE ONLY — NOT A REAL CUSTOMER SUBMISSION (2026-05-28).** This readback is for the test application `ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747`. Reference only; not a real provider submission and not real customer data.
+
 Status: final-pack readiness readback only. This is not a provider submission,
 not a Twilio/RBM/Google submission, not a Trust Hub submission, not callback
 configuration, not sender-pool or phone-number movement, not message sending,

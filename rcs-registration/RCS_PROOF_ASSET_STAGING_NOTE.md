@@ -1,5 +1,7 @@
 # RCS Proof Asset Staging Note
 
+> **SUPERSEDED (2026-05-28).** Current proof-asset readiness lives in `RCS_REGISTRATION_PACK_READINESS_MAP.md`, which states it supersedes this note. Kept for history.
+
 Last updated: 2026-05-20
 
 This note records the current local proof-asset staging position for the public
