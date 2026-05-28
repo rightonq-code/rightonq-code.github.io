@@ -10,6 +10,268 @@ Branch: `rcs-registration-part-a-b-20260507`
 
 This file is the living handover for RCS-Twilio-4. Keep updating it as the session moves so RCS-Twilio-5 can inherit the work without guessing from browser state or terminal scrollback.
 
+## Update - Thursday 28 May 2026 Recovery Re-Anchor
+
+This handover contains older branch/path history below. The current active RT4/RCS-ONB work is now in:
+
+- Repo/worktree: `/Users/macpro/rightonq-main-live`
+- Branch: `main`
+- Remote state at last check: `main...origin/main`
+- Current dirty files:
+  - `rcs-registration/google-apps-script/Code.gs`
+  - `rcs-registration/tools/final-pack-preflight.mjs`
+  - this handover file, after this recovery update
+
+The blueprint is the spec. This lane is the RCS onboarding activation/evidence factory, not the live RightOnQ messaging product, not a packet exercise, and not a docs-generation lane. Live sending, runtime channel decisions, delivery projection, reminders, and recipient state belong to `rightonq-system`.
+
+Current source-of-truth documents:
+
+- `rcs-registration/RCS_ONBOARDING_ARCHITECTURE_BLUEPRINT.md`
+- `rcs-registration/RCS_ONBOARDING_MAIN_BUILD_PLAN.md`
+- `rcs-registration/RCS_REGISTRATION_PACK_READINESS_MAP.md`
+
+Correct product path:
+
+1. Client uses the guided RCS onboarding UI.
+2. Part A posts to Apps Script and the Google Sheet.
+3. RightOnQ reviews the submission.
+4. Part B collects/approves name, logo, storyboard/video, opt-in proof, and final evidence.
+5. Operator Submission Pack assembles the reviewed values and gates.
+6. RightOnQ manually submits/copies the approved pack into Twilio Console/provider workflow.
+7. Provider/carrier wait happens outside the product.
+8. Activation handover happens only after explicit approval.
+
+The `/private/tmp` application draft packet is demoted to checklist/reference only. It must not drive the product workflow and must not replace the guided UI, Sheet, Part B review, or Operator Submission Pack.
+
+### Work That Is Actually Satisfied And Should Be Kept
+
+This is the successor's quick inventory of useful work from the recent session. Do not throw these pieces away; use them only in their proper place.
+
+1. Client onboarding UI exists and remains the front door.
+   - File: `rcs-registration/index.html`
+   - Fit: this is where clients complete Part A and Part B. The client should enter each fact once; later operator views should reuse those values rather than asking again.
+
+2. Part A posts into the Apps Script / Sheet path.
+   - Files: `rcs-registration/index.html`, `rcs-registration/google-apps-script/Code.gs`
+   - Fit: this is the intake bridge from the client form to the operator/Sheet world. Do not replace it with local packets.
+
+3. Operator snapshot security was hardened.
+   - Files/tools: `rcs-registration/tools/operator-status.mjs`, related snapshot workflow docs
+   - Fit: operator snapshots containing business/application data are written locally with restricted permissions and no stdout PII dump. This supports internal review and preflight only.
+
+4. Private-link/token leak discipline was tightened.
+   - Files/tools: private-link/operator tooling under `rcs-registration/tools/`
+   - Fit: client private links and application tokens must stay local/private and must not appear in snapshots, logs, or repo artifacts.
+
+5. Readiness map is the current source of truth.
+   - File: `rcs-registration/RCS_REGISTRATION_PACK_READINESS_MAP.md`
+   - Fit: distinguishes test-fixture proof from real-client readiness and keeps provider submission, go-live, and usage pull at `not_started`.
+
+6. Final-pack / proof-pack preflight tooling is useful and should be reused.
+   - Files/tools:
+     - `rcs-registration/tools/final-pack-preflight.mjs`
+     - `rcs-registration/tools/proof-pack-preflight.mjs`
+     - `rcs-registration/tools/proof-video-preflight.mjs`
+     - `rcs-registration/tools/proof-asset-url-preflight.mjs`
+   - Fit: these are checkers/gates. They do not submit to Twilio and do not make a real client ready by themselves.
+
+7. Twilio banner-size uncertainty is captured and must not be flattened.
+   - Files:
+     - `rcs-registration/RCS_TWILIO_CONSOLE_ASSET_CLARIFICATION_2026-05-22.md`
+     - `rcs-registration/RCS_PROVIDER_SUBMISSION_PREFLIGHT_CHECKLIST.md`
+     - `rcs-registration/RCS_REGISTRATION_PACK_READINESS_MAP.md`
+   - Fit: keep both the 1440 x 448 master and 1140 x 448 Twilio export path alive until ticket `#26791676` is resolved or BUGS explicitly accepts a size decision.
+
+8. Provider-submission boundaries are documented and should stay.
+   - Files:
+     - `rcs-registration/RCS_PROVIDER_SUBMISSION_ACTION_PACK_2026-05-21.md`
+     - `rcs-registration/RCS_PROVIDER_SUBMISSION_READBACK_2026-05-21.md`
+     - `rcs-registration/RCS_PROVIDER_SUBMISSION_PREFLIGHT_CHECKLIST.md`
+   - Fit: submission is a separate RightOnQ-approved human/provider action. These docs must not be read as permission to submit, go live, move sender pools, configure callbacks, or send messages.
+
+9. Operator Submission Pack slice is the current useful local build.
+   - Dirty files:
+     - `rcs-registration/google-apps-script/Code.gs`
+     - `rcs-registration/tools/final-pack-preflight.mjs`
+   - Fit: thin internal bridge from already-collected Part A/Part B/Sheet data into an operator-copy pack for manual Twilio submission. CODA passed the trimmed shape as safe to commit/open PR after BUGS approval. It is not deployed.
+
+10. A-ID / extra-evidence secure-link flow is identified but not satisfied.
+    - Current location: this handover section plus CODA rescue design in chat/log
+    - Fit: future client-facing state for "Twilio/provider needs more evidence; use this secure link." It must avoid raw document upload to RightOnQ. It is a missing product feature, not current working code.
+
+11. `/private/tmp` draft packets are not product.
+    - Location: `/private/tmp` if present
+    - Fit: checklist/reference only. Do not use them as the workflow, do not commit them, and do not let them replace the client UI or Sheet/operator review path.
+
+### Current Local Code Slice - Operator Submission Pack
+
+The current uncommitted code slice is the Operator Submission Pack rescue slice. It is intended to be a thin assembly layer over data already collected by the onboarding UI, Sheet tabs, and existing preflight gates.
+
+Current shape:
+
+- `Code.gs`
+  - builds `operatorSubmissionPack` inside `getOperatorSnapshot`;
+  - computes Part A submission fields internally but does not return a redundant top-level `partASubmission`;
+  - parses `Submission JSON` only for named allow-listed fields;
+  - never returns raw `Submission JSON`;
+  - never exposes `Private application token`;
+  - includes `canonicalSources` for operator-copy fields so the operator knows which value is authoritative.
+- `final-pack-preflight.mjs`
+  - passes through `operatorSubmissionPack: snapshot.operatorSubmissionPack || null`;
+  - does not change gate logic.
+
+Checks already run after the trim:
+
+- `Code.gs` syntax check via local Node/CommonJS wrapper: passed
+- `node --check rcs-registration/tools/final-pack-preflight.mjs`: passed
+- `node rcs-registration/tools/final-pack-preflight.mjs --self-test`: passed
+- `git diff --check`: passed
+
+CODA verdict on the trimmed slice: PASS, safe to commit/open PR after BUGS approval. Carry-forward notes:
+
+- Low: `senderDisplayName` canonical source ranks `twilioSetup["RBM sender name"]`; confirm that row holds the approved name, not just a seed.
+- Low: duplicate Applications/latest-wins risk remains separate and should be prioritized later.
+- Info: Apps Script deploy is a separate explicit gate after PR/merge.
+
+Exact next safe action for this code slice:
+
+1. Wait for BUGS explicit approval to commit/open PR.
+2. Before GitHub PR work, run `roq-github-doctor`. If normal sandbox says STOP but BUGS Terminal is OK, rerun with escalated network/keyring access and proceed only if that doctor says OK.
+3. Commit exactly the intended Operator Submission Pack code files unless BUGS separately approves including this handover update.
+4. Open a draft PR with full lane identity, for example: `[RCS-Twilio-4] Add operator submission pack snapshot view`.
+5. Ask CODA for committed-SHA review.
+6. Do not deploy Apps Script. Deployment requires a separate explicit BUGS approval after merge.
+
+### A-ID / Extra Evidence Client-Link Miss
+
+The extra-evidence/A-ID secure-link flow was missed. Treat this as a real requirement, not trivia.
+
+Correct requirement:
+
+- Normal Part A must not collect raw passport, ID, proof-of-address, or private evidence files.
+- If Twilio/Trust Hub/provider asks for further identity/address evidence, RightOnQ should be able to tell the client: "Twilio/the provider needs further information; use this secure link."
+- Evidence should go through a provider-issued/Twilio-managed secure route where supported.
+- RightOnQ should store only status, references, timestamps, rejection reasons, provider IDs, and the secure-link metadata needed to route the client. No raw documents.
+
+Current status:
+
+- Not built.
+- Documented/planned only.
+- Deferred from the current Operator Submission Pack PR.
+
+CODA rescue design for a later approved slice:
+
+- Reuse the existing Trust Hub KYC status model.
+- Add minimal fields:
+  - `Evidence request reason`
+  - `Evidence secure link URL`
+  - `Evidence lane`
+  - locked `Evidence status` enum: `not_required / requested / link_sent / opened / submitted / complete / rejected / cancelled / expired`
+- Add a private-link client state: "Extra information required."
+- Show request reason and provider secure link.
+- Say clearly that documents go to Twilio/the provider, not to RightOnQ.
+- No file upload in RightOnQ.
+- Defer full Compliance Embeddable/session-token integration until Twilio confirms account/use-case support.
+
+Do not build this until BUGS explicitly approves a separate Evidence-request delivery slice.
+
+### Outside Information Still Needed
+
+Do not ask Twilio/Isa a broad list of questions. The banner-size question is already tracked separately under ticket `#26791676`; do not keep re-asking it unless Twilio replies with new information.
+
+The only external information currently needed for the missed A-ID / extra-evidence client-link flow is:
+
+1. Can Twilio generate or provide a secure evidence link when extra ID/address evidence is required?
+   - Reason: the client-facing form already tells users not to upload passport, driving licence, or proof-of-address documents into the normal onboarding path. If Twilio asks for private evidence, RightOnQ needs a secure provider/Twilio route to send the client to.
+   - Affects: future Evidence-request delivery slice; specifically the private-link "Extra information required" client state and the operator field `Evidence secure link URL`.
+
+2. Which route applies to RightOnQ's RCS/Trust Hub case?
+   - Possible routes: Twilio Console-generated evidence request, Compliance Embeddable, Trust Hub, Secondary Compliance Profile, UK RC Bundle, or another Twilio-supported flow.
+   - Reason: the blueprint says not to assume RCS sender onboarding is Compliance Embeddable-supported. The build must not hard-code an embedded flow if Twilio only supports a Console/manual evidence request for this account/use case.
+   - Affects: future Evidence-request delivery slice architecture. If Twilio provides a link manually, build the simple link-display flow. If Twilio confirms Compliance Embeddable support, design a separate embedded/session-token slice later.
+
+3. What references/statuses should RightOnQ store after the evidence step?
+   - Examples: inquiry ID, registration ID, document SID, submitted/approved/rejected timestamps, rejection reason.
+   - Reason: RightOnQ must store provider references and state only, not raw identity documents or session tokens.
+   - Affects: Trust Hub KYC fields, operator tracking, and any later client-facing status/resume view.
+
+Evidence in the current build:
+
+- `rcs-registration/index.html` contains the client note: do not upload passport, driving licence, or proof-of-address documents in the normal form; RightOnQ will arrange a separate secure step if needed.
+- `rcs-registration/RCS_ONBOARDING_ARCHITECTURE_BLUEPRINT.md` contains the secure evidence boundary and says not to assume Compliance Embeddable support for RCS unless Twilio confirms it.
+- `rcs-registration/google-apps-script/Code.gs` already has many evidence status/reference fields, but it does not yet have the client-facing secure-link field/state.
+
+Plain-English reason: the product promise is "do not send private documents to RightOnQ through the normal form." Therefore the missing feature cannot be finished honestly until Twilio confirms how a client should securely provide those documents if they are requested.
+
+### Isa Bell / Twilio Guardrails To Preserve
+
+These points are part of the lane guardrails:
+
+- RCS sender creation/submission remains a Twilio Console/provider workflow, not an automated local submit.
+- Normal Part A is business/use-case/asset capture; no raw ID documents.
+- If extra evidence is requested, use a Twilio/provider secure route where available.
+- One authorized representative is expected for branded RCS sender public docs; extra representatives belong to separate Trust Hub/Compliance lanes.
+- Logo guidance: 224 x 224, JPG/JPEG/PNG, max 50 KB, public URL.
+- Banner guidance remains unresolved in practice:
+  - keep a 1440 x 448 master;
+  - keep a 1140 x 448 Twilio submission export path alive;
+  - ticket `#26791676` records the Console/help discrepancy and must be resolved or consciously accepted before real submission.
+- Opt-in proof and review/use-case video work together; do not treat a representative/test proof as real client evidence.
+- Status callback URL can be deferred/configured later before live traffic; no callback config in the current slice.
+
+### Twilio Developer Kit
+
+The Twilio Developer Kit is installed locally and can be used as guidance for RCS, Messaging Services, compliance onboarding, webhooks, regulatory bundles, identity verification, and debugging.
+
+It is not authority and does not grant live/provider/write permission. It does not override BUGS, CODA, Isa/Twilio, or the current approval gates. If used materially, record it in diary/handover.
+
+### Hard Stops
+
+Until BUGS explicitly approves a separate step:
+
+- no Twilio resource creation;
+- no provider submission;
+- no Compliance Embeddable initialization;
+- no callback configuration;
+- no sender-pool or phone-number movement;
+- no message send;
+- no Apps Script deploy;
+- no new planning-doc sprawl;
+- no packet expansion as product workflow.
+
+After any CODA review, state the proposed next edit/action and wait for BUGS' explicit approval before doing it.
+
+### Update - Thursday 28 May 2026, Post-Merge
+
+The Operator Submission Pack code slice landed on `main` as PR #15:
+
+- Squash-merge SHA: `4d23b4ef6341aaae542abec7f2a0ff4dc023c1b2`
+- Squash subject: `[RCS-Twilio-4] Add operator submission pack snapshot view (#15)`
+- Parent: `13be22fca814cceecb01a487c32b86450fc1c9ce` (single parent — squash confirmed)
+- Files changed on `main`: `rcs-registration/google-apps-script/Code.gs` (+255/-3) and `rcs-registration/tools/final-pack-preflight.mjs` (+25/0)
+
+Apps Script is **NOT** redeployed. Public web app remains pinned at version `45`; operator API executable remains pinned at version `46`. The Pack code is on `main` but inert at runtime until a separate Apps Script redeploy gate moves. Deployment requires explicit BUGS approval per the existing gates.
+
+CODA pre-merge committed-SHA re-verification passed at `c5acbb3e69c3e969ae5de4a9d08f2ac029b31ac4` before merge. Post-merge tree-equivalence check confirmed that the squash at `4d23b4e` produced a git tree byte-identical to the reviewed `c5acbb3` tree. See `/Users/macpro/coda/logs/REVIEW_LOG.md`, entries dated 2026-05-28 under "PR #15".
+
+This handover commit is intentionally separate from the code merge. It captures the recovery re-anchor narrative as written immediately before the merge, plus this post-merge update.
+
+Next safe step for the handover successor (RT5):
+
+1. Doc-pruning slice — no code:
+   - archive `RCS_TWILIO_1_HANDOVER_2026-05-06.md`, `RCS_TWILIO_2_HANDOVER_2026-05-11.md`, and `RCS_TWILIO_3_HANDOVER_2026-05-12.md` to `backups/` (do not delete);
+   - add a one-line "TEST FIXTURE ONLY — NOT A REAL CUSTOMER SUBMISSION" header to `RCS_PROVIDER_SUBMISSION_ACTION_PACK_2026-05-21.md` and `RCS_PROVIDER_SUBMISSION_READBACK_2026-05-21.md`;
+   - finalise or archive `RCS_ONBOARDING_CODEX_REVIEW_DRAFT_2026-05-20.md`;
+   - confirm `RCS_NEXT_SLICE_CHECKLIST_2026-05-23.md` is superseded by this recovery re-anchor and archive if so.
+
+2. ONE blueprint build slice picked with BUGS — not bundled:
+   - either Slice A (proof-video script and generator hardening), or
+   - Slice B (real-client proof pack — needs a real client ready).
+
+A-ID / extra-evidence secure-link slice remains deferred. It is blocked on Twilio Isa's reply about evidence-link routing for RCS sender registrations; do not start it until that reply is in.
+
+Banner-size ticket `#26791676` remains open with a 2026-05-29 chase date.
+
 The working rhythm with Bugs/Adam is:
 
 1. discuss the exact change first;
