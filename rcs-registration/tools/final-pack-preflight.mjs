@@ -156,6 +156,7 @@ async function assessFinalPack(snapshot, options = {}) {
       proofVideo,
       assetUrls
     },
+    operatorSubmissionPack: snapshot.operatorSubmissionPack || null,
     note: "Final pack preflight only. Provider submission still requires explicit RightOnQ approval and a separate submission action."
   };
 }
@@ -188,6 +189,29 @@ function makeReadySnapshot() {
       "Go-live status": "not_started",
       "Usage pull status": "not_started",
       "Manual pause flag": "no"
+    },
+    operatorSubmissionPack: {
+      purpose: "Internal operator copy view for manual Twilio RCS Sender submission preparation. This is not approval to submit.",
+      senderProfile: {
+        senderDisplayName: "Example",
+        legalBusinessName: "Example Ltd",
+        customerWebsite: "https://example.com",
+        privacyPolicyUrl: "https://example.com/privacy",
+        termsUrl: "https://example.com/terms",
+        rbmLogoUrl: "https://assets.example.test/final/logo.png",
+        rbmBannerUrl: "https://assets.example.test/final/banner.png"
+      },
+      useCaseAndConsent: {
+        useCaseDescription: "Transactional customer updates.",
+        exampleMessageOne: "Example: your update is ready. Reply HELP or STOP.",
+        optInProofUrls: "https://assets.example.test/final/opt-in.png",
+        reviewVideoUrl: "https://assets.example.test/final/review-video.webm"
+      },
+      reviewAndGates: {
+        providerSubmissionStatus: "not_started",
+        goLiveStatus: "not_started",
+        usagePullStatus: "not_started"
+      }
     },
     recentStatusEvents: [
       {
@@ -230,6 +254,7 @@ async function runSelfTest() {
   assert(ready.ok === true, "ready offline snapshot should have no blockers");
   assert(ready.finalPackReady === false, "ready offline snapshot should not be final-ready when asset URL check is skipped");
   assert(ready.summary.assetUrlCheckSkipped === true, "ready offline snapshot should record skipped asset URL check");
+  assert(ready.operatorSubmissionPack?.senderProfile?.privacyPolicyUrl === "https://example.com/privacy", "ready snapshot should pass through operator submission pack");
 
   const blocked = await assessFinalPack(makeBlockedSnapshot(), { skipAssetUrlCheck: true });
   assert(blocked.ok === false, "blocked snapshot should have blockers");
