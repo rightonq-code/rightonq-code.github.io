@@ -5350,7 +5350,7 @@
       const brand = data.displayName || data.tradingName || data.legalBusinessName || "Client Brand";
       const colour = /^#[0-9a-fA-F]{6}$/.test(data.brandColour || "") ? data.brandColour : "#3f8cff";
       const accent = getReadableAccent(colour);
-      const phase = progress * 5;
+      const phase = progress * 6;
 
       ctx.clearRect(0, 0, width, height);
       drawBackground(ctx, width, height, colour);
@@ -5362,10 +5362,12 @@
         drawMessageScene(ctx, data, assets, (phase - 1.15) / 1.25, colour, accent, false);
       } else if (phase < 3.45) {
         drawMessageScene(ctx, data, assets, (phase - 2.4) / 1.05, colour, accent, true);
-      } else if (phase < 4.35) {
-        drawOptOutScene(ctx, data, assets, (phase - 3.45) / 0.9, colour, accent);
+      } else if (phase < 4.4) {
+        drawHelpScene(ctx, data, assets, (phase - 3.45) / 0.95, colour, accent);
+      } else if (phase < 5.35) {
+        drawOptOutScene(ctx, data, assets, (phase - 4.4) / 0.95, colour, accent);
       } else {
-        drawClosingScene(ctx, data, assets, (phase - 4.35) / 0.65, colour, accent);
+        drawClosingScene(ctx, data, assets, (phase - 5.35) / 0.65, colour, accent);
       }
     }
 
@@ -5490,7 +5492,7 @@
       drawChatBubble(ctx, 584, 226, 286, data.exampleMessageOne || "You are subscribed to updates. Reply STOP to opt out.", colour, accent, 1);
       drawUserBubble(ctx, 706, 405, 126, "STOP", sceneProgress > 0.25);
       drawChatBubble(ctx, 584, 470, 286, data.stopSampleMessage || "You have been removed from our messages. Send START to restart.", "#eef5fc", "#10223a", sceneProgress > 0.55 ? 1 : 0);
-      drawSceneLabel(ctx, "4. STOP unsubscribe flow", 584, 618);
+      drawSceneLabel(ctx, "5. STOP unsubscribe flow", 584, 618);
 
       ctx.fillStyle = "#fff";
       roundRect(ctx, 948, 178, 270, 294, 8, true);
@@ -5501,6 +5503,42 @@
       drawCheckLine(ctx, "STOP response", 974, 326);
       drawCheckLine(ctx, "No real data", 974, 370);
       drawCheckLine(ctx, "Hosted review URL", 974, 414);
+    }
+
+    function drawHelpScene(ctx, data, assets, sceneProgress, colour, accent) {
+      const brand = data.displayName || data.tradingName || "Client Brand";
+      const helpReply = data.helpSampleMessage || "Reply HELP any time and our team will assist you.";
+      const contactLines = [];
+      if (data.customerEmail) contactLines.push(["Email", data.customerEmail]);
+      if (data.customerPhone) contactLines.push(["Phone", data.customerPhone]);
+
+      drawInfoPanel(ctx, 62, 154, 430, 484, "HELP / support route", "Recipients can ask for support by sending HELP. The sender replies with clear support instructions and contact details.");
+      drawPhoneShell(ctx, 545, 112, 370, 552);
+      drawPhoneHeader(ctx, 568, 142, 324, brand, assets.logo, colour);
+      drawChatBubble(ctx, 584, 226, 286, data.exampleMessageOne || "Thanks for signing up. Reply HELP for support or STOP to opt out.", colour, accent, 1);
+      drawUserBubble(ctx, 706, 405, 126, "HELP", sceneProgress > 0.25);
+      drawChatBubble(ctx, 584, 470, 286, helpReply, "#eef5fc", "#10223a", sceneProgress > 0.55 ? 1 : 0);
+      drawSceneLabel(ctx, "4. HELP support response", 584, 618);
+
+      ctx.fillStyle = "#fff";
+      roundRect(ctx, 948, 178, 270, 294, 8, true);
+      ctx.fillStyle = "#10223a";
+      ctx.font = "800 20px Syne, Arial, sans-serif";
+      truncateText(ctx, "Support contacts", 974, 232, 212);
+      ctx.fillStyle = "#52667e";
+      ctx.font = "700 15px DM Sans, Arial, sans-serif";
+      if (contactLines.length) {
+        contactLines.forEach((line, index) => {
+          ctx.fillText(`${line[0]}:`, 974, 282 + index * 54);
+          ctx.fillStyle = "#10223a";
+          ctx.font = "800 15px DM Sans, Arial, sans-serif";
+          truncateText(ctx, line[1], 974, 304 + index * 54, 212);
+          ctx.fillStyle = "#52667e";
+          ctx.font = "700 15px DM Sans, Arial, sans-serif";
+        });
+      } else {
+        wrapText(ctx, "Support contacts are supplied from the customer-facing email and phone fields.", 974, 282, 212, 24);
+      }
     }
 
     function drawClosingScene(ctx, data, assets, sceneProgress, colour, accent) {
@@ -5515,8 +5553,9 @@
       ctx.font = "500 22px DM Sans, Arial, sans-serif";
       wrapText(ctx, "Representative draft generated from the client registration information for RightOnQ-assisted RCS sender review.", 348, 284, 620, 32);
       drawCheckLine(ctx, "Opt-in flow shown", 348, 386);
-      drawCheckLine(ctx, "Primary and secondary message examples shown", 348, 430);
-      drawCheckLine(ctx, "STOP opt-out capability shown", 348, 474);
+      drawCheckLine(ctx, "Primary and secondary message examples shown", 348, 428);
+      drawCheckLine(ctx, "HELP support response shown", 348, 470);
+      drawCheckLine(ctx, "STOP opt-out capability shown", 348, 512);
 
       ctx.fillStyle = colour;
       ctx.globalAlpha = Math.min(1, sceneProgress + 0.25);
