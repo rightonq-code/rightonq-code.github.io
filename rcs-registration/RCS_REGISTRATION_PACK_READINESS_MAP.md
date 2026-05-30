@@ -1,5 +1,12 @@
 # RightOnQ RCS Registration Pack Readiness Map
 
+> ## ⚠️ CURRENT CORRECTIONS (2026-05-30) — READ FIRST
+> Some specifics later in this document are **superseded**. Where this notice and the body conflict, **this notice wins.**
+> - **Proof video:** the PRIMARY artifact is a **real-device iPhone screen recording** of the branded message → HELP → STOP → START exchange. The animated/browser generator is **demoted to fallback/storyboard** and is being moved **off the public page** — it is RightOnQ internal IP, never a client-facing feature.
+> - **Banner spec:** **1440 × 448, ≤200KB, JPEG/PNG ONLY.** The "1140 × 448 Twilio export" mentioned below is **WRONG — disregard it.**
+> - **Use-case / samples (UK/GB):** every submission goes in as **multi-use with BOTH a promotional AND a transactional/service sample.** RightOnQ handles the Twilio category/sample formatting **in the back office** — the client is **not** asked to pick a Twilio category.
+> - **Pricing, refund policy, and exact build specs** are governed **per-slice by RightOnQ**, not in this public document.
+
 Status: current source of truth for registration-pack readiness, updated Monday 25 May 2026.
 
 Scope:
