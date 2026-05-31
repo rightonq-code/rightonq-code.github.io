@@ -1662,11 +1662,6 @@
       gap: 12px;
     }
 
-    .market-us-choice {
-      border-color: #f0c36d;
-      background: #fff8e6;
-    }
-
     .market-country-grid {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -1695,6 +1690,24 @@
       width: auto;
       margin-top: 3px;
       flex: 0 0 auto;
+    }
+
+    .choice.confirmed-market {
+      border-color: #62c084;
+      background: #ecfff3;
+      box-shadow: inset 0 0 0 1px rgba(98, 192, 132, 0.45);
+    }
+
+    .choice.confirmed-market:hover,
+    .choice.confirmed-market:focus-visible {
+      border-color: #229a55;
+      background: #e1faeb;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(98, 192, 132, 0.22), inset 0 0 0 1px rgba(34, 154, 85, 0.55);
+    }
+
+    .choice.confirmed-market .choice-cost {
+      color: #176339;
     }
 
     .choice-detail {
@@ -2843,125 +2856,36 @@
           <section class="step" data-step="6">
             <p class="step-kicker">Step 7</p>
             <h2 class="step-title">RCS launch markets</h2>
-            <p class="step-intro">RightOnQ is currently preparing RCS sender registrations for UK-registered companies. Choose the countries where your business expects to send RCS messages.</p>
+            <p class="step-intro">RightOnQ is currently preparing UK RCS sender registrations. The United Kingdom is your launch market; other countries can be noted as future expansion interest only.</p>
             <div class="grid">
               <div class="field full" data-checkbox-required="regions">
-                <span class="group-label">Destination countries for your RCS messages <span class="required">*</span></span>
-                <p class="helper">Choose every destination country that matters at launch. The application cost note shown here is about sender registration/onboarding only, not message usage charges.</p>
+                <span class="group-label">RCS launch market</span>
+                <p class="helper">Your first registration is UK-only. Future countries are not included in this launch registration.</p>
                 <div class="market-picker">
-                  <p class="market-picker-title">Quick choices</p>
                   <div class="market-quick-grid">
-                    <label class="choice">
+                    <label class="choice confirmed-market">
                       <input type="checkbox" name="regions" value="United Kingdom" checked>
-                      <span>United Kingdom<span class="choice-detail">UK recipient numbers.</span><span class="choice-cost">No known RCS sender onboarding fee.</span></span>
-                    </label>
-                    <label class="choice">
-                      <input type="checkbox" id="allListedEuropeanCountries" data-region-bundle="europe">
-                      <span>All listed European countries<span class="choice-detail">Ticks every European country listed below.</span><span class="choice-cost">No known RCS sender onboarding fee.</span></span>
-                    </label>
-                    <label class="choice">
-                      <input type="checkbox" name="regions" value="Mexico">
-                      <span>Mexico<span class="choice-detail">Mexico recipient numbers.</span><span class="choice-cost">No known RCS sender onboarding fee.</span></span>
-                    </label>
-                  </div>
-                  <label class="choice market-us-choice">
-                    <input type="checkbox" name="regions" value="United States">
-                    <span>United States <span class="required">*</span><span class="choice-detail">US recipient numbers. Extra onboarding checks and fees apply.</span><span class="choice-cost warning">Known extra onboarding fees apply.</span></span>
-                  </label>
-                  <p class="cost-note"><span class="required">*</span> United States registration currently carries third-party/carrier onboarding fees of up to $700 initially and $200 annually per RCS Sender, based on current provider guidance. Selecting United States does not take payment today. RightOnQ will confirm the current fees before any US carrier submission is made, and US registration will only proceed once those fees have been agreed and paid. Fees paid for US registration will not be refunded if approval is not granted.</p>
-                  <p class="market-picker-title">Choose individual European countries instead</p>
-                  <div class="market-country-grid">
-                    <label class="choice">
-                      <input type="checkbox" name="regions" value="Austria" data-europe-region>
-                      <span>Austria</span>
-                    </label>
-                    <label class="choice">
-                      <input type="checkbox" name="regions" value="Belgium" data-europe-region>
-                      <span>Belgium</span>
-                    </label>
-                    <label class="choice">
-                      <input type="checkbox" name="regions" value="Czech Republic" data-europe-region>
-                      <span>Czech Republic</span>
-                    </label>
-                    <label class="choice">
-                      <input type="checkbox" name="regions" value="Denmark" data-europe-region>
-                      <span>Denmark</span>
-                    </label>
-                    <label class="choice">
-                      <input type="checkbox" name="regions" value="Finland / Aland Islands" data-europe-region>
-                      <span>Finland / Aland Islands</span>
-                    </label>
-                    <label class="choice">
-                      <input type="checkbox" name="regions" value="France" data-europe-region>
-                      <span>France</span>
-                    </label>
-                    <label class="choice">
-                      <input type="checkbox" name="regions" value="Germany" data-europe-region>
-                      <span>Germany</span>
-                    </label>
-                    <label class="choice">
-                      <input type="checkbox" name="regions" value="Ireland" data-europe-region>
-                      <span>Ireland</span>
-                    </label>
-                    <label class="choice">
-                      <input type="checkbox" name="regions" value="Italy" data-europe-region>
-                      <span>Italy</span>
-                    </label>
-                    <label class="choice">
-                      <input type="checkbox" name="regions" value="Netherlands" data-europe-region>
-                      <span>Netherlands</span>
-                    </label>
-                    <label class="choice">
-                      <input type="checkbox" name="regions" value="Norway" data-europe-region>
-                      <span>Norway</span>
-                    </label>
-                    <label class="choice">
-                      <input type="checkbox" name="regions" value="Poland" data-europe-region>
-                      <span>Poland</span>
-                    </label>
-                    <label class="choice">
-                      <input type="checkbox" name="regions" value="Portugal" data-europe-region>
-                      <span>Portugal</span>
-                    </label>
-                    <label class="choice">
-                      <input type="checkbox" name="regions" value="Romania" data-europe-region>
-                      <span>Romania</span>
-                    </label>
-                    <label class="choice">
-                      <input type="checkbox" name="regions" value="Slovakia" data-europe-region>
-                      <span>Slovakia</span>
-                    </label>
-                    <label class="choice">
-                      <input type="checkbox" name="regions" value="Sweden" data-europe-region>
-                      <span>Sweden</span>
+                      <span>United Kingdom<span class="choice-detail">UK recipient numbers. This is the confirmed launch market.</span><span class="choice-cost">Included in this registration.</span></span>
                     </label>
                   </div>
                 </div>
                 <p class="error-text" data-error-for="regions"></p>
               </div>
-              <div class="field" data-us-only hidden>
-                <label for="organicTraffic">Approximate monthly website visitors</label>
-                <p class="helper">Needed for United States registration. US carriers ask for website traffic linked to this use case. This is overall website traffic, not US visitors only.</p>
-                <select id="organicTraffic" name="organicTraffic">
-                  <option value="">Select an option</option>
-                  <option>Not sure</option>
-                  <option>Under 500</option>
-                  <option>500 - 2,000</option>
-                  <option>Over 2,000</option>
-                </select>
-              </div>
-              <div class="field" data-us-only hidden>
-                <label for="existingSmsTraffic">Existing US messaging activity</label>
-                <p class="helper">Needed for United States registration. US carriers ask whether the business already uses Short Code, Toll-Free, 10DLC, SMS, or similar messaging. Choose the closest match.</p>
-                <select id="existingSmsTraffic" name="existingSmsTraffic">
-                  <option value="">Select an option</option>
-                  <option>Not sure</option>
-                  <option>No existing US messaging</option>
-                  <option>Yes, US SMS or 10DLC</option>
-                  <option>Yes, US Toll-Free messaging</option>
-                  <option>Yes, US Short Code messaging</option>
-                  <option>Yes, another US messaging route</option>
-                </select>
+              <div class="field full">
+                <span class="group-label">Interested in expanding to other countries later? (optional)</span>
+                <p class="helper">This is interest only. Ticking a future region does not start a registration, add fees, or create any commitment now.</p>
+                <div class="market-picker">
+                  <div class="market-quick-grid">
+                    <label class="choice">
+                      <input type="checkbox" name="expansionInterest" value="Rest of Europe">
+                      <span>Rest of Europe<span class="choice-detail">Future interest only. RightOnQ can discuss this after UK registration.</span></span>
+                    </label>
+                    <label class="choice">
+                      <input type="checkbox" name="expansionInterest" value="United States">
+                      <span>United States<span class="choice-detail">Future interest only. No US registration is included now.</span></span>
+                    </label>
+                  </div>
+                </div>
               </div>
             </div>
           </section>
@@ -3170,8 +3094,7 @@
         title: "RCS launch markets",
         fields: [
           ["Destination countries", "regions"],
-          ["Approximate monthly website visitors", "organicTraffic"],
-          ["Existing US messaging activity", "existingSmsTraffic"]
+          ["Future expansion interest", "expansionInterest"]
         ]
       }
     ];
@@ -3486,8 +3409,6 @@
       form.addEventListener("change", event => {
         clearFieldError(event.target);
         updateSelectPlaceholders();
-        syncRegionBundle(event.target);
-        updateUsRegistrationFields();
         updateConsentRouteExplanation();
         maybeSyncDisplayName(event.target);
         maybeUpdateSenderDescription(event.target);
@@ -3549,8 +3470,6 @@
       const restoredProgress = progressSaveEnabled && restoreAutosavedProgress();
       ensurePreviewNumberDefaults();
       updateSelectPlaceholders();
-      updateEuropeBundleState();
-      updateUsRegistrationFields();
       updatePartBStatusDisplay();
       enableProofStudioIfRequested();
       if (!restoredProgress) showStep(0);
@@ -4165,41 +4084,6 @@
         if (!select.value) select.selectedIndex = 0;
         select.classList.toggle("placeholder", !select.value);
       });
-    }
-
-    function updateUsRegistrationFields() {
-      const usSelected = Boolean(document.querySelector('input[name="regions"][value="United States"]:checked'));
-      document.querySelectorAll("[data-us-only]").forEach(field => {
-        field.hidden = !usSelected;
-        field.querySelectorAll("select, input, textarea").forEach(input => {
-          input.required = usSelected;
-          if (!usSelected) clearFieldError(input);
-        });
-      });
-    }
-
-    function syncRegionBundle(target) {
-      if (!target) return;
-      if (target.id === "allListedEuropeanCountries") {
-        document.querySelectorAll("[data-europe-region]").forEach(input => {
-          input.checked = target.checked;
-          clearFieldError(input);
-        });
-        return;
-      }
-
-      if (target.matches && target.matches("[data-europe-region]")) {
-        updateEuropeBundleState();
-      }
-    }
-
-    function updateEuropeBundleState() {
-      const bundle = document.getElementById("allListedEuropeanCountries");
-      if (!bundle) return;
-      const europeanRegions = Array.from(document.querySelectorAll("[data-europe-region]"));
-      const checkedCount = europeanRegions.filter(input => input.checked).length;
-      bundle.checked = europeanRegions.length > 0 && checkedCount === europeanRegions.length;
-      bundle.indeterminate = false;
     }
 
     function updateConsentRouteExplanation() {
@@ -5751,6 +5635,7 @@
       data.registrationFeeAcknowledgement = registrationFeeAcknowledgement.checked ? "Confirmed" : "";
       data.billingStatus = data.billingStatus || "registration_fee_pending";
       data.regions = [].concat(data.regions || []);
+      data.expansionInterest = [].concat(data.expansionInterest || []);
       data.consentRoute = getSelectedConsentRoutes();
       data.iphonePreviewNumber = cleanPreviewNumber(data.iphonePreviewNumber);
       data.androidPreviewNumber = cleanPreviewNumber(data.androidPreviewNumber);
@@ -5852,7 +5737,7 @@
         partAStatus: data.partAStatus || applicationStatus.partAStatus
       });
       Object.entries(data).forEach(([key, value]) => {
-        if (["applicationId", "registrationStatus", "partAStatus", "logoUpload", "bannerUpload", "regions", "consentRoute", draftStateKey, "generatedAt", "templateVersion", "registeredAddress", "currentStep", "progressStepCount", "progressSavedAt"].includes(key)) return;
+        if (["applicationId", "registrationStatus", "partAStatus", "logoUpload", "bannerUpload", "regions", "expansionInterest", "consentRoute", draftStateKey, "generatedAt", "templateVersion", "registeredAddress", "currentStep", "progressStepCount", "progressSavedAt"].includes(key)) return;
         const field = form.elements[key];
         if (!field || typeof value === "object") return;
 
@@ -5871,8 +5756,10 @@
         const ukRegion = document.querySelector('input[name="regions"][value="United Kingdom"]');
         if (ukRegion) ukRegion.checked = true;
       }
-      updateUsRegistrationFields();
-      updateEuropeBundleState();
+      const expansionInterest = Array.isArray(data.expansionInterest) ? data.expansionInterest : [data.expansionInterest].filter(Boolean);
+      document.querySelectorAll('input[name="expansionInterest"]').forEach(input => {
+        input.checked = expansionInterest.includes(input.value);
+      });
       if (Array.isArray(data.consentRoute)) {
         document.querySelectorAll('input[name="consentRoutes"]').forEach(input => {
           input.checked = data.consentRoute.includes(input.value);
@@ -5937,9 +5824,6 @@
     }
 
     function shouldShowReviewField(key, data) {
-      if (key === "organicTraffic" || key === "existingSmsTraffic") {
-        return Array.isArray(data.regions) && data.regions.includes("United States");
-      }
       return true;
     }
 
@@ -6151,13 +6035,11 @@
       autosaveStatus.textContent = "Autosave ready.";
       document.querySelectorAll(".file-feedback").forEach(node => { node.textContent = ""; });
       document.querySelectorAll(".invalid").forEach(node => node.classList.remove("invalid"));
-      updateUsRegistrationFields();
       updateConsentRouteExplanation();
       updateSenderDescriptionDraft();
       updateComplianceDrafts();
       updateCharacterCounts();
       drawVideoPoster();
-      updateEuropeBundleState();
       showStep(0);
     }
 

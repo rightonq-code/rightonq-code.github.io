@@ -526,7 +526,8 @@ function doPost(event) {
       "Not started",
       "",
       "",
-      now
+      now,
+      safeCell(asList(payload.expansionInterest).join(", "))
     ]);
 
     upsertApplicationRecord(spreadsheet, payload, {
