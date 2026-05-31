@@ -2382,7 +2382,7 @@
         <h2 id="gateway-title">Choose your RightOnQ plan before completing Part A.</h2>
         <p>Part A collects the business, brand, message and compliance details RightOnQ needs to check your application before any RCS sender registration work begins.</p>
         <div class="gateway-fee">
-          <strong>£100 + VAT</strong>
+          <strong>£380 + VAT</strong>
           <span>RCS registration handling fee before work starts</span>
         </div>
         <div class="gateway-guarantee">If your sender application is not approved for reasons outside your control, the handling fee is refunded in full.</div>
@@ -2390,7 +2390,7 @@
         <div class="gateway-actions">
           <label class="gateway-ack" for="registrationFeeAcknowledgement">
             <input id="registrationFeeAcknowledgement" name="registrationFeeAcknowledgement" type="checkbox" value="Confirmed" form="registrationForm" required>
-            <span>I confirm I am applying on behalf of a registered business and entering into this arrangement for business purposes. I ask RightOnQ to begin the RCS registration handling work after payment. I understand the £100 + VAT handling fee is not refundable once that work has started, except where the application cannot proceed for reasons outside the customer's control. Monthly platform billing only starts after approval and ready-to-use setup.</span>
+            <span>I confirm I am applying on behalf of a registered business and entering into this arrangement for business purposes. I ask RightOnQ to begin the RCS registration handling work after payment. I understand the £380 + VAT handling fee is not refundable once that work has started, except where the application cannot proceed for reasons outside the customer's control. Monthly platform billing only starts after approval and ready-to-use setup.</span>
           </label>
           <button class="btn secondary" type="button" id="gatewayStartButton">Complete Part A</button>
           <div class="gateway-error" id="gatewayError" aria-live="polite"></div>
@@ -2486,7 +2486,7 @@
         <form id="registrationForm" novalidate autocomplete="off">
           <input type="hidden" id="packageInterest" name="packageInterest" value="">
           <input type="hidden" id="monthlyBaseFeeGbp" name="monthlyBaseFeeGbp" value="">
-          <input type="hidden" id="registrationFeeGbp" name="registrationFeeGbp" value="100">
+          <input type="hidden" id="registrationFeeGbp" name="registrationFeeGbp" value="380">
           <input type="hidden" id="billingStatus" name="billingStatus" value="registration_fee_pending">
           <div class="save-panel">
             <div>
@@ -2654,7 +2654,7 @@
               </div>
               <div class="field">
                 <label for="bannerUpload">Banner image <span class="required">*</span></label>
-                <p class="helper">PNG, JPG or JPEG. Use a 1440 x 448 px Google/RBM master banner, no larger than 200 KB. RightOnQ prepares the 1140 x 448 px Twilio submission export from the approved master.</p>
+                <p class="helper">PNG, JPG or JPEG. Use a 1440 x 448 px Google/RBM master banner, no larger than 200 KB.</p>
                 <input id="bannerUpload" name="bannerUpload" type="file" accept="image/png,image/jpeg" data-required-width="1440" data-required-height="448" data-max-kb="200" data-shape="landscape" required>
                 <div class="file-feedback" id="bannerUploadFeedback"></div>
               </div>
@@ -5774,7 +5774,7 @@
         data.packageInterest = selectedPackage.dataset.packageInterest || selectedPackage.value;
         data.monthlyBaseFeeGbp = selectedPackage.dataset.monthlyFeeGbp || "";
       }
-      data.registrationFeeGbp = "100";
+      data.registrationFeeGbp = "380";
       data.registrationFeeVatTreatment = "+ VAT";
       data.registrationFeeAcknowledgement = registrationFeeAcknowledgement.checked ? "Confirmed" : "";
       data.billingStatus = data.billingStatus || "registration_fee_pending";
