@@ -2379,7 +2379,7 @@
     <section class="registration-gateway" aria-labelledby="gateway-title">
       <div class="gateway-copy">
         <p class="eyebrow">Start your RCS registration</p>
-        <h2 id="gateway-title">Choose your RightOnQ plan before completing Part A.</h2>
+        <h2 id="gateway-title">Review your RightOnQ platform before completing Part A.</h2>
         <p>Part A collects the business, brand, message and compliance details RightOnQ needs to check your application before any RCS sender registration work begins.</p>
         <div class="gateway-fee">
           <strong>£380 + VAT</strong>
@@ -2397,22 +2397,14 @@
         </div>
       </div>
       <div class="gateway-plans" aria-label="RightOnQ platform plans">
-        <label class="gateway-plan selectable">
-          <input type="radio" name="packageName" value="RightOnQ UK" data-package-interest="RightOnQ UK" data-monthly-fee-gbp="25" form="registrationForm" required>
+        <article class="gateway-plan">
+          <span aria-hidden="true"></span>
           <div>
-            <h3>RightOnQ UK</h3>
-            <p>For UK-focused RCS sending, local operating hours and a straightforward managed sender setup.</p>
+            <h3>RightOnQ® platform</h3>
+            <p>Managed UK RCS sending, registration handling and ongoing platform access after approval.</p>
           </div>
-          <div class="gateway-price">£25<small>per month + VAT after approval</small></div>
-        </label>
-        <label class="gateway-plan selectable">
-          <input type="radio" name="packageName" value="RightOnQ Global" data-package-interest="RightOnQ Global" data-monthly-fee-gbp="49" form="registrationForm" required>
-          <div>
-            <h3>RightOnQ Global</h3>
-            <p>For businesses planning wider launch markets, international timing controls and a broader managed sending setup.</p>
-          </div>
-          <div class="gateway-price">£49<small>per month + VAT after approval</small></div>
-        </label>
+          <div class="gateway-price">£38<small>per month + VAT after approval</small></div>
+        </article>
         <article class="gateway-plan">
           <span aria-hidden="true"></span>
           <div>
@@ -2484,8 +2476,9 @@
 
           <section class="form-panel">
         <form id="registrationForm" novalidate autocomplete="off">
-          <input type="hidden" id="packageInterest" name="packageInterest" value="">
-          <input type="hidden" id="monthlyBaseFeeGbp" name="monthlyBaseFeeGbp" value="">
+          <input type="hidden" id="packageName" name="packageName" value="RightOnQ">
+          <input type="hidden" id="packageInterest" name="packageInterest" value="RightOnQ">
+          <input type="hidden" id="monthlyBaseFeeGbp" name="monthlyBaseFeeGbp" value="38">
           <input type="hidden" id="registrationFeeGbp" name="registrationFeeGbp" value="380">
           <input type="hidden" id="billingStatus" name="billingStatus" value="registration_fee_pending">
           <div class="save-panel">
@@ -3565,15 +3558,6 @@
     }
 
     function setupCommercialGateway() {
-      document.querySelectorAll('input[name="packageName"]').forEach(input => {
-        input.addEventListener("change", () => {
-          syncCommercialFields();
-          clearGatewayError();
-          queueAutosave();
-          if (currentStep === steps.length - 1) renderReview();
-        });
-      });
-
       registrationFeeAcknowledgement.addEventListener("change", () => {
         clearGatewayError();
         queueAutosave();
@@ -3589,14 +3573,10 @@
       syncCommercialFields();
     }
 
-    function getSelectedPackageInput() {
-      return document.querySelector('input[name="packageName"]:checked');
-    }
-
     function syncCommercialFields() {
-      const selected = getSelectedPackageInput();
-      document.getElementById("packageInterest").value = selected ? selected.dataset.packageInterest || selected.value : "";
-      document.getElementById("monthlyBaseFeeGbp").value = selected ? selected.dataset.monthlyFeeGbp || "" : "";
+      document.getElementById("packageName").value = "RightOnQ";
+      document.getElementById("packageInterest").value = "RightOnQ";
+      document.getElementById("monthlyBaseFeeGbp").value = "38";
       document.getElementById("billingStatus").value = "registration_fee_pending";
     }
 
@@ -3607,10 +3587,8 @@
 
     function validateCommercialGateway(focusFirst = true) {
       syncCommercialFields();
-      const selected = getSelectedPackageInput();
       const acknowledged = registrationFeeAcknowledgement.checked;
       const errors = [];
-      if (!selected) errors.push("choose RightOnQ UK or RightOnQ Global");
       if (!acknowledged) errors.push("confirm the registration handling fee and refund terms");
       if (!errors.length) {
         clearGatewayError();
@@ -3620,7 +3598,7 @@
       registrationGateway.classList.add("invalid");
       gatewayError.textContent = `Before continuing, please ${errors.join(" and ")}.`;
       if (focusFirst) {
-        (selected ? registrationFeeAcknowledgement : document.querySelector('input[name="packageName"]')).focus({ preventScroll: true });
+        registrationFeeAcknowledgement.focus({ preventScroll: true });
         registrationGateway.scrollIntoView({ behavior: "smooth", block: "center" });
       }
       return false;
@@ -5768,12 +5746,6 @@
 
       data.applicationId = applicationId;
       data.registrationStatus = "draft";
-      const selectedPackage = getSelectedPackageInput();
-      if (selectedPackage) {
-        data.packageName = selectedPackage.value;
-        data.packageInterest = selectedPackage.dataset.packageInterest || selectedPackage.value;
-        data.monthlyBaseFeeGbp = selectedPackage.dataset.monthlyFeeGbp || "";
-      }
       data.registrationFeeGbp = "380";
       data.registrationFeeVatTreatment = "+ VAT";
       data.registrationFeeAcknowledgement = registrationFeeAcknowledgement.checked ? "Confirmed" : "";
@@ -6154,7 +6126,6 @@
       document.getElementById("primaryContactPhone").value = "+44 ";
       document.getElementById("customerPhone").value = "+44 ";
       registrationFeeAcknowledgement.checked = false;
-      document.querySelectorAll('input[name="packageName"]').forEach(input => { input.checked = false; });
       syncCommercialFields();
       clearGatewayError();
       applicationId = generateApplicationId();
