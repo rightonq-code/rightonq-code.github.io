@@ -6,9 +6,9 @@ import { pathToFileURL } from "node:url";
 const IMAGE_CONTENT_TYPES = new Set(["image/png", "image/jpeg", "image/jpg"]);
 
 const BANNER_PROFILES = {
-  twilio: { width: 1140, height: 448, label: "Twilio sender submission export" },
+  twilio: { width: 1440, height: 448, label: "Twilio sender submission export" },
   google: { width: 1440, height: 448, label: "Google/RBM master asset" },
-  "twilio-onboarding-doc": { width: 1140, height: 448, label: "Twilio RCS onboarding page" }
+  "twilio-onboarding-doc": { width: 1440, height: 448, label: "Twilio RCS onboarding page" }
 };
 
 const ASSET_FIELDS = [
@@ -418,7 +418,7 @@ async function runSelfTest() {
       headers: { "content-type": "image/png", "content-length": String(40 * 1024) }
     },
     [baseUrl + "/banner.png"]: {
-      body: makePng(1140, 448),
+      body: makePng(1440, 448),
       headers: { "content-type": "image/png", "content-length": String(150 * 1024) }
     },
     [baseUrl + "/opt-in.png"]: {
@@ -452,13 +452,13 @@ async function runSelfTest() {
     fetcher: fakeFetcher({
       ...fixtures,
       [baseUrl + "/banner.png"]: {
-        body: makePng(1140, 448),
+        body: makePng(1440, 448),
         headers: { "content-type": "image/png", "content-length": String(150 * 1024) }
       }
     }),
     bannerProfile: "twilio-onboarding-doc"
   });
-  assert(twilioOnboardingDoc.ok === true, "twilio-onboarding-doc alias should pass 1140x448");
+  assert(twilioOnboardingDoc.ok === true, "twilio-onboarding-doc alias should pass 1440x448");
 
   const badSnapshot = makeReadySnapshot(baseUrl);
   badSnapshot.twilioSetup["RBM logo URL"] = baseUrl + "/opt-in.png";

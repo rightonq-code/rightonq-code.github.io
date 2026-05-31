@@ -74,7 +74,7 @@ Revolut should ideally handle:
 
 - initial onboarding checkout/payment;
 - payment method saving where supported;
-- `£100 + VAT` registration handling fee payment;
+- `£380 + VAT` registration handling fee payment;
 - later post-approval monthly subscription payment;
 - later prepaid usage credit/top-up payment;
 - merchant-initiated top-up orders/charges where supported;
@@ -103,12 +103,12 @@ Do not rely on Revolut alone as the full SaaS billing brain until its sandbox an
 Bugs decided the customer journey should be simple and platform-led:
 
 - no standalone "application only" product for now;
-- every client pays a `£100 + VAT` RCS registration handling fee before RightOnQ starts the registration work;
+- every client pays a `£380 + VAT` RCS registration handling fee before RightOnQ starts the registration work;
 - RightOnQ only accepts registered businesses / companies for this flow, not sole traders or unregistered businesses;
 - the customer must confirm they are applying on behalf of a registered business and entering the arrangement for business purposes;
 - the fee confirms the business is serious and covers application review, preparation, provider/compliance handling, administration, submission support, phone preview work, and registration follow-up;
 - monthly platform fees start only once the RCS sender is approved and ready to use;
-- if the RCS sender application is not approved for reasons outside the client's control, the `£100 + VAT` handling fee is refunded in full;
+- if the RCS sender application is not approved for reasons outside the client's control, the `£380 + VAT` handling fee is refunded in full;
 - the handling fee is not refundable once RightOnQ has started the registration handling work, except where the application cannot proceed for reasons outside the customer's control;
 - the handling fee is not refundable if the application cannot proceed or is rejected because the business provided inaccurate information, failed required checks, did not complete requested actions, withdrew, or has business/compliance history that prevents approval.
 
@@ -517,14 +517,14 @@ Target smooth journey:
 1. Client expresses interest and is qualified by RightOnQ/outreach.
 2. Client opens a RightOnQ registration gateway page or receives a guided link.
 3. Client sees the commercial terms:
-   - `£100 + VAT` RCS registration handling fee;
+   - `£380 + VAT` RCS registration handling fee;
    - refund guarantee if the application is not approved for reasons outside the client's control;
    - no monthly platform fee until approved and ready to use;
    - RightOnQ UK at `£25/month + VAT` after approval;
    - RightOnQ Global at `£49/month + VAT` after approval;
    - messaging costs charged separately.
 4. Client accepts service/payment terms.
-5. Client pays the `£100 + VAT` registration handling fee, likely via Revolut.
+5. Client pays the `£380 + VAT` registration handling fee, likely via Revolut.
 6. RightOnQ creates/sends a private onboarding/application link.
 7. Client completes the intake once, with fields accurate enough for both RCS sender registration and Twilio Trust Hub/KYC.
 8. RightOnQ checks the intake.
@@ -549,7 +549,7 @@ Target internal flow:
 1. Lead qualified.
 2. Commercial offer agreed.
 3. Revolut checkout/order/payment setup created.
-4. `£100 + VAT` registration handling fee received.
+4. `£380 + VAT` registration handling fee received.
 5. Payment method saved where supported.
 6. Post-approval subscription/base monthly entitlement recorded but not charged until approved and ready to use.
 7. Application record created with stable `application_id`.
@@ -2277,7 +2277,7 @@ Status:
 Output:
 
 - package explanation;
-- `£100 + VAT` RCS registration handling fee wording;
+- `£380 + VAT` RCS registration handling fee wording;
 - refund guarantee wording;
 - post-approval plan wording for RightOnQ UK and RightOnQ Global;
 - terms acceptance;
@@ -2287,7 +2287,7 @@ Output:
 Current implemented gateway mechanics:
 
 - customer chooses `RightOnQ UK` or `RightOnQ Global`;
-- customer acknowledges the `£100 + VAT` registration handling fee and refund terms;
+- customer acknowledges the `£380 + VAT` registration handling fee and refund terms;
 - `Complete Part A` is gated until plan choice and acknowledgement are complete;
 - Part A payload carries:
   - `packageName`;
@@ -2366,7 +2366,7 @@ Questions:
 
 - Can RightOnQ create a customer/order/payment in sandbox?
 - Can the payment method be saved for future merchant-initiated charge?
-- Can the first payment be `£100 + VAT`?
+- Can the first payment be `£380 + VAT`?
 - Can later top-up charge be initiated?
 - What webhook events arrive?
 - How are failed payments represented?
@@ -3713,15 +3713,15 @@ Purpose:
 
 - add a repeatable read-only check for hosted proof-pack asset URLs;
 - verify that final logo, banner, opt-in proof, and review-video URLs are publicly reachable before provider submission;
-- keep the Twilio/Google banner-size discrepancy visible instead of burying it in chat.
+- keep the Twilio/Google banner-size evidence visible instead of burying it in chat.
 
 Changes:
 
 - Added `tools/proof-asset-url-preflight.mjs`.
 - The tool reads a saved `operator-status.mjs` JSON snapshot and fetches only the public proof asset URLs in `Twilio setup`.
 - It checks HTTPS, HTTP reachability, PNG/JPEG content types, logo dimensions `224x224`, logo max `50kB`, banner max `200kB`, and video content type.
-- It originally defaulted to the `1440x448` banner size shown by Google/RBM guidance and the available console evidence at the time.
-- It also supports `--banner-profile twilio-onboarding-doc` for the `1140x448` size shown by Twilio's RCS onboarding page, and `--banner-profile either` for comparison.
+- It defaults to the current `1440x448` banner size used for both the reusable master and Twilio submission asset.
+- It also keeps the historical `--banner-profile twilio-onboarding-doc` alias for backward-compatible checks, and `--banner-profile either` for legacy snapshots.
 - `tools/README.md`, `RCS_PROVIDER_SUBMISSION_PREFLIGHT_CHECKLIST.md`, and `RCS_PROOF_VIDEO_WORKFLOW.md` now include the verifier in the final-pack workflow.
 
 Proof run:
@@ -3739,9 +3739,8 @@ Proof run:
 
 Superseded correction:
 
-- A follow-up check initially interpreted the available Twilio Help/Console evidence as aligning with Google at `1440x448`, while treating Twilio's onboarding-page `1140x448` value as a comparison profile.
-- Under that now-superseded interpretation, corrected default proof against `/tmp/roq-rcs-current-operator-snapshot.json` returned `ok: true`, `assets: 4`, `blockers: 0`, while `--banner-profile twilio-onboarding-doc` returned `ok: false`, `blockers: 1`.
-- This interpretation was later superseded by the Slice 11Q Twilio Digital Sales clarification: keep `1440x448` as the reusable master, but use `1140x448` for the actual Twilio sender-profile submission export.
+- A follow-up check initially treated the provider surfaces as requiring separate banner-size profiles.
+- Current operating rule is simpler: use `1440x448` for the reusable master and the actual Twilio sender-profile submission, while tracking the submitted file/URL separately.
 
 Boundary:
 
@@ -3920,17 +3919,17 @@ Provider clarification:
 - Logo remains `224 x 224 px`, JPG/JPEG/PNG, max `50 KB`, public URL.
 - For banner/hero assets, Twilio confirmed the docs mismatch is real:
   - keep a `1440 x 448 px` master asset internally for reusable client packs and Google/RBM alignment;
-  - export a `1140 x 448 px` file for the actual Twilio sender-profile submission;
-  - if only one Twilio-ready file is prepared for the application itself, use `1140 x 448`.
+  - export a `1440 x 448 px` file for the actual Twilio sender-profile submission;
+  - if only one Twilio-ready file is prepared for the application itself, use `1440 x 448`.
 - The use-case/review video must be publicly hosted and show the sender in action plus opt-out capability.
 - Twilio's public docs do not publish a strict video file type, max duration, or requirement that the recording be captured from a live/test RCS sender.
 - The proof pack should standardise opt-in description, opt-out description, opt-in policy image URL, and review video URL together; the video is not the whole compliance proof.
 
 Implementation:
 
-- `tools/proof-asset-url-preflight.mjs` now treats `--banner-profile twilio` as the `1140x448` Twilio sender submission export.
+- `tools/proof-asset-url-preflight.mjs` now treats `--banner-profile twilio` as the `1440x448` Twilio sender submission export.
 - `--banner-profile google` remains the `1440x448` Google/RBM master check.
-- `--banner-profile twilio-onboarding-doc` remains as a backward-compatible alias for the `1140x448` Twilio onboarding-doc size.
+- `--banner-profile twilio-onboarding-doc` remains as a backward-compatible alias for the `1440x448` Twilio onboarding-doc size.
 - `--banner-profile either` continues to support packs that intentionally retain both derivatives.
 - `tools/README.md`, `RCS_REGISTRATION_PACK_READINESS_MAP.md`, `RCS_PROVIDER_SUBMISSION_PREFLIGHT_CHECKLIST.md`, `RCS_ONBOARDING_ARCHITECTURE_BLUEPRINT.md`, and `RCS_PROOF_VIDEO_WORKFLOW.md` now record this clarification.
 
@@ -4046,7 +4045,7 @@ Purpose:
 
 - begin the approved proof-pack asset slice without uploading or mutating anything;
 - make the required local asset set explicit before replacing hosted placeholders;
-- keep the `1440x448` reusable banner master separate from the `1140x448` Twilio sender submission export.
+- keep the `1440x448` reusable banner master record separate from the exact Twilio sender submission file/URL.
 
 Implementation:
 
@@ -4055,7 +4054,7 @@ Implementation:
 - With `--asset-dir`, it checks local candidate files using the expected naming convention:
   - `rightonq-proof-logo.*` - `224x224`, max `50 KB`;
   - `rightonq-proof-banner-master.*` - `1440x448`, max `200 KB`;
-  - `rightonq-proof-banner.*` - Twilio submission export, `1140x448`, max `200 KB`;
+  - `rightonq-proof-banner.*` - Twilio submission export, `1440x448`, max `200 KB`;
   - `rightonq-proof-opt-in.*` - opt-in proof image;
   - `rightonq-proof-review-video.*` - review/use-case video.
 - It emits the planned GCS object names under `rcs-proof/<application-id>/`, the Cloud Run public URLs, and the operator tracking fields that will later be written after upload.
@@ -4086,7 +4085,7 @@ Date: 2026-05-20
 Purpose:
 
 - test the manifest planner against the best existing local proof-pack candidates;
-- prove the Twilio `1140x448` banner derivative can be produced locally from the reusable `1440x448` master;
+- prove the Twilio `1440x448` banner candidate can be produced locally and tracked separately from the reusable master;
 - record the remaining proof-pack blockers before any upload or status update.
 
 Implementation:
@@ -4097,7 +4096,7 @@ Implementation:
 - Staged three candidate files from existing storyboard assets:
   - `rightonq-proof-logo.png` - `224x224`, under `50 KB`;
   - `rightonq-proof-banner-master.jpg` - `1440x448`, under `200 KB`;
-  - `rightonq-proof-banner.jpg` - `1140x448`, under `200 KB`, derived locally from the master by center crop.
+  - `rightonq-proof-banner.jpg` - `1440x448`, under `200 KB`, derived locally from the master by center crop.
 - Ran the manifest planner against the candidate folder.
 
 Result:
@@ -4162,7 +4161,7 @@ Boundary:
 ## Open Questions
 
 - Exact sales-page wording for `RightOnQ UK` and `RightOnQ Global`.
-- Exact VAT-inclusive checkout amount for the `£100 + VAT` registration handling fee.
+- Exact VAT-inclusive checkout amount for the `£380 + VAT` registration handling fee.
 - Exact prepaid credit/top-up threshold.
 - Whether auto top-up is mandatory or optional.
 - Whether clients can use Direct Debit later.

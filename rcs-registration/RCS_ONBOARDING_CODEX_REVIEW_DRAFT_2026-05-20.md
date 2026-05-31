@@ -102,7 +102,7 @@ Current source reading:
 - Twilio says RCS setup can take four to six weeks or longer for multiple regions.
 - Twilio public sender details require public URL assets, including:
   - logo image: 224 x 224 px, max 50 KB;
-  - banner image: 1140 x 448 px, max 200 KB;
+  - banner image: 1440 x 448 px, max 200 KB;
   - privacy policy URL;
   - terms of service URL;
   - contact details.
@@ -113,7 +113,7 @@ Current source reading:
 
 Important local implication:
 
-There is a live source discrepancy, not a simple local typo. Google/RBM documentation uses a 1440 x 448 banner/hero image. Twilio RCS onboarding documentation currently shows 1140 x 448. Isa Bell / Twilio Digital Sales later confirmed on 2026-05-20 that RightOnQ should keep a 1440 x 448 master internally and export a 1140 x 448 file for the actual Twilio sender-profile submission. The local form should keep collecting the 1440 x 448 master, and the submission pack should track the exact 1140 x 448 derivative/URL submitted through Twilio.
+This older review draft is superseded by the current 1440 x 448 operating standard. The local form should collect the 1440 x 448 banner asset, and the submission pack should track the exact 1440 x 448 file/URL submitted through Twilio.
 
 ## User-provided Twilio evidence
 
@@ -129,15 +129,15 @@ This supports the correction above:
 
 ### 1. Fix source-of-truth asset requirements
 
-Update local docs and form validation/copy so the banner requirement shows the current source conflict:
+Update local docs and form validation/copy so the banner requirement shows the current operating standard:
 
 ```text
 Google/RBM master: 1440 x 448 px, max 200 KB
-Twilio RCS onboarding doc: 1140 x 448 px, max 200 KB
-Action: keep master asset, prepare 1140 x 448 Twilio submission derivative
+Twilio RCS onboarding doc: 1440 x 448 px, max 200 KB
+Action: use 1440 x 448, keep source and submitted asset records separate
 ```
 
-Check for unqualified `1440 x 448` or `1140 x 448` references in:
+Check for stale or contradictory banner-size references in:
 
 - `/Users/macpro/rightonq-code.github.io/rcs-registration/index.html`
 - `/Users/macpro/rightonq-code.github.io/rcs-registration/RCS_REGISTRATION_PACK_READINESS_MAP.md`
@@ -244,7 +244,7 @@ Please answer these in a strict read-only review first:
 2. Should production Twilio/RCS delivery and status callbacks terminate in `rightonq-system` rather than this onboarding repo?
 3. Is the callback receiver correctly parked as proof/staging, or should it be removed from the onboarding path entirely?
 4. Are the Twilio/Google video requirements accurately represented in the local docs and form?
-5. Is the Google/RBM `1440 x 448` master plus possible Twilio `1140 x 448` derivative model correct, or should the source form collect a different master asset?
+5. Is the single `1440 x 448` banner model correct for both collection and Twilio submission, with the submitted URL tracked separately?
 6. Does the existing browser video generator produce something that can become a submission-quality review video, or should the submission video be produced separately and only tracked/hosted by the onboarding lane?
 7. What exact Part B statuses should exist between `video_ready_for_review`, `video_approved`, and `provider_submission_ready`?
 8. What is the minimal activation handover contract `rightonq-system` needs on day one after approval?
@@ -258,7 +258,7 @@ Run these read-only from `/Users/macpro/rightonq-code.github.io`:
 ```bash
 git status -sb
 git log --oneline -12
-rg -n "1440|1140|Use case video|agent preview|review video|callback|Provider submission status|activation handover" rcs-registration
+rg -n "banner|Use case video|agent preview|review video|callback|Provider submission status|activation handover" rcs-registration
 rg -n "passport|driving licence|government ID|proof-of-address|document" rcs-registration
 ```
 

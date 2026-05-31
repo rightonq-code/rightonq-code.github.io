@@ -1109,7 +1109,7 @@ Implemented:
 - Character counts for bounded fields.
 - UK-only launch confirmation.
 
-Historical note added 2026-05-20: this validation summary records the early 2026-05-06 handover state. It is superseded for current Twilio sender-profile submission assets: the current operating standard is a 1440 x 448 reusable Google/RBM master and a 1140 x 448 Twilio submission export.
+Historical note added 2026-05-20: this validation summary records the early 2026-05-06 handover state. It is superseded for current Twilio sender-profile submission assets: the current operating standard is 1440 x 448 for both the reusable Google/RBM master and the actual Twilio submission asset, with the submitted file/URL tracked separately.
 
 Current caveat:
 

@@ -4,7 +4,7 @@ const DEFAULT_API_BASE_URL = "https://sandbox-merchant.revolut.com/api";
 const DEFAULT_API_VERSION = "2026-04-20";
 
 const DEFAULT_ORDER = {
-  amount: 12000,
+  amount: 45600,
   currency: "GBP",
   description: "RightOnQ RCS registration handling fee",
   redirect_url: "https://rightonq-code.github.io/rcs-registration/payment-return.html",
@@ -22,9 +22,9 @@ const DEFAULT_ORDER = {
       quantity: {
         value: 1
       },
-      unit_price_amount: 12000,
-      total_amount: 12000,
-      description: "RCS sender registration handling work. Includes GBP 100 + VAT."
+      unit_price_amount: 45600,
+      total_amount: 45600,
+      description: "RCS sender registration handling work. Includes GBP 380 + VAT."
     }
   ]
 };
@@ -70,14 +70,14 @@ function usage() {
     "  REVOLUT_MERCHANT_API_SECRET=... node rcs-registration/tools/revolut-sandbox-proof.mjs --order-id <order_id>",
     "  REVOLUT_MERCHANT_API_SECRET=... node rcs-registration/tools/revolut-sandbox-proof.mjs --list-orders --reference ROQ-RCS-...",
     "  REVOLUT_MERCHANT_API_SECRET=... node rcs-registration/tools/revolut-sandbox-proof.mjs --retrieve-payments --order-id <order_id>",
-    "  REVOLUT_MERCHANT_API_SECRET=... node rcs-registration/tools/revolut-sandbox-proof.mjs --refund-order --order-id <order_id> --refund-amount 12000",
+    "  REVOLUT_MERCHANT_API_SECRET=... node rcs-registration/tools/revolut-sandbox-proof.mjs --refund-order --order-id <order_id> --refund-amount 45600",
     "  REVOLUT_MERCHANT_API_SECRET=... node rcs-registration/tools/revolut-sandbox-proof.mjs --pay-order --order-id <order_id> --payment-method-id <id> --payment-method-type card",
     "",
     "Options:",
-    "  --create-registration-order    Create a GBP 120.00 sandbox Hosted Checkout order",
+    "  --create-registration-order    Create a GBP 456.00 sandbox Hosted Checkout order",
     "  --order-id <id>                 Retrieve an existing sandbox order",
     "  --application-id ROQ-RCS-...    Use the onboarding application ID as Revolut reference",
-    "  --amount 12000                 Amount in minor units; defaults to 12000",
+    "  --amount 45600                 Amount in minor units; defaults to 45600",
     "  --currency GBP",
     "  --customer-email test@example.com",
     "  --customer-name \"Test User\"",
@@ -90,7 +90,7 @@ function usage() {
     "  --state completed",
     "  --retrieve-payments            Retrieve payments for --order-id",
     "  --refund-order                 Refund --order-id; use --refund-amount in minor units",
-    "  --refund-amount 12000",
+    "  --refund-amount 45600",
     "  --refund-reference ROQ-RCS-...",
     "  --refund-description \"Registration handling fee refund\"",
     "  --pay-order                    Pay --order-id using a saved payment method",

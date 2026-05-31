@@ -43,7 +43,7 @@ function usage() {
     "  --application-id ROQ-RCS-...           Required for --check-active and --record",
     "  --revolut-order-id <id>",
     "  --order-state pending|authorised|completed|cancelled|failed",
-    "  --amount-minor 12000",
+    "  --amount-minor 45600",
     "  --currency GBP",
     "  --checkout-url https://...",
     "  --merchant-order-reference ROQ-RCS-...",

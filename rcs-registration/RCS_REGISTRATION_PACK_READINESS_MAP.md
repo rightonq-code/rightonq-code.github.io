@@ -3,7 +3,7 @@
 > ## ⚠️ CURRENT CORRECTIONS (2026-05-30) — READ FIRST
 > Some specifics later in this document are **superseded**. Where this notice and the body conflict, **this notice wins.**
 > - **Proof video:** the PRIMARY artifact is a **real-device iPhone screen recording** of the branded message → HELP → STOP → START exchange. The animated/browser generator is **demoted to fallback/storyboard** and is being moved **off the public page** — it is RightOnQ internal IP, never a client-facing feature.
-> - **Banner spec:** **1440 × 448, ≤200KB, JPEG/PNG ONLY.** The "1140 × 448 Twilio export" mentioned below is **WRONG — disregard it.**
+> - **Banner spec:** **1440 × 448, ≤200KB, JPEG/PNG ONLY.** Older separate Twilio-export-size guidance is superseded; use this size for both the reusable master and submitted banner, while tracking the exact submitted URL.
 > - **Use-case / samples (UK/GB):** every submission goes in as **multi-use with BOTH a promotional AND a transactional/service sample.** RightOnQ handles the Twilio category/sample formatting **in the back office** — the client is **not** asked to pick a Twilio category.
 > - **Pricing, refund policy, and exact build specs** are governed **per-slice by RightOnQ**, not in this public document.
 
@@ -31,9 +31,9 @@ Current readiness distinction:
   checks.
 - Provider submission, go-live, and usage pull: keep `not_started` until a
   separate explicit approval moves each gate.
-- Banner submission size: interim/unresolved pending Twilio ticket `#26791676`;
-  keep both the `1440 x 448` master and `1140 x 448` Twilio export paths alive
-  until Twilio replies or RightOnQ records a deliberate decision.
+- Banner submission size: use `1440 x 448` for both the reusable master and
+  Twilio submission asset; keep the exact submitted file/URL tracked separately
+  from the reusable source asset.
 
 This map supersedes the dated 2026-05-20 staging note for current readiness
 status without rewriting that historical candidate snapshot.
@@ -71,7 +71,7 @@ Local RightOnQ source checked:
 | Sender display name | Part A `displayName`; `Twilio setup` `RBM sender name` | Ready | Collected and seeded into tracking. Client approves name/logo in Part B before submission. |
 | Sender description | Part A `senderDescription` | Ready | Max 100 characters in the current form. Needs RightOnQ review for clarity before submission. |
 | Logo image | Part A `logoUpload` validates PNG/JPEG, 224 x 224 px, max 50 KB | Build gap | Twilio requires a publicly accessible URL. Current form validates metadata and local preview only. Must host approved asset and store `RBM logo URL`. |
-| Banner image | Part A `bannerUpload` validates PNG/JPEG, 1440 x 448 px Google/RBM master, max 200 KB | Build gap | Twilio requires a publicly accessible URL. Current interim stance is to keep a 1440 x 448 master internally and retain the 1140 x 448 Twilio export path, but the final Twilio submission size remains unresolved pending ticket `#26791676`. Host the approved submission derivative and store that exact submitted `RBM banner URL`; retain the 1440 master for reusable client packs and visual QA. |
+| Banner image | Part A `bannerUpload` validates PNG/JPEG, 1440 x 448 px Google/RBM master, max 200 KB | Build gap | Twilio requires a publicly accessible URL. Current stance is to use 1440 x 448 for the reusable master and Twilio submission asset. Host the approved submitted asset and store that exact `RBM banner URL`; retain the reusable master separately for client packs and visual QA. |
 | Brand/accent colour | Part A `brandColour` | Ready | Captured as hex. |
 | Customer-facing email | Part A `customerEmail` | Ready | Needs internal review that it belongs to the brand where possible. |
 | Customer-facing phone | Part A `customerPhone` | Ready | Needs internal review that it is reachable and brand-appropriate. |

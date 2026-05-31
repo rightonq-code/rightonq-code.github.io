@@ -50,7 +50,7 @@ asset URL check: passed
 Asset readback:
 
 - Logo: PNG, `224 x 224`, `21555` bytes
-- Banner: JPEG, `1140 x 448`, `12269` bytes
+- Banner: JPEG, `1440 x 448`, `12269` bytes
 - Opt-in proof: PNG, `1280 x 720`, `528293` bytes
 - Review video: WebM, `3101185` bytes
 

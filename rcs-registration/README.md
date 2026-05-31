@@ -34,7 +34,7 @@ This lane has many files. They fall into three groups. **If you are picking the 
 - `RCS_REGISTRATION_PACK_READINESS_MAP.md` — source-of-truth map of Twilio RCS Sender / Secondary Compliance Profile requirements against RightOnQ Part A and tracking fields, with the test-fixture-vs-real-client distinction and the submission gates.
 - `RCS_PROOF_VIDEO_WORKFLOW.md` — workflow guardrail for preparing, reviewing, hosting, approving, and storing the RCS proof/review video URL.
 - `RCS_PROVIDER_SUBMISSION_PREFLIGHT_CHECKLIST.md` — operator guardrail for final proof-pack review before moving provider submission out of `not_started`.
-- `RCS_TWILIO_CONSOLE_ASSET_CLARIFICATION_2026-05-22.md` — live note recording the Twilio Console / Help Center asset-size discrepancy under open ticket `#26791676` and the interim master/export stance.
+- `RCS_TWILIO_CONSOLE_ASSET_CLARIFICATION_2026-05-22.md` — live note recording the Twilio Console / Help Center asset-size clarification under open ticket `#26791676` and the source/submitted-asset tracking stance.
 
 ### SUPPORT
 

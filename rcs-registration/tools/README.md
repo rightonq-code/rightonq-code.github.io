@@ -553,7 +553,7 @@ RCS_ONBOARDING_OPERATOR_PIN="..." node rcs-registration/tools/operator-payment-o
   --application-id ROQ-RCS-... \
   --revolut-order-id order_... \
   --order-state pending \
-  --amount-minor 12000 \
+  --amount-minor 45600 \
   --currency GBP \
   --checkout-url https://sandbox-checkout.revolut.com/payment-link/... \
   --merchant-order-reference ROQ-RCS-... \
@@ -703,11 +703,11 @@ node rcs-registration/tools/proof-asset-url-preflight.mjs \
   --snapshot-file /private/tmp/roq-rcs-current-operator-snapshot.json
 ```
 
-Default banner profile is `twilio`, using the `1140x448` Twilio sender
+Default banner profile is `twilio`, using the `1440x448` Twilio sender
 submission export confirmed by Twilio Digital Sales on 2026-05-20. Use
 `--banner-profile google` for the reusable `1440x448` Google/RBM master asset,
 `--banner-profile twilio-onboarding-doc` as a backward-compatible alias for the
-same `1140x448` Twilio onboarding-doc size, or `--banner-profile either` when
+same `1440x448` Twilio onboarding-doc size, or `--banner-profile either` when
 checking a pack that intentionally stores both derivatives.
 
 ```bash
@@ -731,7 +731,7 @@ Latest proof against `ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747`: all four hosted
 asset URLs were publicly reachable. The current placeholder banner is
 `1440x448`, so it matches the reusable Google/RBM master profile but not the
 current Twilio submission export profile. Before real provider submission,
-prepare and host the approved `1140x448` Twilio derivative and store that exact
+prepare and host the approved `1440x448` Twilio derivative and store that exact
 submitted `RBM banner URL`.
 
 ## Local Proof Asset Manifest Plan
@@ -756,7 +756,7 @@ Expected local filenames:
 
 - `rightonq-proof-logo.png` or `.jpg` / `.jpeg` - `224x224`, max `50 KB`;
 - `rightonq-proof-banner-master.png` or `.jpg` / `.jpeg` - `1440x448`, max `200 KB`;
-- `rightonq-proof-banner.png` or `.jpg` / `.jpeg` - Twilio submission export, `1140x448`, max `200 KB`;
+- `rightonq-proof-banner.png` or `.jpg` / `.jpeg` - Twilio submission export, `1440x448`, max `200 KB`;
 - `rightonq-proof-opt-in.png` or `.jpg` / `.jpeg` - public opt-in proof image;
 - `rightonq-proof-review-video.webm` or `.mp4` - public review/use-case video.
 
@@ -768,7 +768,7 @@ node rcs-registration/tools/proof-asset-manifest-plan.mjs --self-test
 
 Safety: this is an offline planner. It does not upload files, write Sheets, call
 Apps Script, call Twilio, call Google Cloud APIs, or mutate state. Use it before
-the upload/update slice so the `1140x448` Twilio banner export is not confused
+the upload/update slice so the `1440x448` Twilio banner export is not confused
 with the `1440x448` reusable master.
 
 ## Public Part B Guard Proof
@@ -844,7 +844,7 @@ Refund proof, after a sandbox order is completed:
 REVOLUT_MERCHANT_API_SECRET="..." node rcs-registration/tools/revolut-sandbox-proof.mjs \
   --refund-order \
   --order-id order_... \
-  --refund-amount 12000 \
+  --refund-amount 45600 \
   --refund-reference ROQ-RCS-... \
   --idempotency-key refund-ROQ-RCS-...
 ```
