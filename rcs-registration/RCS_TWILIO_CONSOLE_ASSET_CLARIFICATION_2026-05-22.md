@@ -28,28 +28,25 @@ The RCS Sender public details screen showed the expected manual profile fields:
 
 The Console helper text observed during this inspection indicated a `1440 x
 448` banner/hero image requirement. The Twilio Help Center AI answer in the
-same logged-in support surface also stated `1440 x 448` and suggested `1140 x
-448` may be outdated.
+same logged-in support surface also stated `1440 x 448`.
 
-That conflicts with the earlier Isa Bell / Twilio Digital Sales guidance already
-recorded in this repo: keep a reusable `1440 x 448` Google/RBM master asset, but
-export a `1140 x 448` derivative for the actual Twilio sender-profile
-submission.
+This now aligns with the current RightOnQ operating rule: keep a reusable
+`1440 x 448` Google/RBM master asset and use a `1440 x 448` file for the actual
+Twilio sender-profile submission, while tracking the exact submitted URL.
 
 ## Current RightOnQ Operating Stance
 
-Until Twilio replies on ticket `#26791676`, keep both asset paths alive:
+Use one banner dimension, with separate source/submission tracking:
 
 - retain a `1440 x 448` master banner for Google/RBM reuse and visual QA;
-- retain a `1140 x 448` Twilio submission export path because the current
-  proof-pack tools and readback passed with the Twilio profile;
+- retain the exact submitted `1440 x 448` Twilio banner file/URL separately
+  because submission evidence must be traceable;
 - visually preview the logo and banner in Twilio before client/provider use;
 - treat logo safe-area and crop behaviour as a visual QA requirement, not just
   a pixel-size requirement.
 
-Do not rewrite the final submission tooling solely because the Console helper
-text currently says `1440 x 448`. Wait for Twilio's ticket reply or a deliberate
-RightOnQ decision after visual retesting.
+Do not treat this note as permission to submit. Wait for Twilio's ticket reply
+or a deliberate RightOnQ decision after visual retesting before provider use.
 
 ## Ticket Comment Posted
 
@@ -59,10 +56,8 @@ to confirm:
 - RCS Sender logo dimensions, max file size, and recommended internal
   padding/safe area;
 - RCS Sender banner/hero dimensions for actual Twilio Console submission;
-- whether `1140 x 448` is outdated, still accepted, or relevant only to a
-  specific preview/submission surface;
-- whether agencies should maintain both a `1440 x 448` master and a
-  Twilio-specific export.
+- whether any additional crop, safe-area, or preview-surface guidance applies;
+- whether agencies should maintain separate source and submitted asset records.
 
 ## Boundaries
 

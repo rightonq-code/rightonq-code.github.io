@@ -82,14 +82,14 @@ Required:
 Banner asset standard:
 
 - Keep a reusable 1440 x 448 Google/RBM master asset internally.
-- Export a 1140 x 448 derivative for the actual Twilio sender-profile submission; this submission export size remains under review pending Twilio ticket `#26791676`.
+- Use a 1440 x 448 file for the actual Twilio sender-profile submission; track the submitted file/URL separately from the reusable master.
 - Host the approved Twilio submission derivative and store that exact asset URL in `RBM banner URL`.
 - If both derivatives are retained in the client pack, label them clearly so the Twilio submission file is not confused with the master.
 
 Provider clarification:
 
 - Isa Bell / Twilio Digital Sales confirmed this operational split on 2026-05-20.
-- On 2026-05-22, the logged-in Twilio Console RCS Sender public-details screen and Twilio Help Center AI both indicated `1440 x 448`; this conflicts with the earlier `1440` master / `1140` Twilio export guidance, so RightOnQ posted a clarification request on Twilio ticket `#26791676`. Until Twilio replies, keep both asset paths alive and visually preview before client/provider use. See `RCS_TWILIO_CONSOLE_ASSET_CLARIFICATION_2026-05-22.md`.
+- On 2026-05-22, the logged-in Twilio Console RCS Sender public-details screen and Twilio Help Center AI both indicated `1440 x 448`. RightOnQ posted a clarification request on Twilio ticket `#26791676`; until any further provider guidance arrives, use the current 1440 x 448 standard and visually preview before client/provider use. See `RCS_TWILIO_CONSOLE_ASSET_CLARIFICATION_2026-05-22.md`.
 - The same reply confirmed that current public docs require the review video to be publicly hosted and show the use case plus opt-out capability, but do not publish a strict file type, max duration, or live/test-sender capture requirement.
 - Isa Bell / Twilio Digital Sales clarified on 2026-05-21 that the opt-in policy image URL can be a public screenshot of the opt-in page, the opt-in webpage itself, or a document explaining the opt-in flow. Public docs do not publish required dimensions, file type, max size, or number-of-images limits for this specific opt-in-policy asset.
 - Standardise opt-in descriptions, opt-out descriptions, opt-in policy image URL, and review video URL together; do not treat the video as the whole compliance proof.

@@ -131,7 +131,7 @@ async function runSelfTest() {
     token: "token_not_returned",
     type: "payment",
     state: "completed",
-    amount: 12000,
+    amount: 45600,
     currency: "GBP",
     merchant_order_data: {
       reference: "ROQ-RCS-TEST-ENRICHMENT"
@@ -141,7 +141,7 @@ async function runSelfTest() {
       {
         id: "payment_TEST",
         state: "captured",
-        amount: 12000,
+        amount: 45600,
         currency: "GBP",
         payment_method: {
           type: "card",
@@ -154,14 +154,14 @@ async function runSelfTest() {
     id: "refund_order_TEST",
     type: "refund",
     state: "completed",
-    amount: 12000,
+    amount: 45600,
     currency: "GBP",
     related_order_id: "order_payment_TEST",
     payments: [
       {
         id: "refund_payment_TEST",
         state: "completed",
-        amount: 12000,
+        amount: 45600,
         currency: "GBP"
       }
     ]
@@ -170,14 +170,14 @@ async function runSelfTest() {
     id: "refund_order_OBSERVED",
     type: "refund",
     state: "completed",
-    amount: 12000,
+    amount: 45600,
     currency: "GBP",
     relatedOrderId: "order_payment_TEST",
     payments: [
       {
         id: "refund_payment_OBSERVED",
         state: "completed",
-        amount: 12000,
+        amount: 45600,
         currency: "GBP",
         paymentMethodType: "card"
       }

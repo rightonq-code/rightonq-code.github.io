@@ -42,7 +42,7 @@ const ASSET_SPECS = [
     required: true,
     kind: "image",
     submittedToTwilio: true,
-    dimensions: { width: 1140, height: 448 },
+    dimensions: { width: 1440, height: 448 },
     maxBytes: 200 * 1024,
     notes: "Twilio sender-profile submission export derived from the 1440x448 master."
   },
@@ -360,7 +360,7 @@ function runSelfTest() {
   const directory = makeTempDir();
   fs.writeFileSync(path.join(directory, "rightonq-proof-logo.png"), makePng(224, 224));
   fs.writeFileSync(path.join(directory, "rightonq-proof-banner-master.png"), makePng(1440, 448));
-  fs.writeFileSync(path.join(directory, "rightonq-proof-banner.png"), makePng(1140, 448));
+  fs.writeFileSync(path.join(directory, "rightonq-proof-banner.png"), makePng(1440, 448));
   fs.writeFileSync(path.join(directory, "rightonq-proof-opt-in.png"), makePng(1200, 800));
   fs.writeFileSync(path.join(directory, "rightonq-proof-review-video.webm"), Buffer.from("webm"));
 
@@ -374,7 +374,7 @@ function runSelfTest() {
   assert(ready.readyForUpload === true, "ready manifest should be upload-ready");
   assert(ready.operatorTrackingPreview["RBM banner URL"].endsWith("/rightonq-proof-banner.png"), "tracking preview should use Twilio banner export");
 
-  fs.writeFileSync(path.join(directory, "rightonq-proof-banner.png"), makePng(1440, 448));
+  fs.writeFileSync(path.join(directory, "rightonq-proof-banner.png"), makePng(1440, 449));
   const bad = buildManifest({
     applicationId: "ROQ-RCS-TEST-MANIFEST",
     assetDir: directory,

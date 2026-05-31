@@ -80,7 +80,7 @@ This is the successor's quick inventory of useful work from the recent session. 
      - `rcs-registration/RCS_TWILIO_CONSOLE_ASSET_CLARIFICATION_2026-05-22.md`
      - `rcs-registration/RCS_PROVIDER_SUBMISSION_PREFLIGHT_CHECKLIST.md`
      - `rcs-registration/RCS_REGISTRATION_PACK_READINESS_MAP.md`
-   - Fit: keep both the 1440 x 448 master and 1140 x 448 Twilio export path alive until ticket `#26791676` is resolved or BUGS explicitly accepts a size decision.
+   - Fit: use 1440 x 448 for both the reusable master and Twilio submission asset; track the exact submitted file/URL separately until ticket `#26791676` or BUGS records any further decision.
 
 8. Provider-submission boundaries are documented and should stay.
    - Files:
@@ -212,10 +212,10 @@ These points are part of the lane guardrails:
 - If extra evidence is requested, use a Twilio/provider secure route where available.
 - One authorized representative is expected for branded RCS sender public docs; extra representatives belong to separate Trust Hub/Compliance lanes.
 - Logo guidance: 224 x 224, JPG/JPEG/PNG, max 50 KB, public URL.
-- Banner guidance remains unresolved in practice:
-  - keep a 1440 x 448 master;
-  - keep a 1140 x 448 Twilio submission export path alive;
-  - ticket `#26791676` records the Console/help discrepancy and must be resolved or consciously accepted before real submission.
+- Banner guidance uses one dimension with separate tracking:
+  - use 1440 x 448 for the reusable master;
+  - use 1440 x 448 for the Twilio submission asset;
+  - ticket `#26791676` records the provider clarification trail and must be resolved or consciously accepted before real submission.
 - Opt-in proof and review/use-case video work together; do not treat a representative/test proof as real client evidence.
 - Status callback URL can be deferred/configured later before live traffic; no callback config in the current slice.
 
@@ -644,7 +644,7 @@ Research direction from Twilio-4 plus payment-focused and Revolut-focused sub-ag
 - Use Revolut for:
   - initial checkout/payment;
   - saved payment method where available;
-  - `£100 + VAT` registration handling fee collection;
+  - `£380 + VAT` registration handling fee collection;
   - possible post-approval monthly subscription after sandbox testing;
   - merchant-initiated top-up orders/charges;
   - webhooks/reporting for reconciliation.
@@ -669,7 +669,7 @@ Important Twilio billing point:
 Recommended early risk rule:
 
 - No client should get live Twilio-backed usage with unlimited postpaid exposure.
-- Require the `£100 + VAT` RCS registration handling fee before RightOnQ starts registration work.
+- Require the `£380 + VAT` RCS registration handling fee before RightOnQ starts registration work.
 - Do not charge monthly platform fees during the 4-6 week registration wait.
 - Start monthly platform fees only once the sender is approved and ready to use.
 - Keep auto top-up / pause rules for later live Twilio usage.
@@ -677,7 +677,7 @@ Recommended early risk rule:
 Commercial decision from Bugs on 2026-05-15:
 
 - no standalone "application only" product for now;
-- every client pays a `£100 + VAT` RCS registration handling fee to start;
+- every client pays a `£380 + VAT` RCS registration handling fee to start;
 - this flow is B2B only: registered businesses / companies are accepted; sole traders and unregistered businesses are not accepted;
 - the client must confirm they are applying on behalf of a registered business and entering the arrangement for business purposes;
 - the handling fee covers application review, preparation, provider/compliance handling, administration, submission support, phone preview work, and registration follow-up;
@@ -694,7 +694,7 @@ Likely customer journey:
 1. Lead agrees in principle to use RightOnQ RCS.
 2. Customer sees the RCS registration gateway and platform package summary.
 3. Customer accepts service/payment terms.
-4. Customer pays the `£100 + VAT` registration handling fee, likely via Revolut checkout/hosted payment.
+4. Customer pays the `£380 + VAT` registration handling fee, likely via Revolut checkout/hosted payment.
 5. RightOnQ creates/sends a private RCS application link.
 6. Customer receives the private RCS application link.
 7. Customer completes Part A.
@@ -712,7 +712,7 @@ Likely internal journey:
 1. Lead qualified.
 2. Commercial offer agreed.
 3. Revolut customer/payment record created, or checkout session/order prepared.
-4. `£100 + VAT` registration handling fee paid.
+4. `£380 + VAT` registration handling fee paid.
 5. Payment method saved where supported.
 6. Subscription/base monthly entitlement recorded but not charged until approved and ready to use.
 7. Application record created with stable `application_id`.
@@ -1008,7 +1008,7 @@ Implemented:
 
 Bugs supplied a Twilio onboarding screenshot showing the logo requirement as 224 x 224 px, not the app's earlier 256 x 256 minimum. Twilio and Google docs both confirm the logo is 224 x 224 px with a 50 KB max. Google also confirms the banner image is 1440 x 448 px with a 200 KB max.
 
-Historical note added 2026-05-20: this section records the state of the work on 2026-05-12. It is superseded for Twilio sender-profile submission assets by the later Isa Bell / Twilio Digital Sales clarification: keep the 1440 x 448 banner as the reusable Google/RBM master, but export/use a 1140 x 448 derivative for the actual Twilio sender-profile submission. See `RCS_ONBOARDING_MAIN_BUILD_PLAN.md` Slice 11Q and `RCS_REGISTRATION_PACK_READINESS_MAP.md` for the current rule.
+Historical note added 2026-05-20: this section records the state of the work on 2026-05-12. It is superseded for Twilio sender-profile submission assets by the later Isa Bell / Twilio Digital Sales clarification: use 1440 x 448 for both the reusable Google/RBM master and the actual Twilio sender-profile submission, while tracking the exact submitted file/URL separately. See `RCS_ONBOARDING_MAIN_BUILD_PLAN.md` Slice 11Q and `RCS_REGISTRATION_PACK_READINESS_MAP.md` for the current rule.
 
 Implemented:
 
@@ -2443,7 +2443,7 @@ Current gateway behaviour:
 - customer must choose either:
   - `RightOnQ UK` at `£25/month + VAT after approval`; or
   - `RightOnQ Global` at `£49/month + VAT after approval`;
-- customer must acknowledge the `£100 + VAT` registration handling fee and refund terms before continuing into Part A;
+- customer must acknowledge the `£380 + VAT` registration handling fee and refund terms before continuing into Part A;
 - `Complete Part A` now validates the plan choice and acknowledgement before scrolling into the form;
 - the selected plan, monthly base fee, registration fee, VAT treatment, acknowledgement, and billing status are included in the Part A payload;
 - review/export data now includes:
@@ -2608,7 +2608,7 @@ Official Revolut doc points captured in the proof plan:
 Proof helper behaviour:
 
 - `node rcs-registration/tools/revolut-sandbox-proof.mjs --dry-run` prints the intended sandbox order request without needing a secret;
-- intended first live sandbox call is a `GBP 120.00` order for the `GBP 100 + VAT` registration handling fee;
+- intended first live sandbox call is a `GBP 120.00` order for the then-current registration handling fee plus VAT;
 - live sandbox calls require `REVOLUT_MERCHANT_API_SECRET` in the local environment;
 - no Revolut API secret should be pasted into chat or committed to the repo.
 
@@ -2629,7 +2629,7 @@ Follow-up refinement from external read-only sanity check:
 - prove both Revolut Subscriptions API and RightOnQ-owned monthly MIT charges against a saved payment method;
 - use the onboarding `applicationId` as the Revolut order reference where supported;
 - prove `Idempotency-Key` handling so retries do not create duplicate orders;
-- prove refund behaviour for full and partial refunds before relying on the `£100 + VAT` refund policy;
+- prove refund behaviour for full and partial refunds before relying on the `£380 + VAT` refund policy;
 - capture at least one negative path such as declined card, 3DS failure, or abandoned checkout;
 - capture webhook signature/timestamp header shape and verification behaviour;
 - keep endpoint hardening as a pre-public-launch blocker:
@@ -3160,7 +3160,7 @@ Next job:
 - do not paste the secret into chat, docs, commits, screenshots, or command examples;
 - use a local terminal prompt/environment flow only;
 - run the first live sandbox registration-fee order proof with:
-  - `amount = 12000` minor units (`GBP 120.00`, representing `GBP 100 + VAT`);
+  - `amount = 12000` minor units (`GBP 120.00`, representing the then-current registration handling fee plus VAT);
   - a fixed `Idempotency-Key`;
   - the RightOnQ `applicationId` as the Revolut reference;
 - repeat the same idempotency-key call to prove duplicate protection;
@@ -3180,7 +3180,7 @@ RCS-Twilio-4 ran the first live Revolut Merchant sandbox Hosted Checkout proof o
 Inputs:
 
 - application/reference: `ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747`;
-- amount: `12000` minor units (`GBP 120.00`, representing `GBP 100 + VAT`);
+- amount: `12000` minor units (`GBP 120.00`, representing the then-current registration handling fee plus VAT);
 - API base URL: `https://sandbox-merchant.revolut.com/api`;
 - API version: `2026-04-20`;
 - secret handling: Bugs pasted the sandbox Merchant API secret only into a local silent terminal prompt, then the environment variable was unset.
@@ -3509,7 +3509,7 @@ Bugs clarified the commercial/refund posture:
 - RightOnQ will only deal with registered businesses / companies in this onboarding flow;
 - sole traders and unregistered businesses are not accepted;
 - this is B2B, not a consumer checkout;
-- the `£100 + VAT` charge should be described as an RCS registration handling fee, because it pays for application review, preparation, provider/compliance handling and administration;
+- the `£380 + VAT` charge should be described as an RCS registration handling fee, because it pays for application review, preparation, provider/compliance handling and administration;
 - RightOnQ may start that handling work after payment;
 - once RightOnQ has started the handling work, change-of-mind refund is not available;
 - refund remains available where the application cannot proceed for reasons outside the customer's control.

@@ -10,7 +10,7 @@ Prove the Revolut-first billing assumptions before wiring live customer payment 
 
 The proof should answer whether RightOnQ can safely use Revolut for:
 
-- the one-off `£100 + VAT` RCS registration handling fee;
+- the one-off `£380 + VAT` RCS registration handling fee;
 - a saved customer/payment method;
 - the post-approval monthly platform fee for `RightOnQ UK` or `RightOnQ Global`;
 - later PAYG/top-up payments;
@@ -21,7 +21,7 @@ The proof should answer whether RightOnQ can safely use Revolut for:
 Customer flow should become:
 
 1. customer chooses `RightOnQ UK` or `RightOnQ Global`;
-2. customer pays the `£100 + VAT` registration handling fee through Revolut;
+2. customer pays the `£380 + VAT` registration handling fee through Revolut;
 3. Revolut returns/updates order and payment status;
 4. RightOnQ records `registration_fee_paid`;
 5. RightOnQ creates/reveals the private Part A link;
@@ -71,7 +71,7 @@ First happy-path registration-fee payment proof passed using the Revolut Merchan
 Inputs:
 
 - RightOnQ application ID / Revolut reference: `ROQ-RCS-TEST-PUBLIC-PARTA-20260515151747`
-- Amount: `12000` minor units (`GBP 120.00`, representing `GBP 100 + VAT`)
+- Amount: `12000` minor units (`GBP 120.00`, representing the then-current registration handling fee plus VAT)
 - API base URL: `https://sandbox-merchant.revolut.com/api`
 - API version: `2026-04-20`
 - Secret handling: `REVOLUT_MERCHANT_API_SECRET` was pasted into the local terminal prompt only, then unset. It was not pasted into chat, docs, commits, or command history as a literal value.
@@ -92,7 +92,7 @@ Observed results:
 
 Build impact:
 
-- Revolut Merchant Hosted Checkout is viable for the one-off `GBP 100 + VAT` registration-fee gate.
+- Revolut Merchant Hosted Checkout is viable for the one-off registration-fee gate.
 - RightOnQ must not rely on Revolut create-order idempotency. Store/check Billing state before creating a checkout order.
 - Store at least: Revolut order ID, token or checkout URL while pending, customer ID, payment ID, order/payment state, amount/currency, and the application reference.
 - The RightOnQ return URL now has a static `payment-return.html` page. It confirms browser return only; payment still needs to be verified through Revolut order/webhook state before Billing changes.
@@ -198,7 +198,7 @@ Build impact:
 
 ### A. One-off registration handling fee
 
-- Can a sandbox Merchant order be created for `12000` minor units (`£120.00`, representing `£100 + VAT`)?
+- Can a sandbox Merchant order be created for `45600` minor units (`£456.00`, representing `£380 + VAT`)?
 - Does the API treat `12000` as `£120.00` in GBP minor units?
 - Does the response include a stable order `id` and customer-facing `checkout_url`?
 - Can RightOnQ set the `applicationId` as the Revolut external/reference field?
@@ -246,7 +246,7 @@ Build impact:
 ### E. PAYG / top-up control
 
 - Is PAYG credit better as separate one-off orders rather than Revolut subscription usage?
-- Can RightOnQ create top-up orders for fixed amounts, e.g. `£50 + VAT`, `£100 + VAT`?
+- Can RightOnQ create top-up orders for fixed amounts, e.g. `£50 + VAT`, `£380 + VAT`?
 - Can later top-ups use a saved merchant-initiated payment method?
 - What is the cleanest way to pause sending if top-up fails?
 

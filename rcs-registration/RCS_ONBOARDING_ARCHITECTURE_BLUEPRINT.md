@@ -3,7 +3,7 @@
 > ## ⚠️ CURRENT CORRECTIONS (2026-05-30) — READ FIRST
 > Some specifics later in this document are **superseded**. Where this notice and the body conflict, **this notice wins.**
 > - **Proof video:** the PRIMARY artifact is a **real-device iPhone screen recording** of the branded message → HELP → STOP → START exchange. The animated/browser generator is **demoted to fallback/storyboard** and is being moved **off the public page** — it is RightOnQ internal IP, never a client-facing feature.
-> - **Banner spec:** **1440 × 448, ≤200KB, JPEG/PNG ONLY.** The "1140 × 448 Twilio export" mentioned below is **WRONG — disregard it.**
+> - **Banner spec:** **1440 × 448, ≤200KB, JPEG/PNG ONLY.** Older separate Twilio-export-size guidance is superseded; use this size for both the reusable master and submitted banner, while tracking the exact submitted URL.
 > - **Use-case / samples (UK/GB):** every submission goes in as **multi-use with BOTH a promotional AND a transactional/service sample.** RightOnQ handles the Twilio category/sample formatting **in the back office** — the client is **not** asked to pick a Twilio category.
 > - **Pricing, refund policy, and exact build specs** are governed **per-slice by RightOnQ**, not in this public document.
 
@@ -128,7 +128,7 @@ The onboarding lane has already proved:
 The onboarding lane has not yet completed:
 
 - real approved client logo/banner upload;
-- final logo/banner dimension check before generating approved files; current operating standard from Twilio Digital Sales on 2026-05-20 is 1440 x 448 as the reusable Google/RBM master asset and 1140 x 448 as the Twilio sender-profile submission export, so store the exact submitted Twilio asset URL and retain the master separately;
+- final logo/banner dimension check before generating approved files; current operating standard is 1440 x 448 for both the reusable Google/RBM master asset and the Twilio sender-profile submission asset, with the exact submitted Twilio asset URL stored separately from the reusable master;
 - real opt-in proof image upload;
 - real review/proof video creation;
 - client Part B approval of name/logo/video;

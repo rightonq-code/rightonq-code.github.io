@@ -32,12 +32,13 @@ Current local candidate files:
 ```text
 rightonq-proof-logo.png            224x224, under 50 KB
 rightonq-proof-banner-master.jpg   1440x448, under 200 KB
-rightonq-proof-banner.jpg          1140x448, under 200 KB
+rightonq-proof-banner.jpg          1440x448, under 200 KB
 ```
 
-The 1140x448 Twilio sender-profile banner export was derived from the 1440x448
-master by a local center crop. It still needs human visual approval before any
-upload or use in a provider submission pack.
+The Twilio sender-profile banner candidate uses the same 1440x448 dimensions as
+the reusable master. It still needs human visual approval before any upload or
+use in a provider submission pack, and the exact submitted file/URL must be
+tracked separately.
 
 ## Current Blockers
 

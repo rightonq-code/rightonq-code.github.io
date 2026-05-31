@@ -70,7 +70,7 @@ Parked for later polish after the payment and onboarding mechanics are clearer:
 
 - Add a short "registration journey" storyboard near the top of the page so the client understands the full path before filling Part A.
 - Make the process feel calm and low pressure: RCS approval usually takes around 4-6 weeks, and the monthly RightOnQ plan should not start until the sender is approved and ready to use.
-- Keep the registration fee wording visible: the £100 + VAT fee starts the RCS registration work, with a full refund if approval fails for reasons outside the client's control.
+- Keep the registration fee wording visible: the £380 + VAT fee starts the RCS registration work, with a full refund if approval fails for reasons outside the client's control.
 - Make it clear the selected RightOnQ plan is a starting plan, not a trap: clients can upgrade or downgrade between RightOnQ UK and RightOnQ Global at the end of a monthly billing cycle.
 - Avoid promising pro-rata credits until billing systems can support them. Current preferred wording should say plan changes happen at month end and pro-rata credits are not currently offered.
 - Consider moving the final "Complete Part A" action below the plan choices and fee acknowledgement so the visual order matches the logical order on desktop, tablet, and mobile.

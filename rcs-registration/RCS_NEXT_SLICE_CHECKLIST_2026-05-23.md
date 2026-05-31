@@ -62,10 +62,10 @@ Do not bundle the next slice with:
 
 Twilio ticket `#26791676` is open for the logo/banner asset-size clarification.
 
-Current interim stance:
+Current stance:
 
-- keep the `1440 x 448` Google/RBM master banner path alive;
-- keep the `1140 x 448` Twilio submission export path alive;
+- use `1440 x 448` for both the reusable master and Twilio submission asset;
+- track the exact submitted file/URL separately from the reusable source asset;
 - visually preview the logo and banner in Twilio before client/provider use;
 - chase Twilio if no reply by 2026-05-29.
 
