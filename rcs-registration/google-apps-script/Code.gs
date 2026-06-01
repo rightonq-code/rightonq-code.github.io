@@ -20,6 +20,18 @@ const PART_A_PAYMENT_READY_STATUSES = [
   "registration_fee_manually_confirmed",
   "registration_fee_waived"
 ];
+const FAULT_CATEGORIES = [
+  "roq_fault",
+  "client_fault",
+  "external_provider",
+  "mixed"
+];
+const FAULT_CATEGORY_REQUIRED_STATUSES = [
+  "rejected",
+  "part_a_changes_needed",
+  "provider_changes_requested"
+];
+const OPERATOR_REASON_TEXT_LIMIT = 500;
 const APPLICATION_HEADERS = [
   "Application ID",
   "Client ID",
@@ -54,7 +66,12 @@ const APPLICATION_HEADERS = [
   "Internal owner",
   "Next action owner",
   "Next action note",
-  "Internal notes"
+  "Internal notes",
+  "Fault category",
+  "Status reason",
+  "Prep work started at",
+  "Prep work started by",
+  "Prep work start reason"
 ];
 const PART_B_APPROVAL_HEADERS = [
   "Received at",
@@ -104,7 +121,9 @@ const STATUS_EVENT_HEADERS = [
   "Changed by",
   "Source",
   "Submission JSON",
-  "Last updated"
+  "Last updated",
+  "Fault category",
+  "Status reason"
 ];
 const COMMUNICATION_HEADERS = [
   "Created at",
@@ -331,6 +350,7 @@ const REGISTRATION_STATUS_ORDER = [
   "registration_submitted",
   "provider_review",
   "provider_changes_requested",
+  "rejected",
   "approved",
   "live",
   "paused_billing",
@@ -601,6 +621,7 @@ function isOperatorOnlyAction(action) {
     createApplicationDraft: true,
     getOperatorSnapshot: true,
     updateApplicationStatus: true,
+    markPrepWorkStarted: true,
     updateBilling: true,
     checkActiveCheckout: true,
     recordPaymentOrder: true,
@@ -633,6 +654,10 @@ function rcsOperatorAction(payload) {
     if (payload.action === "updateApplicationStatus") {
       requireOperatorPin(payload);
       return serialiseExecutionApiValue(updateApplicationStatus(spreadsheet, payload));
+    }
+    if (payload.action === "markPrepWorkStarted") {
+      requireOperatorPin(payload);
+      return serialiseExecutionApiValue(markPrepWorkStarted(spreadsheet, payload));
     }
     if (payload.action === "updateBilling") {
       requireOperatorPin(payload);
@@ -942,11 +967,95 @@ function updateApplicationStatus(spreadsheet, payload) {
   if (!previous) throw new Error("Application ID not found");
 
   validateRegistrationStatus(payload.registrationStatus);
+  validateStatusFaultPayload(payload.registrationStatus, payload.faultCategory);
   const updates = buildStatusUpdates(payload, now);
   if (!Object.keys(updates).length) throw new Error("No status fields supplied");
 
   updateApplicationControlFields(spreadsheet, applicationId, updates);
 
+  const statusResult = appendStatusEvent(spreadsheet, applicationId, previous, updates, payload, now);
+
+  queueStatusCommunication(spreadsheet, payload, previous, updates, now);
+
+  return {
+    ok: true,
+    applicationId: applicationId,
+    registrationStatus: statusResult.registrationStatus,
+    partAStatus: statusResult.partAStatus,
+    partBStatus: statusResult.partBStatus,
+    updatedAt: now.toISOString()
+  };
+}
+
+function markPrepWorkStarted(spreadsheet, payload) {
+  const now = new Date();
+  const applicationId = payload.applicationId;
+  if (!applicationId) throw new Error("Missing application ID");
+
+  const previous = findApplicationRecord(spreadsheet, { applicationId: applicationId });
+  if (!previous) throw new Error("Application ID not found");
+
+  if (previous["Prep work started at"]) {
+    return {
+      ok: true,
+      applicationId: applicationId,
+      alreadySet: true,
+      prepWorkStartedAt: serialiseDate(previous["Prep work started at"]),
+      prepWorkStartedBy: previous["Prep work started by"] || ""
+    };
+  }
+
+  if (payload.registrationStatus) {
+    validateRegistrationStatus(payload.registrationStatus);
+    validateStatusFaultPayload(payload.registrationStatus, payload.faultCategory);
+  }
+
+  const prepWorkStartedBy = firstValue(payload.changedBy, payload.operatorName, "operator (PIN-authenticated)");
+  const updates = {
+    "Prep work started at": now,
+    "Prep work started by": prepWorkStartedBy,
+    "Prep work start reason": normaliseOperatorReasonText(payload.prepWorkStartReason),
+    "Updated at": now,
+    "Last internal action at": now
+  };
+
+  if (payload.registrationStatus) {
+    updates["Registration status"] = payload.registrationStatus;
+  }
+  if (Object.prototype.hasOwnProperty.call(payload, "faultCategory")) {
+    updates["Fault category"] = normaliseFaultCategory(payload.faultCategory);
+  }
+  if (Object.prototype.hasOwnProperty.call(payload, "statusReason")) {
+    updates["Status reason"] = normaliseOperatorReasonText(payload.statusReason);
+  }
+
+  updateApplicationControlFields(spreadsheet, applicationId, updates);
+
+  let statusResult = {
+    registrationStatus: finalValue(updates["Registration status"], previous["Registration status"]),
+    partAStatus: previous["Part A status"] || "",
+    partBStatus: previous["Part B status"] || ""
+  };
+  if (payload.registrationStatus) {
+    statusResult = appendStatusEvent(spreadsheet, applicationId, previous, updates, {
+      ...payload,
+      eventType: firstValue(payload.eventType, "prep_work_started")
+    }, now);
+  }
+
+  return {
+    ok: true,
+    applicationId: applicationId,
+    alreadySet: false,
+    prepWorkStartedAt: now.toISOString(),
+    prepWorkStartedBy: prepWorkStartedBy,
+    registrationStatus: statusResult.registrationStatus,
+    partAStatus: statusResult.partAStatus,
+    partBStatus: statusResult.partBStatus
+  };
+}
+
+function appendStatusEvent(spreadsheet, applicationId, previous, updates, payload, now) {
   const registrationStatus = finalValue(updates["Registration status"], previous["Registration status"]);
   const partAStatus = finalValue(updates["Part A status"], previous["Part A status"]);
   const partBStatus = finalValue(updates["Part B status"], previous["Part B status"]);
@@ -973,18 +1082,15 @@ function updateApplicationStatus(spreadsheet, payload) {
     safeCell(firstValue(payload.changedBy, payload.operatorName, "RightOnQ")),
     safeCell(firstValue(payload.source, "operator")),
     JSON.stringify(sanitiseAuditPayload(payload)),
-    now
+    now,
+    safeCell(finalValue(updates["Fault category"], previous["Fault category"])),
+    safeCell(finalValue(updates["Status reason"], previous["Status reason"]))
   ]);
 
-  queueStatusCommunication(spreadsheet, payload, previous, updates, now);
-
   return {
-    ok: true,
-    applicationId: applicationId,
     registrationStatus: registrationStatus,
     partAStatus: partAStatus,
-    partBStatus: partBStatus,
-    updatedAt: now.toISOString()
+    partBStatus: partBStatus
   };
 }
 
@@ -1055,7 +1161,12 @@ function buildOperatorApplicationSummary(record) {
     lastInternalActionAt: serialiseDate(record["Last internal action at"]),
     nextActionOwner: record["Next action owner"] || "",
     nextActionNote: record["Next action note"] || "",
-    internalNotes: record["Internal notes"] || ""
+    internalNotes: record["Internal notes"] || "",
+    faultCategory: record["Fault category"] || "",
+    statusReason: record["Status reason"] || "",
+    prepWorkStartedAt: serialiseDate(record["Prep work started at"]),
+    prepWorkStartedBy: record["Prep work started by"] || "",
+    prepWorkStartReason: record["Prep work start reason"] || ""
   };
 }
 
@@ -1981,6 +2092,20 @@ function validateRegistrationStatus(status) {
   throw new Error("Unknown registration status: " + status);
 }
 
+function normaliseFaultCategory(faultCategory) {
+  const value = String(faultCategory || "").trim();
+  if (!value) return "";
+  if (FAULT_CATEGORIES.indexOf(value) !== -1) return value;
+  throw new Error("Unknown fault category: " + value);
+}
+
+function validateStatusFaultPayload(registrationStatus, faultCategory) {
+  const normalisedFaultCategory = normaliseFaultCategory(faultCategory);
+  if (registrationStatus && FAULT_CATEGORY_REQUIRED_STATUSES.indexOf(registrationStatus) !== -1 && !normalisedFaultCategory) {
+    throw new Error("Fault category is required for registration status: " + registrationStatus);
+  }
+}
+
 function buildStatusUpdates(payload, now) {
   const updates = {};
   const fieldMap = {
@@ -1994,11 +2119,21 @@ function buildStatusUpdates(payload, now) {
     internalOwner: "Internal owner",
     nextActionOwner: "Next action owner",
     nextActionNote: "Next action note",
-    internalNotes: "Internal notes"
+    internalNotes: "Internal notes",
+    faultCategory: "Fault category",
+    statusReason: "Status reason"
   };
 
   Object.keys(fieldMap).forEach(function(payloadKey) {
     if (!Object.prototype.hasOwnProperty.call(payload, payloadKey)) return;
+    if (payloadKey === "faultCategory") {
+      updates[fieldMap[payloadKey]] = normaliseFaultCategory(payload[payloadKey]);
+      return;
+    }
+    if (payloadKey === "statusReason") {
+      updates[fieldMap[payloadKey]] = normaliseOperatorReasonText(payload[payloadKey]);
+      return;
+    }
     updates[fieldMap[payloadKey]] = payload[payloadKey];
   });
 
@@ -2899,6 +3034,12 @@ function sanitiseAuditPayload(payload) {
     if (Object.prototype.hasOwnProperty.call(copy, key)) copy[key] = "[redacted]";
   });
   return copy;
+}
+
+// Plain text only: do not paste secrets, PINs, private links, or raw personal data.
+function normaliseOperatorReasonText(value) {
+  if (value === null || value === undefined) return "";
+  return String(value).trim().slice(0, OPERATOR_REASON_TEXT_LIMIT);
 }
 
 function safeCell(value) {
