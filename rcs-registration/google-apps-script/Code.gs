@@ -527,7 +527,8 @@ function doPost(event) {
       "",
       "",
       now,
-      safeCell(asList(payload.expansionInterest).join(", "))
+      safeCell(asList(payload.expansionInterest).join(", ")),
+      safeCell(payload.termsVersion)
     ]);
 
     upsertApplicationRecord(spreadsheet, payload, {

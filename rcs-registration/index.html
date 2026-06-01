@@ -2403,7 +2403,7 @@
         <div class="gateway-actions">
           <label class="gateway-ack" for="registrationFeeAcknowledgement">
             <input id="registrationFeeAcknowledgement" name="registrationFeeAcknowledgement" type="checkbox" value="Confirmed" form="registrationForm" required>
-            <span>I confirm I am applying on behalf of a registered business and entering into this arrangement for business purposes. I ask RightOnQ to begin the RCS registration handling work after payment. I understand the £380 + VAT handling fee is not refundable once that work has started, except where the application cannot proceed for reasons outside the customer's control. Monthly platform billing only starts after approval and ready-to-use setup.</span>
+            <span>I confirm I am applying on behalf of a registered business and entering into this arrangement for business purposes. I agree to the <a href="/terms/" target="_blank" rel="noopener">RightOnQ Terms &amp; Conditions</a>. I understand RightOnQ cannot guarantee RCS sender approval. I authorise the monthly platform fee plus VAT, as set out on this page or in my service agreement, to be charged automatically to my saved payment method once my sender is approved and the setup is ready to use, and then monthly until cancelled. I ask RightOnQ to begin the RCS registration handling work after payment. I understand the £380 + VAT handling fee is not refundable once that work has started, except where the application cannot proceed for reasons outside the customer's control.</span>
           </label>
           <button class="btn secondary" type="button" id="gatewayStartButton">Complete Part A</button>
           <div class="gateway-error" id="gatewayError" aria-live="polite"></div>
@@ -3176,6 +3176,7 @@
     const applicationIdKey = "rightonq-rcs-application-id-v1";
     const applicationTokenKey = "rightonq-rcs-application-token-v1";
     const progressSaveEnabled = true;
+    const TERMS_VERSION = "2026-06-01";
     const partASubmissionEndpoint = "https://script.google.com/macros/s/AKfycbyI81Ir2xvHLar0R0iFBBWyXa1Nj93T4_8Ni5_eX3XEYDA-AKQbVYbPHnTROLm8e4a6/exec";
     let applicationToken = loadLinkedApplicationToken();
     let applicationId = loadOrCreateApplicationId();
@@ -5633,6 +5634,7 @@
       data.registrationFeeGbp = "380";
       data.registrationFeeVatTreatment = "+ VAT";
       data.registrationFeeAcknowledgement = registrationFeeAcknowledgement.checked ? "Confirmed" : "";
+      data.termsVersion = TERMS_VERSION;
       data.billingStatus = data.billingStatus || "registration_fee_pending";
       data.regions = [].concat(data.regions || []);
       data.expansionInterest = [].concat(data.expansionInterest || []);
