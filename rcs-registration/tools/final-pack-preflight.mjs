@@ -110,9 +110,74 @@ function aggregateCounts(sections) {
   );
 }
 
+function add(list, code, message, field) {
+  list.push({ code, message, field });
+}
+
+function assessProviderSamples(snapshot) {
+  const blockers = [];
+  const warnings = [];
+  const info = [];
+  const providerSamples = snapshot?.operatorSubmissionPack?.providerSamples || null;
+
+  if (!providerSamples || typeof providerSamples !== "object") {
+    add(blockers, "missing_providerSamples", "Operator submission pack is missing typed providerSamples.", "operatorSubmissionPack.providerSamples");
+    return buildProviderSamplesResult(snapshot, blockers, warnings, info);
+  }
+
+  const gate = providerSamples.gate || "";
+  if (gate !== "clear") {
+    const reasons = Array.isArray(providerSamples.gateReasons) ? providerSamples.gateReasons : [];
+    if (reasons.length) {
+      reasons.forEach(function(reason) {
+        add(
+          blockers,
+          "provider_sample_" + (reason.category || "missing"),
+          reason.message || "Provider sample gate is not clear.",
+          "operatorSubmissionPack.providerSamples"
+        );
+      });
+    } else {
+      add(blockers, "provider_samples_gated", "Provider sample gate is not clear.", "operatorSubmissionPack.providerSamples.gate");
+    }
+  }
+
+  const promotional = providerSamples.promotional || {};
+  const transactionalService = providerSamples.transactionalService || {};
+  if (!promotional.value || !promotional.source) {
+    add(blockers, "missing_promotional_provider_sample", "Promotional provider sample is missing a value or source.", "operatorSubmissionPack.providerSamples.promotional");
+  }
+  if (!transactionalService.value || !transactionalService.source) {
+    add(blockers, "missing_transactional_service_provider_sample", "Transactional/service provider sample is missing a value or source.", "operatorSubmissionPack.providerSamples.transactionalService");
+  }
+
+  if (blockers.length === 0 && warnings.length === 0) {
+    add(info, "provider_samples_clean", "Typed promotional and transactional/service provider samples are present and sourced.");
+  }
+  return buildProviderSamplesResult(snapshot, blockers, warnings, info);
+}
+
+function buildProviderSamplesResult(snapshot, blockers, warnings, info) {
+  return {
+    ok: blockers.length === 0,
+    providerSamplesReady: blockers.length === 0 && warnings.length === 0,
+    applicationId: getApplicationId(snapshot),
+    summary: {
+      blockers: blockers.length,
+      warnings: warnings.length,
+      info: info.length
+    },
+    blockers,
+    warnings,
+    info,
+    note: "Provider sample check only. Provider submission still requires explicit RightOnQ approval."
+  };
+}
+
 async function assessFinalPack(snapshot, options = {}) {
   const proofPack = assessProofPack(snapshot);
   const proofVideo = assessVideoReadiness(snapshot);
+  const providerSamples = assessProviderSamples(snapshot);
   const assetUrls = options.skipAssetUrlCheck
     ? {
         skipped: true,
@@ -122,12 +187,13 @@ async function assessFinalPack(snapshot, options = {}) {
       }
     : await assessAssetUrls(snapshot, { bannerProfile: options.bannerProfile || "twilio" });
 
-  const sections = { proofPack, proofVideo, assetUrls };
+  const sections = { proofPack, proofVideo, providerSamples, assetUrls };
   const totals = aggregateCounts(sections);
   const assetReady = assetUrls.skipped ? false : assetUrls.ok && (assetUrls.summary?.warnings || 0) === 0;
   const finalPackReady =
     proofPack.readyForProviderSubmission === true &&
     proofVideo.videoReadyForFinalPackReview === true &&
+    providerSamples.providerSamplesReady === true &&
     assetReady;
 
   return {
@@ -143,6 +209,7 @@ async function assessFinalPack(snapshot, options = {}) {
     sections: {
       proofPack: summarize(proofPack),
       proofVideo: summarize(proofVideo),
+      providerSamples: summarize(providerSamples),
       assetUrls: assetUrls.skipped
         ? { skipped: true, ok: null, blockers: 0, warnings: 0, info: 1 }
         : {
@@ -154,6 +221,7 @@ async function assessFinalPack(snapshot, options = {}) {
     details: {
       proofPack,
       proofVideo,
+      providerSamples,
       assetUrls
     },
     operatorSubmissionPack: snapshot.operatorSubmissionPack || null,
@@ -207,6 +275,22 @@ function makeReadySnapshot() {
         optInProofUrls: "https://assets.example.test/final/opt-in.png",
         reviewVideoUrl: "https://assets.example.test/final/review-video.webm"
       },
+      providerSamples: {
+        promotional: {
+          value: "Example: subscribe for news and seasonal offers. Reply HELP or STOP.",
+          sourceType: "part_a_example",
+          sourceField: "exampleMessageTwo",
+          source: "Part A submission / exampleMessageTwo"
+        },
+        transactionalService: {
+          value: "Example: your update is ready. Reply HELP or STOP.",
+          sourceType: "part_a_example",
+          sourceField: "exampleMessageOne",
+          source: "Part A submission / exampleMessageOne"
+        },
+        gate: "clear",
+        gateReasons: []
+      },
       reviewAndGates: {
         providerSubmissionStatus: "not_started",
         goLiveStatus: "not_started",
@@ -255,6 +339,7 @@ async function runSelfTest() {
   assert(ready.finalPackReady === false, "ready offline snapshot should not be final-ready when asset URL check is skipped");
   assert(ready.summary.assetUrlCheckSkipped === true, "ready offline snapshot should record skipped asset URL check");
   assert(ready.operatorSubmissionPack?.senderProfile?.privacyPolicyUrl === "https://example.com/privacy", "ready snapshot should pass through operator submission pack");
+  assert(ready.sections.providerSamples.blockers === 0, "ready snapshot should pass provider sample gate");
 
   const blocked = await assessFinalPack(makeBlockedSnapshot(), { skipAssetUrlCheck: true });
   assert(blocked.ok === false, "blocked snapshot should have blockers");
@@ -262,12 +347,35 @@ async function runSelfTest() {
   assert(blocked.sections.proofPack.blockers > 0, "blocked snapshot should have proof-pack blockers");
   assert(blocked.sections.proofVideo.blockers > 0, "blocked snapshot should have proof-video blockers");
 
+  const missingSamples = makeReadySnapshot();
+  missingSamples.operatorSubmissionPack.providerSamples = {
+    promotional: {
+      value: "Example: subscribe for news and seasonal offers. Reply HELP or STOP.",
+      sourceType: "part_a_example",
+      sourceField: "exampleMessageTwo",
+      source: "Part A submission / exampleMessageTwo"
+    },
+    transactionalService: { value: "", sourceType: "", sourceField: "", source: "" },
+    gate: "gated",
+    gateReasons: [
+      {
+        category: "transactional_service",
+        gate: "provider_sample_missing",
+        message: "Provider submission is gated pending an explicitly classified or ROQ-authored transactional/service sample."
+      }
+    ]
+  };
+  const sampleBlocked = await assessFinalPack(missingSamples, { skipAssetUrlCheck: true });
+  assert(sampleBlocked.ok === false, "missing sample snapshot should have blockers");
+  assert(sampleBlocked.sections.providerSamples.blockers > 0, "missing sample snapshot should block provider samples");
+
   return {
     ok: true,
     selfTest: "passed",
     cases: {
       readyOffline: ready.summary,
-      blockedOffline: blocked.summary
+      blockedOffline: blocked.summary,
+      sampleBlocked: sampleBlocked.summary
     }
   };
 }

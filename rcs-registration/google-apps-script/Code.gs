@@ -32,6 +32,19 @@ const FAULT_CATEGORY_REQUIRED_STATUSES = [
   "provider_changes_requested"
 ];
 const PART_A_CORRECTION_EVENT_TYPE = "part_a_correction";
+const OPERATOR_PROVIDER_SAMPLE_EVENT_TYPE = "operator_provider_sample";
+const PROVIDER_SAMPLE_CATEGORIES = [
+  "promotional",
+  "transactional_service"
+];
+const PROVIDER_SAMPLE_SOURCE_TYPES = [
+  "part_a_example",
+  "roq_draft"
+];
+const PROVIDER_SAMPLE_PART_A_SOURCE_FIELDS = [
+  "exampleMessageOne",
+  "exampleMessageTwo"
+];
 const OPERATOR_REASON_TEXT_LIMIT = 500;
 const PART_A_CORRECTABLE_FIELDS = {
   legalBusinessName: { label: "Legal business name" },
@@ -652,6 +665,7 @@ function isOperatorOnlyAction(action) {
     updateApplicationStatus: true,
     markPrepWorkStarted: true,
     recordPartACorrection: true,
+    recordProviderSample: true,
     updateBilling: true,
     checkActiveCheckout: true,
     recordPaymentOrder: true,
@@ -692,6 +706,10 @@ function rcsOperatorAction(payload) {
     if (payload.action === "recordPartACorrection") {
       requireOperatorPin(payload);
       return serialiseExecutionApiValue(recordPartACorrection(spreadsheet, payload));
+    }
+    if (payload.action === "recordProviderSample") {
+      requireOperatorPin(payload);
+      return serialiseExecutionApiValue(recordProviderSample(spreadsheet, payload));
     }
     if (payload.action === "updateBilling") {
       requireOperatorPin(payload);
@@ -1150,6 +1168,74 @@ function recordPartACorrection(spreadsheet, payload) {
   };
 }
 
+function recordProviderSample(spreadsheet, payload) {
+  const now = new Date();
+  const applicationId = payload.applicationId;
+  if (!applicationId) throw new Error("Missing application ID");
+
+  const applicationRecord = findApplicationRecord(spreadsheet, { applicationId: applicationId });
+  if (!applicationRecord) throw new Error("Application ID not found");
+
+  const category = normaliseProviderSampleCategory(payload.category);
+  const sourceType = normaliseProviderSampleSourceType(payload.sourceType);
+  const value = normaliseRequiredCorrectionValue(payload.value);
+  const sourceField = normaliseProviderSampleSourceField(payload.sourceField, sourceType);
+  const reason = normaliseRequiredOperatorReasonText(payload.reason);
+  const partARecord = findLatestPartASubmissionRecord(spreadsheet, applicationId);
+  if (!partARecord) throw new Error("Part A submission not found for application ID: " + applicationId);
+  const partASubmissionId = getPartASubmissionId(partARecord);
+  if (!partASubmissionId) throw new Error("Part A submission ID not found for application ID: " + applicationId);
+  const currentPartA = buildOperatorPartASubmissionSummary(
+    partARecord,
+    findPartACorrectionEvents(spreadsheet, applicationId, partASubmissionId)
+  );
+
+  const clientReconfirmation = normaliseClientReconfirmation(payload);
+  const changedBy = firstValue(payload.changedBy, payload.operatorName, "operator (PIN-authenticated)");
+  const oldSource = firstValue(payload.oldSource, sourceType === "part_a_example" ? "Part A submission / " + sourceField : "missing");
+  const oldValue = firstValue(payload.oldValue, sourceType === "part_a_example" ? currentPartA[sourceField] : "");
+
+  const providerSamplePayload = {
+    ...payload,
+    action: "recordProviderSample",
+    eventType: OPERATOR_PROVIDER_SAMPLE_EVENT_TYPE,
+    changedBy: changedBy,
+    source: firstValue(payload.source, "operator"),
+    submissionId: partASubmissionId,
+    category: category,
+    value: value,
+    sourceType: sourceType,
+    sourceField: sourceField,
+    oldSource: oldSource,
+    oldValue: oldValue,
+    reason: reason,
+    clientReconfirmationNeeded: isTruthy(payload.clientReconfirmationNeeded),
+    clientReconfirmation: clientReconfirmation || null,
+    reviewedBy: firstValue(payload.reviewedBy),
+    reviewedAt: firstValue(payload.reviewedAt)
+  };
+
+  appendStatusEvent(spreadsheet, applicationId, applicationRecord, {}, providerSamplePayload, now);
+
+  return {
+    ok: true,
+    applicationId: applicationId,
+    eventType: OPERATOR_PROVIDER_SAMPLE_EVENT_TYPE,
+    submissionId: partASubmissionId,
+    category: category,
+    value: value,
+    sourceType: sourceType,
+    sourceField: sourceField,
+    oldSource: oldSource,
+    oldValue: oldValue,
+    reason: reason,
+    clientReconfirmationNeeded: providerSamplePayload.clientReconfirmationNeeded,
+    clientReconfirmation: providerSamplePayload.clientReconfirmation,
+    changedBy: changedBy,
+    recordedAt: now.toISOString()
+  };
+}
+
 function appendStatusEvent(spreadsheet, applicationId, previous, updates, payload, now) {
   const registrationStatus = finalValue(updates["Registration status"], previous["Registration status"]);
   const partAStatus = finalValue(updates["Part A status"], previous["Part A status"]);
@@ -1197,6 +1283,7 @@ function getOperatorSnapshot(spreadsheet, payload) {
   if (!applicationRecord) throw new Error("Application ID not found");
   const applicationSummary = buildOperatorApplicationSummary(applicationRecord);
   const partASubmission = findLatestPartASubmissionSummary(spreadsheet, applicationId);
+  const providerSampleEvents = findProviderSampleEvents(spreadsheet, applicationId, partASubmission.submissionId);
   const internalReview = findLatestRecordByApplicationId(spreadsheet, INTERNAL_REVIEWS_SHEET_NAME, applicationId, INTERNAL_REVIEW_HEADERS);
   const twilioSetup = findLatestRecordByApplicationId(spreadsheet, TWILIO_SETUP_SHEET_NAME, applicationId, TWILIO_SETUP_HEADERS);
 
@@ -1207,6 +1294,7 @@ function getOperatorSnapshot(spreadsheet, payload) {
     operatorSubmissionPack: buildOperatorSubmissionPack({
       application: applicationSummary,
       partASubmission: partASubmission,
+      providerSampleEvents: providerSampleEvents,
       internalReview: internalReview,
       twilioSetup: twilioSetup
     }),
@@ -1398,6 +1486,48 @@ function findPartACorrectionEvents(spreadsheet, applicationId, submissionId) {
   return corrections;
 }
 
+function findProviderSampleEvents(spreadsheet, applicationId, submissionId) {
+  const sheet = spreadsheet.getSheetByName(STATUS_EVENTS_SHEET_NAME);
+  if (!sheet) return [];
+  const values = sheet.getDataRange().getValues();
+  if (values.length < 2) return [];
+
+  const headers = normaliseHeaders(values[0]);
+  const applicationIdColumn = headers.indexOf("Application ID");
+  const eventTypeColumn = headers.indexOf("Event type");
+  const auditColumn = headers.indexOf("Submission JSON");
+  if (applicationIdColumn === -1 || eventTypeColumn === -1 || auditColumn === -1) return [];
+  const targetSubmissionId = firstValue(submissionId);
+
+  const samples = [];
+  for (let index = 1; index < values.length; index += 1) {
+    if (String(values[index][applicationIdColumn]) !== String(applicationId)) continue;
+    if (String(values[index][eventTypeColumn]) !== OPERATOR_PROVIDER_SAMPLE_EVENT_TYPE) continue;
+    const auditPayload = parseOperatorSubmissionJson(values[index][auditColumn]);
+    if (targetSubmissionId && String(firstValue(auditPayload.submissionId)) !== String(targetSubmissionId)) continue;
+    if (PROVIDER_SAMPLE_CATEGORIES.indexOf(auditPayload.category) === -1) continue;
+    if (PROVIDER_SAMPLE_SOURCE_TYPES.indexOf(auditPayload.sourceType) === -1) continue;
+    samples.push({
+      rowNumber: index + 1,
+      submissionId: firstValue(auditPayload.submissionId),
+      category: auditPayload.category,
+      value: firstValue(auditPayload.value),
+      sourceType: auditPayload.sourceType,
+      sourceField: firstValue(auditPayload.sourceField),
+      oldSource: firstValue(auditPayload.oldSource),
+      oldValue: firstValue(auditPayload.oldValue),
+      reason: firstValue(auditPayload.reason),
+      clientReconfirmationNeeded: auditPayload.clientReconfirmationNeeded === true || String(auditPayload.clientReconfirmationNeeded).toLowerCase() === "true",
+      clientReconfirmation: firstValue(auditPayload.clientReconfirmation),
+      reviewedBy: firstValue(auditPayload.reviewedBy),
+      reviewedAt: firstValue(auditPayload.reviewedAt),
+      changedBy: firstValue(auditPayload.changedBy, auditPayload.operatorName),
+      recordedAt: serialiseOperatorValue(values[index][headers.indexOf("Received at")])
+    });
+  }
+  return samples;
+}
+
 function applyPartACorrections(summary, correctionEvents) {
   const output = { ...summary };
   const latestByField = {};
@@ -1464,11 +1594,75 @@ function partACorrectionSource(partA, fieldKey, fallbackSource) {
   return correction ? "Operator correction overlay / " + (correction.fieldLabel || fieldKey) : fallbackSource;
 }
 
+function buildProviderSamples(providerSampleEvents) {
+  const latestByCategory = {};
+  for (let index = providerSampleEvents.length - 1; index >= 0; index -= 1) {
+    const event = providerSampleEvents[index];
+    if (!event || latestByCategory[event.category]) continue;
+    latestByCategory[event.category] = event;
+  }
+
+  const promotional = buildProviderSampleSlot(latestByCategory.promotional);
+  const transactionalService = buildProviderSampleSlot(latestByCategory.transactional_service);
+  const gateReasons = [];
+  if (!promotional.value) {
+    gateReasons.push({
+      category: "promotional",
+      gate: "provider_sample_missing",
+      message: "Provider submission is gated pending an explicitly classified or ROQ-authored promotional sample."
+    });
+  }
+  if (!transactionalService.value) {
+    gateReasons.push({
+      category: "transactional_service",
+      gate: "provider_sample_missing",
+      message: "Provider submission is gated pending an explicitly classified or ROQ-authored transactional/service sample."
+    });
+  }
+
+  return {
+    promotional: promotional,
+    transactionalService: transactionalService,
+    gate: gateReasons.length ? "gated" : "clear",
+    gateReasons: gateReasons
+  };
+}
+
+function buildProviderSampleSlot(event) {
+  if (!event || !event.value) {
+    return {
+      value: "",
+      sourceType: "",
+      sourceField: "",
+      source: ""
+    };
+  }
+  return {
+    value: event.value,
+    sourceType: event.sourceType,
+    sourceField: event.sourceField,
+    source: providerSampleSourceLabel(event),
+    submissionId: event.submissionId,
+    reason: event.reason,
+    changedBy: event.changedBy,
+    recordedAt: event.recordedAt,
+    rowNumber: event.rowNumber
+  };
+}
+
+function providerSampleSourceLabel(event) {
+  if (event.sourceType === "part_a_example") return "Part A submission / " + event.sourceField;
+  if (event.sourceType === "roq_draft") return "Status events / operator_provider_sample (ROQ-authored)";
+  return "";
+}
+
 function buildOperatorSubmissionPack(context) {
   const application = context.application || {};
   const partA = context.partASubmission || {};
+  const providerSampleEvents = context.providerSampleEvents || [];
   const twilioSetup = context.twilioSetup || {};
   const internalReview = context.internalReview || {};
+  const providerSamples = buildProviderSamples(providerSampleEvents);
   const packFields = {
     senderDisplayName: chooseOperatorPackValue([
       { value: twilioSetup["RBM sender name"], source: "Twilio setup / RBM sender name" },
@@ -1547,6 +1741,7 @@ function buildOperatorSubmissionPack(context) {
       reviewVideoUrl: packFields.reviewVideoUrl.value,
       launchCountries: packFields.launchCountries.value
     },
+    providerSamples: providerSamples,
     reviewAndGates: {
       partAStatus: firstValue(application.partAStatus, partA.partAStatus),
       partBStatus: application.partBStatus || "",
@@ -1589,6 +1784,12 @@ function buildOperatorSubmissionPack(context) {
         optInProofUrls: packFields.optInProofUrls.source,
         reviewVideoUrl: packFields.reviewVideoUrl.source,
         launchCountries: packFields.launchCountries.source
+      },
+      providerSamples: {
+        promotional: providerSamples.promotional.source,
+        transactionalService: providerSamples.transactionalService.source,
+        gate: "Provider sample overlay / both-samples gate",
+        gateReasons: "Provider sample overlay / missing category reasons"
       },
       reviewAndGates: {
         partAStatus: "Applications / Part A status, falling back to Part A submission status",
@@ -2333,6 +2534,28 @@ function normaliseRequiredOperatorReasonText(value) {
   const text = normaliseOperatorReasonText(value);
   if (!text) throw new Error("Correction reason is required");
   return text;
+}
+
+function normaliseProviderSampleCategory(value) {
+  const category = String(value || "").trim();
+  if (PROVIDER_SAMPLE_CATEGORIES.indexOf(category) !== -1) return category;
+  throw new Error("Unknown provider sample category: " + category);
+}
+
+function normaliseProviderSampleSourceType(value) {
+  const sourceType = String(value || "").trim();
+  if (PROVIDER_SAMPLE_SOURCE_TYPES.indexOf(sourceType) !== -1) return sourceType;
+  throw new Error("Unknown provider sample source type: " + sourceType);
+}
+
+function normaliseProviderSampleSourceField(value, sourceType) {
+  const sourceField = String(value || "").trim();
+  if (sourceType === "part_a_example") {
+    if (PROVIDER_SAMPLE_PART_A_SOURCE_FIELDS.indexOf(sourceField) !== -1) return sourceField;
+    throw new Error("sourceField is required for part_a_example and must be exampleMessageOne or exampleMessageTwo");
+  }
+  if (sourceField) throw new Error("sourceField must be blank when sourceType is roq_draft");
+  return "";
 }
 
 function normaliseClientReconfirmation(payload) {
