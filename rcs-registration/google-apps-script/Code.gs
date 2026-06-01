@@ -1178,7 +1178,6 @@ function recordProviderSample(spreadsheet, payload) {
 
   const category = normaliseProviderSampleCategory(payload.category);
   const sourceType = normaliseProviderSampleSourceType(payload.sourceType);
-  const value = normaliseRequiredCorrectionValue(payload.value);
   const sourceField = normaliseProviderSampleSourceField(payload.sourceField, sourceType);
   const reason = normaliseRequiredOperatorReasonText(payload.reason);
   const partARecord = findLatestPartASubmissionRecord(spreadsheet, applicationId);
@@ -1190,6 +1189,7 @@ function recordProviderSample(spreadsheet, payload) {
     findPartACorrectionEvents(spreadsheet, applicationId, partASubmissionId)
   );
 
+  const value = normaliseProviderSampleValue(payload.value, sourceType, sourceField, currentPartA);
   const clientReconfirmation = normaliseClientReconfirmation(payload);
   const changedBy = firstValue(payload.changedBy, payload.operatorName, "operator (PIN-authenticated)");
   const oldSource = firstValue(payload.oldSource, sourceType === "part_a_example" ? "Part A submission / " + sourceField : "missing");
@@ -2556,6 +2556,17 @@ function normaliseProviderSampleSourceField(value, sourceType) {
   }
   if (sourceField) throw new Error("sourceField must be blank when sourceType is roq_draft");
   return "";
+}
+
+function normaliseProviderSampleValue(value, sourceType, sourceField, currentPartA) {
+  const sampleValue = normaliseRequiredCorrectionValue(value);
+  if (sourceType !== "part_a_example") return sampleValue;
+
+  const partAValue = normaliseRequiredCorrectionValue(currentPartA[sourceField]);
+  if (sampleValue !== partAValue) {
+    throw new Error("Provider sample value must match " + sourceField + " when sourceType is part_a_example");
+  }
+  return sampleValue;
 }
 
 function normaliseClientReconfirmation(payload) {
