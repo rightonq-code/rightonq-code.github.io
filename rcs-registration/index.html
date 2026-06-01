@@ -1952,6 +1952,11 @@
       background: #f4f9ff;
     }
 
+    .completion-panel.send-failed {
+      border-color: #f5b66d;
+      background: #fff8ed;
+    }
+
     .completion-panel.show {
       display: block;
     }
@@ -5880,7 +5885,7 @@
         });
         if (!response.ok) return false;
         const result = await response.json().catch(() => ({}));
-        return result.ok !== false;
+        return result.ok === true;
       } catch (error) {
         return false;
       } finally {
@@ -5890,14 +5895,22 @@
     }
 
     function showCompletionMessage(sent, submissionId) {
+      completionPanel.classList.toggle("send-failed", !sent);
       if (sent) {
         completionTitle.textContent = "Thank you. Part A has been received by RightOnQ.";
         completionMessage.innerHTML = `Your copy has been saved. Your reference is <strong>${escapeHtml(submissionId)}</strong>. RightOnQ will check the written registration details first. Once Part A has been reviewed, we will prepare Part B, the review video, and send you a secure review link so you can check and approve it. Select <span class="completion-step-link"><span class="future-step-index">1</span> Part B storyboard</span> to see the next stage.`;
+        submitPartAButton.hidden = true;
+        finalActionNote.textContent = "A copy will automatically download for your records.";
         showToast("Thank you. Part A has been received by RightOnQ.");
       } else {
-        completionTitle.textContent = "Your Part A copy has been saved.";
-        completionMessage.innerHTML = `We could not send this automatically yet. Your reference is <strong>${escapeHtml(submissionId)}</strong>. Please email the saved Part A file to adam@rightonq.co.uk so RightOnQ can review it.`;
-        showToast("Part A copy saved. Please email it to RightOnQ.");
+        completionTitle.textContent = "Your copy has downloaded, but Part A has not been sent to RightOnQ.";
+        completionMessage.innerHTML = `Your reference is <strong>${escapeHtml(submissionId)}</strong>. Please try sending again. If it still does not send, email the downloaded Part A file to adam@rightonq.co.uk so RightOnQ can review it.`;
+        submitPartAButton.hidden = false;
+        submitPartAButton.disabled = false;
+        submitPartAButton.textContent = "Try sending again";
+        finalActionNote.textContent = "Your downloaded copy is only for records until RightOnQ receives it.";
+        finalActionNote.classList.add("show");
+        showToast("Copy downloaded, but Part A was not sent. Please try again.");
       }
       completionPanel.classList.add("show");
       completionPanel.scrollIntoView({ behavior: "smooth", block: "center" });
