@@ -31,7 +31,36 @@ const FAULT_CATEGORY_REQUIRED_STATUSES = [
   "part_a_changes_needed",
   "provider_changes_requested"
 ];
+const PART_A_CORRECTION_EVENT_TYPE = "part_a_correction";
 const OPERATOR_REASON_TEXT_LIMIT = 500;
+const PART_A_CORRECTABLE_FIELDS = {
+  legalBusinessName: { label: "Legal business name" },
+  tradingName: { label: "Trading name" },
+  senderDisplayName: { label: "Sender display name" },
+  companiesHouseNumber: { label: "Companies House number", material: true },
+  businessWebsite: { label: "Business website" },
+  businessIndustry: { label: "Business industry" },
+  customerEmail: { label: "Customer-facing email" },
+  customerPhone: { label: "Customer-facing phone" },
+  customerWebsite: { label: "Customer-facing website" },
+  privacyPolicyUrl: { label: "Privacy policy URL" },
+  termsUrl: { label: "Terms URL" },
+  senderDescription: { label: "Public profile description" },
+  brandColour: { label: "Brand colour" },
+  primaryUseCase: { label: "Primary use case" },
+  useCaseDescription: { label: "Use case description" },
+  messageTrigger: { label: "Message trigger" },
+  exampleMessageOne: { label: "Example message 1" },
+  exampleMessageTwo: { label: "Example message 2" },
+  helpSampleMessage: { label: "HELP sample message" },
+  stopSampleMessage: { label: "STOP sample message" },
+  optInDescription: { label: "Opt-in description" },
+  optOutDescription: { label: "Opt-out description" },
+  consentRoutes: { label: "Consent routes" },
+  monthlyVolume: { label: "Monthly volume" },
+  launchCountries: { label: "Launch countries" },
+  notes: { label: "Notes" }
+};
 const APPLICATION_HEADERS = [
   "Application ID",
   "Client ID",
@@ -622,6 +651,7 @@ function isOperatorOnlyAction(action) {
     getOperatorSnapshot: true,
     updateApplicationStatus: true,
     markPrepWorkStarted: true,
+    recordPartACorrection: true,
     updateBilling: true,
     checkActiveCheckout: true,
     recordPaymentOrder: true,
@@ -658,6 +688,10 @@ function rcsOperatorAction(payload) {
     if (payload.action === "markPrepWorkStarted") {
       requireOperatorPin(payload);
       return serialiseExecutionApiValue(markPrepWorkStarted(spreadsheet, payload));
+    }
+    if (payload.action === "recordPartACorrection") {
+      requireOperatorPin(payload);
+      return serialiseExecutionApiValue(recordPartACorrection(spreadsheet, payload));
     }
     if (payload.action === "updateBilling") {
       requireOperatorPin(payload);
@@ -1055,6 +1089,67 @@ function markPrepWorkStarted(spreadsheet, payload) {
   };
 }
 
+function recordPartACorrection(spreadsheet, payload) {
+  const now = new Date();
+  const applicationId = payload.applicationId;
+  if (!applicationId) throw new Error("Missing application ID");
+
+  const applicationRecord = findApplicationRecord(spreadsheet, { applicationId: applicationId });
+  if (!applicationRecord) throw new Error("Application ID not found");
+
+  const field = getPartACorrectableField(payload.fieldKey);
+  const newValue = normaliseRequiredCorrectionValue(payload.newValue);
+  const reason = normaliseRequiredOperatorReasonText(payload.reason);
+  const partARecord = findLatestPartASubmissionRecord(spreadsheet, applicationId);
+  if (!partARecord) throw new Error("Part A submission not found for application ID: " + applicationId);
+  const partASubmissionId = getPartASubmissionId(partARecord);
+  if (!partASubmissionId) throw new Error("Part A submission ID not found for application ID: " + applicationId);
+
+  const existingCorrections = findPartACorrectionEvents(spreadsheet, applicationId, partASubmissionId);
+  const currentPartA = buildOperatorPartASubmissionSummary(partARecord, existingCorrections);
+  const oldValue = firstValue(currentPartA[field.key]);
+  const materialChange = field.material ? true : isTruthy(payload.materialChange);
+  const clientReconfirmation = normaliseClientReconfirmation(payload);
+  const changedBy = firstValue(payload.changedBy, payload.operatorName, "operator (PIN-authenticated)");
+
+  if (field.material && !materialChange) {
+    throw new Error("Material correction flag is required for field: " + payload.fieldKey);
+  }
+
+  const correctionPayload = {
+    ...payload,
+    action: "recordPartACorrection",
+    eventType: PART_A_CORRECTION_EVENT_TYPE,
+    changedBy: changedBy,
+    source: firstValue(payload.source, "operator"),
+    fieldKey: field.key,
+    fieldLabel: field.label,
+    submissionId: partASubmissionId,
+    oldValue: oldValue,
+    newValue: newValue,
+    reason: reason,
+    materialChange: materialChange,
+    clientReconfirmation: clientReconfirmation || null
+  };
+
+  appendStatusEvent(spreadsheet, applicationId, applicationRecord, {}, correctionPayload, now);
+
+  return {
+    ok: true,
+    applicationId: applicationId,
+    eventType: PART_A_CORRECTION_EVENT_TYPE,
+    fieldKey: field.key,
+    fieldLabel: field.label,
+    submissionId: partASubmissionId,
+    oldValue: oldValue,
+    newValue: newValue,
+    materialChange: materialChange,
+    clientReconfirmation: clientReconfirmation || null,
+    changedBy: changedBy,
+    recordedAt: now.toISOString()
+  };
+}
+
 function appendStatusEvent(spreadsheet, applicationId, previous, updates, payload, now) {
   const registrationStatus = finalValue(updates["Registration status"], previous["Registration status"]);
   const partAStatus = finalValue(updates["Part A status"], previous["Part A status"]);
@@ -1171,26 +1266,32 @@ function buildOperatorApplicationSummary(record) {
 }
 
 function findLatestPartASubmissionSummary(spreadsheet, applicationId) {
+  const record = findLatestPartASubmissionRecord(spreadsheet, applicationId);
+  if (!record) return {};
+  const submissionId = getPartASubmissionId(record);
+  return buildOperatorPartASubmissionSummary(record, findPartACorrectionEvents(spreadsheet, applicationId, submissionId));
+}
+
+function findLatestPartASubmissionRecord(spreadsheet, applicationId) {
   const sheet = spreadsheet.getSheetByName(SHEET_NAME);
-  if (!sheet) return {};
+  if (!sheet) return null;
 
   const values = sheet.getDataRange().getValues();
-  if (values.length < 2) return {};
+  if (values.length < 2) return null;
 
   const headers = normaliseHeaders(values[0]);
   const applicationIdColumn = headers.indexOf("Application ID");
-  if (applicationIdColumn === -1) return {};
+  if (applicationIdColumn === -1) return null;
 
   for (let index = values.length - 1; index >= 1; index -= 1) {
     if (String(values[index][applicationIdColumn]) !== String(applicationId)) continue;
-    const record = rowToObject(values[index], headers);
-    return buildOperatorPartASubmissionSummary(record);
+    return rowToObject(values[index], headers);
   }
 
-  return {};
+  return null;
 }
 
-function buildOperatorPartASubmissionSummary(record) {
+function buildOperatorPartASubmissionSummary(record, correctionEvents) {
   const payload = parseOperatorSubmissionJson(record["Submission JSON"]);
   const consentRoutes = firstValue(
     record["Consent route"],
@@ -1205,7 +1306,7 @@ function buildOperatorPartASubmissionSummary(record) {
     payload.regions
   );
 
-  return {
+  const summary = {
     receivedAt: serialiseOperatorValue(record["Received at"]),
     submissionId: firstValue(record["Submission ID"], payload.submissionId),
     registrationStatus: firstValue(record["Registration status"], payload.registrationStatus),
@@ -1241,6 +1342,12 @@ function buildOperatorPartASubmissionSummary(record) {
     notes: firstValue(record["Notes"], payload.notes),
     lastUpdated: serialiseOperatorValue(record["Last updated"])
   };
+  return applyPartACorrections(summary, correctionEvents || []);
+}
+
+function getPartASubmissionId(record) {
+  const payload = parseOperatorSubmissionJson(record["Submission JSON"]);
+  return firstValue(record["Submission ID"], payload.submissionId);
 }
 
 function parseOperatorSubmissionJson(value) {
@@ -1251,6 +1358,89 @@ function parseOperatorSubmissionJson(value) {
   } catch (error) {
     return {};
   }
+}
+
+function findPartACorrectionEvents(spreadsheet, applicationId, submissionId) {
+  const sheet = spreadsheet.getSheetByName(STATUS_EVENTS_SHEET_NAME);
+  if (!sheet) return [];
+  const values = sheet.getDataRange().getValues();
+  if (values.length < 2) return [];
+
+  const headers = normaliseHeaders(values[0]);
+  const applicationIdColumn = headers.indexOf("Application ID");
+  const eventTypeColumn = headers.indexOf("Event type");
+  const auditColumn = headers.indexOf("Submission JSON");
+  if (applicationIdColumn === -1 || eventTypeColumn === -1 || auditColumn === -1) return [];
+  const targetSubmissionId = firstValue(submissionId);
+
+  const corrections = [];
+  for (let index = 1; index < values.length; index += 1) {
+    if (String(values[index][applicationIdColumn]) !== String(applicationId)) continue;
+    if (String(values[index][eventTypeColumn]) !== PART_A_CORRECTION_EVENT_TYPE) continue;
+    const auditPayload = parseOperatorSubmissionJson(values[index][auditColumn]);
+    if (targetSubmissionId && String(firstValue(auditPayload.submissionId)) !== String(targetSubmissionId)) continue;
+    const field = PART_A_CORRECTABLE_FIELDS[auditPayload.fieldKey];
+    if (!field) continue;
+    corrections.push({
+      rowNumber: index + 1,
+      fieldKey: auditPayload.fieldKey,
+      fieldLabel: auditPayload.fieldLabel || field.label,
+      submissionId: firstValue(auditPayload.submissionId),
+      oldValue: firstValue(auditPayload.oldValue),
+      newValue: firstValue(auditPayload.newValue),
+      reason: firstValue(auditPayload.reason),
+      materialChange: auditPayload.materialChange === true || String(auditPayload.materialChange).toLowerCase() === "true",
+      clientReconfirmation: firstValue(auditPayload.clientReconfirmation),
+      changedBy: firstValue(auditPayload.changedBy, auditPayload.operatorName),
+      recordedAt: serialiseOperatorValue(values[index][headers.indexOf("Received at")])
+    });
+  }
+  return corrections;
+}
+
+function applyPartACorrections(summary, correctionEvents) {
+  const output = { ...summary };
+  const latestByField = {};
+
+  for (let index = correctionEvents.length - 1; index >= 0; index -= 1) {
+    const event = correctionEvents[index];
+    if (!event || latestByField[event.fieldKey]) continue;
+    latestByField[event.fieldKey] = event;
+  }
+
+  const appliedCorrections = {};
+  const providerSubmissionGates = [];
+  Object.keys(latestByField).forEach(function(fieldKey) {
+    const event = latestByField[fieldKey];
+    output[fieldKey] = event.newValue;
+    appliedCorrections[fieldKey] = {
+      fieldKey: fieldKey,
+      fieldLabel: event.fieldLabel,
+      submissionId: event.submissionId,
+      oldValue: event.oldValue,
+      newValue: event.newValue,
+      reason: event.reason,
+      materialChange: event.materialChange,
+      clientReconfirmation: event.clientReconfirmation,
+      changedBy: event.changedBy,
+      recordedAt: event.recordedAt,
+      rowNumber: event.rowNumber
+    };
+
+    if (fieldKey === "companiesHouseNumber" && event.materialChange && !event.clientReconfirmation) {
+      providerSubmissionGates.push({
+        fieldKey: fieldKey,
+        fieldLabel: event.fieldLabel,
+        gate: "client_reconfirmation_required",
+        message: "Provider submission is gated pending client reconfirmation of the corrected Companies House number."
+      });
+    }
+  });
+
+  output.corrections = appliedCorrections;
+  output.providerSubmissionCorrectionGate = providerSubmissionGates.length ? "gated" : "clear";
+  output.providerSubmissionCorrectionGateReasons = providerSubmissionGates;
+  return output;
 }
 
 function chooseOperatorPackValue(candidates) {
@@ -1269,6 +1459,11 @@ function chooseOperatorPackValue(candidates) {
   };
 }
 
+function partACorrectionSource(partA, fieldKey, fallbackSource) {
+  const correction = partA && partA.corrections ? partA.corrections[fieldKey] : null;
+  return correction ? "Operator correction overlay / " + (correction.fieldLabel || fieldKey) : fallbackSource;
+}
+
 function buildOperatorSubmissionPack(context) {
   const application = context.application || {};
   const partA = context.partASubmission || {};
@@ -1277,47 +1472,47 @@ function buildOperatorSubmissionPack(context) {
   const packFields = {
     senderDisplayName: chooseOperatorPackValue([
       { value: twilioSetup["RBM sender name"], source: "Twilio setup / RBM sender name" },
-      { value: partA.senderDisplayName, source: "Part A submission / sender display name" },
+      { value: partA.senderDisplayName, source: partACorrectionSource(partA, "senderDisplayName", "Part A submission / sender display name") },
       { value: application.clientName, source: "Applications / client name" },
       { value: application.tradingName, source: "Applications / trading name" },
       { value: application.legalBusinessName, source: "Applications / legal business name" }
     ]),
     legalBusinessName: chooseOperatorPackValue([
-      { value: partA.legalBusinessName, source: "Part A submission / legal business name" },
+      { value: partA.legalBusinessName, source: partACorrectionSource(partA, "legalBusinessName", "Part A submission / legal business name") },
       { value: application.legalBusinessName, source: "Applications / legal business name" }
     ]),
     tradingName: chooseOperatorPackValue([
-      { value: partA.tradingName, source: "Part A submission / trading name" },
+      { value: partA.tradingName, source: partACorrectionSource(partA, "tradingName", "Part A submission / trading name") },
       { value: application.tradingName, source: "Applications / trading name" }
     ]),
-    senderDescription: chooseOperatorPackValue([{ value: partA.senderDescription, source: "Part A submission / public profile description" }]),
-    brandColour: chooseOperatorPackValue([{ value: partA.brandColour, source: "Part A submission / brand colour" }]),
-    customerEmail: chooseOperatorPackValue([{ value: partA.customerEmail, source: "Part A submission / customer-facing email" }]),
-    customerPhone: chooseOperatorPackValue([{ value: partA.customerPhone, source: "Part A submission / customer-facing phone" }]),
+    senderDescription: chooseOperatorPackValue([{ value: partA.senderDescription, source: partACorrectionSource(partA, "senderDescription", "Part A submission / public profile description") }]),
+    brandColour: chooseOperatorPackValue([{ value: partA.brandColour, source: partACorrectionSource(partA, "brandColour", "Part A submission / brand colour") }]),
+    customerEmail: chooseOperatorPackValue([{ value: partA.customerEmail, source: partACorrectionSource(partA, "customerEmail", "Part A submission / customer-facing email") }]),
+    customerPhone: chooseOperatorPackValue([{ value: partA.customerPhone, source: partACorrectionSource(partA, "customerPhone", "Part A submission / customer-facing phone") }]),
     customerWebsite: chooseOperatorPackValue([
-      { value: partA.customerWebsite, source: "Part A submission / customer-facing website" },
-      { value: partA.businessWebsite, source: "Part A submission / business website" }
+      { value: partA.customerWebsite, source: partACorrectionSource(partA, "customerWebsite", "Part A submission / customer-facing website") },
+      { value: partA.businessWebsite, source: partACorrectionSource(partA, "businessWebsite", "Part A submission / business website") }
     ]),
-    privacyPolicyUrl: chooseOperatorPackValue([{ value: partA.privacyPolicyUrl, source: "Part A submission / privacy policy URL" }]),
-    termsUrl: chooseOperatorPackValue([{ value: partA.termsUrl, source: "Part A submission / terms URL" }]),
+    privacyPolicyUrl: chooseOperatorPackValue([{ value: partA.privacyPolicyUrl, source: partACorrectionSource(partA, "privacyPolicyUrl", "Part A submission / privacy policy URL") }]),
+    termsUrl: chooseOperatorPackValue([{ value: partA.termsUrl, source: partACorrectionSource(partA, "termsUrl", "Part A submission / terms URL") }]),
     rbmLogoUrl: chooseOperatorPackValue([{ value: twilioSetup["RBM logo URL"], source: "Twilio setup / reviewed hosted RBM logo URL" }]),
     rbmBannerUrl: chooseOperatorPackValue([{ value: twilioSetup["RBM banner URL"], source: "Twilio setup / reviewed hosted RBM banner URL" }]),
     primaryUseCase: chooseOperatorPackValue([
-      { value: partA.primaryUseCase, source: "Part A submission / primary use case" },
+      { value: partA.primaryUseCase, source: partACorrectionSource(partA, "primaryUseCase", "Part A submission / primary use case") },
       { value: application.qualifiedUseCase, source: "Applications / qualified use case" }
     ]),
-    useCaseDescription: chooseOperatorPackValue([{ value: partA.useCaseDescription, source: "Part A submission / use-case description" }]),
-    messageTrigger: chooseOperatorPackValue([{ value: partA.messageTrigger, source: "Part A submission / message trigger" }]),
-    exampleMessageOne: chooseOperatorPackValue([{ value: partA.exampleMessageOne, source: "Part A submission / example message 1" }]),
-    exampleMessageTwo: chooseOperatorPackValue([{ value: partA.exampleMessageTwo, source: "Part A submission / example message 2" }]),
-    helpSampleMessage: chooseOperatorPackValue([{ value: partA.helpSampleMessage, source: "Part A submission / HELP sample message" }]),
-    stopSampleMessage: chooseOperatorPackValue([{ value: partA.stopSampleMessage, source: "Part A submission / STOP sample message" }]),
-    consentRoutes: chooseOperatorPackValue([{ value: partA.consentRoutes, source: "Part A submission / consent routes" }]),
-    optInDescription: chooseOperatorPackValue([{ value: partA.optInDescription, source: "Part A submission / opt-in description" }]),
-    optOutDescription: chooseOperatorPackValue([{ value: partA.optOutDescription, source: "Part A submission / opt-out description" }]),
+    useCaseDescription: chooseOperatorPackValue([{ value: partA.useCaseDescription, source: partACorrectionSource(partA, "useCaseDescription", "Part A submission / use-case description") }]),
+    messageTrigger: chooseOperatorPackValue([{ value: partA.messageTrigger, source: partACorrectionSource(partA, "messageTrigger", "Part A submission / message trigger") }]),
+    exampleMessageOne: chooseOperatorPackValue([{ value: partA.exampleMessageOne, source: partACorrectionSource(partA, "exampleMessageOne", "Part A submission / example message 1") }]),
+    exampleMessageTwo: chooseOperatorPackValue([{ value: partA.exampleMessageTwo, source: partACorrectionSource(partA, "exampleMessageTwo", "Part A submission / example message 2") }]),
+    helpSampleMessage: chooseOperatorPackValue([{ value: partA.helpSampleMessage, source: partACorrectionSource(partA, "helpSampleMessage", "Part A submission / HELP sample message") }]),
+    stopSampleMessage: chooseOperatorPackValue([{ value: partA.stopSampleMessage, source: partACorrectionSource(partA, "stopSampleMessage", "Part A submission / STOP sample message") }]),
+    consentRoutes: chooseOperatorPackValue([{ value: partA.consentRoutes, source: partACorrectionSource(partA, "consentRoutes", "Part A submission / consent routes") }]),
+    optInDescription: chooseOperatorPackValue([{ value: partA.optInDescription, source: partACorrectionSource(partA, "optInDescription", "Part A submission / opt-in description") }]),
+    optOutDescription: chooseOperatorPackValue([{ value: partA.optOutDescription, source: partACorrectionSource(partA, "optOutDescription", "Part A submission / opt-out description") }]),
     optInProofUrls: chooseOperatorPackValue([{ value: twilioSetup["Opt-in proof URL(s)"], source: "Twilio setup / reviewed hosted opt-in proof URL(s)" }]),
     reviewVideoUrl: chooseOperatorPackValue([{ value: twilioSetup["Review video URL"], source: "Twilio setup / reviewed hosted review video URL" }]),
-    launchCountries: chooseOperatorPackValue([{ value: partA.launchCountries, source: "Part A submission / launch countries" }])
+    launchCountries: chooseOperatorPackValue([{ value: partA.launchCountries, source: partACorrectionSource(partA, "launchCountries", "Part A submission / launch countries") }])
   };
 
   return {
@@ -1359,6 +1554,8 @@ function buildOperatorSubmissionPack(context) {
       reviewVideoStatus: twilioSetup["Review video status"] || "",
       registrationPackStatus: twilioSetup["Registration pack status"] || "",
       providerSubmissionStatus: twilioSetup["Provider submission status"] || "not_started",
+      providerSubmissionCorrectionGate: partA.providerSubmissionCorrectionGate || "clear",
+      providerSubmissionCorrectionGateReasons: partA.providerSubmissionCorrectionGateReasons || [],
       goLiveStatus: twilioSetup["Go-live status"] || "not_started",
       usagePullStatus: twilioSetup["Usage pull status"] || "not_started",
       manualPauseFlag: twilioSetup["Manual pause flag"] || ""
@@ -1400,6 +1597,8 @@ function buildOperatorSubmissionPack(context) {
         reviewVideoStatus: "Twilio setup / Review video status",
         registrationPackStatus: "Twilio setup / Registration pack status",
         providerSubmissionStatus: "Twilio setup / Provider submission status",
+        providerSubmissionCorrectionGate: "Part A correction overlay / provider submission gate",
+        providerSubmissionCorrectionGateReasons: "Part A correction overlay / provider submission gate reasons",
         goLiveStatus: "Twilio setup / Go-live status",
         usagePullStatus: "Twilio setup / Usage pull status",
         manualPauseFlag: "Twilio setup / Manual pause flag"
@@ -2104,6 +2303,45 @@ function validateStatusFaultPayload(registrationStatus, faultCategory) {
   if (registrationStatus && FAULT_CATEGORY_REQUIRED_STATUSES.indexOf(registrationStatus) !== -1 && !normalisedFaultCategory) {
     throw new Error("Fault category is required for registration status: " + registrationStatus);
   }
+}
+
+function getPartACorrectableField(fieldKey) {
+  const key = String(fieldKey || "").trim();
+  if (!key) throw new Error("Missing Part A correction field key");
+  if (key === "regions") {
+    throw new Error("Part A field is not correctable by key 'regions'; use canonical key 'launchCountries'");
+  }
+  const field = PART_A_CORRECTABLE_FIELDS[key];
+  if (!field) throw new Error("Part A field is not correctable: " + key);
+  return {
+    key: key,
+    label: field.label,
+    material: Boolean(field.material)
+  };
+}
+
+function normaliseRequiredCorrectionValue(value) {
+  if (value === null || value === undefined) {
+    throw new Error("Missing Part A correction value");
+  }
+  const text = String(value).trim();
+  if (!text) throw new Error("Blank values not permitted; field-clearing is not supported in v1");
+  return text;
+}
+
+function normaliseRequiredOperatorReasonText(value) {
+  const text = normaliseOperatorReasonText(value);
+  if (!text) throw new Error("Correction reason is required");
+  return text;
+}
+
+function normaliseClientReconfirmation(payload) {
+  const text = firstValue(
+    payload.clientReconfirmation,
+    payload.clientReconfirmationNote,
+    payload.reconfirmationNote
+  );
+  return text ? String(text).trim() : "";
 }
 
 function buildStatusUpdates(payload, now) {
