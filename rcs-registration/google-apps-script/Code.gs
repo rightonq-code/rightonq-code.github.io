@@ -1380,7 +1380,7 @@ function findLatestPartASubmissionRecord(spreadsheet, applicationId) {
 }
 
 function buildOperatorPartASubmissionSummary(record, correctionEvents) {
-  const payload = parseOperatorSubmissionJson(record["Submission JSON"]);
+  const payload = parseOperatorSubmissionJson(firstValue(record["Submission JSON"], record["Part A JSON"]));
   const consentRoutes = firstValue(
     record["Consent route"],
     record["Consent routes"],
@@ -1434,7 +1434,7 @@ function buildOperatorPartASubmissionSummary(record, correctionEvents) {
 }
 
 function getPartASubmissionId(record) {
-  const payload = parseOperatorSubmissionJson(record["Submission JSON"]);
+  const payload = parseOperatorSubmissionJson(firstValue(record["Submission JSON"], record["Part A JSON"]));
   return firstValue(record["Submission ID"], payload.submissionId);
 }
 
