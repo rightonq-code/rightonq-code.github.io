@@ -2164,6 +2164,195 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 6px rgba(47,
     .pricing-rate-grid { grid-template-columns: 1fr; }
   }
 </style>
+
+<!-- ============================================================
+     ROQ — SAUCY UPGRADE LAYER  (design refresh, 2026-07-10)
+     Additive theme on top of existing styles.
+     Copy, structure, pricing, markup: UNCHANGED.
+     ============================================================ -->
+<style id="roq-saucy-upgrade">
+  :root {
+    --grad-primary: linear-gradient(118deg, #3f86ff 0%, #5f9bff 46%, #8f86ff 100%);
+    --grad-soft:    linear-gradient(118deg, #7db4ff 0%, #a99bff 100%);
+    --gold: #e3c56d;
+    --gold-bright: #f0d881;
+    --blue-light: #7db4ff;
+    --glow-blue: rgba(63,134,255,0.30);
+    --glow-violet: rgba(143,134,255,0.20);
+    --card-hi: rgba(125,180,255,0.42);
+  }
+
+  /* ---- Ambient page depth --------------------------------- */
+  body {
+    background:
+      radial-gradient(1150px 760px at 80% -8%, rgba(63,134,255,0.16), transparent 60%),
+      radial-gradient(920px 660px at 4% 6%, rgba(143,134,255,0.10), transparent 56%),
+      radial-gradient(900px 720px at 92% 40%, rgba(63,134,255,0.06), transparent 60%),
+      radial-gradient(820px 720px at 3% 70%, rgba(143,134,255,0.05), transparent 60%),
+      radial-gradient(1100px 820px at 50% 112%, rgba(63,134,255,0.08), transparent 60%),
+      var(--navy);
+  }
+  ::selection { background: rgba(63,134,255,0.34); color: #fff; }
+  html { scrollbar-color: rgba(125,180,255,0.45) transparent; }
+
+  /* ---- Scroll progress + nav hairline --------------------- */
+  #roq-progress {
+    position: fixed; top: 0; left: 0; height: 2px; width: 0; z-index: 200;
+    background: var(--grad-primary);
+    box-shadow: 0 0 12px rgba(63,134,255,0.75);
+    transition: width .1s linear;
+  }
+  nav::after {
+    content: ''; position: absolute; left: 0; right: 0; bottom: -1px; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(125,180,255,0.55), transparent);
+    pointer-events: none;
+  }
+  nav a.cta-nav { transition: all .2s; }
+  nav a.cta-nav:hover {
+    background: var(--grad-primary); border-color: transparent;
+    box-shadow: 0 8px 24px -8px rgba(63,134,255,0.6);
+  }
+
+  /* ---- Gradient identity on accent type ------------------- */
+  h1 em, .section-heading em, .comparison-title em, .quote-panel p em,
+  .demo-strip-text h2 em, .contact h2 em, .what-left h2 em,
+  .pricing-highlight, .step-num {
+    background: var(--grad-primary);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent; color: transparent;
+  }
+  .section-tag, .hero-tag { color: var(--blue-light); }
+  .section-tag::before, .hero-tag::before {
+    height: 2px; width: 28px; border-radius: 2px;
+    background: var(--grad-primary);
+    box-shadow: 0 0 12px rgba(63,134,255,0.6);
+  }
+
+  /* ---- Hero drama ----------------------------------------- */
+  .hero::before {
+    display: block; content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none;
+    background:
+      radial-gradient(700px 540px at 84% 28%, rgba(63,134,255,0.20), transparent 62%),
+      radial-gradient(540px 500px at 10% 80%, rgba(143,134,255,0.15), transparent 60%);
+  }
+  .hero::after {
+    display: block; content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none;
+    background-image: radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px);
+    background-size: 34px 34px;
+    -webkit-mask-image: linear-gradient(180deg, rgba(0,0,0,0.55), transparent 68%);
+            mask-image: linear-gradient(180deg, rgba(0,0,0,0.55), transparent 68%);
+    opacity: .5;
+  }
+  .hero-grid { position: relative; z-index: 1; }
+  .hero-copy h1 {
+    font-size: clamp(30px, 4vw, 48px); line-height: 1.08; letter-spacing: -0.02em;
+    text-shadow: 0 2px 44px rgba(63,134,255,0.16);
+  }
+
+  /* ---- Buttons: gradient + shine sweep -------------------- */
+  .btn-primary, .btn-demo, .cookie-btn-accept, button.btn-primary {
+    background: var(--grad-primary);
+    position: relative; overflow: hidden;
+    box-shadow: 0 10px 30px -10px rgba(63,134,255,0.55);
+    transition: transform .2s, box-shadow .2s;
+  }
+  .btn-primary::after, .btn-demo::after {
+    content: ''; position: absolute; top: 0; left: -130%; width: 55%; height: 100%;
+    background: linear-gradient(100deg, transparent, rgba(255,255,255,0.38), transparent);
+    transform: skewX(-18deg); transition: left .6s ease; pointer-events: none;
+  }
+  .btn-primary:hover::after, .btn-demo:hover::after { left: 170%; }
+  .btn-primary:hover, .btn-demo:hover, button.btn-primary:hover {
+    background: var(--grad-primary);
+    transform: translateY(-2px);
+    box-shadow: 0 18px 46px -10px rgba(63,134,255,0.65);
+  }
+
+  /* ---- Glass cards + real hover --------------------------- */
+  .scenario-card, .rcs-quick-card, .registration-panel, .quote-panel,
+  .branded-message, .pricing-example, .card {
+    background: linear-gradient(180deg, rgba(255,255,255,0.055), rgba(255,255,255,0.02));
+    border: 1px solid rgba(255,255,255,0.10);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 22px 52px -34px rgba(0,0,0,0.75);
+    transition: transform .35s cubic-bezier(.2,.7,.2,1), border-color .35s, box-shadow .35s, background .35s;
+  }
+  .scenario-card:hover, .rcs-quick-card:hover, .registration-panel:hover, .card:hover {
+    border-color: var(--card-hi);
+    box-shadow: inset 0 1px 0 rgba(125,180,255,0.16), 0 26px 60px -30px rgba(63,134,255,0.5);
+    transform: translateY(-6px) !important;
+  }
+  .rcs-quick-card, .pricing-rate { position: relative; overflow: hidden; }
+  .rcs-quick-card::before, .pricing-rate::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: var(--grad-primary); opacity: 0; transition: opacity .35s;
+  }
+  .rcs-quick-card:hover::before, .pricing-rate:hover::before { opacity: 1; }
+  .feature-item { border-radius: 8px; transition: background .3s, color .3s; }
+  .feature-item:hover { color: var(--white); background: rgba(125,180,255,0.06); }
+
+  /* ---- Forms ---------------------------------------------- */
+  .form-group input:focus, .form-group textarea:focus {
+    border-color: rgba(125,180,255,0.7);
+    box-shadow: 0 0 0 3px rgba(63,134,255,0.15);
+  }
+
+  /* ---- FAQ ------------------------------------------------- */
+  .faq-list summary { transition: color .2s; }
+  .faq-list summary:hover { color: var(--blue-light); }
+
+  /* ---- Demo strip glow ------------------------------------ */
+  .demo-strip {
+    background: linear-gradient(120deg, rgba(63,134,255,0.16), rgba(143,134,255,0.10) 58%, rgba(63,134,255,0.05));
+    position: relative; overflow: hidden;
+  }
+  .demo-strip::before {
+    content: ''; position: absolute; inset: -40% 60% -40% -10%;
+    background: radial-gradient(closest-side, rgba(63,134,255,0.18), transparent 72%);
+    pointer-events: none;
+  }
+  .demo-strip-inner { position: relative; z-index: 1; }
+
+  /* ---- Living dashboard: animated fill + pulse ------------ */
+  .dashboard-progress { position: relative; }
+  .timezone-badge:not(.timezone-badge--wait) { display: inline-flex; align-items: center; }
+  .timezone-badge:not(.timezone-badge--wait)::before {
+    content: ''; display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+    background: #2ec07a; margin-right: 6px; box-shadow: 0 0 0 0 rgba(46,192,122,0.6);
+  }
+
+  /* ---- Motion (guarded) ----------------------------------- */
+  @media (prefers-reduced-motion: no-preference) {
+    .dashboard-progress span { animation: roqFill 2.4s cubic-bezier(.2,.7,.2,1) both; }
+    .dashboard-progress::after {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+      transform: translateX(-100%); animation: roqShimmer 2.8s ease-in-out 1.4s infinite;
+    }
+    .timezone-badge:not(.timezone-badge--wait)::before { animation: roqPulse 1.9s infinite; }
+
+    @media (min-width: 1181px) {
+      .hero-visual .visual-stack { position: relative; opacity: 0; animation: roqRise .9s ease forwards .15s; }
+      .hero-visual .visual-stack--receiver { animation-delay: .32s; }
+      .hero-visual .visual-stack::before {
+        content: ''; position: absolute; inset: 12% -12% -6%; z-index: 0;
+        background: radial-gradient(closest-side, rgba(143,134,255,0.16), transparent 76%);
+        filter: blur(10px); pointer-events: none;
+      }
+      .hero-visual .sender-dashboard, .hero-visual .rcs-phone { position: relative; z-index: 1; }
+      .rcs-phone { animation: roqFloat 6.5s ease-in-out infinite; }
+      .rcs-phone::before {
+        content: ''; position: absolute; inset: -6% -12%; z-index: -1;
+        background: radial-gradient(closest-side, rgba(63,134,255,0.30), transparent 78%);
+        filter: blur(14px);
+      }
+    }
+  }
+  @keyframes roqFill { from { width: 0; } to { width: 30%; } }
+  @keyframes roqShimmer { 0% { transform: translateX(-100%);} 55%,100% { transform: translateX(100%);} }
+  @keyframes roqPulse { 70% { box-shadow: 0 0 0 7px rgba(46,192,122,0);} 100% { box-shadow: 0 0 0 0 rgba(46,192,122,0);} }
+  @keyframes roqFloat { 0%,100% { transform: translateY(0);} 50% { transform: translateY(-10px);} }
+  @keyframes roqRise { from { opacity: 0; transform: translateY(26px);} to { opacity: 1; transform: translateY(0);} }
+</style>
 </head>
 <body>
 
@@ -2587,7 +2776,7 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 6px rgba(47,
     <div>
       <form class="contact-form" action="https://formspree.io/f/xykbkrnv" method="POST">
   <input type="hidden" name="_subject" value="New RightOnQ enquiry from website">
-  <input type="hidden" name="_autoresponse" value="Hi there, thank you so much for getting in touch with RightOnQ. I&#39;m really looking forward to hearing more about what you&#39;re looking for and will be in touch with you shortly. In the meantime, if you&#39;d prefer to speak directly, please don&#39;t hesitate to call or message me on +44 7852 331166. Warm regards, Adam Smith, RightOnQ www.rightonq.co.uk">
+  <input type="hidden" name="_autoresponse" value="Hi there, thank you so much for getting in touch with RightOnQ. I&#39;m really looking forward to hearing more about what you&#39;re looking for and will be in touch with you shortly. Warm regards, Adam Smith, RightOnQ www.rightonq.co.uk">
   <input type="hidden" name="_next" value="https://www.rightonq.co.uk">
         <!-- Honeypot: hidden from real users, traps bots -->
         <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;opacity:0;pointer-events:none">
@@ -2841,6 +3030,25 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 6px rgba(47,
       gtag('consent', 'update', { analytics_storage: choice });
       banner.hidden = true;
     });
+  })();
+</script>
+
+
+<script id="roq-saucy-js">
+  (function () {
+    // Scroll-progress bar
+    var bar = document.createElement('div');
+    bar.id = 'roq-progress';
+    document.body.appendChild(bar);
+    function onScroll() {
+      var h = document.documentElement;
+      var max = h.scrollHeight - h.clientHeight;
+      var p = max > 0 ? h.scrollTop / max : 0;
+      bar.style.width = (p * 100).toFixed(2) + '%';
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+    onScroll();
   })();
 </script>
 
